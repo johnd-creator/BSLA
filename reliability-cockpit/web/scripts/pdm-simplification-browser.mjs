@@ -266,10 +266,12 @@ const screens=[
 ];
 try{
  await page.setViewportSize({width:1440,height:900});await go('/pdm');await page.locator('.pdm-register tbody tr').first().waitFor();
+ await page.evaluate(async()=>{await document.fonts.ready;await Promise.all(document.getAnimations().filter(a=>Number.isFinite(a.effect?.getComputedTiming().endTime)).map(a=>a.finished.catch(()=>{})));});
  const firstRow=await page.locator('.pdm-register tbody tr').first().boundingBox();
  writeFileSync(out+'/first-row.json',JSON.stringify({y:firstRow.y,bottom:firstRow.y+firstRow.height}));
  checks.push({name:'first register row at1440x900',pass:baseline||firstRow.y+firstRow.height<=900,y:firstRow.y,bottom:firstRow.y+firstRow.height});
- if(!baseline)assert.ok(firstRow.y+firstRow.height<=900,'entire first inspection row must fit inside1440x900');
+ console.log('Register1440x900 bounds '+JSON.stringify({y:firstRow.y,bottom:firstRow.y+firstRow.height}));
+ if(!baseline)assert.ok(firstRow.y+firstRow.height<=900,'entire first inspection row must fit inside1440x900: '+JSON.stringify(firstRow));
  await page.screenshot({path:out+'/register-1440x900.png',fullPage:true});
  for(const width of (process.env.NADI_BROWSER_WIDTHS??'390,768,1440,1920').split(',').map(Number))for(const theme of ['light','dark'])for(const [name,open]of screens){
   await page.setViewportSize({width,height:1086});await open();

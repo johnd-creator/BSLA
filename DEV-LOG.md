@@ -1099,3 +1099,10 @@ revision views before preserving every existing date/raw assertion. Local native
 input/keyboard/review checks and42 timezone/source-date browser checks pass.
 These are fixture-journey adaptations only; production implementation remains the
 reviewed e05d016 delta. Both hosted jobs must pass again at the final test head.
+
+The hosted full-row900px guard then exposed cross-runner margin insufficiency.
+Kept that guard intact and compacted non-essential container spacing further;
+time-basis help and inspector identity remain available through native disclosures.
+Final local register geometry701.91–833.70px provides66px bottom margin at1440×900.
+Measurement waits for fonts/finite animations to settle; numeric diagnostics expose
+runner differences. This supersedes the earlier local geometry, not its history.

@@ -136,3 +136,13 @@ The latest MCP browser was signed out; this task does not authorize credential
 retrieval, resets or manufactured proofs. If that session gate remains unavailable,
 source delivery continues while local promotion is SOURCE_PASS_LIVE_BLOCKED.
 No merge or production deployment. PO visual acceptance remains PENDING.
+
+The full-row hosted gate subsequently exposed insufficient cross-runner margin in
+that initial local geometry. The final register moves secondary time-basis help
+inside the advanced filter disclosure and inspector identity inside the record
+identity disclosure; critical errors, dates, values and warnings remain visible.
+Container spacing is reduced without reducing text/control sizes. Final local
+1440×900 geometry is701.91–833.70px, versus the unchanged39da baseline977.09–1108.89.
+The entire-row<=900px guard remains mandatory, now measured after fonts/finite
+animations settle with numeric diagnostics. Earlier geometry is historical, not
+final acceptance. Final SHA and both hosted job outcomes remain bound in PR114.
