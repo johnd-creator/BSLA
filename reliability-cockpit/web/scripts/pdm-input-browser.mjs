@@ -59,8 +59,11 @@ const button=name=>p.getByRole('button',{name,exact:true});const go=async()=>{aw
 async function evidence(name){for(const width of [1440,768,390]){await p.setViewportSize({width,height:1086});check('no page overflow '+name+' '+width,await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await p.evaluate(()=>window.scrollTo(0,0));await p.screenshot({path:out+'/'+name+'-'+width+'.png',fullPage:true});}}
 try{
  await go();
- const advanced=p.locator('.workspace-filters summary');await advanced.focus();await p.keyboard.press('Enter');
+ const advanced=p.locator('.workspace-filters > summary');await advanced.focus();await p.keyboard.press('Enter');
  check('advanced time filters open by keyboard',await p.getByLabel('Waktu awal (ISO + zona waktu)').isVisible());
+ const timeBasis=p.locator('.workspace-filters .help-details > summary');await timeBasis.focus();await p.keyboard.press('Enter');
+ check('secondary time-basis guidance opens by keyboard',await p.getByText('Filter register memakai waktu inspeksi asli; filter riwayat memakai waktu measurement asli. Waktu yang belum diketahui tidak dimasukkan ke rentang waktu yang dipilih.',{exact:true}).isVisible());
+ await timeBasis.focus();await p.keyboard.press('Enter');
  await advanced.focus();await p.keyboard.press('Enter');
  check('advanced filters collapse without hiding main search',!(await p.getByLabel('Waktu awal (ISO + zona waktu)').isVisible())&&await p.getByLabel('Cari inspeksi / observasi').isVisible());
  await pdmKeyboardChecks({p,button,go,check,out});
@@ -139,8 +142,10 @@ try{
  await p.getByLabel('Alasan review / revisi').fill('SYNTHETIC request corrected context');await p.getByRole('radio',{name:'Kembalikan untuk koreksi',exact:true}).check();await button('Simpan keputusan review').click();await p.locator('.product-record-detail .status-badge').filter({hasText:'RETURNED'}).waitFor();
  role='AUTHOR';subject='synthetic-author';const authorPage=await ctx.newPage();await authorPage.goto(base+'/pdm?record='+encodeURIComponent(inspections[0].record_id),{waitUntil:'networkidle'});
  await authorPage.getByLabel('Alasan review / revisi').fill('SYNTHETIC correct requested context');await authorPage.getByRole('button',{name:'Revisi rekam dikembalikan / ditolak',exact:true}).click();await authorPage.getByRole('button',{name:'Ubah draf inspeksi',exact:true}).click();await authorPage.getByLabel('Observasi (satu per baris)').fill('SYNTHETIC corrected observation');await authorPage.getByRole('button',{name:'Simpan revisi draf',exact:true}).click();await authorPage.getByRole('button',{name:'Ajukan inspeksi',exact:true}).click();await authorPage.locator('.product-record-detail .status-badge').filter({hasText:'SUBMITTED'}).waitFor();
- check('returned author revises through existing lifecycle',inspections[0].status==='SUBMITTED'&&audit.get(inspections[0].record_id).some(e=>e.action==='revise'));await authorPage.close();
- role='REVIEWER';subject='synthetic-reviewer';await button('Baca revisi terbaru').click();await button('Mulai review independen').waitFor();
+ check('returned author revises through existing lifecycle',inspections[0].status==='SUBMITTED'&&audit.get(inspections[0].record_id).some(e=>e.action==='revise'));
+ // Closing the author tab can focus the retained reviewer tab and refresh its
+ // trusted session. Restore that tab's fixture identity before the focus event.
+ role='REVIEWER';subject='synthetic-reviewer';await authorPage.close();await button('Baca revisi terbaru').click();await button('Mulai review independen').waitFor();
  check('retained reviewer page clears prior rationale on new revision',await p.getByLabel('Alasan review / revisi').inputValue()===''&&await button('Mulai review independen').isDisabled());
  await p.getByLabel('Alasan review / revisi').fill('SYNTHETIC second independent review');await button('Mulai review independen').click();await p.getByRole('radio',{name:'Setujui rekam inspeksi',exact:true}).waitFor();
  check('retained reviewer page requires fresh decision and rationale',await p.getByRole('radio').evaluateAll(nodes=>nodes.every(n=>!n.checked))&&await p.getByLabel('Alasan review / revisi').inputValue()===''&&await button('Simpan keputusan review').isDisabled());

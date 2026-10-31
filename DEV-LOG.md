@@ -1106,3 +1106,16 @@ time-basis help and inspector identity remain available through native disclosur
 Final local register geometry701.91–833.70px provides66px bottom margin at1440×900.
 Measurement waits for fonts/finite animations to settle; numeric diagnostics expose
 runner differences. This supersedes the earlier local geometry, not its history.
+
+The next hosted backend passed; frontend identified an ambiguous descendant
+summary selector after time-basis help moved inside advanced filters. The keyboard
+test now selects the direct parent summary and also explicitly opens the nested
+time-basis guidance by keyboard before checking collapse/main-search preservation.
+No production source changed in this test repair; both hosted jobs remain required
+again on its final immutable head.
+
+The local full input regression also exposed a fixture identity race: closing the
+author tab could focus the retained reviewer tab before the global synthetic
+identity returned to reviewer. Restore the reviewer fixture identity before that
+focus event; retain every independent-review/new-rationale/revision assertion.
+This changes no application authentication or production behavior.
