@@ -23,7 +23,8 @@
     "check:reports": "node scripts/reports-check.mjs",
     "check:global-auth": "node scripts/global-auth-check.mjs",
     "check:factual-policy": "node scripts/factual-policy-check.mjs && node scripts/factual-error-check.mjs",
-    "check:engineering-fixes": "node scripts/frozen-case-evidence-check.mjs && node scripts/recommendation-draft-check.mjs"
+    "check:engineering-fixes": "node scripts/frozen-case-evidence-check.mjs && node scripts/recommendation-draft-check.mjs",
+    "check:source-interpretation": "node scripts/pdm-source-interpretation-check.mjs"
   },
   "dependencies": {
     "next": "^15.5.9",

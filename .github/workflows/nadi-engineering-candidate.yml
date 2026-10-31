@@ -18,7 +18,7 @@ jobs:
         env:
           POSTGRES_PASSWORD: isolated-ci-only
           POSTGRES_DB: nadi_application_test
-        ports: ['5432:5432', '127.0.0.1:15953:5432']
+        ports: ['5432:5432', '127.0.0.1:15953:5432', '127.0.0.1:15483:5432']
         options: >-
           --health-cmd "pg_isready -U postgres"
           --health-interval 5s --health-timeout 5s --health-retries 10
@@ -26,6 +26,7 @@ jobs:
       COCKPIT_CONFIG_MODE: managed
       DATABASE_URL: 'sqlite://'
       NADI_APPLICATION_TEST_DSN: postgresql+psycopg://postgres:isolated-ci-only@127.0.0.1:5432/nadi_application_test
+      NADI_DEMO_ACCOUNT_TEST_DSN: postgresql+psycopg://nadi_local_dev_01:isolated-ci-only@127.0.0.1:15483/nadi_local_dev_01_test
       NADI_COMPLETE_HISTORY_TEST_DSN: postgresql+psycopg://postgres:isolated-ci-only@127.0.0.1:15953/pdm_history_complete_ci_test
       NADI_HISTORY_PILOT_TEST_DSN: postgresql+psycopg://postgres:isolated-ci-only@127.0.0.1:15953/pdm_history_pilot_ci_test
       NADI_HISTORY_BRIDGE_TEST_DSN: postgresql+psycopg://postgres:isolated-ci-only@127.0.0.1:15953/pdm_history_complete_bridge_ci_test
@@ -54,6 +55,8 @@ jobs:
               connection.exec_driver_sql("CREATE DATABASE pdm_history_pilot_ci_test")
               connection.exec_driver_sql("CREATE DATABASE pdm_history_complete_ci_test")
               connection.exec_driver_sql("CREATE DATABASE pdm_history_complete_bridge_ci_test")
+              connection.exec_driver_sql("CREATE ROLE nadi_local_dev_01 LOGIN PASSWORD 'isolated-ci-only'")
+              connection.exec_driver_sql("CREATE DATABASE nadi_local_dev_01_test OWNER nadi_local_dev_01")
           engine.dispose()
           PYTHON
       - name: Select PostgreSQL 16 client tools for isolated restore qualification
@@ -61,6 +64,16 @@ jobs:
           test -x /usr/lib/postgresql/16/bin/pg_dump
           /usr/lib/postgresql/16/bin/pg_dump --version
           echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"
+      - name: Synthetic demo account rename and scoped password policy
+        working-directory: reliability-cockpit
+        env:
+          PYTHONPATH: '.:tests'
+        run: python -m unittest test_demo_account_management -v
+      - name: Immutable source interpretation and authorized display-only estimates
+        working-directory: reliability-cockpit
+        env:
+          PYTHONPATH: '.:tests'
+        run: python -m unittest test_pdm_source_interpretation -v
       - name: Application and trusted HTTP acceptance
         working-directory: reliability-cockpit
         env:
@@ -83,6 +96,9 @@ jobs:
           npm ci --prefix reliability-cockpit/web
           python -m pip install playwright==1.63.0
           python -m playwright install --with-deps chromium
+      - name: Render actual source interpretation components with sanitized values
+        working-directory: reliability-cockpit/web
+        run: node scripts/pdm-source-interpretation-check.mjs
       - name: Build actual PdM package test components
         working-directory: reliability-cockpit/web
         run: node scripts/pdm-follow-up-browser-bundle.mjs "$RUNNER_TEMP/nadi-pdm-package"
@@ -131,4 +147,4 @@ jobs:
           NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/reports-browser.mjs
           NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/login-visual-browser.mjs
           NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/experience-browser.mjs
-          NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/pdm-simplification-browser.mjs
+          NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" NADI_SOURCE_INTERPRETATION_ACCEPTANCE=1 node scripts/pdm-simplification-browser.mjs

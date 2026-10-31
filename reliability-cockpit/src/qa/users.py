@@ -30,9 +30,12 @@ def main(argv=None):
     parser.add_argument("--admin-username")
     parser.add_argument("--username")
     parser.add_argument("--target-user-id")
+    parser.add_argument("--expected-username")
+    parser.add_argument("--new-username")
+    parser.add_argument("--demo-password-profile", help="Explicit private verified four-account demo profile; replacement passwords only")
     parser.add_argument("--roles", nargs="*", choices=["ADMIN","AUTHOR","REVIEWER"])
     parser.add_argument("--assets", nargs="*")
-    parser.add_argument("action", choices=["bootstrap","create","disable","reactivate","reset-password","grants","revoke-sessions","audit"])
+    parser.add_argument("action", choices=["bootstrap","create","disable","reactivate","reset-password","rename","grants","revoke-sessions","audit"])
     args = parser.parse_args(argv)
     engine = None
     try:
@@ -47,7 +50,14 @@ def main(argv=None):
         store = ApplicationStore(engine, expected_database=args.expected_database, dedicated=True)
         if any(s["status"] != "APPLIED" for s in ApplicationMigrator(engine,expected_database=args.expected_database,dedicated=True).status()):
             raise EngineeringError("APPLICATION_SCHEMA_NOT_READY", 503)
-        provider = LocalIdentityProvider(store,policy=PasswordPolicy(minimum_length=args.minimum_password_length))
+        demo_profile = None
+        if args.demo_password_profile:
+            if args.action != 'reset-password':
+                raise EngineeringError('DEMO_PROFILE_REPLACEMENT_ONLY', 400)
+            from src.services.local_demo_accounts import load_demo_profile
+            demo_profile = load_demo_profile(args.demo_password_profile, engine)
+        provider = LocalIdentityProvider(store,policy=PasswordPolicy(minimum_length=args.minimum_password_length),
+                                         demo_profile=demo_profile)
         if args.action == "bootstrap":
             password = secret("New administrator password: ")
             if password != secret("Confirm password: "):
@@ -59,6 +69,10 @@ def main(argv=None):
             actor = grant
             if args.action == "audit":
                 result = {"events":provider.security_events(actor)}
+            elif args.action == 'rename':
+                provider.rename_account(actor,args.target_user_id,
+                    expected_username=args.expected_username,new_username=args.new_username)
+                result = {'status':'ACCOUNT_RENAMED','user_id':args.target_user_id}
             elif args.action == "create":
                 password = secret("New account temporary password: ")
                 if password != secret("Confirm password: "):
