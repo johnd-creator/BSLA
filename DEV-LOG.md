@@ -1091,3 +1091,11 @@ full IDs always visible. Updated those tests to open the new native identity
  disclosures, then retain exact persisted-record and offset1/limit1 assertions.
 All13 local auth/draft/late-ACK/pagination scenarios pass without relaxing identity,
 receipt or authorization checks. Final exact-head CI remains required on the repair.
+
+The subsequent frontend run exposed one remaining button-descendant ID selector.
+Adapted it to the exact-ID row disclosure and added exact URL identity readback.
+Source-clock tests now open source disclosures in both current and immutable
+revision views before preserving every existing date/raw assertion. Local native
+input/keyboard/review checks and42 timezone/source-date browser checks pass.
+These are fixture-journey adaptations only; production implementation remains the
+reviewed e05d016 delta. Both hosted jobs must pass again at the final test head.
