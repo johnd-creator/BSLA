@@ -1085,3 +1085,9 @@ and typed Beranda403/401/retryable error presentation. Source baseline39da859;
 exact final SHA/CI are bound in PR114, not inferred from these measurements.
 No backend/schema/collector/account changes; current live pair remains39da859
 until all conditional activation gates, including legitimate session proof, pass.
+
+The first focused-fix hosted run exposed two legacy browser assertions that expected
+full IDs always visible. Updated those tests to open the new native identity
+ disclosures, then retain exact persisted-record and offset1/limit1 assertions.
+All13 local auth/draft/late-ACK/pagination scenarios pass without relaxing identity,
+receipt or authorization checks. Final exact-head CI remains required on the repair.

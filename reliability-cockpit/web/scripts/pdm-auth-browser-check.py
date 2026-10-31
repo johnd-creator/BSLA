@@ -154,6 +154,7 @@ with sync_playwright() as p:
             require(page.get_by_role('button',name='Simpan draf inspeksi',exact=True).count()==0,'successful late create left active unsaved editor')
             require(diagnostics(page)['recovery'] is None,'late successful create left stale recovery')
             require(len(state['posts'])==1 and len(state['records'])==1,'late success duplicated record')
+            page.locator('.inspection-provenance > summary').click()
             require(row['record_id'] in page.locator('.product-record-detail').inner_text(),'completion navigated wrong record')
         else:
             route.fulfill(status=503,json={'detail':{'code':'QA_BACKEND_UNAVAILABLE'}})
@@ -236,6 +237,7 @@ with sync_playwright() as p:
         page.get_by_role('button',name='Halaman berikutnya',exact=True).click()
         page.wait_for_function("document.querySelector('.page-number')?.textContent==='2'")
         require(state['list_requests'][-1]==dict(offset=1,limit=1),'next page not offset1/limit1')
+        page.get_by_text('Identitas inspeksi',exact=True).click()
         require('inspection:SYNTHETIC:2' in page.locator('.pdm-register').inner_text(),'next page did not load exact second record')
     scenario('bounded capture listing requests1 and honest server pagination advances offset1 without changing proxy budget',bounded_list)
 
