@@ -4,7 +4,7 @@ import { idText, statusLabel } from "../lib/id-copy";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { reliabilityApi, type DecisionOverviewView } from "../lib/api";
-import { factualErrorMessage } from "../lib/factual-error";
+import { factualErrorMessage, factualErrorKind, type FactualErrorKind } from "../lib/factual-error";
 import { formatNumber } from "../lib/format";
 import { attentionItems, factualMetric as metric, overviewDate } from "../lib/overview";
 import { Breadcrumbs, Button, DataMaturity, EmptyState, ErrorState, HelpDetails, LoadingState, PageHeader, SectionCard, StatCard, TableFrame } from "./ui";
@@ -32,6 +32,7 @@ export default function ExecutiveOverview() {
   const [data, setData] = useState<DecisionOverviewView | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [errorKind, setErrorKind] = useState<FactualErrorKind>("service");
   const [allActivity, setAllActivity] = useState(false);
   const [retry, setRetry] = useState(0);
   useEffect(() => {
@@ -42,7 +43,7 @@ export default function ExecutiveOverview() {
     reliabilityApi.decisionOverview(windowDays).then(next => {
       if (!cancelled) { setData(next); setError(null); }
     }).catch((reason: unknown) => {
-      if (!cancelled) { setData(null); setError(factualErrorMessage(reason)); }
+      if (!cancelled) { setData(null); setError(factualErrorMessage(reason)); setErrorKind(factualErrorKind(reason)); }
     }).finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [windowDays, retry]);
@@ -53,7 +54,7 @@ export default function ExecutiveOverview() {
     <section className="overview-filter-bar" aria-label={idText("Executive Overview context")}><div><span className="filter-caption">{idText("Operating scope")}</span><strong>BSR / IP</strong></div><div><span className="filter-caption">{idText("Population")}</span><Link href="/assets">{idText("Registered Reliability Assets →")}</Link></div><label className="window-select">{idText("Maintenance activity window")}<select value={windowDays} onChange={event => setWindowDays(Number(event.target.value) as WindowDays)}>{WINDOWS.map(days => <option key={days} value={days}>{days}  {idText("days")}</option>)}</select></label><div className="overview-query-time"><span className="filter-caption">{idText("Query as of · not source freshness")}</span><time dateTime={current?.as_of}>{overviewDate(current?.as_of)}</time></div></section>
     <div className="overview-assessment-note"><span className="dataset-badge">{idText("MIXED DATA MATURITY")}</span><DataMaturity state={current?.data_maturity.asset_maintenance ?? "UNKNOWN"} /><DataMaturity state={current?.data_maturity.controlled_domains ?? "UNKNOWN"} /><span>{idText("Equipment condition: NOT ASSESSED by this dashboard")}</span></div>
     {loading && <LoadingState label={idText("Reading Executive Overview aggregates…")} />}
-    {!loading && error && <ErrorState message={error} onRetry={() => setRetry(value => value + 1)} />}
+    {!loading && error && <ErrorState variant={errorKind} message={error} onRetry={() => setRetry(value => value + 1)} />}
     {!loading && !error && data && <>
       <section className="overview-scoreboard" aria-label={idText("Factual KPI overview")}>
         <StatCard label={idText("Registered Reliability Assets")} value={metric(data.summary.registered_assets)} detail={`Jumlah Registry · ${data.summary.registered_assets.evidence_class}`} tone="accent" />

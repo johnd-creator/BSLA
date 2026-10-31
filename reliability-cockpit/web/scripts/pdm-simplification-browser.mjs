@@ -26,6 +26,7 @@ const ctx = await browser.newContext({
   page = await ctx.newPage();
 const fixture = JSON.parse(readFileSync("fixtures/ux-bundle-b.json")),
   overview = JSON.parse(readFileSync("fixtures/executive-overview.json"));
+fixture.inspections[0].engineering_analysis={notes:'SYNTHETIC — analisis manual tetap terlihat.',recommended_follow_up:'SYNTHETIC — verifikasi oleh engineer.'};
 const copy = JSON.parse(readFileSync("lib/id-messages.json")),
   t = (k) => copy[k] ?? k;
 const asset = fixture.asset.canonical_id,
@@ -35,6 +36,7 @@ const asset = fixture.asset.canonical_id,
   requests = [],
   violations = [];
 let newerCaseRevision = false;
+let overviewFailure = null;
 const sourceEvent={event_key:'a'.repeat(64),source_ref:'WB-SYNTHETIC',source_sha256:'c'.repeat(64),sheet_index:0,sheet_label:'Peralatan DEMO',profile_id:'profile-synthetic',axis:'ROW',position:3,kind:'MEASUREMENT_SOURCE',classification:'RAW_UNRESOLVED',source_asset_label:'Label DEMO belum dipetakan',clocks:[{role:'UNSPECIFIED',precision:'DATE',value:'2019-01-03',raw_value:'2019-01-03'}],reasons:['UNIT_UNKNOWN'],distinct_source_cells:2,canonical_eligible:false};
 const sourceField=(id,raw)=>({field_id:id,cell:id==='zero'?'B3':'C3',role:'INPUT',label_claim:'Velocity DEMO',unit_claim:null,source_point_claim:null,source_axis_claim:null,value:{coordinate:id==='zero'?'B3':'C3',raw_value:raw,formula_present:false,cache_status:'NOT_FORMULA'},headers:[],unit_evidence:[]});
 const cases = [
@@ -125,7 +127,7 @@ await ctx.route("**/*", async (route) => {
       contentType: "text/html",
       body: '<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SYNTHETIC NADI design comparison</title><link rel="stylesheet" href="/candidate.css"></head><body><div id="root"></div><script src="/candidate.js"></script></body></html>',
     });
-  if (p.includes("decision-overview")) return route.fulfill({ json: overview });
+  if (p.includes("decision-overview")) {if(overviewFailure==="network")return route.abort();if(overviewFailure)return route.fulfill({status:overviewFailure,json:{detail:{code:"SYNTHETIC_DENIED"}}});return route.fulfill({ json: overview });}
   if (p.startsWith("/api/engineering-qa/")) {
     const [resource, encoded, action] = p
         .slice("/api/engineering-qa/".length)
@@ -263,6 +265,12 @@ const screens=[
  ['case-handoff',async()=>{await go('/pdm?record='+encodeURIComponent(fixture.inspections[0].record_id));await page.getByRole('button',{name:/^(Mulai|Buat) Engineering Case$/}).click();await page.locator('#case-title').waitFor();}],
 ];
 try{
+ await page.setViewportSize({width:1440,height:900});await go('/pdm');await page.locator('.pdm-register tbody tr').first().waitFor();
+ const firstRow=await page.locator('.pdm-register tbody tr').first().boundingBox();
+ writeFileSync(out+'/first-row.json',JSON.stringify({y:firstRow.y,bottom:firstRow.y+firstRow.height}));
+ checks.push({name:'first register row at1440x900',pass:baseline||firstRow.y+firstRow.height<=900,y:firstRow.y,bottom:firstRow.y+firstRow.height});
+ if(!baseline)assert.ok(firstRow.y+firstRow.height<=900,'entire first inspection row must fit inside1440x900');
+ await page.screenshot({path:out+'/register-1440x900.png',fullPage:true});
  for(const width of (process.env.NADI_BROWSER_WIDTHS??'390,768,1440,1920').split(',').map(Number))for(const theme of ['light','dark'])for(const [name,open]of screens){
   await page.setViewportSize({width,height:1086});await open();
   await page.evaluate(t=>{document.documentElement.dataset.theme=t;document.activeElement?.blur();window.scrollTo(0,0)},theme);
@@ -274,11 +282,22 @@ try{
  }
 
  if(!baseline){
+  await page.setViewportSize({width:1440,height:900});
+  for(const status of [403,401,503,500,'network']){
+   overviewFailure=status;await go('/');if(status===401){await page.waitForURL(base+'/login?expired=1');check('401 follows existing legitimate login renewal',await page.getByRole('textbox',{name:t('Username'),exact:true}).count()===1);await page.screenshot({path:out+'/overview-401.png',fullPage:true});continue;}const alert=page.getByRole('alert');await alert.waitFor();
+   const text=await alert.innerText();const retry=await alert.getByRole('button',{name:t('Try again'),exact:true}).count();
+   if(status===403){check('403 has access guidance without outage or retry',text.includes('scope')&&!text.includes('belum dapat dibaca')&&retry===0);}
+   else if(status===401){check('401 offers legitimate renewal without retry',await alert.getByRole('link',{name:'Masuk kembali'}).count()===1&&retry===0);}
+   else check('retryable factual error '+status,retry===1&&text.includes('belum dapat dibaca'));
+   await page.screenshot({path:out+'/overview-'+status+'.png',fullPage:true});
+  }
+  overviewFailure=null;
+  await go('/pdm?record='+encodeURIComponent(fixture.inspections[0].record_id));check('manual analysis visible outside reference disclosures',await page.getByText('SYNTHETIC — analisis manual tetap terlihat.',{exact:true}).isVisible());
   await page.setViewportSize({width:1440,height:1086});await go('/login?returnTo=%2Fpdm');
   await page.getByRole('textbox',{name:t('Username'),exact:true}).fill('synthetic-engineer');await page.getByRole('textbox',{name:t('Password'),exact:true}).fill('SYNTHETIC-NOT-A-CREDENTIAL');await button(t('Sign in')).click();await page.waitForURL(base+'/pdm');await page.locator('.pdm-register').waitFor();check('actual login component leads authorized synthetic engineer to PdM',true);
   const primary=page.getByRole('group',{name:'Area kerja utama',exact:true});check('exact five primary entries',JSON.stringify(await primary.getByRole('link').allTextContents())===JSON.stringify(['Beranda','Aset','PdM Center','Tindak Lanjut','Laporan']));
   check('inspection request keeps limit one',requests.some(r=>r.path.endsWith('/inspections')&&new URLSearchParams(r.query).get('limit')==='1'));
-  check('current page count is not the total inspection population',await page.locator('.record-open').count()===1&&(await page.locator('.experience-facts').innerText()).includes('3'));
+  check('current page count is not the total inspection population',await page.locator('.record-open').count()===1&&(await page.locator('.pdm-status-strip').innerText()).includes('3'));
   await go('/pdm?context=SYNTHETIC');await page.locator('.record-open').first().click();await page.locator('#pdm-record-pane').waitFor();check('selection preserves unrelated query and exact record',new URL(page.url()).searchParams.get('context')==='SYNTHETIC'&&new URL(page.url()).searchParams.get('record')===fixture.inspections[0].record_id);
   await page.goBack();await page.locator('.pdm-register').waitFor();check('Back restores register with query',new URL(page.url()).searchParams.get('context')==='SYNTHETIC'&&!new URL(page.url()).searchParams.has('record'));
   await page.goForward();await page.locator('#pdm-record-pane').waitFor();check('Forward restores exact inspection detail',new URL(page.url()).searchParams.get('record')===fixture.inspections[0].record_id);

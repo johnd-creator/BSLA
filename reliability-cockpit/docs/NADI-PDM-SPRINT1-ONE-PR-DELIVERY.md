@@ -99,3 +99,40 @@ legitimate flow is still required for authenticated paired acceptance. If unavai
 only activation stops: preserve current preview and deliver SOURCE_PASS_LIVE_BLOCKED
 with that one precise action. Do not weaken the controller, use stored credentials,
 invent sessions, or restore an old database to evade the gate.
+
+## 1 November 2026 — NADI-PR114-UX-ACCEPTANCE-FIX-01
+
+This is a focused frontend-only follow-up on the same PR114, based on39da859.
+The earlier source/runtime checkpoints above remain historical. No backend, DTO,
+route, controller, account policy, collector or stored record is changed.
+
+- Register: compact population/page strip, persistent QA warning and exactly one
+  Input Pengukuran action; same search/asset/status/advanced filters and limit1.
+  At identical synthetic fixture state1440×900/100% zoom, the first row previously
+  began at977.09px (bottom1108.89); it now begins752.91px and ends884.70px.
+  The browser regression requires the entire row inside900px, not a one-pixel edge.
+- Detail: work origin, inspection precision, original native readings and a bounded
+  original provisional-field summary precede secondary provenance. Full raw fields,
+  clocks/formulas, IDs and SR metadata remain reachable through native disclosures.
+  Manual engineering_analysis and follow-up stay visible separately from hypotheses;
+  independent review/Case rules and all server commands remain unchanged.
+- Beranda: typed HTTP403 has access guidance without an outage message or retry;
+  401 follows existing legitimate login renewal (redirect; link fallback), while5xx/network failures retain retry. Other4xx
+  use request-error presentation. Shared ErrorState keeps its legacy default for
+  existing consumers; no backend message/forbidden identity is exposed.
+
+Qualification uses actual React components with fully intercepted SYNTHETIC
+fixtures, never live engineering evidence. Responsive before/after comparisons use
+390/768/1440/1920 widths and light/dark, plus1440×900 first-row measurement and
+403/401/503/500/network screenshots. Exact-head hosted frontend/backend CI and
+final independent review are bound in the PR description after commit. F01–F24
+protected-source/28-route guards remain required. Production build/TypeScript/lint
+and the native/provisional, origin/SR, CAS/retry, history, authorization and Case
+regressions remain mandatory; synthetic visual checks do not imply live UAT.
+
+The current live39da pair is preserved. New-source cutover remains conditional on
+all refreshed official controller/session/preservation/recovery/backup gates.
+The latest MCP browser was signed out; this task does not authorize credential
+retrieval, resets or manufactured proofs. If that session gate remains unavailable,
+source delivery continues while local promotion is SOURCE_PASS_LIVE_BLOCKED.
+No merge or production deployment. PO visual acceptance remains PENDING.

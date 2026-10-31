@@ -1075,3 +1075,13 @@ without private runtime reports/samples. Source/hash scope guard, synthetic test
 private official source seal, independent recovery and fresh backup qualification
 prepare conditional single-pair activation. No cutover is claimed; session proof
 and final immutable CI/acceptance remain separate. [Current report](reliability-cockpit/docs/NADI-PDM-SPRINT1-ONE-PR-DELIVERY.md).
+
+### 2026-11-01 — PR114 focused UX acceptance corrections
+
+NADI-PR114-UX-ACCEPTANCE-FIX-01 updates the existing Sprint1 branch only: compact
+PdM register (synthetic1440×900 row752.91–884.70px versus977.09–1108.89px),
+scannable detail with visible manual analysis and preserved raw/provenance fields,
+and typed Beranda403/401/retryable error presentation. Source baseline39da859;
+exact final SHA/CI are bound in PR114, not inferred from these measurements.
+No backend/schema/collector/account changes; current live pair remains39da859
+until all conditional activation gates, including legitimate session proof, pass.

@@ -40,8 +40,9 @@ export function EmptyState({ title = "Belum ada data Reliability Mart untuk tamp
   return <div className="state-card empty-state"><span className="state-symbol" aria-hidden="true">∅</span><strong>{title}</strong>{detail && <p>{detail}</p>}</div>;
 }
 
-export function ErrorState({ message = idText("Reliability Mart unavailable"), onRetry }: { message?: string; onRetry?: () => void }) {
-  return <div className="state-card error-state" role="alert"><span className="state-symbol" aria-hidden="true">!</span><strong>{message}</strong><p>Data Reliability Mart belum dapat dibaca. Coba muat ulang beberapa saat lagi.</p>{onRetry && <Button onClick={onRetry}>{idText("Try again")}</Button>}</div>;
+export function ErrorState({ message = idText("Reliability Mart unavailable"), onRetry, variant = "service" }: { message?: string; onRetry?: () => void; variant?: "service" | "access" | "session" | "request" }) {
+  const detail = variant === "access" ? "Akun ini belum memiliki capability atau scope portofolio faktual yang disetujui. Hubungi operator berwenang untuk verifikasi akses; status ini tidak menyatakan Reliability Mart mengalami gangguan." : variant === "session" ? "Masuk kembali melalui halaman login untuk memperbarui sesi." : variant === "request" ? "Permintaan tidak dapat diproses. Periksa konteks permintaan atau hubungi operator." : "Data Reliability Mart belum dapat dibaca. Coba muat ulang beberapa saat lagi.";
+  return <div className="state-card error-state" role="alert"><span className="state-symbol" aria-hidden="true">!</span><strong>{message}</strong><p>{detail}</p>{variant === "session" && <Link className="button secondary" href="/login?returnTo=%2F">Masuk kembali</Link>}{variant === "service" && onRetry && <Button onClick={onRetry}>{idText("Try again")}</Button>}</div>;
 }
 
 export function Pagination({ meta, onChange }: { meta: PageMeta; onChange: (offset: number) => void }) {
