@@ -1,5 +1,16 @@
 # NADI product roadmap — main quest
 
+## 31 October 2026 — PdM product reset proposal
+
+**Documentation proposal; no implementation, activation or phase completion.**
+Verified main f1fc4e8b395691a17fe6d986bf14c772d37c1f2c contains PR105/106/108–112; PR107 remains OPEN. Development runtime is a different local source lokal yang berbeda. Historical entries below, including their “current” wording and source checkpoints, retain their dated scope.
+
+Start with [the Product Owner blueprint](../reliability-cockpit/docs/NADI-PDM-PRODUCT-BLUEPRINT.md). Proposed execution priority: make the existing engineer workflow understandable → bounded frontend presentation Sprint1 → engineer validation/offline crosswalk inventory → contract-first reliability KPI planning. Three pillars: Data Integration, PdM Center, Reliability Performance. Five entry points: Beranda, Aset, PdM Center, Tindak Lanjut, Laporan.
+
+[Roadmap/Linear mapping and Sprint1](../reliability-cockpit/docs/NADI-PDM-ROADMAP-AND-SPRINT-1.md) retains Phase0–5/M01–M07/UX history, existing Engineering/Recommendation/review/audit services and pending F03/field/operational gates. No Linear issues were created. Existing historical archive counts are not inspection counts or canonical evidence; runtime parity must be resolved before any later authorized deployment. Phase statuses are not recertified here.
+
+### Retained historical roadmap and acceptance checkpoints
+
 Latest verified source checkpoint: [19 October 2026 — PR105 integration](#19-october-2026--verified-pr105-source-integration-and-next-batch). Historical runtime/policy checkpoints below retain their dated scope.
 
 ## Source-free 72h review — 12 Oktober 2026
