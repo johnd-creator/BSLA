@@ -1058,3 +1058,11 @@ publication/immutable CI binding lives in the Draft PR handoff.
 [Report and F01–F24 evidence](reliability-cockpit/docs/NADI-PDM-SIMPLIFICATION-SPRINT-01.md).
 No runtime activation/merge or operational data/source change. PO visual acceptance
 and runtime-only F23/F24 parity remain pending.
+
+### Sprint 1 CI follow-up — 31 October 2026
+
+First exact-head backend passed; frontend exposed an existing date test expecting
+record provenance before opening its new disclosure. Updated that interaction
+without changing date assertions or product code; all42 date checks,56 existing
+login/logout checks and reports browser suite pass locally. Final delivery requires
+both CI jobs on the subsequent exact SHA; no runtime or source-system action.

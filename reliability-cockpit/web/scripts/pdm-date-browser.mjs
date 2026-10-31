@@ -47,6 +47,8 @@ try {
   check('register known instant in WIB '+timezoneId,await p.locator('.pdm-register').getByText('21 Oktober 2026, 06.30.00 WIB',{exact:true}).isVisible());
   await button('Buka inspeksi').click();await p.locator('.product-record-detail').waitFor();
   check('detail same instant as list '+timezoneId,await p.locator('.asset-facts').getByText('21 Oktober 2026, 06.30.00 WIB',{exact:true}).count()===2);
+  check('record provenance starts secondary without hiding measurement time '+timezoneId,!await p.locator('.inspection-provenance').getByText('20 Oktober 2026, 22.15.00 WIB',{exact:true}).isVisible());
+  await p.locator('.inspection-provenance > summary').click();
   check('application revision crosses to correct WIB day '+timezoneId,await p.locator('.asset-facts').getByText('20 Oktober 2026, 22.15.00 WIB',{exact:true}).isVisible());
   const original=p.locator('.asset-facts details').first();await original.locator('summary').click();
   check('original ISO available in detail '+timezoneId,await original.getByText(instant,{exact:true}).isVisible());

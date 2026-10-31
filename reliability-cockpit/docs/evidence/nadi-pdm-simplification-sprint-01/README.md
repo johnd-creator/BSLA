@@ -36,7 +36,9 @@ Additional evidence: [contract/lint groups](contract-checks.json),
 [13 session/draft scenarios](auth-session-results.json),
 [4 actual UI/API/PostgreSQL scenarios](ui-api-results.json),
 [source-history regression](source-history-results.json), and
-[full input/keyboard/review/Case retry regression](input-workflow-results.json). Existing source suites
+[full input/keyboard/review/Case retry regression](input-workflow-results.json),
+[42 timezone/source-precision checks](pdm-date-results.json), and
+[56 existing login/logout visual checks](login-visual-results.json). Existing source suites
 and the expanded input/review/Case retry test run in exact-head candidate CI.
 
 Reproduce from `reliability-cockpit/web` using the existing CI-pinned browser tooling:

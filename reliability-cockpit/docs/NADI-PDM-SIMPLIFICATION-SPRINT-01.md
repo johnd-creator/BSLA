@@ -50,7 +50,8 @@ No new permanent frontend or operational database was created.
   and revoked401/403. Four actual UI→trusted API→PostgreSQL scenarios pass for
   origin/analysis/reported SR, readback/retry/revisions and explicit clear.
 - Existing localization399, integration67, experience107 and source-history15 browser
-  checks pass. Final exact-head backend/frontend CI is a delivery gate, separately
+  checks pass. Existing date42, login/logout56 and reports browser suites also
+  pass locally. Final exact-head backend/frontend CI is a delivery gate, separately
   bound to the implementation SHA in the PR; local results alone do not satisfy it.
 
 The standalone login presentation and global auth enforcement are unchanged. Tests
@@ -127,3 +128,12 @@ PO VISUAL/ENGINEER ACCEPTANCE: PENDING. F23/F24 release compatibility: PENDING.
 Phase0–5 history and Phase1 engineering gates remain unchanged.
 
 Next: **Senior Review → PO UX Acceptance → Separate Runtime Compatibility & Activation Task.**
+
+### CI qualification correction
+
+The first run on c452945 passed backend acceptance but the frontend date browser
+asserted visibility of the now-collapsed record provenance. The regression now
+explicitly opens that disclosure and retains all original exact date/ISO/timezone
+assertions. Both America/Los_Angeles and Pacific/Kiritimati synthetic contexts pass
+(42 checks); no formatter, timestamp or runtime source changed. Final CI is bound
+to the subsequent delivery head in the PR, not the first backend-only success.
