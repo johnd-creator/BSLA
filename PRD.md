@@ -424,3 +424,12 @@ record alias must be preserved as immutable receipt evidence. Replay must reject
 missing/changed aliases after recovery, preserve legitimate later user revisions,
 and never silently reconstruct links. This correction is implemented/tested only
 in disposable copies; demo-target activation/import remains separately gated.
+
+## Sprint 1 product simplification — 31 October 2026
+
+The Product Owner authorized PR113's engineer-first direction. FR-03/04/05/07 now
+have an isolated S1-01–S1-05 frontend candidate: five primary work areas, distinct
+native/Excel history, continuous measurement entry and optional contextual Case.
+[Implementation and preservation evidence](reliability-cockpit/docs/NADI-PDM-SIMPLIFICATION-SPRINT-01.md).
+This is not PO visual/UAT acceptance or deployment. Existing contracts, review,
+source read-only boundaries and runtime-only F23/F24 release gates remain in force.

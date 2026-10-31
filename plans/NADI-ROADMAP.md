@@ -1108,3 +1108,14 @@ Next: independent final review and authorized publication/CI, then separately
 approved migration/controller activation and full-history demo adapter/import.
 Canonical mapping, historical chart, engineering qualification and cloud transfer
 remain distinct future acceptance. [Evidence](../reliability-cockpit/docs/nadi-pdm-complete-history-01.md).
+
+### NADI-PDM-SIMPLIFICATION-SPRINT-01 — 31 October 2026 isolated candidate
+
+The Product Owner accepted the PR113 blueprint direction and authorized S1-01–S1-05
+frontend implementation/testing/Draft PR. [Sprint evidence](../reliability-cockpit/docs/NADI-PDM-SIMPLIFICATION-SPRINT-01.md)
+records five-entry navigation, Register/history/editor/detail simplification and
+optional contextual Engineering. Implementation/testing, exact-head CI, senior
+review, PO visual acceptance, merge and active visibility remain distinct.
+No Phase0–5 history, source engineering gate, F03/PR107 or future KPI plan changes.
+Next: senior review → PO UX acceptance → separately authorized F23/F24 runtime
+compatibility and activation. Localhost remains on its existing preview.

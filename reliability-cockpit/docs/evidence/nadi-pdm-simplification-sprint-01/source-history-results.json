@@ -1,0 +1,142 @@
+{
+  "checks": [
+    "Indonesian source date with date-only precision",
+    "provisional and unmapped context explicit",
+    "zero and null remain distinct",
+    "unknown unit is explicit",
+    "conflicting raw date remains accessible",
+    "immutable source alias and current revision separated",
+    "no page overflow 1440",
+    "no page overflow 390",
+    "detail advances actual byte-bounded cursor",
+    "source keyset next page navigable",
+    "access/schema/session distinction forbidden",
+    "access/schema/session distinction unavailable",
+    "access/schema/session distinction expired",
+    "no browser errors or unexpected network",
+    "GET-only requests"
+  ],
+  "errors": [],
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/pdm",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/candidate.css",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/candidate.js",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/engineering-qa/source-history/batches",
+      "query": "?after="
+    },
+    {
+      "method": "GET",
+      "path": "/api/engineering-qa/source-history",
+      "query": "?limit=25&after="
+    },
+    {
+      "method": "GET",
+      "path": "/api/engineering-qa/source-history/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "query": "?offset=0&limit=25"
+    },
+    {
+      "method": "GET",
+      "path": "/api/engineering-qa/source-history/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "query": "?offset=2&limit=25"
+    },
+    {
+      "method": "GET",
+      "path": "/api/engineering-qa/source-history/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "query": "?offset=0&limit=25"
+    },
+    {
+      "method": "GET",
+      "path": "/api/engineering-qa/source-history",
+      "query": "?limit=25&after=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "method": "GET",
+      "path": "/pdm",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/candidate.css",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/candidate.js",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/engineering-qa/source-history/batches",
+      "query": "?after="
+    },
+    {
+      "method": "GET",
+      "path": "/api/engineering-qa/source-history",
+      "query": "?limit=25&after="
+    },
+    {
+      "method": "GET",
+      "path": "/pdm",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/candidate.css",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/candidate.js",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/engineering-qa/source-history/batches",
+      "query": "?after="
+    },
+    {
+      "method": "GET",
+      "path": "/api/engineering-qa/source-history",
+      "query": "?limit=25&after="
+    },
+    {
+      "method": "GET",
+      "path": "/pdm",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/candidate.css",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/candidate.js",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/api/engineering-qa/source-history/batches",
+      "query": "?after="
+    },
+    {
+      "method": "GET",
+      "path": "/api/engineering-qa/source-history",
+      "query": "?limit=25&after="
+    }
+  ]
+}

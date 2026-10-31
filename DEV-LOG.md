@@ -1045,3 +1045,16 @@ review passed. Portable synthetic controller/installer/PostgreSQL checks are add
 to the exact-head candidate workflow. Publication/testing is separate from live
 installation, migration, SQL privilege changes, activation and import; none of those
 live actions is performed by this support package. See the owning activation proposal.
+
+## 31 October 2026 — NADI-PDM-SIMPLIFICATION-SPRINT-01
+
+Implemented authorized S1-01–S1-05 in an isolated branch on reviewed blueprint
+2437fdb (PR113). Five primary work areas, separate native/Excel history, A–D editor
+and contextual review/optional Case preserve existing payloads and services.
+Independent review corrections include query/hash preservation, exact active-route
+semantics, primary-action hierarchy and dirty editor anchor Back/Forward.
+Synthetic component, draft/session and disposable UI/API qualification completed;
+publication/immutable CI binding lives in the Draft PR handoff.
+[Report and F01–F24 evidence](reliability-cockpit/docs/NADI-PDM-SIMPLIFICATION-SPRINT-01.md).
+No runtime activation/merge or operational data/source change. PO visual acceptance
+and runtime-only F23/F24 parity remain pending.

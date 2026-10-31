@@ -1,0 +1,70 @@
+[
+  {
+    "check": "check:product-safety",
+    "passed": true
+  },
+  {
+    "check": "check:engineering",
+    "passed": true
+  },
+  {
+    "check": "check:phase2",
+    "passed": true
+  },
+  {
+    "check": "check:workflow",
+    "passed": true
+  },
+  {
+    "check": "check:http-qa",
+    "passed": true
+  },
+  {
+    "check": "check:bounded-http",
+    "passed": true
+  },
+  {
+    "check": "check:bounded-proxy",
+    "passed": true
+  },
+  {
+    "check": "check:local-auth",
+    "passed": true
+  },
+  {
+    "check": "check:ux",
+    "passed": true
+  },
+  {
+    "check": "check:pdm-input",
+    "passed": true
+  },
+  {
+    "check": "check:eng-product",
+    "passed": true
+  },
+  {
+    "check": "check:integration",
+    "passed": true
+  },
+  {
+    "check": "check:reports",
+    "passed": true
+  },
+  {
+    "check": "check:global-auth",
+    "passed": true
+  },
+  {
+    "check": "check:factual-policy",
+    "passed": true
+  },
+  {
+    "check": "check:engineering-fixes",
+    "passed": true
+  },
+  {
+    "check": "lint",
+    "passed": true
+  }
+]

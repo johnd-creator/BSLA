@@ -1,0 +1,24 @@
+{
+  "results": [
+    {
+      "scenario": "package1\u20133 native department+manual analysis+unverified SR actual form \u2192 real API/PG \u2192 committed503/retry same intent \u2192 one saved record/detail",
+      "status": "PASS"
+    },
+    {
+      "scenario": "actual native editor readback \u2192 PM52 conditional fields \u2192 real CAS revision \u2192 immutable origin/analysis/SR history rendered per revision",
+      "status": "PASS"
+    },
+    {
+      "scenario": "390px real component form reopens persisted PM52+analysis+SR with fixed authorized asset, no department or operator dependency",
+      "status": "PASS"
+    },
+    {
+      "scenario": "actual editor explicit clear origin/analysis/SR \u2192 persisted legacy-native downgrade, previous immutable context retained",
+      "status": "PASS"
+    }
+  ],
+  "scope": "actual imported UI + trusted-session FastAPI TestClient + hermetic PostgreSQL; all browser traffic intercepted; no TLS bypass; synthetic fixture identity only",
+  "browser_errors": [],
+  "unexpected_requests": [],
+  "writes": 4
+}
