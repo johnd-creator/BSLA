@@ -226,7 +226,9 @@ with sync_playwright() as p:
     scenario('pending lostACK→auth503→retry retains lock/receipt; final503→sameID retry persists one record',lambda p,s:unavailable_retry(p,s,True))
 
     def bounded_list(page,state):
-        for _ in range(2):
+        for index in range(2):
+            if index:
+                page.get_by_role('button',name='Kembali ke register',exact=True).click()
             edit(page);page.get_by_role('button',name='Simpan draf inspeksi',exact=True).click();page.locator('.product-record-detail').wait_for()
         page.get_by_role('button',name='Register Inspeksi',exact=True).click()
         require(all(q['limit']==1 for q in state['list_requests']),'inspection list still requests unbounded25 capture records')

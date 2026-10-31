@@ -55,7 +55,7 @@ try{
  check('reasons disclosure works using keyboard',await mx.getByText('COLLECTOR_ERRORS',{exact:true}).isVisible());
  check('keyboard has visible focus indicator',await disclosure.evaluate(node=>parseFloat(getComputedStyle(node).outlineWidth)>=3));
  await p.keyboard.press('Enter');
- for(const href of ['/system-integration','/data-quality','/maintenance','/maintenance/investigation','/work-orders','/fmea','/rcfa','/overhauls'])check('existing technical navigation '+href,await p.locator(`#nav-integration a[href="${href}"]`).count()===1);
+ for(const href of ['/system-integration','/data-quality','/maintenance','/maintenance/investigation','/work-orders','/fmea','/rcfa','/overhauls'])check('existing technical navigation '+href,await p.locator(`.nadi-utility-nav a[href="${href}"]`).count()===1);
  check('integration overview has correct active route',await p.locator('#nav-integration a[aria-current="page"]').getAttribute('href')==='/system-integration');
  check('no invented PI or CEMS route',await p.locator('a[href^="/pi"],a[href^="/cems"]').count()===0);
  check('one main and one page heading',await p.getByRole('main').count()===1&&await p.getByRole('heading',{level:1}).count()===1);

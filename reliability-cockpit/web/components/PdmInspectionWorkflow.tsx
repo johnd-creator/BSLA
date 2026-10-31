@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import {useState} from 'react';
+import {useEffect,useState} from 'react';
 import type {Inspection,QaSession} from '../lib/product-records';
 import type {InspectionDraft} from '../lib/pdm-input';
 import type {CaseDraft,CaseRecord} from '../lib/case-records';
@@ -15,6 +15,7 @@ import {Button,Feedback,SectionCard} from './ui';
 export default function PdmInspectionWorkflow({initial,session,onExpired,onChanged}:{initial:Inspection;session:QaSession;onExpired:()=>void;onChanged:()=>void}){
  const draftCache=usePdmDraft(),recovery=draftCache?.recovery;
  const [row,setRow]=useState(initial),[editing,setEditing]=useState(recovery?.subject===session.subject&&recovery?.base?.record_id===initial.record_id),[reason,setReason]=useState(''),[decision,setDecision]=useState(''),[creatingCase,setCreatingCase]=useState(false),[newCase,setNewCase]=useState<CaseRecord|null>(null),[linked,setLinked]=useState(false),[evidenceVersion,setEvidenceVersion]=useState(initial.revision),[readError,setReadError]=useState('');
+ useEffect(()=>{setDecision('');setReason('');},[row.record_id,row.revision,row.status]);
  const cmd=usePdmCommand(session,onExpired);
  const author=session.roles.includes('AUTHOR')&&row.created_by===session.subject;
  const independent=session.roles.includes('REVIEWER')&&![row.created_by,row.inspector_ref,...row.contributors??[]].includes(session.subject);
