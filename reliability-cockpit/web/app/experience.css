@@ -1106,3 +1106,12 @@
 .pdm-workspace > .experience-facts {grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:8px;}
 .pdm-workspace > details.help-details {margin-bottom:16px;}
 .register-observation {max-width:48ch;white-space:pre-wrap;overflow-wrap:anywhere;}
+
+.nadi-shell .pdm-entry .pdm-work-section {min-width:0;scroll-margin-top:90px;}
+.nadi-shell .pdm-entry section.pdm-work-section {border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:16px;}
+.nadi-shell .pdm-entry .pdm-work-section > .filter-grid {gap:12px;}
+.nadi-shell .pdm-entry fieldset fieldset {min-width:0;}
+.nadi-shell .pdm-workspace > .experience-facts {margin:0;padding:16px 0;}
+.nadi-shell .pdm-workspace > .help-details {margin:0;padding:0;}
+.nadi-shell .inspection-provenance,.nadi-shell .inspection-evidence {margin:12px 0;}
+.nadi-shell :is(.inspection-provenance,.inspection-evidence) > summary {min-height:44px;display:list-item;align-content:center;cursor:pointer;color:var(--primary);font-weight:600;}

@@ -24,7 +24,7 @@ function PdmPage({qaEnabled}:{qaEnabled:boolean}){
  const {state,page,session,reload,invalidate}=useQaRecords<Inspection>('inspections',qaEnabled,offset,query);
  const locationRef=useRef(''),cacheRef=useRef(cache);cacheRef.current=cache;
  useEffect(()=>{
-  const readLocation=()=>{const id=new URLSearchParams(window.location.search).get('record');setSelected(validRecordId(id)?id:null);setView('register');locationRef.current=window.location.pathname+window.location.search;};
+  const readLocation=()=>{const id=new URLSearchParams(window.location.search).get('record');setSelected(validRecordId(id)?id:null);setView('register');locationRef.current=window.location.pathname+window.location.search+window.location.hash;};
   readLocation();
   const back=()=>{const saved=cacheRef.current;if(saved?.busy||saved?.recovery&&!saved.discard()){window.history.pushState({},'',locationRef.current);return;}readLocation();};
   window.addEventListener('popstate',back);return()=>window.removeEventListener('popstate',back);
@@ -33,9 +33,10 @@ function PdmPage({qaEnabled}:{qaEnabled:boolean}){
  const proof=page as typeof page & {filter_scope?:string;event_time_basis?:string};
  const contractReady=proof?.filter_scope==='AUTHORIZED_POPULATION'&&proof?.event_time_basis==='INSPECTED_AT';
  const expire=useCallback(()=>invalidate(),[invalidate]);
+ const updateRecordLocation=useCallback((id:string|null,replace=false)=>{const params=new URLSearchParams(window.location.search);if(id)params.set('record',id);else params.delete('record');const next='/pdm'+(params.size?'?'+params.toString():'')+window.location.hash;if(replace)window.history.replaceState({},'',next);else if(next!==window.location.pathname+window.location.search+window.location.hash)window.history.pushState({},'',next);locationRef.current=next;},[]);
  const completed=cache?.completed,consumeCompletion=cache?.consumeCompletion;
- useEffect(()=>{if(state!=='ready'||!session||!completed)return;consumeCompletion?.();if(completed.created_by!==session.subject||!session.asset_ids.includes(completed.canonical_asset_id))return;setSelected(completed.record_id);setView('register');window.history.replaceState({},'',`/pdm?record=${encodeURIComponent(completed.record_id)}`);reload();},[completed,consumeCompletion,state,session,reload]);
- function selectRecord(id:string|null){setSelected(id);setView('register');const params=new URLSearchParams(window.location.search);if(id)params.set('record',id);else params.delete('record');const next='/pdm'+(params.size?'?'+params.toString():'');if(next!==window.location.pathname+window.location.search)window.history.pushState({},'',next);locationRef.current=next;}
+ useEffect(()=>{if(state!=='ready'||!session||!completed)return;consumeCompletion?.();if(completed.created_by!==session.subject||!session.asset_ids.includes(completed.canonical_asset_id))return;setSelected(completed.record_id);setView('register');updateRecordLocation(completed.record_id,true);reload();},[completed,consumeCompletion,state,session,reload,updateRecordLocation]);
+ function selectRecord(id:string|null){setSelected(id);setView('register');updateRecordLocation(id);}
  function changeView(next:string){if(cache?.busy)return;if(next==='entry'&&cache?.recovery?.base&&!cache.discard())return;if(view==='entry'&&next!=='entry'){if(cache?.recovery&&!window.confirm('Tutup dan buang input pengukuran yang belum disimpan?'))return;cache?.clear();}if(next==='register'){selectRecord(null);}else setView(next);}
  function applyFilters(nextMethod=method){
   setFilterError('');
@@ -43,7 +44,7 @@ function PdmPage({qaEnabled}:{qaEnabled:boolean}){
   const params=new URLSearchParams();for(const [key,value] of [['search',search],['method',nextMethod],['asset_id',asset],['status',status],['since',since],['until',until]])if(value)params.set(key,value);
   setOffset(0);setSelected(null);setQuery('&'+params.toString());
  }
- return <div className="product-workspace pdm-workspace experience-workspace"><PageHeader eyebrow="Pengukuran & investigasi" title={idText('PdM Center')} description="Catat pengukuran, baca riwayat, lalu ajukan rekam untuk review independen." actions={state==='ready'&&contractReady&&session?.roles.includes('AUTHOR')?<Button variant="primary" aria-pressed={view==='entry'} onClick={()=>changeView('entry')}>Input Pengukuran</Button>:undefined}/>
+ return <div className="product-workspace pdm-workspace experience-workspace"><PageHeader eyebrow="Pengukuran & investigasi" title={idText('PdM Center')} description="Catat pengukuran, baca riwayat, lalu ajukan rekam untuk review independen." actions={state==='ready'&&contractReady&&session?.roles.includes('AUTHOR')&&view!=='entry'&&!(view==='register'&&selected)?<Button variant="primary" aria-pressed={view==='entry'} onClick={()=>changeView('entry')}>Input Pengukuran</Button>:undefined}/>
  <QaProductBoundary state={state} reload={reload}/>{view!=='entry'&&<CompactFacts items={[
  {label:'Inspeksi berotorisasi',value:contractReady&&page?page.total:'UNKNOWN',detail:'Jumlah inspeksi sesuai akses dan filter server'},
  {label:'Pada halaman ini',value:contractReady&&page?page.items.length:'UNKNOWN',detail:'Halaman ini saja · gunakan navigasi untuk rekam berikutnya'},
