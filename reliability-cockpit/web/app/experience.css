@@ -1115,3 +1115,7 @@
 .nadi-shell .pdm-workspace > .help-details {margin:0;padding:0;}
 .nadi-shell .inspection-provenance,.nadi-shell .inspection-evidence {margin:12px 0;}
 .nadi-shell :is(.inspection-provenance,.inspection-evidence) > summary {min-height:44px;display:list-item;align-content:center;cursor:pointer;color:var(--primary);font-weight:600;}
+
+.inspection-review-decision {display:grid;gap:12px;min-width:0;}
+.nadi-shell .inspection-review-decision > label {display:flex;align-items:center;gap:10px;min-height:44px;}
+.nadi-shell .inspection-review-decision input[type="radio"] {width:20px;height:20px;min-height:20px;flex:none;}
