@@ -137,3 +137,12 @@ explicitly opens that disclosure and retains all original exact date/ISO/timezon
 assertions. Both America/Los_Angeles and Pacific/Kiritimati synthetic contexts pass
 (42 checks); no formatter, timestamp or runtime source changed. Final CI is bound
 to the subsequent delivery head in the PR, not the first backend-only success.
+
+## Superseding integrated qualification — 31 October 2026
+
+The unchanged-backend/auth and F23/F24-not-backported claims above describe original
+Sprint head6549516 only. The subsequently authorized one-PR integration carries
+six exact reviewed parity files plus supporting UI/tests. Current acceptance and
+remaining live/session/controller gates are in
+[NADI-PDM-SPRINT1-ONE-PR-DELIVERY](NADI-PDM-SPRINT1-ONE-PR-DELIVERY.md).
+No old CI or screenshot is reclassified as current live evidence.

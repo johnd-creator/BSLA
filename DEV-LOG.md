@@ -1066,3 +1066,12 @@ record provenance before opening its new disclosure. Updated that interaction
 without changing date assertions or product code; all42 date checks,56 existing
 login/logout checks and reports browser suite pass locally. Final delivery requires
 both CI jobs on the subsequent exact SHA; no runtime or source-system action.
+
+## 31 October 2026 — Sprint 1 one-PR integration
+
+PR114 retargeted to main with all blueprint/Sprint commits retained; PR113 closed
+unmerged as superseded, PR107 excluded. Minimal reviewed F23/F24 parity incorporated
+without private runtime reports/samples. Source/hash scope guard, synthetic tests,
+private official source seal, independent recovery and fresh backup qualification
+prepare conditional single-pair activation. No cutover is claimed; session proof
+and final immutable CI/acceptance remain separate. [Current report](reliability-cockpit/docs/NADI-PDM-SPRINT1-ONE-PR-DELIVERY.md).

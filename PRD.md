@@ -433,3 +433,11 @@ native/Excel history, continuous measurement entry and optional contextual Case.
 [Implementation and preservation evidence](reliability-cockpit/docs/NADI-PDM-SIMPLIFICATION-SPRINT-01.md).
 This is not PO visual/UAT acceptance or deployment. Existing contracts, review,
 source read-only boundaries and runtime-only F23/F24 release gates remain in force.
+
+## Approved runtime parity preservation — 31 October 2026
+
+The authorized PR114 consolidation carries existing F23 display-only interpretation/
+estimate and F24 explicit local-demo account policy, retaining raw custody, standard
+authentication and source read-only semantics. No global password-policy reduction
+or automatic diagnosis/Recommendation/WO write. [Current integrated acceptance](reliability-cockpit/docs/NADI-PDM-SPRINT1-ONE-PR-DELIVERY.md)
+records source qualification separately from conditional live and PO acceptance.

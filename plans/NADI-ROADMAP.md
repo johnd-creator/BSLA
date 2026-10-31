@@ -1119,3 +1119,10 @@ review, PO visual acceptance, merge and active visibility remain distinct.
 No Phase0–5 history, source engineering gate, F03/PR107 or future KPI plan changes.
 Next: senior review → PO UX acceptance → separately authorized F23/F24 runtime
 compatibility and activation. Localhost remains on its existing preview.
+
+### Sprint 1 one-PR integration — 31 October 2026
+
+The Product Owner consolidated blueprint/Sprint/parity and conditional local
+acceptance into PR114 based on main; PR113 is superseded without merge. Phase0–5
+history and engineering gates remain. [One current acceptance report](../reliability-cockpit/docs/NADI-PDM-SPRINT1-ONE-PR-DELIVERY.md)
+separates exact-source/CI qualification from authenticated local activation and PO UX.

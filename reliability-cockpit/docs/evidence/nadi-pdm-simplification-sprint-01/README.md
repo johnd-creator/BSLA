@@ -51,3 +51,10 @@ The committed check commands/workflow supply production build, TypeScript, backe
 full input keyboard/capture/auth/Case, integration and other acceptance gates.
 
 [Scope and F01–F24 report](../../NADI-PDM-SIMPLIFICATION-SPRINT-01.md).
+
+## Historical evidence binding
+
+These matched112 images and their original results qualify Sprint source6549516,
+before the authorized F23/F24 integration. They are preserved, not regenerated or
+claimed as a live/parity certificate. Current source/live gates and additional
+synthetic qualification are in the [one-PR delivery report](../../NADI-PDM-SPRINT1-ONE-PR-DELIVERY.md).

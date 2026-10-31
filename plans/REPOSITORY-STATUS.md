@@ -1098,3 +1098,11 @@ All 28 page entries and protected backend/auth/DTO/source/controller boundaries
 remain unchanged. Synthetic/disposable qualification is separate from exact-head
 CI and PO UAT. No merge, deployment, active DB/account/session/collector change.
 Runtime-only F23/F24 are preserved locally and remain release compatibility gates.
+
+## 31 October 2026 — consolidated Sprint 1 delivery
+
+PR114 now targets main and retains blueprint2437fdb plus Sprint6549516 history.
+PR113 CLOSED_SUPERSEDED/unmerged; PR107 untouched. Reviewed F23/F24 source parity
+changes the original frontend-only scope through six pinned exceptions; the
+[one delivery report](../reliability-cockpit/docs/NADI-PDM-SPRINT1-ONE-PR-DELIVERY.md)
+is the current source/CI/live gate authority. Original dated reports stay historical.
