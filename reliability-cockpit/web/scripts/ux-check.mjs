@@ -83,14 +83,15 @@ try {
     }
   }
   if (existsSync(join(temp, "lib/navigation.js"))) {
-    const { navigation, routeMatches, navigationGroup } = require(join(temp, "lib/navigation.js"));
+    const { navigation, utilityNavigation, routeMatches, navigationGroup } = require(join(temp, "lib/navigation.js"));
+    test("five primary work entries are exact and stable",()=>assert.deepEqual(navigation.map(x=>[x.label,x.href]),[["Beranda","/"],["Aset","/assets"],["PdM Center","/pdm"],["Tindak Lanjut","/action-board"],["Laporan","/reports"]]));
     test("all existing navigation URLs survive", () => {
-      const hrefs = navigation.flatMap(x => x.children?.map(c => c.href) ?? [x.href]);
+      const hrefs = [...navigation,...utilityNavigation].flatMap(x => x.children?.map(c => c.href) ?? [x.href]);
       for (const href of ["/", "/assets", "/asset-health", "/maintenance", "/maintenance/investigation", "/work-orders", "/fmea", "/rcfa", "/overhauls", "/data-quality"]) assert.ok(hrefs.includes(href), href);
     });
     test("route boundary prevents false active links", () => { assert.ok(!routeMatches("/assets-other", "/assets")); assert.ok(routeMatches("/assets/id", "/assets")); assert.ok(!routeMatches("/assets", "/")); });
-    test("detail routes retain domain context", () => { assert.equal(navigationGroup("/assets/A%3AB"), "assets"); assert.equal(navigationGroup("/equipment/42"), "integration"); assert.equal(navigationGroup("/maintenance/investigation"), "integration"); });
-    test("planned modules cannot silently redirect", () => { for(const item of navigation.filter(x => x.planned)) { assert.equal(item.href, undefined); assert.equal(item.children, undefined); } });
+    test("detail routes retain domain context", () => { assert.equal(navigationGroup("/assets/A%3AB"), "assets"); assert.equal(navigationGroup("/equipment/42"), "asset-records"); assert.equal(navigationGroup("/maintenance/investigation"), "asset-records"); });
+    test("planned modules cannot silently redirect", () => { for(const item of [...navigation,...utilityNavigation].filter(x => x.planned)) { assert.equal(item.href, undefined); assert.equal(item.children, undefined); } });
   }
   if (existsSync(join(temp, "lib/overview.js"))) {
     const { factualMetric, overviewDate, attentionItems } = require(join(temp, "lib/overview.js"));

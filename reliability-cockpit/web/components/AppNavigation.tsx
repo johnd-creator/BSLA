@@ -6,7 +6,7 @@ import WorkspaceAccount from "./WorkspaceAccount";
 import { ThemeToggle } from "./ThemeProvider";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { activeLink, navigation, navigationGroup, routeMatches } from "../lib/navigation";
+import { activeLink, navigation, utilityNavigation, navigationGroup } from "../lib/navigation";
 
 const iconPaths: Record<string, string> = {
   overview: "M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z",
@@ -26,7 +26,7 @@ export function NavIcon({ name }: { name: string }) {
 export function AppShell({ children, engineeringVisible = false, liveDevelopment = false }: { children: ReactNode; engineeringVisible?: boolean; liveDevelopment?: boolean }) {
   const pathname = usePathname() ?? "/";
   const group = navigationGroup(pathname);
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({ assets: group === "assets", integration: group === "integration" });
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [collapsed, setCollapsed] = useState(false);
   const [drawer, setDrawer] = useState(false);
   const sidebar = useRef<HTMLElement>(null);
@@ -34,7 +34,7 @@ export function AppShell({ children, engineeringVisible = false, liveDevelopment
 
   useEffect(() => {
     setDrawer(false);
-    if (group) setExpanded(current => ({ ...current, [group]: true }));
+    setExpanded(current => ({ ...current, ...Object.fromEntries(utilityNavigation.filter(item => activeLink(pathname, item.children ?? [])).map(item => [item.id, true])) }));
   }, [pathname, group]);
 
 
@@ -76,10 +76,15 @@ export function AppShell({ children, engineeringVisible = false, liveDevelopment
     <a className="skip-link" href="#main-content">{idText("Skip to content")}</a>
     {drawer && <button type="button" className="drawer-backdrop" aria-label={idText("Close navigation")} onClick={() => setDrawer(false)} />}
     <aside ref={sidebar} id="nadi-sidebar" className="nadi-sidebar" role={drawer ? "dialog" : undefined} aria-modal={drawer ? true : undefined} aria-label={idText("NADI navigation panel")}>
-      <div className="sidebar-brand-row"><Link href="/" className="nadi-brand" aria-label={idText("NADI Executive Overview")}><span className="brand-emblem" aria-hidden="true">N</span><span className="nav-copy"><strong>NADI</strong><small>{idText("Reliability Data Platform")}</small></span></Link><button type="button" className="drawer-close" aria-label={idText("Close navigation")} onClick={() => setDrawer(false)}>×</button></div>
+      <div className="sidebar-brand-row"><Link href="/" className="nadi-brand" aria-label="NADI Beranda"><span className="brand-emblem" aria-hidden="true">N</span><span className="nav-copy"><strong>NADI</strong><small>{idText("Reliability Data Platform")}</small></span></Link><button type="button" className="drawer-close" aria-label={idText("Close navigation")} onClick={() => setDrawer(false)}>×</button></div>
       <nav className="nadi-nav" aria-label={idText("NADI navigation")}>
-        {navigation.map(item => {
-          const active = group === item.id;
+        <div className="nadi-primary-nav" role="group" aria-label="Area kerja utama">
+          {navigation.map(item => <Link key={item.id} href={item.href!} className={`nav-link${group === item.id ? " active" : ""}`} aria-current={group === item.id ? "page" : undefined} aria-label={collapsed ? item.label : undefined} title={collapsed ? item.label : undefined}><NavIcon name={item.icon}/><span className="nav-copy">{item.label}</span></Link>)}
+        </div>
+        <div className="nadi-utility-nav" role="group" aria-label="Navigasi pendukung">
+          <p className="nav-section-label nav-copy">Data, perangkat & bantuan</p>
+        {utilityNavigation.filter(item => !item.engineeringOnly || engineeringVisible).map(item => {
+          const active = group === item.id || !!activeLink(pathname, item.children ?? []);
           const open = expanded[item.id] && !collapsed;
           const currentLink = activeLink(pathname, item.children ?? []);
           const contents = <><NavIcon name={item.icon} /><span className="nav-copy">{item.label}</span></>;
@@ -90,7 +95,7 @@ export function AppShell({ children, engineeringVisible = false, liveDevelopment
             {item.children && <div id={`nav-${item.id}`} className="nav-submenu" hidden={!open}>{item.children.map((link, index) => <div key={link.href}>{link.section && link.section !== item.children?.[index - 1]?.section && <p className="nav-section-label">{link.section}</p>}<Link className={`nav-sublink${currentLink === link.href ? " active" : ""}`} href={link.href} aria-current={currentLink === link.href ? "page" : undefined}>{link.label}</Link></div>)}{item.id === "integration" && <div className="nav-planned-domains"><span>{idText("PI System · Planned")}</span><span>{idText("CEMS · Planned")}</span></div>}</div>}
           </div>;
         })}
-        {engineeringVisible && <div className="engineering-nav"><Link className={`nav-link${routeMatches(pathname, "/engineering") ? " active" : ""}`} href={liveDevelopment ? "/engineering/cases" : "/engineering"} aria-label={collapsed ? idText("Engineering Workspace") : undefined} title={idText("Engineering Workspace")}><NavIcon name="engineering" /><span className="nav-copy">{idText("Engineering Workspace")}</span></Link><small className="nav-copy">{liveDevelopment ? idText("Isolated development QA") : idText("Authorized workspace")}</small></div>}
+        </div>
       </nav>
       <div className="sidebar-footer"><span className="nav-copy scope-label">{idText("OPERATING SCOPE")}</span><strong>BSR / IP</strong><small className="nav-copy">{idText("Controlled Reliability Mart")}</small></div>
       <button type="button" className="sidebar-collapse" onClick={() => setCollapsed(!collapsed)} aria-label={collapsed ? idText("Expand sidebar") : idText("Collapse sidebar")} aria-expanded={!collapsed}><span aria-hidden="true">{collapsed ? "»" : "«"}</span><span className="nav-copy">{idText("Collapse sidebar")}</span></button>
