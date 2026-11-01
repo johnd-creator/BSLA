@@ -41,7 +41,22 @@ const reviewedSprint3 = {
   "reliability-cockpit/contracts/sprint3/examples/sprint3-kpi-readiness.synthetic.json": "0578fe1bcee00c1c762eb760782b8692d931df66e3122f86d8d89afb6927a68e",
   "reliability-cockpit/contracts/sprint3/tests/test_sprint3_evidence.py": "a63a91083e3839a51e35b3ff308e15dfe0041c5471fc61bb171e08163c1df221"
 };
-const admitted={...reviewedParity,...reviewedSprint2,...reviewedSprint3};
+// Sprint4 isolated candidate-only models/engine/fixtures; active shared contracts remain unchanged.
+// Sprint4 isolated candidate-only models/engine/fixtures; active shared contracts remain unchanged.
+// Sprint4 isolated candidate-only models/engine/fixtures; active shared contracts remain unchanged.
+// Sprint4 isolated candidate-only models/engine/fixtures; active shared contracts remain unchanged.
+// Sprint4 isolated candidate-only models/engine/fixtures; active shared contracts remain unchanged.
+const reviewedSprint4 = {
+  "reliability-cockpit/contracts/sprint4/__init__.py": "97a89db4faef9f32c76abbe8ce25495a95b3b5b2b9748ce0635a8b39439bd326",
+  "reliability-cockpit/contracts/sprint4/models.py": "3a04415018c7925d84417406a8910b56cb8a1c1207ef18841aa75fde61a5df20",
+  "reliability-cockpit/contracts/sprint4/engine.py": "5216b792ade0fc0ba225c682e96c17d3348beb9fa14a8fa71cb4c57dc8409860",
+  "reliability-cockpit/contracts/sprint4/packet.schema.json": "3085dcea30d5a392364977643235203d7d84b452694bbe8f0186ee29f8bc6a5f",
+  "reliability-cockpit/contracts/sprint4/reference-input.synthetic.json": "71c83fba979590efb6b7f8e12d3cd754742fef094341679e51b504b705023d5f",
+  "reliability-cockpit/contracts/sprint4/reference-expected.synthetic.json": "6327339aa7f3e63375d54307bba274d3dd0b2187e98035eb28f9842ba7623638",
+  "reliability-cockpit/contracts/sprint4/README.md": "c68ce14c65fd1988b6d6c178d876bcb453aa8b6a6d6b687401ba3c0af1fd76fc",
+  "reliability-cockpit/contracts/sprint4/result.schema.json": "a1e1fe7568ceb6e18c2b89d84f5041f1e87192c3caf2af620ae2d4e26d290ccd"
+};
+const admitted={...reviewedParity,...reviewedSprint2,...reviewedSprint3,...reviewedSprint4};
 const changed=[...git('diff','--name-only',base,'--',...protectedPaths).trim().split('\n'),...git('ls-files','--others','--exclude-standard','--',...protectedPaths).trim().split('\n')].filter(Boolean);
 for(const path of changed){
  assert.ok(Object.hasOwn(admitted,path),`Unreviewed protected boundary: ${path}`);

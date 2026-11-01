@@ -94,3 +94,40 @@ class Packet(Model):
     exposures: Annotated[list[Exposure],Field(max_length=1000)]
     repairs: Annotated[list[Repair],Field(max_length=1000)]
     outages: Annotated[list[Outage],Field(max_length=1000)]
+
+DecimalResult = Annotated[StrictStr, Field(pattern=r'^[0-9]+(?:\.[0-9]+)?(?:E[+-]?[0-9]+)?$')]
+class MetricResult(Model):
+    metric: Literal['MTBF','MTTR']
+    value: DecimalResult | None
+    unit: Literal['h']
+    synthetic_status: Literal['QUALIFIED_SYNTHETIC','NOT_ELIGIBLE']
+    reasons: list[Ref]
+    numerator_hours: DecimalResult | None
+    denominator: Annotated[StrictInt,Field(ge=0)] | None
+    included_ids: list[Ref]
+class Receipt(Model):
+    kind: Ref
+    record_id: Ref
+    reason: Ref
+    revision: Annotated[StrictInt,Field(ge=1)] | None = None
+    superseded_by: Annotated[StrictInt,Field(ge=1)] | None = None
+    target: Ref | None = None
+    work_type: Ref | None = None
+    hours: DecimalResult | None = None
+    active_hours: DecimalResult | None = None
+    episode: Ref | None = None
+    kind_claim: Ref | None = None
+class Result(Model):
+    contract_version: Literal['s4-result-1']
+    execution_mode: Literal['SYNTHETIC_TEST_ONLY']
+    operational_eligibility: Literal['NOT_ELIGIBLE']
+    metrics: Annotated[list[MetricResult],Field(min_length=2,max_length=2)]
+    audit: list[Receipt]
+    label: Literal['SYNTHETIC ONLY — NOT PLANT DATA'] | None = None
+    operational_reason: Ref | None = None
+    scope: Scope | None = None
+    window: Window | None = None
+    definition: Policy | None = None
+    input_sha256: Annotated[StrictStr,Field(pattern=r'^[0-9a-f]{64}$')] | None = None
+    arithmetic: Literal['DECIMAL_28_HALF_EVEN'] | None = None
+    source_lineage: Packet | None = None

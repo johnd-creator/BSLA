@@ -5,11 +5,13 @@ import unittest
 from pathlib import Path
 from decimal import Decimal, localcontext, Inexact
 from jsonschema import Draft202012Validator
+from pydantic import ValidationError
 from contracts.sprint4.engine import evaluate
-from contracts.sprint4.models import Packet
+from contracts.sprint4.models import Packet, Result
 ROOT=Path(__file__).parents[1]/'contracts/sprint4'
 def fixture():return json.loads((ROOT/'reference-input.synthetic.json').read_text())
-def metrics(p):return {r['metric']:r for r in evaluate(p)['metrics']}
+def metrics(p):
+    result=evaluate(p);Result.model_validate(result);return {r['metric']:r for r in result['metrics']}
 def clock(value):return dict(original=value,precision='SECOND')
 class Sprint4FoundationTest(unittest.TestCase):
     def blocked(self,p,metric='MTTR',reason=None):
@@ -117,8 +119,9 @@ class Sprint4FoundationTest(unittest.TestCase):
             result=evaluate(p);self.assertNotIn('SECRET_UNRELATED',json.dumps(result));self.assertIsNone(result['metrics'][0]['value'])
         p=fixture();p['failures']*=501;self.blocked(p,'MTBF')
     def test_engine_not_imported_by_application_and_legacy_unchanged(self):
-        root=ROOT.parents[2]
-        for path in (root/'src').rglob('*.py'):
+        root=ROOT.parents[1]
+        paths=list((root/'src').rglob('*.py'));self.assertGreater(len(paths),50)
+        for path in paths:
             self.assertNotIn('contracts.sprint4',path.read_text())
 
     def test_review_clock_offset_and_utc_overflow_are_typed_rejections(self):
@@ -140,3 +143,36 @@ class Sprint4FoundationTest(unittest.TestCase):
         p=fixture();p['exposures'][0]['operating_hours']='744';self.blocked(p,'MTBF','EXPOSURE_OUTAGE_CONTRADICTION')
     def test_review_multiple_restorations_require_reopened_policy(self):
         p=fixture();d=copy.deepcopy(p['repairs'][0]);d.update(record_id='SYNTHETIC:SECOND-RESTORE');p['repairs'].append(d);self.blocked(p,'MTTR','MULTIPLE_RESTORATIONS_FOR_FAILURE')
+
+    def test_review_active_interval_segmentation_is_exactly_invariant(self):
+        p=fixture();p['outages']=[];p['failures']=p['failures'][:1];p['repairs']=p['repairs'][:1]
+        repair=p['repairs'][0];repair['restored_at']=clock('2026-01-05T09:00:00Z');interval=copy.deepcopy(repair['intervals'][0]);repair['intervals']=[interval]
+        expected=metrics(p)['MTTR'];self.assertEqual(expected['value'],'1')
+        repair['intervals']=[]
+        for i,(a,b) in enumerate([('08:00','08:20'),('08:20','08:40'),('08:40','09:00')]):
+            row=copy.deepcopy(interval);row.update(interval_id='SYNTHETIC:SPLIT-'+str(i),start=clock('2026-01-05T'+a+':00Z'),end=clock('2026-01-05T'+b+':00Z'));repair['intervals'].append(row)
+        self.assertEqual(metrics(p)['MTTR'],expected);repair['intervals'].reverse();self.assertEqual(metrics(p)['MTTR'],expected)
+
+    def test_visual_fixture_is_exact_engine_output_and_not_a_second_formula(self):
+        actual=json.loads((ROOT.parents[1]/'web/fixtures/reliability-performance-result.synthetic.json').read_text())
+        self.assertEqual(actual,evaluate(fixture()))
+    def test_bounded_representative_population(self):
+        import time
+        p=fixture();p.update(repairs=[],outages=[]);base=copy.deepcopy(p['failures'][0]);p['failures']=[]
+        for i in range(1000):
+            row=copy.deepcopy(base);row['record_id']='SYNTHETIC:EVENT-'+str(i);p['failures'].append(row)
+        start=time.perf_counter();result=metrics(p)['MTBF'];self.assertEqual(result['denominator'],1000);self.assertEqual(result['value'],'0.6');self.assertLess(time.perf_counter()-start,5,'gross synthetic regression budget, not operational SLA')
+
+    def test_review_wait_active_interleaving_still_overlaps_episode_envelopes(self):
+        p=fixture();p['outages']=[];p['failures'][1]['occurred_at']=clock('2026-01-05T09:00:00Z');repair=p['repairs'][1];repair.update(repair_started_at=clock('2026-01-05T09:00:00Z'),restored_at=clock('2026-01-05T11:00:00Z'));repair['intervals'][0].update(start=repair['repair_started_at'],end=repair['restored_at']);self.blocked(p,'MTTR','OVERLAPPING_REPAIR_EPISODES')
+
+    def test_review_wait_planned_source_cannot_contradict_active_repair(self):
+        for kind in ['WAITING','PLANNED']:
+            p=fixture();p['outages'][0].update(kind=kind,end=clock('2026-01-05T09:00:00Z'));self.blocked(p,'MTTR','WAIT_PLANNED_ACTIVE_CONTRADICTION')
+
+    def test_result_contract_is_versioned_and_keeps_operational_values_disabled(self):
+        schema=json.loads((ROOT/'result.schema.json').read_text());self.assertEqual(schema,Result.model_json_schema());Draft202012Validator.check_schema(schema)
+        for document in [fixture(),{}]:
+            result=evaluate(document);Result.model_validate(result);Draft202012Validator(schema).validate(result)
+        result=evaluate(fixture());result['operational_eligibility']='ELIGIBLE'
+        with self.assertRaises(ValidationError):Result.model_validate(result)

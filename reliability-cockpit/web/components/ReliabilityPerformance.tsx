@@ -1,7 +1,7 @@
 "use client";
 import {useEffect,useState} from 'react';
 import Link from 'next/link';
-import {reliabilityApi,type AssetView} from '../lib/api';
+import {ApiError,reliabilityApi,type AssetView} from '../lib/api';
 import {evidenceError,evidenceErrorKind} from '../lib/asset-evidence';
 import {performanceDefinition,performanceHref,performanceInput,prerequisites} from '../lib/reliability-performance';
 import AssetMaintenanceEvidence from './AssetMaintenanceEvidence';
@@ -17,7 +17,7 @@ export default function ReliabilityPerformance(){
   useEffect(()=>{
     if(!selected.asset || performanceInput(selected.asset,selected.start,selected.end))return;
     let active=true;setState({key:selected.asset,data:null,loading:true,error:null});
-    reliabilityApi.asset(selected.asset).then(asset=>{if(asset.canonical_id!==selected.asset||asset.site_code!=='BSR'||asset.organization_code!=='IP')throw new Error('scope mismatch');if(active)setState({key:selected.asset,data:asset,loading:false,error:null});}).catch(error=>{if(active)setState({key:selected.asset,data:null,loading:false,error});});
+    reliabilityApi.asset(selected.asset).then(asset=>{if(asset.canonical_id!==selected.asset||asset.site_code!=='BSR'||asset.organization_code!=='IP'||![asset.source_asset_number,asset.description].every(value=>value===null||typeof value==='string'))throw new Error('scope mismatch');if(active)setState({key:selected.asset,data:asset,loading:false,error:null});}).catch(error=>{if(active)setState({key:selected.asset,data:null,loading:false,error});});
     return()=>{active=false;};
   },[selected.asset,selected.start,selected.end,retry]);
   function submit(event:React.FormEvent){event.preventDefault();const next={...draft,asset:draft.asset.trim()};const error=performanceInput(next.asset,next.start,next.end);setInvalid(error);if(error)return;setState({key:next.asset,data:null,loading:true,error:null});setSourceOpen(false);setSelected(next);setRetry(n=>n+1);history.pushState({},'',performanceHref(next.asset,next.start,next.end));}
@@ -29,7 +29,8 @@ export default function ReliabilityPerformance(){
     </SectionCard>
     {!selected.asset&&!invalid&&<EmptyState title="Pilih aset dan periode untuk membaca kesiapan." detail="Tidak ada KPI atau populasi aset yang diunduh sebelum Anda memilih konteks persis."/>}
     {current&&state.loading&&<LoadingState label="Memeriksa identitas aset melalui akses existing…"/>}
-    {current&&!state.loading&&state.error!=null&&<ErrorState message={evidenceError(state.error)} variant={evidenceErrorKind(state.error)} onRetry={()=>setRetry(n=>n+1)}/>}
+    {current&&!state.loading&&state.error instanceof ApiError&&state.error.status===404&&<EmptyState title="Aset tidak ditemukan pada Registry untuk konteks ini." detail="Periksa referensi persis; tidak ada pencarian nama atau mapping otomatis."/>}
+    {current&&!state.loading&&state.error!=null&&!(state.error instanceof ApiError&&state.error.status===404)&&<ErrorState message={evidenceError(state.error)} variant={evidenceErrorKind(state.error)} onRetry={()=>setRetry(n=>n+1)}/>}
     {current&&!state.loading&&state.data&&<>
       <SectionCard><h3>{state.data.source_asset_number??state.data.canonical_id}</h3><p>{state.data.description??'Deskripsi tidak tersedia'}</p><dl className="asset-facts"><div><dt>Identitas persis / lingkup</dt><dd>{state.data.canonical_id}<br/>{state.data.site_code} / {state.data.organization_code}</dd></div><div><dt>Periode pilihan [awal, akhir)</dt><dd>{selected.start}<br/>{selected.end}</dd></div></dl><Link className="text-link" href={'/assets/'+encodeURIComponent(selected.asset)}>Buka evidence aset →</Link></SectionCard>
       <section className="performance-metrics" aria-label="Status KPI operasional">{[['MTBF','Qualified operating hours / distinct qualifying failure events'],['MTTR','Qualified active repair hours / completed qualifying repair episodes']].map(([name,definition])=><SectionCard key={name}><h3>{name}</h3><strong>Belum dapat dihitung</strong><p>NOT_ELIGIBLE · satuan kandidat h</p><p>{definition}</p><p className="section-note">Nilai tetap tidak tersedia. Nol, infinity atau KPI proxy legacy tidak dipublikasikan sebagai hasil qualified.</p></SectionCard>)}</section>

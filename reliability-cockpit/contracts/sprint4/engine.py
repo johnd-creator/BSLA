@@ -32,10 +32,12 @@ def instant(clock):
     try:return stamp.astimezone(timezone.utc)
     except (OverflowError,ValueError):raise Rejected('CLOCK_UTC_OVERFLOW') from None
 
-def hours(start,end):
+def microseconds(start,end):
     delta=end-start
-    microseconds=(delta.days*86400+delta.seconds)*1000000+delta.microseconds
-    return Decimal(microseconds)/Decimal(3600000000)
+    return (delta.days*86400+delta.seconds)*1000000+delta.microseconds
+
+def hours(start,end):
+    return Decimal(microseconds(start,end))/Decimal(3600000000)
 
 def qualified(evidence):
     return all(e.qualification=='SYNTHETIC_VERIFIED' for e in evidence)
@@ -128,7 +130,7 @@ def _evaluate(packet):
             if not start<=a<b<=end:raise Rejected('EXPOSURE_WINDOW_CONTRADICTION')
             if row.operating_hours is None or row.quality!='QUALIFIED':raise Rejected('OPERATING_EXPOSURE_MISSING_OR_BAD')
             value=Decimal(row.operating_hours)
-            if value>hours(a,b):raise Rejected('OPERATING_HOURS_EXCEED_OBSERVED_INTERVAL')
+            if value*Decimal(3600000000)>Decimal(microseconds(a,b)):raise Rejected('OPERATING_HOURS_EXCEED_OBSERVED_INTERVAL')
             spans.append((a,b,row.record_id));exposure_hours.append(value)
             receipt('EXPOSURE',row.record_id,'QUALIFIED_OPERATING_HOURS',hours=row.operating_hours,revision=row.revision)
         except Rejected as error:block(bf,str(error))
@@ -138,7 +140,7 @@ def _evaluate(packet):
         position=b
     if position!=end:block(bf,'EXPOSURE_GAP_OR_OVERLAP')
     if sum(exposure_hours,Decimal(0))==0:block(bf,'ZERO_OPERATING_EXPOSURE')
-    active_hours=[];selected_repairs=[];active_spans=[]
+    active_microseconds=[];selected_repairs=[];active_spans=[];repair_spans=[]
     failure_times={r.record_id:instant(r.occurred_at) for r in selected_failures}
     if not packet.repair_inventory_complete or not qualified([packet.repair_inventory_evidence]):block(tr,'REPAIR_INVENTORY_INCOMPLETE')
     completed_by_failure=defaultdict(int)
@@ -153,7 +155,7 @@ def _evaluate(packet):
         try:
             a,b=instant(row.repair_started_at),instant(row.restored_at)
             if not start<=a<b<=end or a<failure_times[row.failure_event_id]:raise Rejected('REPAIR_WINDOW_OR_FAILURE_CLOCK_CONTRADICTION')
-            spans=[];ids=set();row_hours=Decimal(0);active_count=0
+            spans=[];ids=set();row_microseconds=0;active_count=0
             for interval in row.intervals:
                 if interval.interval_id in ids:raise Rejected('DUPLICATE_REPAIR_INTERVAL')
                 ids.add(interval.interval_id)
@@ -161,7 +163,7 @@ def _evaluate(packet):
                 if not a<=x<y<=b or not qualified(interval.evidence):raise Rejected('REPAIR_INTERVAL_UNQUALIFIED')
                 spans.append((x,y,interval.interval_id))
                 if interval.kind=='ACTIVE':
-                    active_count+=1;row_hours+=hours(x,y);active_spans.append((x,y,row.record_id))
+                    active_count+=1;row_microseconds+=microseconds(x,y);active_spans.append((x,y,row.record_id))
                     receipt('REPAIR_INTERVAL',interval.interval_id,'CANDIDATE_ACTIVE_REPAIR_INTERVAL',episode=row.record_id)
                 elif packet.policy.waiting_planned_rule!='EXCLUDE_EXPLICIT_QUALIFIED':raise Rejected('WAIT_PLANNED_POLICY_PENDING')
                 else:receipt('REPAIR_INTERVAL',interval.interval_id,'EXPLICIT_'+interval.kind+'_EXCLUDED',episode=row.record_id)
@@ -170,9 +172,13 @@ def _evaluate(packet):
                 if x!=position:raise Rejected('REPAIR_GAP_OR_OVERLAP')
                 position=y
             if position!=b or not active_count:raise Rejected('INCOMPLETE_ACTIVE_REPAIR')
-            active_hours.append(row_hours);selected_repairs.append(row)
-            receipt('REPAIR',row.record_id,'COMPLETED_REPAIR_INCLUDED',revision=row.revision,active_hours=str(row_hours))
+            active_microseconds.append(row_microseconds);selected_repairs.append(row);repair_spans.append((a,b,row.record_id))
+            receipt('REPAIR',row.record_id,'COMPLETED_REPAIR_INCLUDED',revision=row.revision,active_hours=str(Decimal(row_microseconds)/Decimal(3600000000)))
         except Rejected as error:block(tr,str(error))
+    last_envelope=None
+    for a,b,key in sorted(repair_spans):
+        if last_envelope is not None and a<last_envelope:block(tr,'OVERLAPPING_REPAIR_EPISODES')
+        last_envelope=max(last_envelope,b) if last_envelope else b
     last_end=None
     for a,b,key in sorted(active_spans):
         if last_end is not None and a<last_end:block(tr,'OVERLAPPING_ACTIVE_REPAIR_EPISODES')
@@ -187,6 +193,12 @@ def _evaluate(packet):
                 total_outages.append((a,b))
                 for repair in selected_repairs:
                     if repair.failure_event_id==row.failure_event_id and not a<=instant(repair.repair_started_at)<instant(repair.restored_at)<=b:raise Rejected('OUTAGE_REPAIR_CONTRADICTION')
+            if row.kind in {'WAITING','PLANNED'}:
+                if row.failure_event_id is None:raise Rejected('UNLINKED_WAIT_OR_PLANNED_CLAIM')
+                for repair in selected_repairs:
+                    if repair.failure_event_id==row.failure_event_id:
+                        for interval in repair.intervals:
+                            if interval.kind=='ACTIVE' and max(a,instant(interval.start))<min(b,instant(interval.end)):raise Rejected('WAIT_PLANNED_ACTIVE_CONTRADICTION')
             receipt('OUTAGE',row.record_id,'NOT_ACTIVE_REPAIR_INPUT',kind_claim=row.kind,revision=row.revision)
         except Rejected as error:block(tr,str(error));block(bf,str(error))
     prior=None
@@ -196,17 +208,19 @@ def _evaluate(packet):
     for exposure in exposures:
         try:
             a,b=instant(exposure.start),instant(exposure.end)
-            unavailable=sum((hours(max(a,x),min(b,y)) for x,y in total_outages if max(a,x)<min(b,y)),Decimal(0))
-            if exposure.operating_hours is not None and Decimal(exposure.operating_hours)>hours(a,b)-unavailable:block(bf,'EXPOSURE_OUTAGE_CONTRADICTION')
+            unavailable=sum(microseconds(max(a,x),min(b,y)) for x,y in total_outages if max(a,x)<min(b,y))
+            if exposure.operating_hours is not None and Decimal(exposure.operating_hours)*Decimal(3600000000)>Decimal(microseconds(a,b)-unavailable):block(bf,'EXPOSURE_OUTAGE_CONTRADICTION')
         except Rejected:pass  # Original exposure validation already records the blocking reason.
-    return _result(packet,selected_failures,selected_repairs,exposure_hours,active_hours,sorted(set(common+bf)),sorted(set(common+tr)),receipts)
+    return _result(packet,selected_failures,selected_repairs,exposure_hours,active_microseconds,sorted(set(common+bf)),sorted(set(common+tr)),receipts)
 
 def _result(packet,failures,repairs,exposure,active,bf,tr,receipts):
     def metric(name,values,records,reasons):
-        numerator=sum(values,Decimal(0));denominator=len(records)
+        total=sum(values,Decimal(0));denominator=len(records)
+        divisor=Decimal(3600000000) if name=='MTTR' else Decimal(1)
+        numerator=total/divisor
         if reasons:return dict(metric=name,value=None,unit='h',synthetic_status='NOT_ELIGIBLE',reasons=sorted(set(reasons)),numerator_hours=None,denominator=None,included_ids=[])
         reason='NO_FAILURES_OBSERVED' if name=='MTBF' else 'NO_COMPLETED_REPAIR_EPISODES'
-        return dict(metric=name,value=str(numerator/Decimal(denominator)) if denominator else None,unit='h',synthetic_status='QUALIFIED_SYNTHETIC',reasons=[] if denominator else [reason],numerator_hours=str(numerator),denominator=denominator,included_ids=sorted(r.record_id for r in records))
+        return dict(metric=name,value=str(total/(divisor*Decimal(denominator))) if denominator else None,unit='h',synthetic_status='QUALIFIED_SYNTHETIC',reasons=[] if denominator else [reason],numerator_hours=str(numerator),denominator=denominator,included_ids=sorted(r.record_id for r in records))
     raw=packet.model_dump(mode='json')
     return dict(contract_version='s4-result-1',execution_mode='SYNTHETIC_TEST_ONLY',label=packet.label,operational_eligibility='NOT_ELIGIBLE',operational_reason='ENGINEERING_POLICY_AND_SOURCE_EVIDENCE_NOT_APPROVED',scope=raw['scope'],window=raw['window'],definition=raw['policy'],input_sha256=hashlib.sha256(json.dumps(raw,sort_keys=True,separators=(',',':')).encode()).hexdigest(),arithmetic='DECIMAL_28_HALF_EVEN',metrics=[metric('MTBF',exposure,failures,bf),metric('MTTR',active,repairs,tr)],audit=sorted(receipts,key=lambda r:json.dumps(r,sort_keys=True)),source_lineage=raw)
 

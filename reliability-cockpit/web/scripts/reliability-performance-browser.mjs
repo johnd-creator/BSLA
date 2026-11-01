@@ -1,0 +1,47 @@
+import assert from 'node:assert/strict';
+import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+import {resolve} from 'node:path';
+import {pathToFileURL} from 'node:url';
+import {browserBundle} from './localization-browser-build.mjs';
+const {chromium}=await import(process.env.NADI_PLAYWRIGHT_MODULE?pathToFileURL(process.env.NADI_PLAYWRIGHT_MODULE).href:'playwright');
+const Axe=process.env.NADI_AXE_MODULE?(await import(pathToFileURL(process.env.NADI_AXE_MODULE).href)).default:null;
+const fixture=JSON.parse(readFileSync('fixtures/asset-evidence.synthetic.json')),asset=fixture.asset.canonical_id;
+const base='https://sprint4.synthetic.invalid',out=resolve(process.env.NADI_SPRINT4_BROWSER_OUTPUT??'/tmp/nadi-sprint04/browser');mkdirSync(out,{recursive:true});
+const bundle=await browserBundle('scripts/reliability-performance/entry.tsx');
+const browser=await chromium.launch({headless:true,...(process.env.NADI_CHROMIUM_EXECUTABLE?{executablePath:process.env.NADI_CHROMIUM_EXECUTABLE}:{})});
+const ctx=await browser.newContext({viewport:{width:1440,height:1080}}),page=await ctx.newPage();page.setDefaultTimeout(12000);
+const requests=[],errors=[],shots=[],checks=[],accessibility=[];let mode='normal',release=null;
+page.on('pageerror',e=>errors.push(e.message));
+const period='&rp_start=2026-01-01T00%3A00%3A00Z&rp_end=2026-02-01T00%3A00%3A00Z';
+const link='/reports?report_view=reliability&rp_asset='+encodeURIComponent(asset)+period;
+await ctx.route('**/*',async route=>{
+ const req=route.request(),u=new URL(req.url());assert.equal(u.origin,base);assert.equal(req.method(),'GET');requests.push(u.pathname+u.search);
+ if(req.resourceType()==='document'){if(u.pathname==='/login')return route.fulfill({contentType:'text/html',body:'<html lang="id"><head><meta charset="utf-8"><title>SYNTHETIC login</title></head><body><main><h1>SYNTHETIC · login required</h1></main></body></html>'});return route.fulfill({contentType:'text/html',body:'<!doctype html><html lang="id"><head><meta charset="utf-8"><title>NADI · SYNTHETIC Sprint4</title><link rel="stylesheet" href="/fixture.css"></head><body><div id="root"></div><script src="/fixture.js"></script></body></html>'});}
+ if(u.pathname==='/fixture.js')return route.fulfill({contentType:'application/javascript',body:bundle.js});
+ if(u.pathname==='/fixture.css')return route.fulfill({contentType:'text/css',body:bundle.css});
+ const path=decodeURIComponent(u.pathname);let status=200,data;
+ if(path.endsWith('/'+asset)||path.endsWith('/asset:FOREIGN')){
+   if(mode==='delayed')await new Promise(done=>release=done);
+   if(mode==='403'||path.endsWith('/asset:FOREIGN')){status=403;data={detail:'scope denied'};}else if(mode==='401'){status=401;data={detail:'expired'};}else if(mode==='404'){status=404;data={detail:'not found'};}else if(mode==='503'){status=503;data={detail:'not available'};}else data=fixture.asset;
+ }else if(path.endsWith('/maintenance-events')){assert.equal(u.searchParams.get('asset_ref'),asset);assert.equal(u.searchParams.get('limit'),'25');const items=fixture.maintenance;data={items,meta:{offset:0,limit:25,total:items.length,has_more:false}};}
+ else if(path.endsWith('/data-trust')){status=403;data={detail:'portfolio capability required'};}
+ else throw new Error('Unexpected request '+path);
+ return route.fulfill({status,contentType:'application/json',body:JSON.stringify(data)});
+});
+async function shot(name){await page.screenshot({path:resolve(out,name+'.png'),fullPage:true});shots.push(name+'.png');}
+async function audit(name){assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));if(Axe){const result=await new Axe({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();assert.deepEqual(result.violations.map(v=>v.id),[],name);accessibility.push({name,violations:0});}}
+async function ready(){await page.getByRole('heading',{name:'Eligibility dan data yang masih diperlukan'}).waitFor();}
+try{
+ await page.goto(base+'/reports?report_view=reliability');await page.getByRole('button',{name:'Periksa kesiapan evidence'}).waitFor();assert(!requests.some(p=>p.includes('/data-trust')));await shot('01-performance-empty');
+ await page.getByLabel('Referensi aset kanonis',{exact:true}).fill(asset);await page.getByLabel('Awal periode (ISO-8601 + zona)',{exact:true}).fill('2026-01-01T00:00:00Z');await page.getByLabel('Akhir periode eksklusif (ISO-8601 + zona)',{exact:true}).fill('2026-02-01T00:00:00Z');await page.getByRole('button',{name:'Periksa kesiapan evidence'}).click();await ready();assert.equal(await page.getByText('Belum dapat dihitung',{exact:true}).count(),2);assert(!requests.some(p=>p.includes('maintenance-events')));await shot('02-performance-readiness');await audit('desktop readiness');
+ await page.getByRole('button',{name:'Periksa kesiapan evidence'}).click();await ready();checks.push('repeat selection reloads without stuck state; no portfolio fetch on performance deep link');
+ await page.getByText('Aktivitas sumber terkait · bukan failure/repair register',{exact:true}).click();await page.getByRole('status').filter({hasText:'5 rekam sumber'}).waitFor();await page.getByRole('button',{name:'Buka rekam SYNTHETIC-0',exact:true}).click();await page.getByRole('heading',{name:'Detail rekam sumber Maximo'}).waitFor();await shot('03-authorized-activity-source');assert((await page.locator('main').innerText()).includes('bukan failure/repair register'));checks.push('lazy authorized activity/detail uses unchanged exactasset contract, no failure join');
+ for(const state of ['403','503','404','401']){mode=state;await page.goto(base+link);if(state==='401'){await page.waitForURL(/\/login/);assert((await page.locator('main').innerText()).includes('login required'));}else if(state==='404'){await page.getByText('Aset tidak ditemukan pada Registry untuk konteks ini.').waitFor();assert.equal(await page.getByRole('heading',{name:'Eligibility dan data yang masih diperlukan'}).count(),0);}else{await page.getByRole('alert').waitFor();assert(!(await page.locator('main').innerText()).includes('SYNTHETIC ONLY · Pump evidence'));if(state==='403'){await shot('04-performance-403');assert(!(await page.getByRole('alert').innerText()).includes('Coba muat ulang'));}}}checks.push('401/403/503 states preserve access/error distinction, no previous asset leakage');
+ mode='delayed';await page.goto(base+link);await page.getByText('Memeriksa identitas aset melalui akses existing…').waitFor();await shot('05-loading');mode='normal';release?.();await ready();
+ await page.getByLabel('Referensi aset kanonis',{exact:true}).fill('asset:FOREIGN');await page.getByRole('button',{name:'Periksa kesiapan evidence'}).click();await page.getByRole('alert').waitFor();assert.equal(await page.getByRole('heading',{name:'Eligibility dan data yang masih diperlukan'}).count(),0);checks.push('scope change synchronously hides old identity and dataset');
+ mode='normal';await page.goto(base+link);await ready();await page.getByRole('button',{name:'Kembali ke katalog laporan'}).click();await page.getByRole('button',{name:'Buka Kinerja Reliabilitas'}).click();await ready();assert.equal(new URL(page.url()).searchParams.get('rp_asset'),asset);await page.goBack();await page.getByRole('button',{name:'Buka Kinerja Reliabilitas'}).waitFor();await page.goForward();await ready();checks.push('existing Reports catalog and exact period/asset context survive return and browser back/forward');
+ for(const width of [390,768,1440])for(const theme of ['light','dark']){await page.setViewportSize({width,height:1000});await page.goto(base+link);await ready();if(await page.evaluate(()=>document.documentElement.dataset.theme)!==theme)await page.getByRole('button',{name:theme==='dark'?'Ganti ke tema gelap':'Ganti ke tema terang'}).click();await page.waitForFunction(value=>document.documentElement.dataset.theme===value,theme);assert.equal(await page.getByRole('button',{name:theme==='dark'?'Ganti ke tema terang':'Ganti ke tema gelap'}).getAttribute('aria-pressed'),String(theme==='dark'));await audit('readiness '+width+' '+theme);if(width!==768)await shot('06-readiness-'+width+'-'+theme);}
+ await page.goto(base+'/__synthetic/reliability');await page.getByRole('heading',{name:'SYNTHETIC ONLY · Offline reference calculation'}).waitFor();assert((await page.locator('main').innerText()).includes('300 h · SYNTHETIC ONLY'));assert((await page.locator('main').innerText()).includes('2 h · SYNTHETIC ONLY'));await audit('synthetic reference');await shot('07-synthetic-reference');checks.push('offline numerical reference visible only in explicitly test-only demonstrator');
+ assert.equal(errors.length,0,errors.join('\n'));assert(!requests.some(p=>/\/kpis|historian|pi-mapping|failure-events|repair-episodes|\/calculate/.test(p)));
+ writeFileSync(resolve(out,'results.json'),JSON.stringify({label:'SYNTHETIC ONLY',checks,shots,accessibility,requests:requests.length,errors,operational_eligibility:'NOT_ELIGIBLE'},null,2));console.log('Sprint4 browser PASS '+checks.length+'groups / '+shots.length+'screens / '+accessibility.length+'axe states');
+}catch(e){console.log('failure URL',page.url());console.log((await page.locator('main').innerText()).slice(0,1500));await page.screenshot({path:resolve(out,'failure.png'),fullPage:true});throw e;}finally{await browser.close();}
