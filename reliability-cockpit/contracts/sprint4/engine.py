@@ -8,7 +8,7 @@ import json
 import re
 from collections import defaultdict
 from datetime import datetime, timezone
-from decimal import Decimal, localcontext, ROUND_HALF_EVEN
+from decimal import Decimal, Context, localcontext, ROUND_HALF_EVEN, InvalidOperation, DivisionByZero, Overflow
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from pydantic import ValidationError
 from .models import Packet
@@ -21,13 +21,16 @@ def instant(clock):
     value=clock.original
     if clock.precision not in {'SECOND','MICROSECOND'} or not isinstance(value,str) or not re.fullmatch(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})',value):
         raise Rejected('INCOMPLETE_OR_IMPRECISE_CLOCK')
+    offset=re.search(r'([+-])(\d{2}):(\d{2})$',value)
+    if offset and (int(offset[2])>23 or int(offset[3])>59 or offset[0]=='-00:00'):raise Rejected('INVALID_OR_UNKNOWN_UTC_OFFSET')
     try:
         stamp=datetime.fromisoformat(value)
     except ValueError:
         raise Rejected('INVALID_CLOCK') from None
     if clock.precision=='SECOND' and stamp.microsecond:
         raise Rejected('CLOCK_PRECISION_CONTRADICTION')
-    return stamp.astimezone(timezone.utc)
+    try:return stamp.astimezone(timezone.utc)
+    except (OverflowError,ValueError):raise Rejected('CLOCK_UTC_OVERFLOW') from None
 
 def hours(start,end):
     delta=end-start
@@ -134,10 +137,14 @@ def _evaluate(packet):
         if a!=position:block(bf,'EXPOSURE_GAP_OR_OVERLAP')
         position=b
     if position!=end:block(bf,'EXPOSURE_GAP_OR_OVERLAP')
-    if sum(exposure_hours,Decimal(0))==0 and selected_failures:block(bf,'ZERO_OPERATING_EXPOSURE')
+    if sum(exposure_hours,Decimal(0))==0:block(bf,'ZERO_OPERATING_EXPOSURE')
     active_hours=[];selected_repairs=[];active_spans=[]
     failure_times={r.record_id:instant(r.occurred_at) for r in selected_failures}
     if not packet.repair_inventory_complete or not qualified([packet.repair_inventory_evidence]):block(tr,'REPAIR_INVENTORY_INCOMPLETE')
+    completed_by_failure=defaultdict(int)
+    for row in repairs:
+        if row.state=='COMPLETED':completed_by_failure[row.failure_event_id]+=1
+    if any(n>1 for n in completed_by_failure.values()):block(tr,'MULTIPLE_RESTORATIONS_FOR_FAILURE')
     for row in repairs:
         if row.state!='COMPLETED' or row.reopened_from is not None:
             block(tr,'OPEN_CENSORED_OR_REOPENED_REPAIR');receipt('REPAIR',row.record_id,'REPAIR_UNRESOLVED');continue
@@ -170,16 +177,28 @@ def _evaluate(packet):
     for a,b,key in sorted(active_spans):
         if last_end is not None and a<last_end:block(tr,'OVERLAPPING_ACTIVE_REPAIR_EPISODES')
         last_end=max(last_end,b) if last_end else b
+    total_outages=[]
     for row in outages:
         try:
             a,b=instant(row.start),instant(row.end)
             if not start<=a<b<=end:raise Rejected('OUTAGE_WINDOW_CONTRADICTION')
             if row.failure_event_id is not None and row.failure_event_id not in selected_ids:raise Rejected('OUTAGE_FAILURE_LINK_UNQUALIFIED')
             if row.kind=='TOTAL_OUTAGE':
+                total_outages.append((a,b))
                 for repair in selected_repairs:
                     if repair.failure_event_id==row.failure_event_id and not a<=instant(repair.repair_started_at)<instant(repair.restored_at)<=b:raise Rejected('OUTAGE_REPAIR_CONTRADICTION')
             receipt('OUTAGE',row.record_id,'NOT_ACTIVE_REPAIR_INPUT',kind_claim=row.kind,revision=row.revision)
-        except Rejected as error:block(tr,str(error))
+        except Rejected as error:block(tr,str(error));block(bf,str(error))
+    prior=None
+    for a,b in sorted(total_outages):
+        if prior is not None and a<prior:block(bf,'OVERLAPPING_TOTAL_OUTAGES');block(tr,'OVERLAPPING_TOTAL_OUTAGES')
+        prior=max(prior,b) if prior else b
+    for exposure in exposures:
+        try:
+            a,b=instant(exposure.start),instant(exposure.end)
+            unavailable=sum((hours(max(a,x),min(b,y)) for x,y in total_outages if max(a,x)<min(b,y)),Decimal(0))
+            if exposure.operating_hours is not None and Decimal(exposure.operating_hours)>hours(a,b)-unavailable:block(bf,'EXPOSURE_OUTAGE_CONTRADICTION')
+        except Rejected:pass  # Original exposure validation already records the blocking reason.
     return _result(packet,selected_failures,selected_repairs,exposure_hours,active_hours,sorted(set(common+bf)),sorted(set(common+tr)),receipts)
 
 def _result(packet,failures,repairs,exposure,active,bf,tr,receipts):
@@ -199,6 +218,5 @@ def evaluate(document):
         packet=Packet.model_validate(document)
     except (ValidationError,ValueError,TypeError,RecursionError):
         return dict(contract_version='s4-result-1',operational_eligibility='NOT_ELIGIBLE',execution_mode='SYNTHETIC_TEST_ONLY',metrics=[dict(metric=k,value=None,unit='h',synthetic_status='NOT_ELIGIBLE',reasons=['INVALID_OR_OVERSIZED_CANDIDATE_CONTRACT'],numerator_hours=None,denominator=None,included_ids=[]) for k in ['MTBF','MTTR']],audit=[])
-    with localcontext() as ctx:
-        ctx.prec=28;ctx.rounding=ROUND_HALF_EVEN
+    with localcontext(Context(prec=28,rounding=ROUND_HALF_EVEN,Emin=-999999,Emax=999999,capitals=1,clamp=0,traps=[InvalidOperation,DivisionByZero,Overflow])):
         return _evaluate(packet)

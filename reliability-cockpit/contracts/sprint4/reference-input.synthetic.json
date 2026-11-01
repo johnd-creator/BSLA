@@ -1,0 +1,408 @@
+{
+  "contract_version": "s4-candidate-1",
+  "execution_mode": "SYNTHETIC_TEST_ONLY",
+  "label": "SYNTHETIC ONLY \u2014 NOT PLANT DATA",
+  "scope": {
+    "canonical_asset_id": "asset:SYNTHETIC:PUMP-04",
+    "site": "BSR",
+    "organization": "IP",
+    "population_ref": "SYNTHETIC:REGISTERED-POPULATION-1",
+    "identity_evidence": {
+      "evidence_ref": "SYNTHETIC:identity",
+      "source_record_id": "SYNTHETIC:identity",
+      "revision": 1,
+      "source_system": "SYNTHETIC",
+      "qualification": "SYNTHETIC_VERIFIED"
+    }
+  },
+  "window": {
+    "start": {
+      "original": "2026-01-01T00:00:00Z",
+      "precision": "SECOND"
+    },
+    "end": {
+      "original": "2026-02-01T00:00:00Z",
+      "precision": "SECOND"
+    },
+    "timezone": "UTC"
+  },
+  "policy": {
+    "definition_id": "SYNTHETIC:FUNCTIONAL-FAILURE-AND-ACTIVE-REPAIR",
+    "version": "SYNTHETIC-1",
+    "approval": "SYNTHETIC_APPROVED",
+    "failure_definition": "SYNTHETIC:FUNCTIONAL-LOSS-1",
+    "exposure_definition": "SYNTHETIC:MEASURED-OPERATING-HOURS-1",
+    "repair_definition": "SYNTHETIC:EXPLICIT-ACTIVE-INTERVALS-1",
+    "evidence": {
+      "evidence_ref": "SYNTHETIC:policy",
+      "source_record_id": "SYNTHETIC:policy",
+      "revision": 1,
+      "source_system": "SYNTHETIC",
+      "qualification": "SYNTHETIC_VERIFIED"
+    },
+    "window_rule": "HALF_OPEN_FULLY_CONTAINED",
+    "duplicate_rule": "EXPLICIT_LINKS_ONLY",
+    "overlap_rule": "REJECT",
+    "reopened_rule": "REJECT",
+    "censored_rule": "REJECT",
+    "waiting_planned_rule": "EXCLUDE_EXPLICIT_QUALIFIED"
+  },
+  "failure_inventory_complete": true,
+  "failure_inventory_evidence": {
+    "evidence_ref": "SYNTHETIC:failure-coverage",
+    "source_record_id": "SYNTHETIC:failure-coverage",
+    "revision": 1,
+    "source_system": "SYNTHETIC",
+    "qualification": "SYNTHETIC_VERIFIED"
+  },
+  "repair_inventory_complete": true,
+  "repair_inventory_evidence": {
+    "evidence_ref": "SYNTHETIC:repair-coverage",
+    "source_record_id": "SYNTHETIC:repair-coverage",
+    "revision": 1,
+    "source_system": "SYNTHETIC",
+    "qualification": "SYNTHETIC_VERIFIED"
+  },
+  "exposure_coverage_complete": true,
+  "exposure_coverage_evidence": {
+    "evidence_ref": "SYNTHETIC:exposure-coverage",
+    "source_record_id": "SYNTHETIC:exposure-coverage",
+    "revision": 1,
+    "source_system": "SYNTHETIC",
+    "qualification": "SYNTHETIC_VERIFIED"
+  },
+  "failures": [
+    {
+      "record_id": "SYNTHETIC:FAILURE-A",
+      "revision": 1,
+      "supersedes_revision": null,
+      "duplicate_of": null,
+      "scope": {
+        "canonical_asset_id": "asset:SYNTHETIC:PUMP-04",
+        "site": "BSR",
+        "organization": "IP",
+        "population_ref": "SYNTHETIC:REGISTERED-POPULATION-1",
+        "identity_evidence": {
+          "evidence_ref": "SYNTHETIC:identity",
+          "source_record_id": "SYNTHETIC:identity",
+          "revision": 1,
+          "source_system": "SYNTHETIC",
+          "qualification": "SYNTHETIC_VERIFIED"
+        }
+      },
+      "definition_version": "SYNTHETIC-1",
+      "evidence": [
+        {
+          "evidence_ref": "SYNTHETIC:SYNTHETIC:FAILURE-A",
+          "source_record_id": "SYNTHETIC:SYNTHETIC:FAILURE-A",
+          "revision": 1,
+          "source_system": "SYNTHETIC",
+          "qualification": "SYNTHETIC_VERIFIED"
+        }
+      ],
+      "kind": "FUNCTIONAL_FAILURE",
+      "qualification": "SYNTHETIC_VERIFIED",
+      "occurred_at": {
+        "original": "2026-01-05T08:00:00Z",
+        "precision": "SECOND"
+      },
+      "work_type": "CM",
+      "work_order_refs": [
+        "SYNTHETIC:WO-1",
+        "SYNTHETIC:CHILD-WO-1"
+      ]
+    },
+    {
+      "record_id": "SYNTHETIC:FAILURE-B",
+      "revision": 1,
+      "supersedes_revision": null,
+      "duplicate_of": null,
+      "scope": {
+        "canonical_asset_id": "asset:SYNTHETIC:PUMP-04",
+        "site": "BSR",
+        "organization": "IP",
+        "population_ref": "SYNTHETIC:REGISTERED-POPULATION-1",
+        "identity_evidence": {
+          "evidence_ref": "SYNTHETIC:identity",
+          "source_record_id": "SYNTHETIC:identity",
+          "revision": 1,
+          "source_system": "SYNTHETIC",
+          "qualification": "SYNTHETIC_VERIFIED"
+        }
+      },
+      "definition_version": "SYNTHETIC-1",
+      "evidence": [
+        {
+          "evidence_ref": "SYNTHETIC:SYNTHETIC:FAILURE-B",
+          "source_record_id": "SYNTHETIC:SYNTHETIC:FAILURE-B",
+          "revision": 1,
+          "source_system": "SYNTHETIC",
+          "qualification": "SYNTHETIC_VERIFIED"
+        }
+      ],
+      "kind": "FUNCTIONAL_FAILURE",
+      "qualification": "SYNTHETIC_VERIFIED",
+      "occurred_at": {
+        "original": "2026-01-20T08:00:00Z",
+        "precision": "SECOND"
+      },
+      "work_type": "CM",
+      "work_order_refs": [
+        "SYNTHETIC:WO-1"
+      ]
+    }
+  ],
+  "exposures": [
+    {
+      "record_id": "SYNTHETIC:EXPOSURE-1",
+      "revision": 1,
+      "supersedes_revision": null,
+      "duplicate_of": null,
+      "scope": {
+        "canonical_asset_id": "asset:SYNTHETIC:PUMP-04",
+        "site": "BSR",
+        "organization": "IP",
+        "population_ref": "SYNTHETIC:REGISTERED-POPULATION-1",
+        "identity_evidence": {
+          "evidence_ref": "SYNTHETIC:identity",
+          "source_record_id": "SYNTHETIC:identity",
+          "revision": 1,
+          "source_system": "SYNTHETIC",
+          "qualification": "SYNTHETIC_VERIFIED"
+        }
+      },
+      "definition_version": "SYNTHETIC-1",
+      "evidence": [
+        {
+          "evidence_ref": "SYNTHETIC:SYNTHETIC:EXPOSURE-1",
+          "source_record_id": "SYNTHETIC:SYNTHETIC:EXPOSURE-1",
+          "revision": 1,
+          "source_system": "SYNTHETIC",
+          "qualification": "SYNTHETIC_VERIFIED"
+        }
+      ],
+      "start": {
+        "original": "2026-01-01T00:00:00Z",
+        "precision": "SECOND"
+      },
+      "end": {
+        "original": "2026-02-01T00:00:00Z",
+        "precision": "SECOND"
+      },
+      "operating_hours": "600",
+      "unit": "h",
+      "quality": "QUALIFIED"
+    }
+  ],
+  "repairs": [
+    {
+      "record_id": "SYNTHETIC:REPAIR-A",
+      "revision": 1,
+      "supersedes_revision": null,
+      "duplicate_of": null,
+      "scope": {
+        "canonical_asset_id": "asset:SYNTHETIC:PUMP-04",
+        "site": "BSR",
+        "organization": "IP",
+        "population_ref": "SYNTHETIC:REGISTERED-POPULATION-1",
+        "identity_evidence": {
+          "evidence_ref": "SYNTHETIC:identity",
+          "source_record_id": "SYNTHETIC:identity",
+          "revision": 1,
+          "source_system": "SYNTHETIC",
+          "qualification": "SYNTHETIC_VERIFIED"
+        }
+      },
+      "definition_version": "SYNTHETIC-1",
+      "evidence": [
+        {
+          "evidence_ref": "SYNTHETIC:SYNTHETIC:REPAIR-A",
+          "source_record_id": "SYNTHETIC:SYNTHETIC:REPAIR-A",
+          "revision": 1,
+          "source_system": "SYNTHETIC",
+          "qualification": "SYNTHETIC_VERIFIED"
+        }
+      ],
+      "failure_event_id": "SYNTHETIC:FAILURE-A",
+      "state": "COMPLETED",
+      "reopened_from": null,
+      "repair_started_at": {
+        "original": "2026-01-05T08:00:00Z",
+        "precision": "SECOND"
+      },
+      "restored_at": {
+        "original": "2026-01-05T12:00:00Z",
+        "precision": "SECOND"
+      },
+      "intervals": [
+        {
+          "interval_id": "SYNTHETIC:ACTIVE-A",
+          "kind": "ACTIVE",
+          "start": {
+            "original": "2026-01-05T08:00:00Z",
+            "precision": "SECOND"
+          },
+          "end": {
+            "original": "2026-01-05T09:00:00Z",
+            "precision": "SECOND"
+          },
+          "evidence": [
+            {
+              "evidence_ref": "SYNTHETIC:SYNTHETIC:ACTIVE-A",
+              "source_record_id": "SYNTHETIC:SYNTHETIC:ACTIVE-A",
+              "revision": 1,
+              "source_system": "SYNTHETIC",
+              "qualification": "SYNTHETIC_VERIFIED"
+            }
+          ]
+        },
+        {
+          "interval_id": "SYNTHETIC:WAIT-A",
+          "kind": "WAITING",
+          "start": {
+            "original": "2026-01-05T09:00:00Z",
+            "precision": "SECOND"
+          },
+          "end": {
+            "original": "2026-01-05T11:00:00Z",
+            "precision": "SECOND"
+          },
+          "evidence": [
+            {
+              "evidence_ref": "SYNTHETIC:SYNTHETIC:WAIT-A",
+              "source_record_id": "SYNTHETIC:SYNTHETIC:WAIT-A",
+              "revision": 1,
+              "source_system": "SYNTHETIC",
+              "qualification": "SYNTHETIC_VERIFIED"
+            }
+          ]
+        },
+        {
+          "interval_id": "SYNTHETIC:ACTIVE-A2",
+          "kind": "ACTIVE",
+          "start": {
+            "original": "2026-01-05T11:00:00Z",
+            "precision": "SECOND"
+          },
+          "end": {
+            "original": "2026-01-05T12:00:00Z",
+            "precision": "SECOND"
+          },
+          "evidence": [
+            {
+              "evidence_ref": "SYNTHETIC:SYNTHETIC:ACTIVE-A2",
+              "source_record_id": "SYNTHETIC:SYNTHETIC:ACTIVE-A2",
+              "revision": 1,
+              "source_system": "SYNTHETIC",
+              "qualification": "SYNTHETIC_VERIFIED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "record_id": "SYNTHETIC:REPAIR-B",
+      "revision": 1,
+      "supersedes_revision": null,
+      "duplicate_of": null,
+      "scope": {
+        "canonical_asset_id": "asset:SYNTHETIC:PUMP-04",
+        "site": "BSR",
+        "organization": "IP",
+        "population_ref": "SYNTHETIC:REGISTERED-POPULATION-1",
+        "identity_evidence": {
+          "evidence_ref": "SYNTHETIC:identity",
+          "source_record_id": "SYNTHETIC:identity",
+          "revision": 1,
+          "source_system": "SYNTHETIC",
+          "qualification": "SYNTHETIC_VERIFIED"
+        }
+      },
+      "definition_version": "SYNTHETIC-1",
+      "evidence": [
+        {
+          "evidence_ref": "SYNTHETIC:SYNTHETIC:REPAIR-B",
+          "source_record_id": "SYNTHETIC:SYNTHETIC:REPAIR-B",
+          "revision": 1,
+          "source_system": "SYNTHETIC",
+          "qualification": "SYNTHETIC_VERIFIED"
+        }
+      ],
+      "failure_event_id": "SYNTHETIC:FAILURE-B",
+      "state": "COMPLETED",
+      "reopened_from": null,
+      "repair_started_at": {
+        "original": "2026-01-20T08:00:00Z",
+        "precision": "SECOND"
+      },
+      "restored_at": {
+        "original": "2026-01-20T10:00:00Z",
+        "precision": "SECOND"
+      },
+      "intervals": [
+        {
+          "interval_id": "SYNTHETIC:ACTIVE-B",
+          "kind": "ACTIVE",
+          "start": {
+            "original": "2026-01-20T08:00:00Z",
+            "precision": "SECOND"
+          },
+          "end": {
+            "original": "2026-01-20T10:00:00Z",
+            "precision": "SECOND"
+          },
+          "evidence": [
+            {
+              "evidence_ref": "SYNTHETIC:SYNTHETIC:ACTIVE-B",
+              "source_record_id": "SYNTHETIC:SYNTHETIC:ACTIVE-B",
+              "revision": 1,
+              "source_system": "SYNTHETIC",
+              "qualification": "SYNTHETIC_VERIFIED"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "outages": [
+    {
+      "record_id": "SYNTHETIC:OUTAGE-A",
+      "revision": 1,
+      "supersedes_revision": null,
+      "duplicate_of": null,
+      "scope": {
+        "canonical_asset_id": "asset:SYNTHETIC:PUMP-04",
+        "site": "BSR",
+        "organization": "IP",
+        "population_ref": "SYNTHETIC:REGISTERED-POPULATION-1",
+        "identity_evidence": {
+          "evidence_ref": "SYNTHETIC:identity",
+          "source_record_id": "SYNTHETIC:identity",
+          "revision": 1,
+          "source_system": "SYNTHETIC",
+          "qualification": "SYNTHETIC_VERIFIED"
+        }
+      },
+      "definition_version": "SYNTHETIC-1",
+      "evidence": [
+        {
+          "evidence_ref": "SYNTHETIC:SYNTHETIC:OUTAGE-A",
+          "source_record_id": "SYNTHETIC:SYNTHETIC:OUTAGE-A",
+          "revision": 1,
+          "source_system": "SYNTHETIC",
+          "qualification": "SYNTHETIC_VERIFIED"
+        }
+      ],
+      "failure_event_id": "SYNTHETIC:FAILURE-A",
+      "kind": "TOTAL_OUTAGE",
+      "start": {
+        "original": "2026-01-05T08:00:00Z",
+        "precision": "SECOND"
+      },
+      "end": {
+        "original": "2026-01-05T12:00:00Z",
+        "precision": "SECOND"
+      }
+    }
+  ]
+}
