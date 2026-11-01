@@ -176,3 +176,7 @@ class Sprint4FoundationTest(unittest.TestCase):
             result=evaluate(document);Result.model_validate(result);Draft202012Validator(schema).validate(result)
         result=evaluate(fixture());result['operational_eligibility']='ELIGIBLE'
         with self.assertRaises(ValidationError):Result.model_validate(result)
+
+    def test_review_window_iana_conversion_extremes_fail_closed(self):
+        p=fixture();p['window'].update(start=clock('0001-01-01T00:00:00Z'),timezone='America/New_York');self.blocked(p,'MTBF','INVALID_WINDOW_OR_TIMEZONE')
+        p=fixture();p['window'].update(start=clock('2026-01-01T14:00:00+14:00'),end=clock('9999-12-31T23:59:59Z'),timezone='Pacific/Kiritimati');self.blocked(p,'MTBF','INVALID_WINDOW_OR_TIMEZONE')

@@ -10,7 +10,9 @@ exact canonical asset+site/org+population, definition versions and source record
 revision/qualification lineage are mandatory. Synthetic policy approval is named
 SYNTHETIC_APPROVED and cannot represent an engineer sign-off. Only synthetic source
 lineage is accepted, and the engine rejects non-synthetic asset identity. No input
-or output is persisted, no clock/network/DSN/store is read, no app route is mounted.
+or output is persisted, no wall clock/network/DSN/business store is read, no app
+route is mounted. Window validation uses the installed Python IANA timezone data;
+a future operational reproducibility contract must pin/review that data version.
 
 Supported *candidate synthetic policy* (not an approved operational method):
 

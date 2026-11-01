@@ -56,7 +56,7 @@ def _evaluate(packet):
         for clock,stamp in [(packet.window.start,start),(packet.window.end,end)]:
             if datetime.fromisoformat(clock.original).utcoffset()!=stamp.astimezone(zone).utcoffset():
                 raise Rejected('WINDOW_TIMEZONE_OFFSET_MISMATCH')
-    except (Rejected,ZoneInfoNotFoundError,ValueError) as error:
+    except (Rejected,ZoneInfoNotFoundError,ValueError,OverflowError):
         return _result(packet,[],[],[],[],['INVALID_WINDOW_OR_TIMEZONE'],['INVALID_WINDOW_OR_TIMEZONE'],receipts)
     if not packet.scope.canonical_asset_id.startswith('asset:SYNTHETIC:'):
         block(common,'SYNTHETIC_SCOPE_REQUIRED')

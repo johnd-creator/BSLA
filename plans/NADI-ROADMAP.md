@@ -1152,3 +1152,16 @@ Sprint2 remains the active local visual-review candidate; Sprint3 is isolated.
 Next: exact-head technical CI/review → consolidated PO visual review → separately
 requested activation. Full mapping inventory/history/DCS and Sprint4 failure,
 exposure and repair definitions remain gated; no automatic KPI implementation.
+
+
+### 1 November2026 — Sprint4 Reliability Performance technical foundation
+
+[Draft PR117](https://github.com/johnd-creator/reliability-knowledge-starter/pull/117)
+is stacked on PR116 exact3778584. [Delivery](../reliability-cockpit/docs/NADI-PDM-SPRINT-04-DELIVERY.md)
+records offline synthetic functional event/exposure/active-repair contracts and
+calculation qualification; Laporan exposes an operationally disabled readiness
+workflow using existing exactasset source access. Phase0–5 history, M0–M8, source
+ownership, M02/comparability and all method decisions remain unchanged/pending.
+Next: exact-head technical CI/review → consolidated PO/source/engineer decisions.
+[Sprint5 handoff](../reliability-cockpit/docs/NADI-SPRINT5-STABILIZATION-HANDOFF.md)
+is a proposal; Sprint5 is not started. No real KPI publication or activation.

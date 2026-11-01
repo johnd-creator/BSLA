@@ -462,3 +462,14 @@ five primary entries and Engineering workflows. Full mapping inventory is blocke
 by current grants; historian history is NOT_QUALIFIED and KPI readiness remains
 NOT_ELIGIBLE. [Implementation, limits and evidence](reliability-cockpit/docs/NADI-PDM-SPRINT-03-DELIVERY.md)
 are distinct from deferred PO UI/UX, method/source-owner acceptance and activation.
+
+
+## 1 November2026 — Reliability Performance offline foundation (Sprint4)
+
+The Product Owner authorizes versioned candidate failure/exposure/active-repair
+models and deterministic offline synthetic MTBF/MTTR qualification. The Laporan
+subview exposes exactasset/period readiness, missing policy/evidence and authorized
+source activities; it publishes no live KPI and does not call an offline calculator.
+[Scope, decisions and preservation](reliability-cockpit/docs/NADI-PDM-SPRINT-04-DELIVERY.md).
+Source/method approval, consolidated PO visuals and any later activation remain
+separate. Existing legacy metrics are neither replaced nor reinterpreted.

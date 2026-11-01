@@ -41,6 +41,16 @@ unsupported overlaps, censor/reopen/cross-window episodes without clipping, now(
 source-changedate fallbacks or inferred owner approval. Operational status always
 NOT_ELIGIBLE, even when a synthetic reference calculation qualifies.
 
+## Publication and exact-source receipt
+
+One [Draft PR117](https://github.com/johnd-creator/reliability-knowledge-starter/pull/117),
+base branch `codex/nadi-pdm-sprint-03`. Exact baseline is
+`3778584a7d4f97b98aae44cea37838a34b61f5d0`. Reviewed technical checkpoint
+`923b7acd495f851f16f0227b785748551554d0f4` is followed by the final fail-closed IANA
+boundary fix/tests and documentation. The final immutable HEAD, hosted CI run and
+independent carry-forward are recorded in the final qualification receipt on PR117;
+those are required before target technical PASS. No automatic merge/activation.
+
 ## Integrated implementation — S4-01–S4-05
 
 | Requirement | Technical implementation | Operational boundary |
@@ -155,12 +165,12 @@ remain; only ReportsCenter adds the contextual readiness subview and scoped CSS.
 | F21 | FMEA/maintenance/health/overhaul/RCFA utility routes retained; exactasset maintenance improved only |
 | F22 | Existing Beranda/DataTrust/report definitions/readers preserved; contextual Laporan readiness added, no KPI publication/portfolio bypass |
 | F23 | Source interpretation/estimates/proofs and six existing parity pins unchanged |
-| F24 | Accounts/sessions/auth/controller/deploy bytes unchanged; no reset/login/grant/session write in Sprint3 |
+| F24 | Accounts/sessions/auth/controller/deploy bytes unchanged; no reset/login/grant/session write in Sprint4 |
 
 
 ## Qualification receipts and known limits
 
-Local qualification:34 foundation tests plus9 unchanged legacy KPI tests PASS;
+Local qualification:35 foundation tests plus9 unchanged legacy KPI tests PASS;
 existing full backend regression checkpoint844 tests PASS (220 optional-environment
 skips locally), all19 frontend contract/lint gates PASS, TypeScript and Next build
 PASS. The final exact-head CI reruns the complete configured backend with disposable
