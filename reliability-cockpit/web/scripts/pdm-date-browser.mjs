@@ -39,7 +39,7 @@ try {
    if(path==='/api/engineering-qa/inspections/measurement-history')return route.fulfill({json:{items:native.measurements.map((m,i)=>({...native,measurement:m,measurement_index:i})),total:2,offset:0,limit:25,has_more:false,filter_scope:'AUTHORIZED_POPULATION',event_time_basis:'MEASURED_AT'}});
    if(path.endsWith('/history'))return route.fulfill({json:[{revision:1,action:'CREATE',actor:'synthetic-author',occurred_at:instant,reason:'DEMO audit reason',snapshot:row}]});
    if(path==='/api/engineering-qa/inspections/'+record)return route.fulfill({json:row});
-   if(path==='/api/engineering-qa/inspections')return route.fulfill({json:{items:[row],total:1,offset:0,limit:1,has_more:false,filter_scope:'AUTHORIZED_POPULATION',event_time_basis:'INSPECTED_AT'}});
+   if(path==='/api/engineering-qa/inspections')return route.fulfill({json:{items:[row],total:1,offset:0,limit:Number(url.searchParams.get('limit')??25),has_more:false,filter_scope:'AUTHORIZED_POPULATION',event_time_basis:'INSPECTED_AT'}});
    errors.push('Unexpected path '+path);return route.abort();
   });
   const button=name=>p.getByRole('button',{name,exact:name!=='Buka inspeksi'}),go=async()=>{await p.goto(base+'/pdm');await button('Buka inspeksi').waitFor();};
@@ -56,8 +56,8 @@ try {
   check('audit time consistently WIB and separately labelled '+timezoneId,await p.getByText('Dicatat di NADI (audit)',{exact:true}).isVisible());
   await p.getByText('Baca isi revisi 1',{exact:true}).click();
   check('immutable revision retains native measurement time '+timezoneId,await p.locator('details[open] .product-record-detail').getByText('21 Oktober 2026, 06.30.00 WIB',{exact:true}).count()===3);
-  await button('Riwayat & Tren').click();await p.locator('.pdm-history table').waitFor();
-  check('measurement history same WIB as detail '+timezoneId,await p.locator('.pdm-history table').getByText('21 Oktober 2026, 06.30.00 WIB',{exact:true}).isVisible());
+  await button('Riwayat & Tren').click();await p.locator('[aria-label="Riwayat measurement asli"] table').waitFor();
+  check('measurement history same WIB as detail '+timezoneId,await p.locator('[aria-label="Riwayat measurement asli"] table').getByText('21 Oktober 2026, 06.30.00 WIB',{exact:true}).isVisible());
   await p.getByLabel('Plot sampel pada halaman ini (satu inspeksi)').selectOption(record);
   check('scatter labels use same known instant format '+timezoneId,(await p.locator('.pdm-raw-plot svg').textContent()).includes('21 Oktober 2026, 06.30.00 WIB'));
   await button('Input Pengukuran').click();

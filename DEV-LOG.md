@@ -1147,3 +1147,14 @@ hash matches but freshness is expired; session proof expired. Fresh cutover gate
 are deferred until separate explicit owner authorization. Full exact-head CI and
 final independent review are recorded in the single Sprint2 Draft PR acceptance
 comment; this log does not claim PO/engineer approval or phase advancement.
+
+
+Sprint2 first hosted head5df6de7 passed backend. Frontend exposed a historical date
+browser fixture returning fixedlimit1 after the app correctly requestedlimit10.
+Aligned date/localization/experience fixture metadata and slices to the actual
+requested bounded page; retained strict product contract validation. Date test
+selects the raw measurement table explicitly alongside the separate eligibility
+checklist. Localization now asserts actual Register rows, preventing an error-state
+screenshot from passing as a translated workspace. No application/runtime bytes
+changed in this test correction; prior matched screenshots retain exact component
+bytes. Both jobs and independent final-head review are required again.

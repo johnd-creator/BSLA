@@ -18,7 +18,7 @@ let role='AUTHOR',subject='demo-author',signedIn=true,qaFailure=0,factualFailure
 const asset=fixture.asset.canonical_id,now='2026-10-11T00:00:00Z';
 let cases=[],recommendations=structuredClone(fixture.recommendations),advisories=[],ack=null;
 const review=()=>({reviewer:subject,decision:'APPROVED',rationale:'Review QA SINTETIS',decided_at:now});
-const pageOf=rows=>({items:rows,total:rows.length,offset:0,limit:25,has_more:false});
+const pageOf=(rows,url)=>{const offset=Number(url?.searchParams.get('offset')??0),limit=Number(url?.searchParams.get('limit')??25);return {items:rows.slice(offset,offset+limit),total:rows.length,offset,limit,has_more:offset+limit<rows.length};};
 const inbox=()=>advisories.filter(a=>a.publication).map(a=>({...a.publication,current_revision:a.revision,availability:a.availability,acknowledgement:ack,follow_up_status:'PLANNED',viewed_status:'NOT_RECORDED'}));
 await context.route('**/*',async route=>{
  const request=route.request(),url=new URL(request.url()),path=url.pathname,method=request.method();
@@ -44,7 +44,7 @@ await context.route('**/*',async route=>{
    return route.fulfill({json:id?item:pageOf(items)});
   }
   let rows=resource==='cases'?cases:resource==='recommendations'?recommendations:resource==='advisories'?advisories:fixture[resource]??[],row=rows.find(r=>(r.case_id??r.record_id)===id);
-  if(method==='GET'&&resource==='inspections'&&!id)return route.fulfill({json:{...pageOf(rows),filter_scope:'AUTHORIZED_POPULATION',event_time_basis:'INSPECTED_AT'}});
+  if(method==='GET'&&resource==='inspections'&&!id)return route.fulfill({json:{...pageOf(rows,url),filter_scope:'AUTHORIZED_POPULATION',event_time_basis:'INSPECTED_AT'}});
   if(method==='GET')return route.fulfill({json:action==='history'?[{revision:1,actor:'demo-author',action:'CREATE',occurred_at:now,reason:'QA SINTETIS — nilai rekam asli'}]:id?row:pageOf(rows)});
   if(resource==='cases'&&!id){
    if(saveFailure){saveFailure=false;return fail(503,'SYNTHETIC_RETRY_FAILURE');}
@@ -123,7 +123,7 @@ try{
   await page.setViewportSize({width,height:1086});
   for(const [i,path] of routes.entries()){
    if(process.env.NADI_BROWSER_ONLY_ROUTE&&!path.startsWith(process.env.NADI_BROWSER_ONLY_ROUTE))continue;
-   await go(path);if(path==='/login'){check('standalone login '+width,await page.locator('.nadi-shell,.nadi-sidebar,.nadi-topbar').count()===0);await page.getByRole('button',{name:'Ganti ke tema gelap'}).click();check('standalone dark theme '+width,await page.locator('html').getAttribute('data-theme')==='dark');await page.screenshot({path:out+'/login-dark-'+width+'.png',fullPage:true});await page.reload({waitUntil:'networkidle'});check('login refresh preserves theme '+width,await page.locator('html').getAttribute('data-theme')==='dark');await page.getByRole('button',{name:'Ganti ke tema terang'}).click();await label('Username').focus();await page.keyboard.press('Tab');check('keyboard reaches password '+width,await label('Password').evaluate(n=>n===document.activeElement));}check('one main '+path+' '+width,await page.getByRole('main').count()===1);check('no horizontal page overflow '+path+' '+width,await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+   await go(path);if(path==='/pdm'){await page.locator('.pdm-register').waitFor();check('localized PdM renders qualified bounded records '+width,await page.locator('.record-open').count()===Math.min(10,fixture.inspections.length));}if(path==='/login'){check('standalone login '+width,await page.locator('.nadi-shell,.nadi-sidebar,.nadi-topbar').count()===0);await page.getByRole('button',{name:'Ganti ke tema gelap'}).click();check('standalone dark theme '+width,await page.locator('html').getAttribute('data-theme')==='dark');await page.screenshot({path:out+'/login-dark-'+width+'.png',fullPage:true});await page.reload({waitUntil:'networkidle'});check('login refresh preserves theme '+width,await page.locator('html').getAttribute('data-theme')==='dark');await page.getByRole('button',{name:'Ganti ke tema terang'}).click();await label('Username').focus();await page.keyboard.press('Tab');check('keyboard reaches password '+width,await label('Password').evaluate(n=>n===document.activeElement));}check('one main '+path+' '+width,await page.getByRole('main').count()===1);check('no horizontal page overflow '+path+' '+width,await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
    // All input controls in the rendered candidate have an accessible name.
    const unnamed=await page.locator('input:not([type=hidden]),select,textarea').evaluateAll(nodes=>nodes.filter(n=>!n.labels?.length&&!n.getAttribute('aria-label')&&!n.getAttribute('aria-labelledby')).length);check('controls labeled '+path+' '+width,unnamed===0);
    if(AxeBuilder && ((width===1440 && [0,1,2,12,13,14,15,18,20].includes(i)) || (width===390 && i===12))){
