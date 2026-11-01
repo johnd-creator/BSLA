@@ -50,3 +50,9 @@ updates as distinct blocking prerequisites. They do not simulate an approved KPI
 formula. Before Sprint4: responsible engineer and source owners sign each scoped
 version, then separately authorize technical implementation and its interval/event
 validation tests. No automatic start after Sprint3.
+
+Proposed offline contracts/fixtures live under `reliability-cockpit/contracts/sprint3/`.
+They are not installed canonical shared contracts, accepted collector DTO changes
+or retained schemas. Adoption into the shared foundation requires separate source/
+engineer approval. CI executes both these proposal tests and the unchanged shared
+contract suite on the exact NADI candidate head.

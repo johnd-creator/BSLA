@@ -31,3 +31,8 @@ promotes CANDIDATE. Multiple selected signals for one mapping must first be grou
 by their recorded mapping identity by the source owner; this inventory deliberately
 requires one relationship per row. Synthetic examples are explicitly labelled and
 cannot serve as actual plant mapping evidence. No persistence or source calls.
+
+The proposal schema, examples and pure offline tool are located in
+`reliability-cockpit/contracts/sprint3/`, independently tested by NADI CI. Existing
+canonical shared contracts remain byte-identical; no collector consumes these
+proposal files. Their future foundation adoption is a separate approval.

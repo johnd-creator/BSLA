@@ -7,7 +7,7 @@ const require=createRequire(import.meta.url),ts=require('typescript');
 const base='3a01e842b5bfca08a5d508b8988dc6deb32c2961';
 const root=execFileSync('git',['rev-parse','--show-toplevel'],{encoding:'utf8'}).trim();
 const git=(...args)=>execFileSync('git',['-C',root,...args],{encoding:'utf8'});
-const paths=['reliability-cockpit/src','reliability-cockpit/migrations','reliability-cockpit/application-migrations','deploy','maximo-collector/src','pi-collector','cems-collector','reliability-cockpit/web/app/api','reliability-cockpit/web/middleware.ts',...['factual-gateway.ts','factual-policy.ts','local-session.ts','navigation.ts','engineering-http.ts','pdm-input.ts','pdm-capture.ts','product-records.ts','pdm-history.ts'].map(p=>'reliability-cockpit/web/lib/'+p)];
+const paths=['reliability-cockpit/src','reliability-data-contracts','reliability-cockpit/migrations','reliability-cockpit/application-migrations','deploy','maximo-collector/src','pi-collector','cems-collector','reliability-cockpit/web/app/api','reliability-cockpit/web/middleware.ts',...['factual-gateway.ts','factual-policy.ts','local-session.ts','navigation.ts','engineering-http.ts','pdm-input.ts','pdm-capture.ts','product-records.ts','pdm-history.ts'].map(p=>'reliability-cockpit/web/lib/'+p)];
 assert.equal(git('diff','--name-only',base,'--',...paths).trim(),'','source/auth/controller/storage/collector contracts changed');
 assert.equal(git('ls-files','--others','--exclude-standard','--',...paths).trim(),'','untracked source-boundary file');
 const emit=source=>ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022,removeComments:true}}).outputText;

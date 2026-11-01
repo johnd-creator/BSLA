@@ -15,7 +15,7 @@ const reviewedSprint3Pages = {
   "reliability-cockpit/web/app/(workspace)/assets/[...canonicalId]/page.tsx": "2d8e040fa7a753fdf443cae0aa40fa8b00d28aa8a7d2a842d428addacf8c0df6"
 };
 for (const page of pages) {if(Object.hasOwn(reviewedSprint3Pages,page))assert.equal(createHash('sha256').update(readFileSync(resolve(root,page))).digest('hex'),reviewedSprint3Pages[page],page);else assert.equal(readFileSync(resolve(root,page),'utf8'),git('show',`${base}:${page}`),`${page} changed`);}
-const protectedPaths = ['reliability-cockpit/src', 'reliability-cockpit/migrations', 'reliability-cockpit/application-migrations', 'reliability-data-contracts', 'maximo-collector', 'pi-collector', 'cems-collector', 'deploy/development', 'reliability-cockpit/web/middleware.ts', 'reliability-cockpit/web/app/api', ...['pdm-input.ts', 'pdm-capture.ts', 'product-records.ts', 'engineering-http.ts'].map(p => `reliability-cockpit/web/lib/${p}`), ...['PdmDraftContext.tsx', 'useQaRecords.ts', 'usePdmCommand.ts'].map(p => `reliability-cockpit/web/components/${p}`)];
+const protectedPaths = ['reliability-cockpit/src', 'reliability-cockpit/migrations', 'reliability-cockpit/application-migrations', 'reliability-data-contracts', 'reliability-cockpit/contracts', 'maximo-collector', 'pi-collector', 'cems-collector', 'deploy/development', 'reliability-cockpit/web/middleware.ts', 'reliability-cockpit/web/app/api', ...['pdm-input.ts', 'pdm-capture.ts', 'product-records.ts', 'engineering-http.ts'].map(p => `reliability-cockpit/web/lib/${p}`), ...['PdmDraftContext.tsx', 'useQaRecords.ts', 'usePdmCommand.ts'].map(p => `reliability-cockpit/web/components/${p}`)];
 const reviewedParity = {
   "reliability-cockpit/src/services/local_authentication.py": "cac45c151340fe3c5074d29bfbc1e6f3d8c77b98c5efa3369e5e3975c8fb542c",
   "reliability-cockpit/src/services/local_demo_accounts.py": "0fc519222fdc6c390f7f98d22c53cac7be5895c93ed0b5ec2bd08b90771ef10c",
@@ -33,13 +33,12 @@ const reviewedSprint2 = {
 };
 // Additive offline contracts and one synthetic collector regression only; operational files remain protected.
 const reviewedSprint3 = {
-  "reliability-data-contracts/catalog/evidence_readiness.py": "70285f9305e3cd856f65a35972885fff47d029130ecfc675c88b12ca3201c2e9",
-  "reliability-data-contracts/schemas/asset-crosswalk-decision.schema.json": "791cca00323506d69a871e58c2bca4b22bd07de6a8abd7850272b0aec36b4cdc",
-  "reliability-data-contracts/schemas/reliability-kpi-readiness.schema.json": "1965706b2eb7518b1265b687e46ae4eab92719a3a36af322295e9048f669ede6",
-  "reliability-data-contracts/examples/sprint3-crosswalk.synthetic.json": "0f130b589bdd0a927405255c00eec71708bcc4e18ca2269dd3392a8fb506389a",
-  "reliability-data-contracts/examples/sprint3-kpi-readiness.synthetic.json": "0578fe1bcee00c1c762eb760782b8692d931df66e3122f86d8d89afb6927a68e",
-  "reliability-data-contracts/tests/test_sprint3_evidence.py": "a63a91083e3839a51e35b3ff308e15dfe0041c5471fc61bb171e08163c1df221",
-
+  "reliability-cockpit/contracts/sprint3/catalog/evidence_readiness.py": "70285f9305e3cd856f65a35972885fff47d029130ecfc675c88b12ca3201c2e9",
+  "reliability-cockpit/contracts/sprint3/schemas/asset-crosswalk-decision.schema.json": "791cca00323506d69a871e58c2bca4b22bd07de6a8abd7850272b0aec36b4cdc",
+  "reliability-cockpit/contracts/sprint3/schemas/reliability-kpi-readiness.schema.json": "1965706b2eb7518b1265b687e46ae4eab92719a3a36af322295e9048f669ede6",
+  "reliability-cockpit/contracts/sprint3/examples/sprint3-crosswalk.synthetic.json": "0f130b589bdd0a927405255c00eec71708bcc4e18ca2269dd3392a8fb506389a",
+  "reliability-cockpit/contracts/sprint3/examples/sprint3-kpi-readiness.synthetic.json": "0578fe1bcee00c1c762eb760782b8692d931df66e3122f86d8d89afb6927a68e",
+  "reliability-cockpit/contracts/sprint3/tests/test_sprint3_evidence.py": "a63a91083e3839a51e35b3ff308e15dfe0041c5471fc61bb171e08163c1df221"
 };
 const admitted={...reviewedParity,...reviewedSprint2,...reviewedSprint3};
 const changed=[...git('diff','--name-only',base,'--',...protectedPaths).trim().split('\n'),...git('ls-files','--others','--exclude-standard','--',...protectedPaths).trim().split('\n')].filter(Boolean);

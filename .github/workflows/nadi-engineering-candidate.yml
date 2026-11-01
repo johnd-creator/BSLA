@@ -90,6 +90,8 @@ jobs:
         env:
           PYTHONPATH: .
         run: python ../reliability-cockpit/tests/test_sprint3_maximo_identity.py -v
+      - name: Sprint3 proposed offline readiness contracts (not active shared contracts)
+        run: python -m unittest discover -s reliability-cockpit/contracts/sprint3/tests -v
       - name: Canonical contracts
         working-directory: reliability-data-contracts
         run: python -m unittest discover -s tests -v

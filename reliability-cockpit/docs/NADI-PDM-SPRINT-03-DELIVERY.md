@@ -68,7 +68,7 @@ implementation/qualification and the final PR receipt for immutable publication 
 
 Single [Draft PR116](https://github.com/johnd-creator/reliability-knowledge-starter/pull/116),
 base branch `codex/nadi-pdm-sprint-02`; no dependency merged/rebased/force-pushed.
-Exact code and screenshot candidate:
+Original code and screenshot candidate:
 `0e31fd2b0a2b5e0b6f7d103474710ca7bc9775ee`.
 The final publication HEAD (including this report), hosted run IDs and independent
 review carry-forward are recorded in the **immutable final qualification receipt
@@ -143,11 +143,15 @@ Local checks on the code candidate and final reviewed repairs:
   variants/focus, qualified AF-target collisions and malformed approval evidence.
   This is bounded independent technical review, not a claimed exhaustive security scan.
 
-An initial additional Maximo workflow refused the stacked base with
-`UNSUPPORTED_PR_BASE`. Its main-only guard remains unchanged. The synthetic
-cross-component replay test was relocated into NADI's qualification package,
-executed with the unchanged Maximo source. Final diff changes no collector path;
-final-head NADI backend/frontend qualification is authoritative for this bundle.
+The auxiliary Maximo workflow refused the stacked base with
+`UNSUPPORTED_PR_BASE`. Its main-only guard remains unchanged. Proposed offline
+readiness contracts and the synthetic cross-component replay qualification now
+live in NADI's own qualification package, where they belong: these do not change
+any active shared contract or collector behavior. Final diff changes neither
+collector paths nor `reliability-data-contracts`. The exact-head NADI backend runs
+both unchanged shared-contract regressions and the proposed offline contracts,
+plus replay against the unchanged Maximo source. Final-head NADI backend/frontend
+qualification is authoritative for this NADI-only bundle.
 No main-only guard, branch protection or ancestry was weakened to manufacture PASS.
 
 ### Query/performance findings
@@ -202,7 +206,7 @@ source scope or aware dated evidence cannot qualify a conclusion. No persistence
 `asset-evidence-preservation.mjs` compares operational backend/migrations/deploy/
 collectors/source/auth/navigation against exact parent3a and compares emitted API
 client JS. Existing simplification scope guard retains all F23/F24 and Sprint2
-pins and admits only additive exact-byte offline contracts plus two exact reviewed
+pins and admits only additive exact-byte proposed NADI offline contracts plus two exact reviewed
 Asset pages. New synthetic test tooling is not an operational collector change.
 
 ### Runtime preservation and future gates
