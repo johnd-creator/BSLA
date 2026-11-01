@@ -1,0 +1,863 @@
+{
+  "$defs": {
+    "Clock": {
+      "additionalProperties": false,
+      "properties": {
+        "original": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Original"
+        },
+        "precision": {
+          "enum": [
+            "SECOND",
+            "MICROSECOND",
+            "MINUTE",
+            "DATE",
+            "UNKNOWN"
+          ],
+          "title": "Precision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "original",
+        "precision"
+      ],
+      "title": "Clock",
+      "type": "object"
+    },
+    "Evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_ref": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Evidence Ref",
+          "type": "string"
+        },
+        "source_record_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Source Record Id",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "source_system": {
+          "const": "SYNTHETIC",
+          "title": "Source System",
+          "type": "string"
+        },
+        "qualification": {
+          "enum": [
+            "SYNTHETIC_VERIFIED",
+            "UNVERIFIED"
+          ],
+          "title": "Qualification",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_ref",
+        "source_record_id",
+        "revision",
+        "source_system",
+        "qualification"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "Exposure": {
+      "additionalProperties": false,
+      "properties": {
+        "record_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Record Id",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "supersedes_revision": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Supersedes Revision"
+        },
+        "duplicate_of": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "pattern": "^\\S(?:.*\\S)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Duplicate Of"
+        },
+        "scope": {
+          "$ref": "#/$defs/Scope"
+        },
+        "definition_version": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Definition Version",
+          "type": "string"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "start": {
+          "$ref": "#/$defs/Clock"
+        },
+        "end": {
+          "$ref": "#/$defs/Clock"
+        },
+        "operating_hours": {
+          "anyOf": [
+            {
+              "pattern": "^(?:0|[1-9][0-9]{0,11})(?:\\.[0-9]{1,6})?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Operating Hours"
+        },
+        "unit": {
+          "const": "h",
+          "title": "Unit",
+          "type": "string"
+        },
+        "quality": {
+          "enum": [
+            "QUALIFIED",
+            "BAD",
+            "UNKNOWN"
+          ],
+          "title": "Quality",
+          "type": "string"
+        }
+      },
+      "required": [
+        "record_id",
+        "revision",
+        "supersedes_revision",
+        "duplicate_of",
+        "scope",
+        "definition_version",
+        "evidence",
+        "start",
+        "end",
+        "operating_hours",
+        "unit",
+        "quality"
+      ],
+      "title": "Exposure",
+      "type": "object"
+    },
+    "Failure": {
+      "additionalProperties": false,
+      "properties": {
+        "record_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Record Id",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "supersedes_revision": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Supersedes Revision"
+        },
+        "duplicate_of": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "pattern": "^\\S(?:.*\\S)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Duplicate Of"
+        },
+        "scope": {
+          "$ref": "#/$defs/Scope"
+        },
+        "definition_version": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Definition Version",
+          "type": "string"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "kind": {
+          "enum": [
+            "FUNCTIONAL_FAILURE",
+            "MAINTENANCE_ACTIVITY"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "qualification": {
+          "enum": [
+            "SYNTHETIC_VERIFIED",
+            "UNVERIFIED"
+          ],
+          "title": "Qualification",
+          "type": "string"
+        },
+        "occurred_at": {
+          "$ref": "#/$defs/Clock"
+        },
+        "work_type": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "pattern": "^\\S(?:.*\\S)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Work Type"
+        },
+        "work_order_refs": {
+          "items": {
+            "maxLength": 200,
+            "minLength": 1,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string"
+          },
+          "maxItems": 20,
+          "title": "Work Order Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "record_id",
+        "revision",
+        "supersedes_revision",
+        "duplicate_of",
+        "scope",
+        "definition_version",
+        "evidence",
+        "kind",
+        "qualification",
+        "occurred_at",
+        "work_type",
+        "work_order_refs"
+      ],
+      "title": "Failure",
+      "type": "object"
+    },
+    "Outage": {
+      "additionalProperties": false,
+      "properties": {
+        "record_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Record Id",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "supersedes_revision": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Supersedes Revision"
+        },
+        "duplicate_of": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "pattern": "^\\S(?:.*\\S)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Duplicate Of"
+        },
+        "scope": {
+          "$ref": "#/$defs/Scope"
+        },
+        "definition_version": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Definition Version",
+          "type": "string"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "failure_event_id": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "pattern": "^\\S(?:.*\\S)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Failure Event Id"
+        },
+        "kind": {
+          "enum": [
+            "TOTAL_OUTAGE",
+            "WAITING",
+            "PLANNED"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "start": {
+          "$ref": "#/$defs/Clock"
+        },
+        "end": {
+          "$ref": "#/$defs/Clock"
+        }
+      },
+      "required": [
+        "record_id",
+        "revision",
+        "supersedes_revision",
+        "duplicate_of",
+        "scope",
+        "definition_version",
+        "evidence",
+        "failure_event_id",
+        "kind",
+        "start",
+        "end"
+      ],
+      "title": "Outage",
+      "type": "object"
+    },
+    "Policy": {
+      "additionalProperties": false,
+      "properties": {
+        "definition_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Definition Id",
+          "type": "string"
+        },
+        "version": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Version",
+          "type": "string"
+        },
+        "approval": {
+          "enum": [
+            "SYNTHETIC_APPROVED",
+            "PENDING_ENGINEER_VALIDATION"
+          ],
+          "title": "Approval",
+          "type": "string"
+        },
+        "failure_definition": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Failure Definition",
+          "type": "string"
+        },
+        "exposure_definition": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Exposure Definition",
+          "type": "string"
+        },
+        "repair_definition": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Repair Definition",
+          "type": "string"
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        },
+        "window_rule": {
+          "const": "HALF_OPEN_FULLY_CONTAINED",
+          "title": "Window Rule",
+          "type": "string"
+        },
+        "duplicate_rule": {
+          "const": "EXPLICIT_LINKS_ONLY",
+          "title": "Duplicate Rule",
+          "type": "string"
+        },
+        "overlap_rule": {
+          "const": "REJECT",
+          "title": "Overlap Rule",
+          "type": "string"
+        },
+        "reopened_rule": {
+          "const": "REJECT",
+          "title": "Reopened Rule",
+          "type": "string"
+        },
+        "censored_rule": {
+          "const": "REJECT",
+          "title": "Censored Rule",
+          "type": "string"
+        },
+        "waiting_planned_rule": {
+          "enum": [
+            "EXCLUDE_EXPLICIT_QUALIFIED",
+            "PENDING"
+          ],
+          "title": "Waiting Planned Rule",
+          "type": "string"
+        }
+      },
+      "required": [
+        "definition_id",
+        "version",
+        "approval",
+        "failure_definition",
+        "exposure_definition",
+        "repair_definition",
+        "evidence",
+        "window_rule",
+        "duplicate_rule",
+        "overlap_rule",
+        "reopened_rule",
+        "censored_rule",
+        "waiting_planned_rule"
+      ],
+      "title": "Policy",
+      "type": "object"
+    },
+    "Repair": {
+      "additionalProperties": false,
+      "properties": {
+        "record_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Record Id",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "supersedes_revision": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Supersedes Revision"
+        },
+        "duplicate_of": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "pattern": "^\\S(?:.*\\S)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Duplicate Of"
+        },
+        "scope": {
+          "$ref": "#/$defs/Scope"
+        },
+        "definition_version": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Definition Version",
+          "type": "string"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "failure_event_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Failure Event Id",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "COMPLETED",
+            "OPEN",
+            "CENSORED",
+            "REOPENED"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "reopened_from": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "pattern": "^\\S(?:.*\\S)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reopened From"
+        },
+        "repair_started_at": {
+          "$ref": "#/$defs/Clock"
+        },
+        "restored_at": {
+          "$ref": "#/$defs/Clock"
+        },
+        "intervals": {
+          "items": {
+            "$ref": "#/$defs/RepairInterval"
+          },
+          "maxItems": 100,
+          "title": "Intervals",
+          "type": "array"
+        }
+      },
+      "required": [
+        "record_id",
+        "revision",
+        "supersedes_revision",
+        "duplicate_of",
+        "scope",
+        "definition_version",
+        "evidence",
+        "failure_event_id",
+        "state",
+        "reopened_from",
+        "repair_started_at",
+        "restored_at",
+        "intervals"
+      ],
+      "title": "Repair",
+      "type": "object"
+    },
+    "RepairInterval": {
+      "additionalProperties": false,
+      "properties": {
+        "interval_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Interval Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "ACTIVE",
+            "WAITING",
+            "PLANNED"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "start": {
+          "$ref": "#/$defs/Clock"
+        },
+        "end": {
+          "$ref": "#/$defs/Clock"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        }
+      },
+      "required": [
+        "interval_id",
+        "kind",
+        "start",
+        "end",
+        "evidence"
+      ],
+      "title": "RepairInterval",
+      "type": "object"
+    },
+    "Scope": {
+      "additionalProperties": false,
+      "properties": {
+        "canonical_asset_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Canonical Asset Id",
+          "type": "string"
+        },
+        "site": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Site",
+          "type": "string"
+        },
+        "organization": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Organization",
+          "type": "string"
+        },
+        "population_ref": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Population Ref",
+          "type": "string"
+        },
+        "identity_evidence": {
+          "$ref": "#/$defs/Evidence"
+        }
+      },
+      "required": [
+        "canonical_asset_id",
+        "site",
+        "organization",
+        "population_ref",
+        "identity_evidence"
+      ],
+      "title": "Scope",
+      "type": "object"
+    },
+    "Window": {
+      "additionalProperties": false,
+      "properties": {
+        "start": {
+          "$ref": "#/$defs/Clock"
+        },
+        "end": {
+          "$ref": "#/$defs/Clock"
+        },
+        "timezone": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Timezone",
+          "type": "string"
+        }
+      },
+      "required": [
+        "start",
+        "end",
+        "timezone"
+      ],
+      "title": "Window",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "s4-candidate-1",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "execution_mode": {
+      "const": "SYNTHETIC_TEST_ONLY",
+      "title": "Execution Mode",
+      "type": "string"
+    },
+    "label": {
+      "const": "SYNTHETIC ONLY \u2014 NOT PLANT DATA",
+      "title": "Label",
+      "type": "string"
+    },
+    "scope": {
+      "$ref": "#/$defs/Scope"
+    },
+    "window": {
+      "$ref": "#/$defs/Window"
+    },
+    "policy": {
+      "$ref": "#/$defs/Policy"
+    },
+    "failure_inventory_complete": {
+      "title": "Failure Inventory Complete",
+      "type": "boolean"
+    },
+    "failure_inventory_evidence": {
+      "$ref": "#/$defs/Evidence"
+    },
+    "repair_inventory_complete": {
+      "title": "Repair Inventory Complete",
+      "type": "boolean"
+    },
+    "repair_inventory_evidence": {
+      "$ref": "#/$defs/Evidence"
+    },
+    "exposure_coverage_complete": {
+      "title": "Exposure Coverage Complete",
+      "type": "boolean"
+    },
+    "exposure_coverage_evidence": {
+      "$ref": "#/$defs/Evidence"
+    },
+    "failures": {
+      "items": {
+        "$ref": "#/$defs/Failure"
+      },
+      "maxItems": 1000,
+      "title": "Failures",
+      "type": "array"
+    },
+    "exposures": {
+      "items": {
+        "$ref": "#/$defs/Exposure"
+      },
+      "maxItems": 1000,
+      "title": "Exposures",
+      "type": "array"
+    },
+    "repairs": {
+      "items": {
+        "$ref": "#/$defs/Repair"
+      },
+      "maxItems": 1000,
+      "title": "Repairs",
+      "type": "array"
+    },
+    "outages": {
+      "items": {
+        "$ref": "#/$defs/Outage"
+      },
+      "maxItems": 1000,
+      "title": "Outages",
+      "type": "array"
+    }
+  },
+  "required": [
+    "contract_version",
+    "execution_mode",
+    "label",
+    "scope",
+    "window",
+    "policy",
+    "failure_inventory_complete",
+    "failure_inventory_evidence",
+    "repair_inventory_complete",
+    "repair_inventory_evidence",
+    "exposure_coverage_complete",
+    "exposure_coverage_evidence",
+    "failures",
+    "exposures",
+    "repairs",
+    "outages"
+  ],
+  "title": "Packet",
+  "type": "object"
+}
