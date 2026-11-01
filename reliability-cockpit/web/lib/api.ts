@@ -322,6 +322,13 @@ export interface AssetConditionEvidence {
   collector_last_success_at: string | null;
   items: {
     evidence: {
+      // Existing server DTO lineage; optional only for older sanitized UI fixtures.
+      contract_version?: string; canonical_asset_id?: string;
+      sources?: {pi: {pi_source_id: string; af_server_ref: string; af_database_ref: string;
+        af_element_ref: string; mapping_role: string; mapping_status: string;
+        attribute_ref: string; attribute_name?: string | null}};
+      provenance?: {selection_evidence_ref: string; selection_approved_by: string;
+        selection_approved_at: string; source_boundary: string};
       signal_id: string; semantic_name: string; mapping_id: string;
       value: number | string | boolean | { name: string | null; code: number | null; is_system: boolean | null } | null;
       value_type: "NUMERIC" | "TEXT" | "DIGITAL_STATE" | "BOOLEAN" | "NULL";
