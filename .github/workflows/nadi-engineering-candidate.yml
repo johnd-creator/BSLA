@@ -89,7 +89,7 @@ jobs:
         working-directory: maximo-collector
         env:
           PYTHONPATH: .
-        run: python -m unittest tests.test_sprint3_canonical_identity -v
+        run: python ../reliability-cockpit/tests/test_sprint3_maximo_identity.py -v
       - name: Canonical contracts
         working-directory: reliability-data-contracts
         run: python -m unittest discover -s tests -v

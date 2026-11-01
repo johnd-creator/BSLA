@@ -1158,3 +1158,17 @@ checklist. Localization now asserts actual Register rows, preventing an error-st
 screenshot from passing as a translated workspace. No application/runtime bytes
 changed in this test correction; prior matched screenshots retain exact component
 bytes. Both jobs and independent final-head review are required again.
+
+
+## 2026-11-01 — NADI-PDM-SPRINT-03 integrated candidate
+
+- Isolated stacked Draft PR116, parent115 exact3a; no merge/activation/reset/source calls.
+- Exactasset Maximo register/source detail and PI latest original quality/lineage,
+  contextual inspection return, read-only crosswalk decisions and contract-first
+  Sprint4 NOT_ELIGIBLE handoff. Source/auth/controller/schema/collectors unchanged.
+- Synthetic SQL10k,18 contracts,804 backend tests (220 localenvironment skips),18
+  frontend gates/build/typecheck;12 screenshots/7 WCAG states. Independent code
+  review0e31fd2 found no remaining blocker; final docs-head/CI receipt on PR116.
+- Official read-only status before/after: active Sprint2 pair3a, samecontroller/
+  retained-store readiness. Human PO/method/mapping approval remains pending.
+- [Complete delivery](reliability-cockpit/docs/NADI-PDM-SPRINT-03-DELIVERY.md).

@@ -39,7 +39,7 @@ const reviewedSprint3 = {
   "reliability-data-contracts/examples/sprint3-crosswalk.synthetic.json": "0f130b589bdd0a927405255c00eec71708bcc4e18ca2269dd3392a8fb506389a",
   "reliability-data-contracts/examples/sprint3-kpi-readiness.synthetic.json": "0578fe1bcee00c1c762eb760782b8692d931df66e3122f86d8d89afb6927a68e",
   "reliability-data-contracts/tests/test_sprint3_evidence.py": "a63a91083e3839a51e35b3ff308e15dfe0041c5471fc61bb171e08163c1df221",
-  "maximo-collector/tests/test_sprint3_canonical_identity.py": "ab0037d0a9c8ea02d55a9f33e96354c54980ec98ee40b9eb03c8c1fa0ebc049a"
+
 };
 const admitted={...reviewedParity,...reviewedSprint2,...reviewedSprint3};
 const changed=[...git('diff','--name-only',base,'--',...protectedPaths).trim().split('\n'),...git('ls-files','--others','--exclude-standard','--',...protectedPaths).trim().split('\n')].filter(Boolean);

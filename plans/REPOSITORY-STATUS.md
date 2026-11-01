@@ -1,5 +1,20 @@
 # Repository status and debt — PLATFORM-ROADMAP-001
 
+## 1 November 2026 — Sprint3 isolated asset-evidence candidate
+
+[Draft PR116](https://github.com/johnd-creator/reliability-knowledge-starter/pull/116)
+is stacked on open Draft PR115 exact3a01e842, itself on open Draft PR114 exactAA.
+Main remainsf1fc4e8 at verification. The [integrated delivery](../reliability-cockpit/docs/NADI-PDM-SPRINT-03-DELIVERY.md)
+records implementation, synthetic qualification, independent review and final-head
+CI receipt separately from PO/engineer approval, merge and activation.
+
+Correction to the earlier pre-activation Sprint2 checkpoint below: the subsequent
+[authorized activation receipt](https://github.com/johnd-creator/reliability-knowledge-starter/pull/115#issuecomment-6555450276)
+records Sprint2 front/back3a at https://localhost:3000. Sprint3 before/after official
+read-only status confirms the same pair/controller/store readiness; no reset,
+activation, source acquisition or service restart in this Sprint3 task. Historical
+Phase0–5/source-policy checkpoints retain their own scope.
+
 ## 1 November 2026 — stacked Sprint2 candidate
 
 Main verified `f1fc4e8b395691a17fe6d986bf14c772d37c1f2c`; PR114 OPEN/DRAFT at

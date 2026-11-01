@@ -26,3 +26,6 @@ class Sprint3CanonicalIdentityTest(unittest.TestCase):
                 row=s.get(MaintenanceEventMartOrm,first['canonical_id'])
                 self.assertEqual(row.status,'SYNTHETIC_UPDATED');self.assertEqual(row.work_order_id,first['work_order_id'])
         finally:db.engine.dispose()
+
+if __name__ == '__main__':
+    unittest.main()

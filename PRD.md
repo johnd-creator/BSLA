@@ -452,3 +452,13 @@ workflow. [Integrated specification and evidence](reliability-cockpit/docs/NADI-
 retains F01–F24. This is a stacked candidate on unmerged PR114 AA; no schema/DTO/
 auth change, new source request, trend policy, live cutover or phase completion.
 Engineer method sign-off and PO acceptance remain PENDING.
+
+
+## 1 November 2026 — FR-02/FR-07 asset evidence candidate
+
+Sprint3 reuses existing exactasset maintenance and approved PI latest contracts,
+adds contextual PdM return links and source/quality/clock disclosures, and preserves
+five primary entries and Engineering workflows. Full mapping inventory is blocked
+by current grants; historian history is NOT_QUALIFIED and KPI readiness remains
+NOT_ELIGIBLE. [Implementation, limits and evidence](reliability-cockpit/docs/NADI-PDM-SPRINT-03-DELIVERY.md)
+are distinct from deferred PO UI/UX, method/source-owner acceptance and activation.
