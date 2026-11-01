@@ -1,0 +1,88 @@
+[
+  {
+    "canonical_asset_id": "SYNTHETIC:VERIFIED",
+    "site_code": "BSR",
+    "organization_code": "IP",
+    "maximo_equipment_ref": "SYNTHETIC:VERIFIED",
+    "pi_af_ref": "SYNTHETIC:VERIFIED",
+    "pi_signal_ref": "SYNTHETIC:VERIFIED",
+    "mapping_evidence_ref": "SYNTHETIC:VERIFIED",
+    "mapping_owner": "SYNTHETIC:VERIFIED",
+    "mapping_verified_at": "2026-01-01T00:00:00Z",
+    "contract_version": "sprint3-decision-1",
+    "recorded_status": "VERIFIED",
+    "conditions": []
+  },
+  {
+    "canonical_asset_id": "SYNTHETIC:CANDIDATE",
+    "site_code": "BSR",
+    "organization_code": "IP",
+    "maximo_equipment_ref": "SYNTHETIC:CANDIDATE",
+    "pi_af_ref": "SYNTHETIC:CANDIDATE",
+    "pi_signal_ref": "SYNTHETIC:CANDIDATE",
+    "mapping_evidence_ref": "SYNTHETIC:CANDIDATE",
+    "mapping_owner": "SYNTHETIC:CANDIDATE",
+    "mapping_verified_at": "2026-01-01T00:00:00Z",
+    "contract_version": "sprint3-decision-1",
+    "recorded_status": "CANDIDATE",
+    "conditions": []
+  },
+  {
+    "canonical_asset_id": "SYNTHETIC:UNKNOWN",
+    "site_code": "BSR",
+    "organization_code": "IP",
+    "maximo_equipment_ref": "SYNTHETIC:UNKNOWN",
+    "pi_af_ref": null,
+    "pi_signal_ref": "SYNTHETIC:UNKNOWN",
+    "mapping_evidence_ref": "SYNTHETIC:UNKNOWN",
+    "mapping_owner": "SYNTHETIC:UNKNOWN",
+    "mapping_verified_at": "2026-01-01T00:00:00Z",
+    "contract_version": "sprint3-decision-1",
+    "recorded_status": "UNRESOLVED",
+    "conditions": []
+  },
+  {
+    "canonical_asset_id": "SYNTHETIC:FORBIDDEN",
+    "site_code": "BSR",
+    "organization_code": "IP",
+    "maximo_equipment_ref": "SYNTHETIC:FORBIDDEN",
+    "pi_af_ref": "SYNTHETIC:FORBIDDEN",
+    "pi_signal_ref": "SYNTHETIC:FORBIDDEN",
+    "mapping_evidence_ref": "SYNTHETIC:FORBIDDEN",
+    "mapping_owner": "SYNTHETIC:FORBIDDEN",
+    "mapping_verified_at": "2026-01-01T00:00:00Z",
+    "contract_version": "sprint3-decision-1",
+    "recorded_status": "FORBIDDEN",
+    "conditions": [
+      "SOURCE_FORBIDDEN"
+    ]
+  },
+  {
+    "canonical_asset_id": "SYNTHETIC:DUPLICATE",
+    "site_code": "BSR",
+    "organization_code": "IP",
+    "maximo_equipment_ref": "SYNTHETIC:DUPLICATE",
+    "pi_af_ref": "SYNTHETIC:DUPLICATE",
+    "pi_signal_ref": "SYNTHETIC:DUPLICATE",
+    "mapping_evidence_ref": "SYNTHETIC:DUPLICATE",
+    "mapping_owner": "SYNTHETIC:DUPLICATE",
+    "mapping_verified_at": "2026-01-01T00:00:00Z",
+    "contract_version": "sprint3-decision-1",
+    "recorded_status": "VERIFIED",
+    "conditions": []
+  },
+  {
+    "canonical_asset_id": "SYNTHETIC:DUPLICATE",
+    "site_code": "BSR",
+    "organization_code": "IP",
+    "maximo_equipment_ref": "SYNTHETIC:DUPLICATE",
+    "pi_af_ref": "SYNTHETIC:DUPLICATE",
+    "pi_signal_ref": "SYNTHETIC:DUPLICATE",
+    "mapping_evidence_ref": "SYNTHETIC:DUPLICATE",
+    "mapping_owner": "SYNTHETIC:DUPLICATE",
+    "mapping_verified_at": "2026-01-01T00:00:00Z",
+    "contract_version": "sprint3-decision-1",
+    "recorded_status": "VERIFIED",
+    "conditions": []
+  }
+]
