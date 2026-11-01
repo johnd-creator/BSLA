@@ -42,7 +42,7 @@ export default function ReportsCenter() {
   const [days, setDays] = useState<ReportPeriod>(30);
   const candidate = reportCandidates.find(value => value.id === selected)!;
   if(performance===null)return <LoadingState label="Memuat konteks laporan…"/>;
-  if(performance)return <div className="reports-workspace"><PageHeader eyebrow="NADI / Laporan" title="Kinerja Reliabilitas" description="Definisi dan kesiapan evidence sebelum hasil MTBF/MTTR." actions={<Button onClick={()=>selectPerformance(false)}>Kembali ke katalog laporan</Button>}/><ReliabilityPerformance/></div>;
+  if(performance)return <div className="reports-workspace reliability-performance-report"><PageHeader eyebrow="NADI / Laporan" title="Kinerja Reliabilitas" description="Definisi dan kesiapan evidence sebelum hasil MTBF/MTTR." actions={<Button onClick={()=>selectPerformance(false)}>Kembali ke katalog laporan</Button>}/><ReliabilityPerformance/></div>;
   return <div className="reports-workspace">
     <Breadcrumbs items={[{ label: "NADI", href: "/" }, { label: "Pusat Laporan" }]} />
     <PageHeader eyebrow="NADI / Preview factual" title="Pusat Laporan" description="Pilih kandidat laporan untuk menelusuri fakta terbatas, lingkup dan ketidakpastiannya." />

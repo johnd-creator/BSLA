@@ -181,7 +181,7 @@ identifies this report's final source. Until those gates PASS, technical status 
 pending. No claim of operational backup/restore or live Sprint4 UAT is made here.
 
 Actual component browser qualification:6 scenario groups,10 screenshots and8
-WCAG2A/AA/2.1A/AA tested states,390/768/1440 light/dark, theme-control pressed state,
+WCAG2A/AA/2.1A/AA tested states,390/768/1440 light/dark, theme-control pressed state and rapid tablet theme switches,
 readiness form/retry, exact asset/period return and browser back/forward, lazy source
 detail, loading/empty/missing-asset/401/403/503 and scope clearing. Network requests
 are intercepted GETs at `.invalid`; no calculator, /kpis, historian or real source
@@ -215,3 +215,14 @@ Target after all technical gates: SPRINT4_TECHNICAL_FOUNDATION_PASS_KPI_NOT_ELIG
 This is not method approved, PO accepted, merged, activated or production ready.
 [Proposed Sprint5 stabilization handoff](NADI-SPRINT5-STABILIZATION-HANDOFF.md) lists
 signed policy/data/UI and future activation requirements. Sprint5 is not started.
+
+
+### Hosted contrast regression follow-up
+
+An intermediate exact-head run passed backend but failed the tablet768px light
+contrast check after a theme switch. The new subview now changes button text and
+background atomically (border-only transition), scoped to Reliability Performance;
+legacy pages/tokens are unchanged. The same full contrast rules remain enabled,
+with full failure diagnostics and rapid tablet theme-switch coverage. Final
+publication requires a fresh backend/frontend PASS on the repaired exact head;
+the earlier failure is not represented as a passing run.

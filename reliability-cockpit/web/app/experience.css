@@ -1156,3 +1156,6 @@
 @media(max-width:640px){.performance-metrics {grid-template-columns:minmax(0,1fr);}}
 .reliability-performance {display:grid;gap:16px;min-width:0;max-width:100%;}
 .reliability-performance > *, .performance-metrics > * {min-width:0;}
+
+/* Keep text/background contrast atomic when switching theme in the new subview. */
+.reliability-performance-report .button {transition:border-color .12s;}
