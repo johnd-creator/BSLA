@@ -180,3 +180,9 @@ class Sprint4FoundationTest(unittest.TestCase):
     def test_review_window_iana_conversion_extremes_fail_closed(self):
         p=fixture();p['window'].update(start=clock('0001-01-01T00:00:00Z'),timezone='America/New_York');self.blocked(p,'MTBF','INVALID_WINDOW_OR_TIMEZONE')
         p=fixture();p['window'].update(start=clock('2026-01-01T14:00:00+14:00'),end=clock('9999-12-31T23:59:59Z'),timezone='Pacific/Kiritimati');self.blocked(p,'MTBF','INVALID_WINDOW_OR_TIMEZONE')
+
+    def test_dst_gap_and_fold_use_explicit_instants_not_wall_clock_hours(self):
+        for start,end,observed in [('2026-03-08T01:30:00-05:00','2026-03-08T03:30:00-04:00','1'),('2026-11-01T01:15:00-04:00','2026-11-01T01:45:00-05:00','1.5')]:
+            p=fixture();p.update(failures=[],repairs=[],outages=[]);p['window'].update(start=clock(start),end=clock(end),timezone='America/New_York');p['exposures'][0].update(start=clock(start),end=clock(end),operating_hours=observed)
+            result=metrics(p)['MTBF'];self.assertEqual(result['numerator_hours'],observed);self.assertIsNone(result['value']);self.assertEqual(result['reasons'],['NO_FAILURES_OBSERVED'])
+        p['window']['end']=clock('2026-11-01T01:45:00-03:00');self.blocked(p,'MTBF','INVALID_WINDOW_OR_TIMEZONE')

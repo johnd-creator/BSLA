@@ -1182,7 +1182,7 @@ bytes. Both jobs and independent final-head review are required again.
   Operational KPI always NOT_ELIGIBLE; legacy source/semantics unchanged.
 - Laporan readiness subview reuses exact authorized Asset/maintenance GETs; no
   calculator endpoint, synthetic app import, retained store/schema/auth/collector change.
--35 foundation +9 legacy tests, existing full regression checkpoint844 (220 local
+-36 foundation +9 legacy tests, existing full regression checkpoint844 (220 local
   optional-environment skips),19 frontend gates/build/tsc;10 synthetic screenshots
   and8 automated WCAG states. Final immutable CI/review receipts on PR117.
 - Independent review repairs cover UTC/IANA overflow, strict offsets, deterministic

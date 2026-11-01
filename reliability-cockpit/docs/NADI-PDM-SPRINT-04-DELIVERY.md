@@ -94,7 +94,7 @@ functional failure, child/shared WO, identical replay, explicit duplicate links,
 conflicting revision/replay, complete supersession chain and preserved old evidence;
 missing/null/boolean/nonfinite/zero hours, exposure gaps/overlap/bad quality,
 contradiction with total outage; invalid/partial/naive/date-only/unknown-offset/
-UTC-overflow clocks, IANA offset mismatch, half-open boundaries; exact mixed asset/
+UTC-overflow clocks, IANA offset mismatch, DST spring-gap/fall-fold instants, half-open boundaries; exact mixed asset/
 site/org/population/units/versions; incomplete repair, waiting/planned policy pending,
 interval gap/overlap, overlapping episode envelopes including waiting interleaving,
 reopen/censor/multiple restoration and pre-failure repair; contradictory standalone
@@ -170,7 +170,7 @@ remain; only ReportsCenter adds the contextual readiness subview and scoped CSS.
 
 ## Qualification receipts and known limits
 
-Local qualification:35 foundation tests plus9 unchanged legacy KPI tests PASS;
+Local qualification:36 foundation tests plus9 unchanged legacy KPI tests PASS;
 existing full backend regression checkpoint844 tests PASS (220 optional-environment
 skips locally), all19 frontend contract/lint gates PASS, TypeScript and Next build
 PASS. The final exact-head CI reruns the complete configured backend with disposable
