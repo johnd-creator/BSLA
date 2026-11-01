@@ -49,11 +49,11 @@ export function validateCondition(data: AssetConditionEvidence, asset: string) {
 }
 // Generated links have a closed set of same-origin destinations. No arbitrary return URL.
 export function inspectionAssetHref(asset: string, inspection: string) {
-  return `/assets/${encodeURIComponent(asset)}?${new URLSearchParams({inspection})}`;
+  return `/assets/${encodeURIComponent(asset)}?${new URLSearchParams({record:inspection})}`;
 }
 export function assetReturnHref(q: URLSearchParams): string {
   const inspection = q.get('inspection');
-  if (inspection && inspection.length <= 200) return `/pdm?${new URLSearchParams({inspection})}`;
+  if (inspection && inspection.length <= 200) return `/pdm?${new URLSearchParams({record:inspection})}`;
   const result = new URLSearchParams();
   for (const key of ['status', 'unit', 'asset_type', 'offset', 'search']) {
     const value = text(q, `origin_${key}`); if (value) result.set(key, value);
