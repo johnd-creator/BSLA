@@ -180,19 +180,19 @@ jobs:
           NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/sprint5-integrated-browser.mjs
           node scripts/sprint5-gallery.mjs
           NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" NADI_SOURCE_INTERPRETATION_ACCEPTANCE=1 node scripts/pdm-simplification-browser.mjs
-      - name: Preserve synthetic Sprint3 screenshots and qualification receipt
+      - name: Preserve non-image Sprint3 synthetic qualification receipt
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: sprint3-synthetic-evidence-${{ github.event.pull_request.head.sha || github.sha }}
-          path: /tmp/nadi-sprint03/browser
+          path: /tmp/nadi-sprint03/browser/results.json
           if-no-files-found: warn
-      - name: Preserve synthetic Sprint4 qualification screenshots
+      - name: Preserve non-image Sprint4 synthetic qualification receipt
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: sprint4-synthetic-evidence-${{ github.event.pull_request.head.sha || github.sha }}
-          path: /tmp/nadi-sprint04/browser
+          path: /tmp/nadi-sprint04/browser/results.json
           if-no-files-found: warn
       - name: Preserve non-image synthetic Sprint5 qualification receipt
         if: always()

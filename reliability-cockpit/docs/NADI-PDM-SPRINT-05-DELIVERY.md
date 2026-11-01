@@ -71,6 +71,10 @@ The test actually projects synthetic API evidence into real ConditionEvidence/
 DataTrust React render and checks unknown/null not fabricated0. Local execution
 PASS, executed1/skipped0. Final hosted receipt must confirm it, not count a skip.
 No existing skip/assertion/coverage requirement was removed or weakened.
+The inherited Sprint3/4 CI uploads are also narrowed to non-image JSON receipts;
+all image generation/browser assertions remain intact. Independent review caught
+this privacy boundary and a new-harness request-ordering race; both are repaired
+with non-image artifact paths and an explicit intercepted-request callback signal.
 
 Existing backend/frontend suites, disposable PG migration/recovery/bridge tests,
 auth/RBAC/CSRF/session/revocation/CAS/Case/recommendation/Advisory/audit, Maximo
