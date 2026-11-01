@@ -5,7 +5,7 @@ import Link from "next/link";
 import IntegrationStatusPanel from "@/components/IntegrationStatusPanel";
 import ConditionEvidencePanel from "@/components/ConditionEvidencePanel";
 import AssetMaintenanceEvidence from "@/components/AssetMaintenanceEvidence";
-import {assetReturnHref} from "@/lib/asset-evidence";
+import {assetReturnHref, evidenceError, evidenceErrorKind} from "@/lib/asset-evidence";
 import AssetHealthSummary from "@/components/AssetHealthSummary";
 import { use, useEffect, useState } from "react";
 import {
@@ -141,6 +141,8 @@ export default function AssetDetailPage({ params }: { params: Promise<{ canonica
   const [notFound, setNotFound] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
   const [refresh, setRefresh] = useState(0);
+  const [contextDenied,setContextDenied]=useState(false);
+  const [detailKind,setDetailKind]=useState<'access'|'session'|'request'|'service'>('service');
   const [contextUnavailable, setContextUnavailable] = useState(false);
   const [tab, setTab] = useState<Tab>("overview");
   const [tabOffset, setTabOffset] = useState(0);
@@ -193,12 +195,13 @@ export default function AssetDetailPage({ params }: { params: Promise<{ canonica
         if (cancelled) return;
         setContext(nextContext.status === "fulfilled" ? nextContext.value : null);
         setContextUnavailable(nextContext.status !== "fulfilled");
+        setContextDenied(nextContext.status === "rejected" && nextContext.reason instanceof ApiError && nextContext.reason.status === 403);
         setCounts({ maintenance: maintenanceCount.status === "fulfilled" ? maintenanceCount.value.meta.total : null, fmea: fmeaCount.status === "fulfilled" ? fmeaCount.value.meta.total : null, health: healthCount.status === "fulfilled" ? healthCount.value.meta.total : null, overhaul: overhaulCount.status === "fulfilled" ? overhaulCount.value.meta.total : null });
         setLatestHealth(nextLatestHealth.status === "fulfilled" ? nextLatestHealth.value : null);
       } catch (reason: unknown) {
         if (cancelled) return;
         if (reason instanceof ApiError && reason.status === 404) setNotFound(true);
-        else setDetailError(errorMessage(reason));
+        else {setDetailError(evidenceError(reason));setDetailKind(evidenceErrorKind(reason));}
       } finally {
         if (!cancelled) setDetailLoading(false);
       }
@@ -238,7 +241,7 @@ export default function AssetDetailPage({ params }: { params: Promise<{ canonica
 
   if (detailLoading) return <><PageHeader eyebrow={idText("Asset Reliability")} title={idText("Asset Detail")} description="Memuat identitas dan konteks Reliability Mart…" actions={<Link className="text-link" href={returnHref}>{returnHref.startsWith("/pdm?") ? "← Kembali ke inspeksi PdM" : idText("← Back to Asset Reliability")}</Link>} /><LoadingState /></>;
   if (notFound) return <><PageHeader eyebrow={idText("Asset Reliability")} title={idText("Asset not found")} description="Aset yang diminta tidak ditemukan pada Reliability Mart saat ini." actions={<Link className="text-link" href={returnHref}>{returnHref.startsWith("/pdm?") ? "← Kembali ke inspeksi PdM" : idText("← Back to Asset Reliability")}</Link>} /><ErrorState message={idText("Asset not found")} /></>;
-  if (detailError || !asset) return <><PageHeader eyebrow={idText("Asset Reliability")} title={idText("Asset Detail")} description="Detail Asset tidak dapat dimuat." actions={<Link className="text-link" href={returnHref}>{returnHref.startsWith("/pdm?") ? "← Kembali ke inspeksi PdM" : idText("← Back to Asset Reliability")}</Link>} /><ErrorState message={idText("Asset detail unavailable")} onRetry={() => setRefresh(value => value + 1)} /></>;
+  if (detailError || !asset) return <><PageHeader eyebrow={idText("Asset Reliability")} title={idText("Asset Detail")} description="Detail Asset tidak dapat dimuat." actions={<Link className="text-link" href={returnHref}>{returnHref.startsWith("/pdm?") ? "← Kembali ke inspeksi PdM" : idText("← Back to Asset Reliability")}</Link>} /><ErrorState message={detailError ?? idText("Asset detail unavailable")} variant={detailKind} onRetry={() => setRefresh(value => value + 1)} /></>;
 
   return <>
     <PageHeader eyebrow={idText("Asset Reliability / Asset Detail")} title={asset.source_asset_number ?? idText("Asset Detail")} description={asset.description ?? idText("Registered Asset reliability workspace")} actions={<Link className="text-link" href={returnHref}>{returnHref.startsWith("/pdm?") ? "← Kembali ke inspeksi PdM" : idText("← Back to Asset Reliability")}</Link>} />
@@ -246,7 +249,7 @@ export default function AssetDetailPage({ params }: { params: Promise<{ canonica
     <nav className="asset-tabs" aria-label={idText("Asset workspace tabs")}>{tabs.map((item) => <button key={item.id} type="button" aria-current={tab === item.id ? "page" : undefined} className={tab === item.id ? "asset-tab active" : "asset-tab"} onClick={() => selectTab(item.id)}>{item.label}</button>)}</nav>
 
     {tab === "overview" && <><AssetHealthSummary asset={asset} context={context} maintenanceCount={counts?.maintenance ?? null} assessmentCount={counts?.health ?? null} onMaintenance={() => selectTab("maintenance")} /><ConditionEvidencePanel canonicalId={canonicalId}/></>}
-    {tab === "overview" && contextUnavailable && <ErrorState message={idText("Additional asset context unavailable")} onRetry={() => setRefresh(value => value + 1)} />}
+    {tab === "overview" && contextUnavailable && <ErrorState message={contextDenied ? "403 · Konteks agregat portofolio memerlukan capability terpisah; evidence aset tetap mengikuti izin aset." : idText("Additional asset context unavailable")} variant={contextDenied ? "access" : "service"} onRetry={() => setRefresh(value => value + 1)} />}
     {tab === "overview" && context && counts && <details className="section-card advanced-evidence"><summary>{idText("Additional factual evidence — FMEA, assessments, overhaul and integration")}</summary>
       <section className="stat-grid asset-stat-grid"><StatCard label={idText("Maintenance Events")} value={formatNumber(counts.maintenance)} detail={idText("Asset-scoped Mart total")} tone="accent" /><StatCard label={idText("FMEA Assessments")} value={formatNumber(counts.fmea)} detail={idText("Asset-scoped Mart total")} /><StatCard label={idText("Asset Health")} value={formatNumber(counts.health)} detail={idText("Asset-scoped Mart total")} /><StatCard label="Overhauls" value={formatNumber(counts.overhaul)} detail={idText("Resolved Asset relationship")} tone="muted" /></section>
       <div className="asset-overview-grid"><SectionCard><div className="section-heading"><div><p className="eyebrow">{idText("Recent context")}</p><h2>{idText("Recent Maintenance")}</h2></div><button className="text-link-button" onClick={() => selectTab("maintenance")}>{idText("View all →")}</button></div><RecentMaintenance rows={context.maintenance} /></SectionCard><SectionCard><div className="section-heading"><div><p className="eyebrow">{idText("Recent context")}</p><h2>{idText("Recent FMEA")}</h2></div><button className="text-link-button" onClick={() => selectTab("fmea")}>{idText("View all →")}</button></div><RecentFmea rows={context.fmea} /></SectionCard><SectionCard><div className="section-heading"><div><p className="eyebrow">{idText("Recent context")}</p><h2>{idText("Recent Asset Health")}</h2></div><button className="text-link-button" onClick={() => selectTab("health")}>{idText("View all →")}</button></div><RecentHealth rows={context.health} /></SectionCard><SectionCard><div className="section-heading"><div><p className="eyebrow">{idText("Recent context")}</p><h2>{idText("Recent Overhaul")}</h2></div><button className="text-link-button" onClick={() => selectTab("overhaul")}>{idText("View all →")}</button></div><RecentOverhaul rows={context.overhauls} /></SectionCard></div>

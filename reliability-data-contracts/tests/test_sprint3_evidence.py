@@ -30,6 +30,11 @@ class Sprint3EvidenceContractTest(unittest.TestCase):
         for key in ['mapping_owner','mapping_verified_at','mapping_evidence_ref','maximo_equipment_ref','canonical_asset_id','pi_af_ref']:
             row=copy.deepcopy(rows[0]); row[key]=None
             self.assertEqual(module.crosswalk_inventory([row])[0]['decision_status'],'UNRESOLVED')
+        collision=copy.deepcopy(rows[0]); collision['canonical_asset_id']='SYNTHETIC:OTHER'
+        self.assertTrue(all(r['decision_status']=='UNRESOLVED' for r in module.crosswalk_inventory([rows[0],collision])))
+        for key,value in [('mapping_verified_at','not-a-date'),('mapping_verified_at','2026-01-01T00:00:00'),('mapping_owner',' '),('mapping_evidence_ref',' padded ')]:
+            row=copy.deepcopy(rows[0]);row[key]=value
+            self.assertEqual(module.crosswalk_inventory([row])[0]['decision_status'],'UNRESOLVED')
         with self.assertRaises(ValueError): module.crosswalk_inventory(rows*2000)
 
     def test_complete_synthetic_evidence_still_not_engineer_approval(self):

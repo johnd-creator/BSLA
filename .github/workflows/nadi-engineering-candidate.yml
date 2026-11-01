@@ -78,13 +78,18 @@ jobs:
         working-directory: reliability-cockpit
         env:
           PYTHONPATH: '.:tests'
-        run: python -m unittest test_application_identity test_identity_adapter.AdapterTest test_application_migrations test_attachments test_session_cleanup test_bundle_d_http.RealHttpQaTest test_identity_configuration test_application_access test_attachment_readiness test_qa_limits test_qa_preflight test_qa_release test_bundle_e_rehearsal test_local_authentication test_local_login_http test_live_development test_frontend_preview test_local_development test_local_development_reusable test_source_preservation test_advisory.AdvisoryTest test_advisory_http.AdvisoryHttpTest test_advisory_http.AdvisorySchemaGateTest test_qa_advisory_schema test_integration_status test_phase1_read_integrity test_projection_acceptance.ProjectionPostgresAcceptanceTest test_integration_observations_client test_integration_ui_contract test_reports_ui_contract test_pdm_workbook_contract test_pdm_input.PdmInputTest test_pdm_input.PdmPostgresInputTest test_pdm_sprint02 test_manual_inspection test_inspection_workflow test_auth03_self_identity test_auth03_readiness test_auth03_controller_update test_engineering test_engineering_qa test_recommendation_workflow test_engineering_integrity test_pdm_input_capture test_pdm_work_origin test_pdm_manual_follow_up test_pdm_history_staging test_pdm_workbook_reader test_pdm_history_pilot.HistoryPilotTest test_pdm_complete_plan test_pdm_source_history test_pdm_complete_postgres.CompleteHistoryPostgresTest -v
+        run: python -m unittest test_sprint3_evidence test_reliability_mart test_condition_evidence test_projection_acceptance.ProjectionAcceptanceTest test_application_identity test_identity_adapter.AdapterTest test_application_migrations test_attachments test_session_cleanup test_bundle_d_http.RealHttpQaTest test_identity_configuration test_application_access test_attachment_readiness test_qa_limits test_qa_preflight test_qa_release test_bundle_e_rehearsal test_local_authentication test_local_login_http test_live_development test_frontend_preview test_local_development test_local_development_reusable test_source_preservation test_advisory.AdvisoryTest test_advisory_http.AdvisoryHttpTest test_advisory_http.AdvisorySchemaGateTest test_qa_advisory_schema test_integration_status test_phase1_read_integrity test_projection_acceptance.ProjectionPostgresAcceptanceTest test_integration_observations_client test_integration_ui_contract test_reports_ui_contract test_pdm_workbook_contract test_pdm_input.PdmInputTest test_pdm_input.PdmPostgresInputTest test_pdm_sprint02 test_manual_inspection test_inspection_workflow test_auth03_self_identity test_auth03_readiness test_auth03_controller_update test_engineering test_engineering_qa test_recommendation_workflow test_engineering_integrity test_pdm_input_capture test_pdm_work_origin test_pdm_manual_follow_up test_pdm_history_staging test_pdm_workbook_reader test_pdm_history_pilot.HistoryPilotTest test_pdm_complete_plan test_pdm_source_history test_pdm_complete_postgres.CompleteHistoryPostgresTest -v
       - name: Exact historical bridge and installer support qualification
         working-directory: reliability-cockpit
         env:
           PYTHONPATH: '.:tests'
           PYTHONDONTWRITEBYTECODE: '1'
         run: python -m unittest test_pdm_complete_demo test_pdm_history_controller_support test_pdm_history_controller_records test_pdm_history_installer_support test_pdm_history_bridge_postgres -v
+      - name: Canonical Maximo status identity replay (synthetic SQLite only)
+        working-directory: maximo-collector
+        env:
+          PYTHONPATH: .
+        run: python -m unittest tests.test_sprint3_canonical_identity -v
       - name: Canonical contracts
         working-directory: reliability-data-contracts
         run: python -m unittest discover -s tests -v
@@ -130,6 +135,7 @@ jobs:
       - run: npm ci
       - run: npm run check:engineering && npm run check:phase2 && npm run check:workflow && npm run check:http-qa && npm run check:bounded-http && npm run check:bounded-proxy && npm run check:local-auth && npm run check:global-auth && npm run check:factual-policy && npm run check:product-safety
       - run: npm run check:ux && npm run check:eng-product && npm run check:engineering-fixes && npm run check:pdm-input && npm run check:integration && npm run check:reports && npm run lint
+      - run: npm run check:asset-evidence
       - run: npx tsc --noEmit
       - run: npm run build
         env:
@@ -147,4 +153,12 @@ jobs:
           NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/reports-browser.mjs
           NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/login-visual-browser.mjs
           NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/experience-browser.mjs
+          NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/asset-evidence-browser.mjs
           NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" NADI_SOURCE_INTERPRETATION_ACCEPTANCE=1 node scripts/pdm-simplification-browser.mjs
+      - name: Preserve synthetic Sprint3 screenshots and qualification receipt
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: sprint3-synthetic-evidence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/nadi-sprint03/browser
+          if-no-files-found: warn

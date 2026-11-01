@@ -11,7 +11,10 @@
     "mapping_verified_at": "2026-01-01T00:00:00Z",
     "contract_version": "sprint3-decision-1",
     "recorded_status": "VERIFIED",
-    "conditions": []
+    "conditions": [],
+    "pi_source_ref": "SYNTHETIC:PI",
+    "pi_af_server_ref": "SYNTHETIC:SERVER",
+    "pi_af_database_ref": "SYNTHETIC:DB"
   },
   {
     "canonical_asset_id": "SYNTHETIC:CANDIDATE",
@@ -25,7 +28,10 @@
     "mapping_verified_at": "2026-01-01T00:00:00Z",
     "contract_version": "sprint3-decision-1",
     "recorded_status": "CANDIDATE",
-    "conditions": []
+    "conditions": [],
+    "pi_source_ref": "SYNTHETIC:PI",
+    "pi_af_server_ref": "SYNTHETIC:SERVER",
+    "pi_af_database_ref": "SYNTHETIC:DB"
   },
   {
     "canonical_asset_id": "SYNTHETIC:UNKNOWN",
@@ -39,7 +45,10 @@
     "mapping_verified_at": "2026-01-01T00:00:00Z",
     "contract_version": "sprint3-decision-1",
     "recorded_status": "UNRESOLVED",
-    "conditions": []
+    "conditions": [],
+    "pi_source_ref": "SYNTHETIC:PI",
+    "pi_af_server_ref": "SYNTHETIC:SERVER",
+    "pi_af_database_ref": "SYNTHETIC:DB"
   },
   {
     "canonical_asset_id": "SYNTHETIC:FORBIDDEN",
@@ -55,7 +64,10 @@
     "recorded_status": "FORBIDDEN",
     "conditions": [
       "SOURCE_FORBIDDEN"
-    ]
+    ],
+    "pi_source_ref": "SYNTHETIC:PI",
+    "pi_af_server_ref": "SYNTHETIC:SERVER",
+    "pi_af_database_ref": "SYNTHETIC:DB"
   },
   {
     "canonical_asset_id": "SYNTHETIC:DUPLICATE",
@@ -69,7 +81,10 @@
     "mapping_verified_at": "2026-01-01T00:00:00Z",
     "contract_version": "sprint3-decision-1",
     "recorded_status": "VERIFIED",
-    "conditions": []
+    "conditions": [],
+    "pi_source_ref": "SYNTHETIC:PI",
+    "pi_af_server_ref": "SYNTHETIC:SERVER",
+    "pi_af_database_ref": "SYNTHETIC:DB"
   },
   {
     "canonical_asset_id": "SYNTHETIC:DUPLICATE",
@@ -83,6 +98,9 @@
     "mapping_verified_at": "2026-01-01T00:00:00Z",
     "contract_version": "sprint3-decision-1",
     "recorded_status": "VERIFIED",
-    "conditions": []
+    "conditions": [],
+    "pi_source_ref": "SYNTHETIC:PI",
+    "pi_af_server_ref": "SYNTHETIC:SERVER",
+    "pi_af_database_ref": "SYNTHETIC:DB"
   }
 ]

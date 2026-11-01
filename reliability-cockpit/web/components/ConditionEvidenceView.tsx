@@ -4,7 +4,7 @@ import AssetCrosswalkInventory from './AssetCrosswalkInventory';
 const stamp = (value: string | null | undefined) => value ?? 'UNKNOWN';
 const flag = (value: boolean | null) => value == null ? 'UNKNOWN' : String(value);
 function originalValue(value: AssetConditionEvidence['items'][number]['evidence']['value']) {
-  if (value === null) return 'NULL · nilai tidak tersedia';
+  if (value === null) return statusLabel('UNKNOWN') + ' · NULL · nilai tidak tersedia';
   if (typeof value === 'object') return `name=${value.name ?? 'UNKNOWN'}; code=${value.code ?? 'UNKNOWN'}; is_system=${value.is_system ?? 'UNKNOWN'}`;
   return String(value);
 }
@@ -20,7 +20,7 @@ export default function ConditionEvidenceView({data, observedAt = null}: {data: 
       <p>Kualitas asli · Good: {flag(e.quality_good)} · Questionable: {flag(e.quality_questionable)} · Substituted: {flag(e.quality_substituted)} · Annotated: {flag(e.quality_annotated)}</p>
       <details><summary>Detail sumber PI · {e.signal_id}</summary><dl className="asset-facts">{Object.entries({"Aset kanonis":e.canonical_asset_id ?? data.canonical_asset_id,"Signal ID":e.signal_id,"Mapping ID":e.mapping_id,"Versi kontrak":e.contract_version,"Sumber PI":e.sources?.pi.pi_source_id,"AF server":e.sources?.pi.af_server_ref,"AF database":e.sources?.pi.af_database_ref,"AF element":e.sources?.pi.af_element_ref,"Attribute":e.sources?.pi.attribute_ref,"Nama attribute":e.sources?.pi.attribute_name,"Status mapping sumber":e.sources?.pi.mapping_status,"Peran mapping":e.sources?.pi.mapping_role,"Evidence persetujuan signal":e.provenance?.selection_evidence_ref,"Pemberi persetujuan signal":e.provenance?.selection_approved_by,"Tanggal persetujuan signal":e.provenance?.selection_approved_at,"Batas sumber":e.provenance?.source_boundary}).map(([name,value]) => <div key={name}><dt>{name}</dt><dd>{value ?? 'NOT_EXPOSED'}</dd></div>)}</dl><p>Persetujuan signal bukan tanggal atau metode verifikasi mapping. Status kualitas sumber tidak menentukan kesehatan peralatan.</p></details>
     </div></article>)}</div>}
-    <p className="section-note">Siklus kolektor terakhir berhasil: {stamp(data.collector_last_success_at)} · upaya proyeksi terakhir: {stamp(data.latest_attempt_at)}. Jam UI tidak membuktikan data baru atau segar.</p>
+    <p className="section-note">Siklus kolektor terakhir berhasil: {stamp(data.collector_last_success_at)} · upaya proyeksi terakhir: {stamp(data.latest_attempt_at)}. Jam UI tidak membuktikan data baru atau segar{idText(". Signal evidence does not determine equipment health.")}</p>
     <AssetCrosswalkInventory data={data}/>
   </>;
 }

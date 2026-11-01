@@ -1139,3 +1139,12 @@
 /* Sprint2 bounded register: a compact labeled control, including413 recovery. */
 .nadi-shell .pdm-status-strip .pdm-page-size { display:inline-flex; align-items:center; gap:8px; font-size:14px; }
 .nadi-shell .pdm-page-size select { width:76px; min-width:76px; margin:0; }
+
+/* Sprint3 exact-source detail must remain readable at narrow widths. */
+.asset-evidence .asset-facts dd { white-space:normal; overflow:visible; text-overflow:clip; overflow-wrap:anywhere; }
+.asset-evidence .asset-record small { white-space:normal; overflow-wrap:anywhere; }
+.asset-evidence .asset-record > div { min-width:0; }
+.asset-evidence details { margin-block:1rem; overflow-wrap:anywhere; }
+.asset-evidence summary { cursor:pointer; }
+.asset-evidence p, .asset-evidence td { overflow-wrap:anywhere; }
+@media(max-width:640px) { .asset-evidence .asset-facts {grid-template-columns:minmax(0,1fr);} }

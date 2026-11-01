@@ -16,7 +16,10 @@
     "mapping_verified_at",
     "contract_version",
     "recorded_status",
-    "conditions"
+    "conditions",
+    "pi_source_ref",
+    "pi_af_server_ref",
+    "pi_af_database_ref"
   ],
   "properties": {
     "canonical_asset_id": {
@@ -89,7 +92,8 @@
         "null"
       ],
       "minLength": 1,
-      "maxLength": 512
+      "maxLength": 512,
+      "format": "date-time"
     },
     "contract_version": {
       "const": "sprint3-decision-1"
@@ -115,6 +119,33 @@
           "FULL_INVENTORY_NOT_EXPOSED"
         ]
       }
+    },
+    "pi_source_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^\\S(?:.*\\S)?$"
+    },
+    "pi_af_server_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^\\S(?:.*\\S)?$"
+    },
+    "pi_af_database_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^\\S(?:.*\\S)?$"
     }
   }
 }

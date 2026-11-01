@@ -1,0 +1,59 @@
+{
+  "label": "SYNTHETIC ONLY",
+  "checks": [
+    "exact asset filters, paging, keyboard detail/return, browser-back",
+    "inspection→asset→exact inspection plus prior filter/page context",
+    "original zero/false/null/text/digital code; clocks, raw quality, stale/unknown source; lineage",
+    "mapping missing/ambiguous/unknown, verified-no-signal, contradictory PI and403 fail closed",
+    "empty/error/access/foreign identity handling",
+    "390/768/1440 responsive light/dark, no horizontal document overflow; WCAG automated tested states"
+  ],
+  "requests": 222,
+  "errors": [],
+  "shots": [
+    "01-asset-register-desktop-light.png",
+    "02-asset-condition-latest.png",
+    "03-maintenance-register.png",
+    "04-maintenance-source-detail.png",
+    "05-pi-source-crosswalk.png",
+    "07-ambiguous-mapping.png",
+    "06-condition-403.png",
+    "08-maintenance-empty.png",
+    "09-maintenance-390-light.png",
+    "09-maintenance-390-dark.png",
+    "09-maintenance-1440-light.png",
+    "09-maintenance-1440-dark.png"
+  ],
+  "axe": [
+    {
+      "name": "maintenance desktop",
+      "violations": 0
+    },
+    {
+      "name": "390-light",
+      "violations": 0
+    },
+    {
+      "name": "390-dark",
+      "violations": 0
+    },
+    {
+      "name": "768-light",
+      "violations": 0
+    },
+    {
+      "name": "768-dark",
+      "violations": 0
+    },
+    {
+      "name": "1440-light",
+      "violations": 0
+    },
+    {
+      "name": "1440-dark",
+      "violations": 0
+    }
+  ],
+  "population": 2000,
+  "maxMaintenanceRows": 25
+}
