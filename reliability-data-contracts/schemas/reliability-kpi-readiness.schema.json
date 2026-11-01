@@ -1,0 +1,776 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nadi.invalid/contracts/reliability-kpi-readiness-1",
+  "title": "Sprint4 prerequisite inventory; no KPI result or approval",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "equipment_identity",
+    "observation_period",
+    "failure_event_identity",
+    "failure_source_traceability",
+    "preventive_corrective_definition",
+    "failure_vs_maintenance_definition",
+    "operating_exposure_hours",
+    "exposure_source_quality",
+    "failure_start",
+    "repair_start",
+    "repair_end",
+    "active_repair_vs_total_outage",
+    "incomplete_timestamps_policy",
+    "overlap_policy",
+    "reopened_work_order_policy",
+    "duplicate_event_policy",
+    "repeated_status_update_policy"
+  ],
+  "properties": {
+    "equipment_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "evidence_ref",
+        "owner",
+        "definition_version"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "AVAILABLE_VERIFIED",
+            "AVAILABLE_UNAPPROVED",
+            "MISSING",
+            "BLOCKED"
+          ]
+        },
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "definition_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        }
+      }
+    },
+    "observation_period": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "evidence_ref",
+        "owner",
+        "definition_version"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "AVAILABLE_VERIFIED",
+            "AVAILABLE_UNAPPROVED",
+            "MISSING",
+            "BLOCKED"
+          ]
+        },
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "definition_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        }
+      }
+    },
+    "failure_event_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "evidence_ref",
+        "owner",
+        "definition_version"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "AVAILABLE_VERIFIED",
+            "AVAILABLE_UNAPPROVED",
+            "MISSING",
+            "BLOCKED"
+          ]
+        },
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "definition_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        }
+      }
+    },
+    "failure_source_traceability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "evidence_ref",
+        "owner",
+        "definition_version"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "AVAILABLE_VERIFIED",
+            "AVAILABLE_UNAPPROVED",
+            "MISSING",
+            "BLOCKED"
+          ]
+        },
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "definition_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        }
+      }
+    },
+    "preventive_corrective_definition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "evidence_ref",
+        "owner",
+        "definition_version"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "AVAILABLE_VERIFIED",
+            "AVAILABLE_UNAPPROVED",
+            "MISSING",
+            "BLOCKED"
+          ]
+        },
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "definition_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        }
+      }
+    },
+    "failure_vs_maintenance_definition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "evidence_ref",
+        "owner",
+        "definition_version"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "AVAILABLE_VERIFIED",
+            "AVAILABLE_UNAPPROVED",
+            "MISSING",
+            "BLOCKED"
+          ]
+        },
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "definition_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        }
+      }
+    },
+    "operating_exposure_hours": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "evidence_ref",
+        "owner",
+        "definition_version"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "AVAILABLE_VERIFIED",
+            "AVAILABLE_UNAPPROVED",
+            "MISSING",
+            "BLOCKED"
+          ]
+        },
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "definition_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        }
+      }
+    },
+    "exposure_source_quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "evidence_ref",
+        "owner",
+        "definition_version"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "AVAILABLE_VERIFIED",
+            "AVAILABLE_UNAPPROVED",
+            "MISSING",
+            "BLOCKED"
+          ]
+        },
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "definition_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        }
+      }
+    },
+    "failure_start": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "evidence_ref",
+        "owner",
+        "definition_version"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "AVAILABLE_VERIFIED",
+            "AVAILABLE_UNAPPROVED",
+            "MISSING",
+            "BLOCKED"
+          ]
+        },
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "definition_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        }
+      }
+    },
+    "repair_start": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "evidence_ref",
+        "owner",
+        "definition_version"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "AVAILABLE_VERIFIED",
+            "AVAILABLE_UNAPPROVED",
+            "MISSING",
+            "BLOCKED"
+          ]
+        },
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "definition_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        }
+      }
+    },
+    "repair_end": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "evidence_ref",
+        "owner",
+        "definition_version"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "AVAILABLE_VERIFIED",
+            "AVAILABLE_UNAPPROVED",
+            "MISSING",
+            "BLOCKED"
+          ]
+        },
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "definition_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        }
+      }
+    },
+    "active_repair_vs_total_outage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "evidence_ref",
+        "owner",
+        "definition_version"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "AVAILABLE_VERIFIED",
+            "AVAILABLE_UNAPPROVED",
+            "MISSING",
+            "BLOCKED"
+          ]
+        },
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "definition_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        }
+      }
+    },
+    "incomplete_timestamps_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "evidence_ref",
+        "owner",
+        "definition_version"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "AVAILABLE_VERIFIED",
+            "AVAILABLE_UNAPPROVED",
+            "MISSING",
+            "BLOCKED"
+          ]
+        },
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "definition_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        }
+      }
+    },
+    "overlap_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "evidence_ref",
+        "owner",
+        "definition_version"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "AVAILABLE_VERIFIED",
+            "AVAILABLE_UNAPPROVED",
+            "MISSING",
+            "BLOCKED"
+          ]
+        },
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "definition_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        }
+      }
+    },
+    "reopened_work_order_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "evidence_ref",
+        "owner",
+        "definition_version"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "AVAILABLE_VERIFIED",
+            "AVAILABLE_UNAPPROVED",
+            "MISSING",
+            "BLOCKED"
+          ]
+        },
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "definition_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        }
+      }
+    },
+    "duplicate_event_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "evidence_ref",
+        "owner",
+        "definition_version"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "AVAILABLE_VERIFIED",
+            "AVAILABLE_UNAPPROVED",
+            "MISSING",
+            "BLOCKED"
+          ]
+        },
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "definition_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        }
+      }
+    },
+    "repeated_status_update_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "evidence_ref",
+        "owner",
+        "definition_version"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "AVAILABLE_VERIFIED",
+            "AVAILABLE_UNAPPROVED",
+            "MISSING",
+            "BLOCKED"
+          ]
+        },
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "definition_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        }
+      }
+    }
+  }
+}

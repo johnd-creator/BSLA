@@ -1,0 +1,104 @@
+{
+  "equipment_identity": {
+    "status": "AVAILABLE_VERIFIED",
+    "evidence_ref": "SYNTHETIC:registry",
+    "owner": "SYNTHETIC:review-owner",
+    "definition_version": "SYNTHETIC:1"
+  },
+  "observation_period": {
+    "status": "MISSING",
+    "evidence_ref": null,
+    "owner": "SYNTHETIC:review-owner",
+    "definition_version": null
+  },
+  "failure_event_identity": {
+    "status": "MISSING",
+    "evidence_ref": null,
+    "owner": "SYNTHETIC:review-owner",
+    "definition_version": null
+  },
+  "failure_source_traceability": {
+    "status": "AVAILABLE_UNAPPROVED",
+    "evidence_ref": "SYNTHETIC:raw-maintenance-fields",
+    "owner": "SYNTHETIC:review-owner",
+    "definition_version": null
+  },
+  "preventive_corrective_definition": {
+    "status": "AVAILABLE_UNAPPROVED",
+    "evidence_ref": "SYNTHETIC:raw-maintenance-fields",
+    "owner": "SYNTHETIC:review-owner",
+    "definition_version": null
+  },
+  "failure_vs_maintenance_definition": {
+    "status": "MISSING",
+    "evidence_ref": null,
+    "owner": "SYNTHETIC:review-owner",
+    "definition_version": null
+  },
+  "operating_exposure_hours": {
+    "status": "MISSING",
+    "evidence_ref": null,
+    "owner": "SYNTHETIC:review-owner",
+    "definition_version": null
+  },
+  "exposure_source_quality": {
+    "status": "MISSING",
+    "evidence_ref": null,
+    "owner": "SYNTHETIC:review-owner",
+    "definition_version": null
+  },
+  "failure_start": {
+    "status": "AVAILABLE_UNAPPROVED",
+    "evidence_ref": "SYNTHETIC:raw-maintenance-fields",
+    "owner": "SYNTHETIC:review-owner",
+    "definition_version": null
+  },
+  "repair_start": {
+    "status": "AVAILABLE_UNAPPROVED",
+    "evidence_ref": "SYNTHETIC:raw-maintenance-fields",
+    "owner": "SYNTHETIC:review-owner",
+    "definition_version": null
+  },
+  "repair_end": {
+    "status": "AVAILABLE_UNAPPROVED",
+    "evidence_ref": "SYNTHETIC:raw-maintenance-fields",
+    "owner": "SYNTHETIC:review-owner",
+    "definition_version": null
+  },
+  "active_repair_vs_total_outage": {
+    "status": "AVAILABLE_UNAPPROVED",
+    "evidence_ref": "SYNTHETIC:raw-maintenance-fields",
+    "owner": "SYNTHETIC:review-owner",
+    "definition_version": null
+  },
+  "incomplete_timestamps_policy": {
+    "status": "MISSING",
+    "evidence_ref": null,
+    "owner": "SYNTHETIC:review-owner",
+    "definition_version": null
+  },
+  "overlap_policy": {
+    "status": "MISSING",
+    "evidence_ref": null,
+    "owner": "SYNTHETIC:review-owner",
+    "definition_version": null
+  },
+  "reopened_work_order_policy": {
+    "status": "MISSING",
+    "evidence_ref": null,
+    "owner": "SYNTHETIC:review-owner",
+    "definition_version": null
+  },
+  "duplicate_event_policy": {
+    "status": "MISSING",
+    "evidence_ref": null,
+    "owner": "SYNTHETIC:review-owner",
+    "definition_version": null
+  },
+  "repeated_status_update_policy": {
+    "status": "AVAILABLE_UNAPPROVED",
+    "evidence_ref": "SYNTHETIC:raw-maintenance-fields",
+    "owner": "SYNTHETIC:review-owner",
+    "definition_version": null
+  }
+}
