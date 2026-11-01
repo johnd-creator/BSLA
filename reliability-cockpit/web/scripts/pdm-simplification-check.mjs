@@ -33,6 +33,7 @@ const reviewedSprint2 = {
 };
 // Additive offline contracts and one synthetic collector regression only; operational files remain protected.
 const reviewedSprint3 = {
+  "reliability-cockpit/contracts/sprint3/README.md": "248a7bad228d16f91fe5d93658eeaaa33988537532e67efb52e362139e2dac33",
   "reliability-cockpit/contracts/sprint3/catalog/evidence_readiness.py": "70285f9305e3cd856f65a35972885fff47d029130ecfc675c88b12ca3201c2e9",
   "reliability-cockpit/contracts/sprint3/schemas/asset-crosswalk-decision.schema.json": "791cca00323506d69a871e58c2bca4b22bd07de6a8abd7850272b0aec36b4cdc",
   "reliability-cockpit/contracts/sprint3/schemas/reliability-kpi-readiness.schema.json": "1965706b2eb7518b1265b687e46ae4eab92719a3a36af322295e9048f669ede6",
