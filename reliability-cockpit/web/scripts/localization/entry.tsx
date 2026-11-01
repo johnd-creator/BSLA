@@ -4,6 +4,7 @@ import {ThemeProvider} from "../../components/ThemeProvider";
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {AppShell} from '../../components/AppNavigation';
+import Reports from '../../components/ReportsCenter';
 import Executive from '../../components/ExecutiveOverview';
 import Login from '../../components/LoginPage';
 import Glossary from '../../components/Glossary';
@@ -30,7 +31,7 @@ import fixture from '../../fixtures/ux-bundle-b.json';
 import PdmTrendDemonstrator from '../../fixtures/PdmTrendDemonstrator';
 const path=location.pathname;
 const pages:Record<string,React.ReactNode>={
- '/':<Executive/>, '/login':<Login expired={new URLSearchParams(location.search).get('expired')==='1'} returnTo={new URLSearchParams(location.search).get('returnTo')??undefined}/>, '/panduan/istilah':<Glossary/>,
+ '/reports':<Reports/>, '/':<Executive/>, '/login':<Login expired={new URLSearchParams(location.search).get('expired')==='1'} returnTo={new URLSearchParams(location.search).get('returnTo')??undefined}/>, '/panduan/istilah':<Glossary/>,
  '/engineering/cases':<Cases enabled/>, '/engineering/advisories':<Advisory enabled/>,
  '/engineering/inbox':<Advisory enabled inbox/>, '/engineering/local':<EngineeringQa localAuthentication/>,
  '/engineering':<Engineering/>, '/engineering/lab':<Phase2/>, '/engineering/workflow':<EngineeringWorkflow/>,

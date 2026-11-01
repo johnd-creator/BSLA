@@ -473,3 +473,13 @@ source activities; it publishes no live KPI and does not call an offline calcula
 [Scope, decisions and preservation](reliability-cockpit/docs/NADI-PDM-SPRINT-04-DELIVERY.md).
 Source/method approval, consolidated PO visuals and any later activation remain
 separate. Existing legacy metrics are neither replaced nor reinterpreted.
+
+
+## Sprint5 integrated stabilization candidate — 1 November2026
+
+Owner-authorized isolated qualification joins Sprint1–4 journeys and retains
+FR01–10/F01–24. [Sprint5 delivery](reliability-cockpit/docs/NADI-PDM-SPRINT-05-DELIVERY.md)
+and [human UAT checklist](reliability-cockpit/docs/NADI-SPRINT5-UAT-CHECKLIST.md)
+separate automated qualification, PO/engineer acceptance, KPI eligibility, merge
+and activation. Only corrupt-response/return-context helper fixes; no new product
+scope, source mapping/method approval, operational KPI or live change.

@@ -1165,3 +1165,14 @@ ownership, M02/comparability and all method decisions remain unchanged/pending.
 Next: exact-head technical CI/review → consolidated PO/source/engineer decisions.
 [Sprint5 handoff](../reliability-cockpit/docs/NADI-SPRINT5-STABILIZATION-HANDOFF.md)
 is a proposal; Sprint5 is not started. No real KPI publication or activation.
+
+
+### 1 November2026 — Sprint5 integrated stabilization candidate
+
+Separate owner task authorizes Sprint5 on exact PR117988af8d. Phase0–5/M0–M8
+history stays unchanged. [Delivery](../reliability-cockpit/docs/NADI-PDM-SPRINT-05-DELIVERY.md)
+qualifies integrated PdM/evidence/disabled-reliability journeys and prepares
+[consolidated human UAT](../reliability-cockpit/docs/NADI-SPRINT5-UAT-CHECKLIST.md).
+Next decision is PO/engineer review; exact-head technical CI/review do not grant
+methods, operational eligibility, merge or local/QA/production activation. Active
+Sprint2 is preserved. No automatic following-sprint implementation.

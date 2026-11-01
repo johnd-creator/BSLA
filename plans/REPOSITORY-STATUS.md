@@ -1146,3 +1146,13 @@ PR113 CLOSED_SUPERSEDED/unmerged; PR107 untouched. Reviewed F23/F24 source parit
 changes the original frontend-only scope through six pinned exceptions; the
 [one delivery report](../reliability-cockpit/docs/NADI-PDM-SPRINT1-ONE-PR-DELIVERY.md)
 is the current source/CI/live gate authority. Original dated reports stay historical.
+
+
+## 1 November2026 — isolated Sprint5 stabilization
+
+Stack remains114aa→1153a→116377→117988, all OPEN/DRAFT at audit; mainf1fc4e8b.
+New `codex/nadi-pdm-sprint-05` starts from exact988; one Draft PR stacked on117.
+[Final delivery/receipt pointer](../reliability-cockpit/docs/NADI-PDM-SPRINT-05-DELIVERY.md).
+Two bounded response/context helper fixes plus integrated/large-fixture qualification
+and no-skip API→React CI. No active backend/frontend/retained-data/auth/collector
+change. Human UAT, methods, real KPI eligibility, merge and activation remain separate.

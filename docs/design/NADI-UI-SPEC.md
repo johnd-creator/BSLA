@@ -625,3 +625,13 @@ result, health grade or traffic-light state. Numerical reference screenshots are
 clearly labelled test-only components, disconnected from application imports.
 [Candidate gallery and limits](../../reliability-cockpit/docs/NADI-PDM-SPRINT-04-DELIVERY.md).
 This implementation does not constitute PO or engineer method acceptance.
+
+
+## Sprint5 consolidated review preparation — 1 November2026
+
+Preserve the five primary entries and existing screens. Fix confirmed malformed
+maintenance-response crash and history context loss on evidence return; no new
+visual architecture. [Private synthetic review package](../../reliability-cockpit/docs/NADI-SPRINT5-PRIVATE-REVIEW-PACKAGE.md)
+and [PO/engineer checklist](../../reliability-cockpit/docs/NADI-SPRINT5-UAT-CHECKLIST.md)
+record exact candidate, screen purposes/states and limitations. Screenshots/axe
+are automated evidence only; preferences and human acceptance remain pending.
