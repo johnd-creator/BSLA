@@ -1135,3 +1135,7 @@
 .nadi-shell .product-record-detail > details { margin-top:12px; }
 .nadi-shell .product-record-detail > .asset-facts { padding:10px 0; }
 @media(max-width:767px){.nadi-shell .pdm-status-strip{gap:8px 16px}.nadi-shell .pdm-filter-panel .filter-apply-actions{justify-content:flex-start;flex-wrap:wrap}}
+
+/* Sprint2 bounded register: a compact labeled control, including413 recovery. */
+.nadi-shell .pdm-status-strip .pdm-page-size { display:inline-flex; align-items:center; gap:8px; font-size:14px; }
+.nadi-shell .pdm-page-size select { width:76px; min-width:76px; margin:0; }

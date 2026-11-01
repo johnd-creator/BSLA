@@ -18,14 +18,20 @@ const out = resolve(
 mkdirSync(out, { recursive: true });
 const baseline = process.env.NADI_SIMPLIFICATION_BASELINE === "1",
   base = "https://experience.synthetic.invalid";
-const bundle = await browserBundle(),
-  browser = await chromium.launch({ headless: true });
+const testRoot=process.cwd();if(process.env.NADI_COMPONENT_SOURCE_ROOT)process.chdir(process.env.NADI_COMPONENT_SOURCE_ROOT);
+const bundle = await browserBundle();process.chdir(testRoot);
+const browser = await chromium.launch({ headless: true });
 const ctx = await browser.newContext({
     viewport: { width: 1440, height: 1086 },
   }),
   page = await ctx.newPage();
 const fixture = JSON.parse(readFileSync("fixtures/ux-bundle-b.json")),
   overview = JSON.parse(readFileSync("fixtures/executive-overview.json"));
+// Identical deterministic synthetic population for actual before/after components.
+fixture.inspections[0].measurements=[{point_ref:'point:SYNTHETIC',quantity:'synthetic_velocity',value:0,unit:'mm/s',measured_at:'2026-10-08T09:31:17+07:00',quality:'INSPECTOR_REPORTED',provenance:'HUMAN_ENTERED_MEASUREMENT'},{point_ref:'point:SYNTHETIC',quantity:'synthetic_velocity',value:4.2,unit:'mm/s',measured_at:'2026-10-08T09:47:23+07:00',quality:'INSPECTOR_REPORTED',provenance:'HUMAN_ENTERED_MEASUREMENT'}];
+fixture.inspections[0].method_extension={instrument_ref:'instrument:SYNTHETIC',procedure_ref:'procedure:SYNTHETIC',orientation:'SYNTHETIC-H'};
+fixture.inspections[0].operating_context='SYNTHETIC steady context; no engineer validation';
+for(let i=4;i<=23;i++){const row=structuredClone(fixture.inspections[0]);row.record_id='inspection:SYNTHETIC-'+String(i).padStart(3,'0');row.observations=['SYNTHETIC paging record '+i];fixture.inspections.push(row);}
 fixture.inspections[0].engineering_analysis={notes:'SYNTHETIC — analisis manual tetap terlihat.',recommended_follow_up:'SYNTHETIC — verifikasi oleh engineer.'};
 const copy = JSON.parse(readFileSync("lib/id-messages.json")),
   t = (k) => copy[k] ?? k;
@@ -36,7 +42,7 @@ const asset = fixture.asset.canonical_id,
   requests = [],
   violations = [];
 let newerCaseRevision = false;
-let overviewFailure = null;
+let overviewFailure = null,inspectionOversize=false,nativeFailure=null;
 const sourceEvent={event_key:'a'.repeat(64),source_ref:'WB-SYNTHETIC',source_sha256:'c'.repeat(64),sheet_index:0,sheet_label:'Peralatan DEMO',profile_id:'profile-synthetic',axis:'ROW',position:3,kind:'MEASUREMENT_SOURCE',classification:'RAW_UNRESOLVED',source_asset_label:'Label DEMO belum dipetakan',clocks:[{role:'UNSPECIFIED',precision:'DATE',value:'2019-01-03',raw_value:'2019-01-03'}],reasons:['UNIT_UNKNOWN'],distinct_source_cells:2,canonical_eligible:false};
 const sourceField=(id,raw)=>({field_id:id,cell:id==='zero'?'B3':'C3',role:'INPUT',label_claim:'Velocity DEMO',unit_claim:null,source_point_claim:null,source_axis_claim:null,value:{coordinate:id==='zero'?'B3':'C3',raw_value:raw,formula_present:false,cache_status:'NOT_FORMULA'},headers:[],unit_evidence:[]});
 const cases = [
@@ -148,7 +154,16 @@ await ctx.route("**/*", async (route) => {
  if(id)return route.fulfill({json:{item:sourceEvent,fields:[sourceField('zero',0),sourceField('unknown',null)],field_total:2,offset:0,limit:25,has_more:false,next_offset:null,previous_offset:null,clock_evidence:[],aliases:[],profile_version:'SYNTHETIC-1',classification_hash:'e'.repeat(64),editable:false,canonical_eligible:false,...(process.env.NADI_SOURCE_INTERPRETATION_ACCEPTANCE==='1'?{derived_interpretation:{version:'SYNTHETIC',notice:'SYNTHETIC display-only estimate; not a measurement.',source_sha256:'a'.repeat(64),canonical_eligible:false,persisted:false,date:null,row_context:null,fields:[{field_id:'unknown',cell:'C3',kind:'SOURCE_HEADER',label:'SYNTHETIC point',unit:'mm/s',method:'SYNTHETIC_HEADER_PROOF',evidence:[{coordinate:'C2',raw_value:'SYNTHETIC point'}],estimate:{label:'ESTIMASI',value:1.5,unit:'mm/s',method:'LINEAR_TIME_INTERPOLATION_DISPLAY_ONLY_V1',gap_days:57,confidence:'LOW',notice:'SYNTHETIC estimate; bukan nilai terukur atau dasar alert/Case.',evidence:[{coordinate:'C1',raw_value:1},{coordinate:'C5',raw_value:2}]}}]}}:{})}});
  return route.fulfill({json:{scope:'AUTHORIZED_PROVISIONAL_SOURCE',items:[sourceEvent],total:1,has_more:false,next_after:null}});
  }
- if(resource==='inspections'&&id==='measurement-history')return route.fulfill({json:{...pageOf(fixture.inspections.flatMap(row=>row.measurements.map((measurement,measurement_index)=>({...row,measurement_index,measurement}))),u),event_time_basis:'MEASURED_AT'}});
+ if(resource==='inspections'&&id==='measurement-history'){
+ if(nativeFailure)return route.fulfill({status:nativeFailure,json:{detail:{code:'SYNTHETIC_HISTORY_FAILURE'}}});
+ let rows=fixture.inspections.filter(row=>!row.input_capture);
+ for(const [key,field]of [['asset_id','canonical_asset_id'],['method','method'],['status','status']])if(u.searchParams.has(key))rows=rows.filter(r=>r[field]===u.searchParams.get(key));
+ if(u.searchParams.has('search'))rows=rows.filter(r=>[r.record_id,r.canonical_asset_id,r.inspector_ref,...r.observations,...r.interpretations].join(' ').toLowerCase().includes(u.searchParams.get('search').toLowerCase()));
+ let events=rows.flatMap(row=>row.measurements.map((measurement,measurement_index)=>({...row,measurement_index,measurement})));
+ for(const [key,field]of [['point','point_ref'],['quantity','quantity']])if(u.searchParams.has(key))events=events.filter(e=>e.measurement[field]===u.searchParams.get(key));
+ for(const [key,predicate]of [['since',(a,b)=>a>=b],['until',(a,b)=>a<=b]])if(u.searchParams.has(key))events=events.filter(e=>e.measurement.measured_at&&predicate(Date.parse(e.measurement.measured_at),Date.parse(u.searchParams.get(key))));
+ return route.fulfill({json:{...pageOf(events,u),event_time_basis:'MEASURED_AT'}});
+ }
  if (resource === "asset-context")
       return route.fulfill({
         json: {
@@ -197,6 +212,7 @@ await ctx.route("**/*", async (route) => {
         status: 409,
         json: { detail: { code: "SYNTHETIC_CONFLICT" } },
       });
+    if(resource==='inspections'&&!id&&inspectionOversize&&u.searchParams.get('limit')==='10')return route.fulfill({status:413,json:{detail:{code:'PDM_PAGE_BODY_LIMIT'}}});
     let result = rows;
     if (u.searchParams.get("status"))
       result = result.filter((x) => x.status === u.searchParams.get("status"));
@@ -262,6 +278,7 @@ const screens=[
  ['navigation',()=>go('/action-board')],['pdm-register',()=>go('/pdm')],['measurement-editor',editor],
  ['inspection-detail',()=>go('/pdm?record='+encodeURIComponent(fixture.inspections[0].record_id))],
  ['native-history',()=>openHistory('Pengukuran Asli')],['excel-history',()=>openHistory('Sumber Excel')],
+ ...(!baseline?[['synthetic-trend',()=>go('/__synthetic/pdm-trend')]]:[]),
  ['case-handoff',async()=>{await go('/pdm?record='+encodeURIComponent(fixture.inspections[0].record_id));await page.getByRole('button',{name:/^(Mulai|Buat) Engineering Case$/}).click();await page.locator('#case-title').waitFor();}],
 ];
 try{
@@ -273,7 +290,7 @@ try{
  console.log('Register1440x900 bounds '+JSON.stringify({y:firstRow.y,bottom:firstRow.y+firstRow.height}));
  if(!baseline)assert.ok(firstRow.y+firstRow.height<=900,'entire first inspection row must fit inside1440x900: '+JSON.stringify(firstRow));
  await page.screenshot({path:out+'/register-1440x900.png',fullPage:true});
- for(const width of (process.env.NADI_BROWSER_WIDTHS??'390,768,1440,1920').split(',').map(Number))for(const theme of ['light','dark'])for(const [name,open]of screens){
+ if(!process.env.NADI_SKIP_CAPTURE)for(const width of (process.env.NADI_BROWSER_WIDTHS??'390,768,1440,1920').split(',').map(Number))for(const theme of ['light','dark'])for(const [name,open]of screens){
   await page.setViewportSize({width,height:1086});await open();
   await page.evaluate(t=>{document.documentElement.dataset.theme=t;document.activeElement?.blur();window.scrollTo(0,0)},theme);
   if(name==='navigation'&&width<1024)await page.getByRole('button',{name:t('Open navigation'),exact:true}).click();
@@ -298,8 +315,20 @@ try{
   await page.setViewportSize({width:1440,height:1086});await go('/login?returnTo=%2Fpdm');
   await page.getByRole('textbox',{name:t('Username'),exact:true}).fill('synthetic-engineer');await page.getByRole('textbox',{name:t('Password'),exact:true}).fill('SYNTHETIC-NOT-A-CREDENTIAL');await button(t('Sign in')).click();await page.waitForURL(base+'/pdm');await page.locator('.pdm-register').waitFor();check('actual login component leads authorized synthetic engineer to PdM',true);
   const primary=page.getByRole('group',{name:'Area kerja utama',exact:true});check('exact five primary entries',JSON.stringify(await primary.getByRole('link').allTextContents())===JSON.stringify(['Beranda','Aset','PdM Center','Tindak Lanjut','Laporan']));
-  check('inspection request keeps limit one',requests.some(r=>r.path.endsWith('/inspections')&&new URLSearchParams(r.query).get('limit')==='1'));
-  check('current page count is not the total inspection population',await page.locator('.record-open').count()===1&&(await page.locator('.pdm-status-strip').innerText()).includes('3'));
+  await page.getByLabel('Inspeksi per halaman',{exact:true}).selectOption('1');await page.waitForFunction(()=>document.querySelectorAll('.record-open').length===1);
+  check('explicit one-inspection compatibility remains',requests.some(r=>r.path.endsWith('/inspections')&&new URLSearchParams(r.query).get('limit')==='1'));
+  check('current page count is not the total inspection population',await page.locator('.record-open').count()===1&&(await page.locator('.pdm-status-strip').innerText()).includes('23'));
+  await page.getByLabel('Inspeksi per halaman',{exact:true}).selectOption('5');await page.waitForFunction(()=>document.querySelectorAll('.record-open').length===5);
+  await Promise.all([page.waitForResponse(r=>r.url().includes('/inspections?offset=5&limit=5')),button('Halaman berikutnya').click()]);await page.locator('.record-open').first().waitFor();check('five-row next offset exact',requests.some(r=>r.path.endsWith('/inspections')&&r.query.includes('offset=5')&&r.query.includes('limit=5')));
+  await page.getByLabel('Inspeksi per halaman',{exact:true}).selectOption('10');await page.waitForFunction(()=>document.querySelectorAll('.record-open').length===10);
+  await Promise.all([page.waitForResponse(r=>r.url().includes('/inspections?offset=10&limit=10')),button('Halaman berikutnya').click()]);await page.waitForFunction(()=>document.querySelectorAll('.record-open').length===10);
+  await button('Halaman berikutnya').click();await page.waitForFunction(()=>document.querySelectorAll('.record-open').length===3);check('last page23 totals and three pages', (await page.locator('.register-pagination').innerText()).includes('3 dari 3'));
+  inspectionOversize=true;await go('/pdm');await page.getByRole('alert').filter({hasText:'batas respons'}).waitFor();check('413 exposes recovery without private rows',await page.getByLabel('Inspeksi per halaman').isVisible()&&await page.locator('.record-open').count()===0);await page.getByLabel('Inspeksi per halaman').selectOption('5');await page.waitForFunction(()=>document.querySelectorAll('.record-open').length===5);inspectionOversize=false;
+  await go('/pdm?record='+encodeURIComponent(fixture.inspections[0].record_id));await page.getByRole('link',{name:'Riwayat pengukuran aset / metode ini',exact:true}).click();await page.locator('.pdm-history tbody tr').first().waitFor();check('actual same-path detail link opens context without navigation',new URL(page.url()).searchParams.get('asset_id')===asset&&new URL(page.url()).searchParams.get('from_inspection')===fixture.inspections[0].record_id&&await page.locator('.product-record-detail').count()===0);
+  await page.getByLabel('Titik exact',{exact:true}).fill('point:SYNTHETIC');await page.getByLabel('Parameter exact',{exact:true}).fill('synthetic_velocity');await button('Terapkan filter measurement').click();await page.getByLabel('Event per halaman',{exact:true}).selectOption('1');await page.waitForFunction(()=>document.querySelectorAll('[aria-label="Riwayat measurement asli"] tbody tr').length===1);
+  await page.locator('.pdm-history').getByRole('button',{name:'Halaman berikutnya',exact:true}).click();await page.waitForFunction(()=>new URLSearchParams(location.search).get('event_offset')==='1');await page.locator('.pdm-history tbody button').first().click();await page.locator('.product-record-detail').waitFor();await button('Kembali ke riwayat').click();await page.waitForFunction(()=>document.querySelectorAll('[aria-label="Riwayat measurement asli"] tbody tr').length===1);check('exact history page and filters survive record return',await page.getByLabel('Titik exact').inputValue()==='point:SYNTHETIC'&&new URL(page.url()).searchParams.get('event_offset')==='1');
+  await page.goBack();await page.locator('.product-record-detail').waitFor();await page.goForward();await page.locator('.pdm-history').waitFor();check('Back/Forward restores history context',await page.getByLabel('Parameter exact').inputValue()==='synthetic_velocity');
+  for(const status of [403,503]){nativeFailure=status;await go('/pdm?pdm_view=history');await page.locator('.pdm-history [role=alert]').waitFor();check('native failure semantics '+status,await page.locator('.pdm-history').getByRole('button',{name:'Coba baca riwayat lagi'}).count()===(status===503?1:0));}nativeFailure=null;
   await go('/pdm?context=SYNTHETIC');await page.locator('.record-open').first().click();await page.locator('#pdm-record-pane').waitFor();check('selection preserves unrelated query and exact record',new URL(page.url()).searchParams.get('context')==='SYNTHETIC'&&new URL(page.url()).searchParams.get('record')===fixture.inspections[0].record_id);
   await page.goBack();await page.locator('.pdm-register').waitFor();check('Back restores register with query',new URL(page.url()).searchParams.get('context')==='SYNTHETIC'&&!new URL(page.url()).searchParams.has('record'));
   await page.goForward();await page.locator('#pdm-record-pane').waitFor();check('Forward restores exact inspection detail',new URL(page.url()).searchParams.get('record')===fixture.inspections[0].record_id);

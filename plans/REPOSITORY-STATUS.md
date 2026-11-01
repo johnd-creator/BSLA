@@ -1,5 +1,17 @@
 # Repository status and debt — PLATFORM-ROADMAP-001
 
+## 1 November 2026 — stacked Sprint2 candidate
+
+Main verified `f1fc4e8b395691a17fe6d986bf14c772d37c1f2c`; PR114 OPEN/DRAFT at
+`aa065af9cef01d8ee3358bcca8fc628ba311ca3a`. `codex/nadi-pdm-sprint-02` preserves
+that ancestry and introduces S2-01–S2-05 in one Draft PR. [Delivery and preservation
+evidence](../reliability-cockpit/docs/NADI-PDM-SPRINT-02-DELIVERY.md) separates
+implementation/CI/review from merge/live/engineer/PO decisions. Active front/back
+remain AA. Current/recovery read-only fixture probes match; prior backup integrity
+is valid but freshness expired, and official session proof expired. No Sprint2
+cutover, account change, import, source call or operational service restart occurred.
+Pending human method/comparability and later activation gates are explicit.
+
 Latest verified source checkpoint: [19 October 2026 — PR105 integration](#19-october-2026--verified-pr105-source-integration-and-next-batch). Historical runtime/policy checkpoints below retain their dated scope.
 
 ## Source-free 72h review — 12 Oktober 2026

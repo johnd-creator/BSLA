@@ -1119,3 +1119,31 @@ author tab could focus the retained reviewer tab before the global synthetic
 identity returned to reviewer. Restore the reviewer fixture identity before that
 focus event; retain every independent-review/new-rationale/revision assertion.
 This changes no application authentication or production behavior.
+
+
+## 2026-11-01 — NADI-PDM-SPRINT-02 candidate
+
+Verified mainf1fc4e8 / PR114OPEN-DRAFT exactAA; created isolated stacked
+`codex/nadi-pdm-sprint-02`. S2-01 retains2MiB/offset/auth boundaries with tested
+1/5/10 fixed pages and typed413 recovery. S2-02 exact native history URL/point/
+quantity/event pages stay separate from source Excel counts/proofs. S2-03 keeps
+original same-inspection scatter; no approved comparability exists, so real trends
+remain NOT_ELIGIBLE and seven-point demo is synthetic test-entry only. Existing
+M02 packet now has one26-decision register; all pending, Q01–Q10 unchanged.
+Actual imported UI/trusted API/disposable PG completes independent return/revise/
+resubmit/approve and optional exact-version Case, preserving zero/unit/time and
+zero automatic Cases. No retained data/account/session mutations.
+
+Independent early review found same-path Link state sync and dirty new-entry413
+recovery gaps; both fixed under existing busy/discard/cache rules and covered by
+actual-component regressions. Large-page early rejection now closes the PG server
+cursor explicitly. Boundary tests preserve exact serializer/envelope/Unicode
+budget, private visibility and provisional/native exclusion. Scope checks pin only
+three explicit read files plus six F23/F24 parity files;28 pages unchanged.
+
+Official read-only active/recovery probes match existing schema/ledger/records;
+active front/back remainAA and controller release unchanged. Old private backup
+hash matches but freshness is expired; session proof expired. Fresh cutover gates
+are deferred until separate explicit owner authorization. Full exact-head CI and
+final independent review are recorded in the single Sprint2 Draft PR acceptance
+comment; this log does not claim PO/engineer approval or phase advancement.

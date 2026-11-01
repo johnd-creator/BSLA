@@ -25,7 +25,7 @@ with sync_playwright() as p:
         if args.only and args.only not in name:return
         context=browser.new_context(viewport=dict(width=1440,height=1000))
         page=context.new_page();page.set_default_timeout(10000)
-        state=dict(who=dict(INITIAL),hold_session=False,sessions=[],hold_write=False,writes=[],posts=[],records=[],receipts={},escaped=[],navigations=[],errors=[],list_requests=[])
+        state=dict(who=dict(INITIAL),hold_session=False,sessions=[],hold_write=False,writes=[],posts=[],records=[],receipts={},escaped=[],navigations=[],errors=[],list_requests=[],oversize=False)
         page.on('pageerror',lambda error:state['errors'].append(str(error)))
         def respond(route):
             request=route.request
@@ -47,6 +47,8 @@ with sync_playwright() as p:
                 route.fulfill(json=dict(canonical_asset_id=INITIAL['asset_ids'][0],identity_availability='AVAILABLE',identity=dict(description='Synthetic asset',location_ref='Synthetic location')));return
             if path=='/api/engineering-qa/inspections' and request.method=='GET':
                 query=parse_qs(urlparse(request.url).query);offset=int(query.get('offset',['0'])[0]);limit=int(query.get('limit',['25'])[0]);state['list_requests'].append(dict(offset=offset,limit=limit))
+                if state['oversize'] and limit==10:
+                    route.fulfill(status=413,json={'detail':{'code':'PDM_PAGE_BODY_LIMIT'}});return
                 route.fulfill(json=dict(items=state['records'][offset:offset+limit],total=len(state['records']),offset=offset,limit=limit,has_more=offset+limit<len(state['records']),filter_scope='AUTHORIZED_POPULATION',event_time_basis='INSPECTED_AT'));return
             if path=='/api/engineering-qa/inspections' and request.method=='POST':
                 body=request.post_data_json;state['posts'].append(body)
@@ -226,13 +228,27 @@ with sync_playwright() as p:
     scenario('transient503 retry: private views stay closed until same identity verified, exact draft retained without full reload',lambda p,s:unavailable_retry(p,s,False))
     scenario('pending lostACK→auth503→retry retains lock/receipt; final503→sameID retry persists one record',lambda p,s:unavailable_retry(p,s,True))
 
+    def oversize_draft(page,state):
+        edit(page);original=diagnostics(page)['recovery'];state['oversize']=True
+        page.evaluate('window.dispatchEvent(new Event("focus"))')
+        page.get_by_role('alert').filter(has_text='batas respons').wait_for()
+        require(page.get_by_label('Inspeksi per halaman',exact=True).is_visible(),'entry413 missing recovery control')
+        require(diagnostics(page)['recovery']==original,'413 cleared private draft')
+        page.get_by_label('Inspeksi per halaman',exact=True).select_option('1')
+        page.get_by_role('button',name='Input Pengukuran',exact=True).wait_for()
+        check_recovered(page)
+        require(diagnostics(page)['recovery']==original,'size recovery changed draft')
+    scenario('dirty new-entry focus413 → public size1 recovery preserves exact draft',oversize_draft)
+
     def bounded_list(page,state):
         for index in range(2):
             if index:
                 page.get_by_role('button',name='Kembali ke register',exact=True).click()
             edit(page);page.get_by_role('button',name='Simpan draf inspeksi',exact=True).click();page.locator('.product-record-detail').wait_for()
         page.get_by_role('button',name='Register Inspeksi',exact=True).click()
-        require(all(q['limit']==1 for q in state['list_requests']),'inspection list still requests unbounded25 capture records')
+        page.get_by_label('Inspeksi per halaman',exact=True).select_option('1')
+        page.wait_for_function("document.querySelectorAll('.pdm-register tbody tr').length===1")
+        require(all(q['limit'] in (1,5,10) for q in state['list_requests']),'inspection list exceeds qualified sizes')
         require(page.locator('.pdm-register tbody tr').count()==1,'one-record page rendered wrong record count')
         page.get_by_role('button',name='Halaman berikutnya',exact=True).click()
         page.wait_for_function("document.querySelector('.page-number')?.textContent==='2'")

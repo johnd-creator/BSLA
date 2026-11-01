@@ -441,3 +441,14 @@ estimate and F24 explicit local-demo account policy, retaining raw custody, stan
 authentication and source read-only semantics. No global password-policy reduction
 or automatic diagnosis/Recommendation/WO write. [Current integrated acceptance](reliability-cockpit/docs/NADI-PDM-SPRINT1-ONE-PR-DELIVERY.md)
 records source qualification separately from conditional live and PO acceptance.
+
+
+## 1 November 2026 — PdM Sprint2 bounded usability candidate
+
+S2-01–S2-05 implement the accepted Sprint1 visual direction: Register1/5/10 with
+unchanged2MiB budget, native exact history context and distinct source history,
+honest trend eligibility, compact M02 decisions and a disposable independent-review
+workflow. [Integrated specification and evidence](reliability-cockpit/docs/NADI-PDM-SPRINT-02-DELIVERY.md)
+retains F01–F24. This is a stacked candidate on unmerged PR114 AA; no schema/DTO/
+auth change, new source request, trend policy, live cutover or phase completion.
+Engineer method sign-off and PO acceptance remain PENDING.

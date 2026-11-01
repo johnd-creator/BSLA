@@ -36,8 +36,8 @@ try {
   "lib/manual-pdm.ts": "22cda16071d8d0912867397cdf916fa4bcb86cb325ecd3eeff3aac6d77aae5be",
   "lib/engineering-http.ts": "1090f7dc3d151c2a790cb954fab9d0f285972321204db0e5dd7ca3873308c5e8",
   "lib/bounded-http.ts": "3c1e79bf7fbb6ae3e9735695c3f944ee4abca87fe20d132c0139e34fa61b813e",
-  // FIX-02: reviewed expiry presentation; server session/list authority and clearing remain regression-tested.
-  "components/useQaRecords.ts": "fe491b8cafab69ace3fd3424f7c95d6b2c6a210148ebd42d70d6759a5a4b9f17",
+  // Sprint2: exact reviewed configurable bounded read hook; auth/clearing still regression-tested.
+  "components/useQaRecords.ts": "59b015a5ae8fc7a57e352f4b16d3ab4855e10bdc8db629c2429ae4c45cba039c",
   "app/api/engineering-qa/[...path]/route.ts": "460aec726cbc10a39de4a6d6c817e1d3fcacda63697b7ce3fd52d46a5856d0b3",
   "fixtures/ux-bundle-b.json": "aac1b608ec2b0ba9e0c99d6293b8c8bb016a3422f3a8e9eedc4118e535d8b061",
   "app/design-tokens.css": "b704e75acb8c61ca2574287dba45a2b929d0823e5d3f57f20b4ceb870736e73a"

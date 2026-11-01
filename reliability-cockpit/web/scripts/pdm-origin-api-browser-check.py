@@ -35,6 +35,7 @@ try:
    if path=='/api/engineering-qa/session':route.fulfill(json=identity);return
    if path.startswith('/api/engineering-qa/'):
     suffix=req.url[len(ORIGIN+'/api/engineering-qa/'):]
+    f.client.cookies.set(f.authority.COOKIE,f.credentials[identity['subject']][0])
     body=req.post_data_json if req.method in ('POST','PUT') else None
     response=f.client.request(req.method,'/v1/engineering/'+suffix,json=body,headers={'Origin':ORIGIN,'X-CSRF-Token':req.headers.get('x-csrf-token','')})
     if req.method in ('POST','PUT'):
@@ -57,6 +58,9 @@ try:
   page.get_by_label('Parameter 1',exact=True).fill('Synthetic velocity')
   page.get_by_label('Tipe nilai 1',exact=True).select_option('NUMERIC')
   page.get_by_label('Nilai asli 1',exact=True).fill('0')
+  page.get_by_label('Titik 1',exact=True).fill('point:SYNTHETIC')
+  page.get_by_label('Unit asli 1',exact=True).fill('mm/s')
+  page.get_by_label('Waktu measurement 1',exact=True).fill('2026-10-08T09:31:17+07:00')
   page.get_by_role('button',name='Simpan draf inspeksi',exact=True).click()
   page.wait_for_function('document.querySelector("[role=alert]")')
   assert page.get_by_label('Bidang peminta',exact=True).input_value()=='  Synthetic EPA  '
@@ -123,6 +127,59 @@ try:
   final_history=f.call('GET','inspections/'+record+'/history')
   assert len(final_history)==3 and final_history[0]['snapshot']['engineering_analysis']==ANALYSIS
   results.append(dict(scenario='actual editor explicit clear origin/analysis/SR → persisted legacy-native downgrade, previous immutable context retained',status='PASS'))
+  # Continue the same actual component, trusted API and disposable PG record.
+  original_measurements=cleared['measurements']
+  assert original_measurements[0]['value']==0 and original_measurements[0]['unit']=='mm/s'
+  assert original_measurements[0]['measured_at']=='2026-10-08T09:31:17+07:00'
+  page.set_viewport_size(dict(width=1440,height=1000))
+  def as_actor(subject):
+   global identity
+   principal=f.directory(subject);token,csrf=f.credentials[subject]
+   identity=dict(subject=subject,username='synthetic-'+subject,roles=[r.value for r in principal.roles],asset_ids=sorted(principal.asset_ids),csrf_token=csrf)
+   f.client.cookies.set(f.authority.COOKIE,token)
+   page.goto(ORIGIN+'/pdm?record='+record)
+   page.locator('.product-record-detail').wait_for()
+  page.get_by_role('button',name='Ajukan inspeksi',exact=True).click()
+  page.locator('.product-record-detail').locator('[title=SUBMITTED]').wait_for()
+  assert page.get_by_role('button',name='Mulai review independen',exact=True).count()==0
+  as_actor('reviewer')
+  page.get_by_label('Alasan review / revisi',exact=True).fill('SYNTHETIC independent check')
+  page.get_by_role('button',name='Mulai review independen',exact=True).click()
+  page.get_by_label('Kembalikan untuk koreksi',exact=True).check()
+  page.get_by_label('Alasan review / revisi',exact=True).fill('SYNTHETIC clarify observation; record only')
+  page.get_by_role('button',name='Simpan keputusan review',exact=True).click()
+  page.locator('.product-record-detail').locator('[title=RETURNED]').wait_for()
+  as_actor('author')
+  page.get_by_label('Alasan review / revisi',exact=True).fill('SYNTHETIC author clarification')
+  page.get_by_role('button',name='Revisi rekam dikembalikan / ditolak',exact=True).click()
+  page.get_by_role('button',name='Ubah draf inspeksi',exact=True).click()
+  page.get_by_label('Observasi (satu per baris)',exact=True).fill('SYNTHETIC clarification after independent return')
+  page.get_by_role('button',name='Simpan revisi draf',exact=True).click()
+  page.get_by_role('button',name='Ajukan inspeksi',exact=True).click()
+  page.locator('.product-record-detail').locator('[title=SUBMITTED]').wait_for()
+  as_actor('reviewer')
+  page.get_by_label('Alasan review / revisi',exact=True).fill('SYNTHETIC second independent check')
+  page.get_by_role('button',name='Mulai review independen',exact=True).click()
+  assert page.get_by_label('Setujui rekam inspeksi',exact=True).is_checked()==False
+  page.get_by_label('Setujui rekam inspeksi',exact=True).check()
+  page.get_by_label('Alasan review / revisi',exact=True).fill('SYNTHETIC record accepted; no health or work authorization')
+  page.get_by_role('button',name='Simpan keputusan review',exact=True).click()
+  page.locator('.product-record-detail').locator('[title=APPROVED]').first.wait_for()
+  approved=f.call('GET','inspections/'+record,actor='reviewer')
+  assert approved['status']=='APPROVED' and approved['measurements']==original_measurements
+  assert f.call('GET','cases')['items']==[], 'normal inspection completion must not create a Case'
+  results.append(dict(scenario='actual author submit → independent reviewer begin/return → author revise/update/resubmit → fresh independent APPROVED; originals preserved and zero automatic Cases',status='PASS'))
+  as_actor('author')
+  page.get_by_role('button',name='Buat Engineering Case',exact=True).click()
+  page.locator('#case-title').fill('SYNTHETIC optional formal investigation')
+  page.locator('#case-problem').fill('SYNTHETIC unverified finding; not a diagnosis')
+  page.get_by_role('button',name='Simpan kasus',exact=True).click()
+  page.get_by_text('Evidence versi exact telah ditautkan.',exact=False).wait_for()
+  cases=f.call('GET','cases')['items'];assert len(cases)==1
+  snapshot=cases[0]['evidence'][0]['snapshot']['reviewed_inspection']
+  assert snapshot['revision']==approved['revision'] and snapshot['measurements']==original_measurements
+  results.append(dict(scenario='deliberate optional Case only after approved native; real API frozen exact reviewed revision and original measurements',status='PASS'))
+  assert not errors and not escaped
   context.close();browser.close()
 except Exception:
  results.append(dict(scenario='real API/UI fixture',status='FAIL',trace=traceback.format_exc()))
