@@ -20,6 +20,7 @@ try {
  check('errors retain exact security/conflict code without leaking transport details',()=>{for(const code of ['REVISION_CONFLICT','ACCESS_DENIED','CSRF_DENIED','SESSION_EXPIRED'])assert.ok(errorLabel(code).includes(code));assert.ok(!errorLabel(new Error('https://private/?password=secret')).includes('secret'));assert.equal(errorLabel('Unable to sign in. Check your credentials.'),idText('Unable to sign in. Check your credentials.'));assert.equal(errorLabel(idText('Enter a reviewer reason before a simulated decision.')),idText('Enter a reviewer reason before a simulated decision.')); });
  check('glossary is searchable in both languages and has unique anchors',()=>{assert.equal(new Set(glossary.map(x=>x.id)).size,glossary.length);assert.ok(searchGlossary('pemeliharaan').length);assert.ok(searchGlossary('acknowledgment').length);assert.equal(searchGlossary('   ').length,glossary.length);assert.equal(searchGlossary('no-such-term-1234').length,0);});
  check('candidate method rules remain pending engineer validation',()=>{for(const id of ['vibration','ir','mcsa','tribology','threshold'])assert.ok(glossary.find(x=>x.id===id)?.pending,id);assert.match(glossary.find(x=>x.id==='pd-dga').meaning,/tidak|bukan/);});
+ // WO/SR classification adds DTO types only; emitted JS equality is asserted in asset-evidence-preservation.
  // Sprint3 lib/api.ts adds types for existing PI lineage; emitted requests/auth unchanged.
  // AUTH-02 reviewed lib/api.ts: only 401 login redirect and scope-denied copy; DTOs and query paths unchanged.
  // Engineering/PdM review: optional v1.2 input_capture, v1.3 work_origin and v1.4 manual analysis/reported SR;
@@ -28,7 +29,7 @@ try {
  // useQaRecords generation fences, synchronous revocation clearing, bounded inspection pages.
  // Native wire values, server-side authority, remaining fixtures and V2 tokens stay pinned.
  const immutable={
-  "lib/api.ts": "a9919b3c083a428ab84a546e309a91d9783f8a48c8471515ff29514eabff3a17",
+  "lib/api.ts": "b4aaf25de56b19e767d63784c47afdeb1afeab584c583d2fd363f7dc94db6b7a",
   "lib/product-records.ts": "6d3fe024d757efe944d48a03a93ddac5a2da657c37613ea7b9b4108cb87cf282",
   "lib/case-records.ts": "1c224aca34185314db8daeb7c21aa2e095e28c35d4b2d419460162315fa31456",
   "lib/advisory-records.ts": "d1edee16e4d68b70d9657bf9787d50f65bae62db103c3937d6f91ba5f94f779a",

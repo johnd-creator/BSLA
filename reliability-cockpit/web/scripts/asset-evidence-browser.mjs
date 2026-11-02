@@ -15,6 +15,8 @@ page.setDefaultTimeout(12000);page.setDefaultNavigationTimeout(15000);
 const requests=[],errors=[],checks=[],shots=[],axe=[];let mode='normal';
 page.on('pageerror',e=>errors.push(e.message));
 const rows=Array.from({length:2000},(_,i)=>({...fixture.maintenance[i%5],canonical_id:'maintenance:SYNTHETIC-'+String(i).padStart(4,'0'),id:'SYNTHETIC-'+i,work_order_id:i<2?'WO:SYNTHETIC-SHARED':'WO:SYNTHETIC-'+i}));
+// Synthetic valid raw code with no canonical mapping; no source data.
+rows[0].event_type=null;rows[0].classification={raw_work_type:'CD',canonical_category:null,state:'UNMAPPED',origin:'RETAINED_MAXIMO_WORKTYPE',confidence:'UNRESOLVED',description:null,workflow_name:null,workflow_version:null,workflow_state:'NOT_AVAILABLE',status_state:'AVAILABLE'};
 await ctx.route('**/*',async route=>{
  const req=route.request(),url=new URL(req.url());requests.push({path:url.pathname,query:url.search,method:req.method()});
  assert.equal(url.origin,origin,'all network must stay on intercepted synthetic origin');assert.equal(req.method(),'GET');
@@ -59,12 +61,12 @@ try{
  assert(new URL(await back.first().getAttribute('href'),origin).searchParams.get('unit')==='SYNTHETIC-UNIT');
  console.log('stage maintenance');
  await page.getByRole('button',{name:'Pemeliharaan',exact:true}).click();await page.getByRole('status').filter({hasText:'2000 rekam sumber'}).waitFor();await audit('maintenance desktop');await shot('03-maintenance-register');
- assert.equal(await page.getByRole('table').locator('tbody tr').count(),25);
+ assert.equal(await page.getByRole('table').locator('tbody tr').count(),25);await page.getByRole('cell',{name:/^CD/}).first().waitFor();assert((await page.locator('main').innerText()).includes('UNMAPPED'));
  const before=requests.filter(r=>r.path.endsWith('maintenance-events')).length;
  await page.getByRole('button',{name:'Buka rekam SYNTHETIC-0',exact:true}).focus();await page.keyboard.press('Enter');await page.getByRole('heading',{name:'Detail rekam sumber Maximo'}).waitFor();assert.equal(await page.evaluate(()=>document.activeElement?.id),'maintenance-source-detail');assert.equal(requests.filter(r=>r.path.endsWith('maintenance-events')).length,before);await shot('04-maintenance-source-detail');
  await page.getByRole('button',{name:'Kembali ke register evidence'}).click();assert((await page.evaluate(()=>document.activeElement?.id)).startsWith('maintenance-open-'));
  console.log('stage filter');
- await page.getByLabel('Jenis pekerjaan sumber',{exact:true}).fill('PM');await page.getByRole('button',{name:'Terapkan filter evidence'}).click();await page.getByRole('status').filter({hasText:'800 rekam sumber'}).waitFor();
+ await page.getByLabel('Kategori kanonis (persis)',{exact:true}).fill('PM');await page.getByRole('button',{name:'Terapkan filter evidence'}).click();await page.getByRole('status').filter({hasText:'800 rekam sumber'}).waitFor();
  await page.getByRole('button',{name:'Halaman berikutnya'}).click();await page.waitForURL(/me_offset=25/);await page.getByRole('status').filter({hasText:'800 rekam sumber'}).waitFor();
  assert(requests.some(r=>r.query.includes('offset=25')&&r.query.includes('event_type=PM')));await page.goBack();await page.waitForURL(url=>!url.searchParams.has('me_offset'));checks.push('exact asset filters, paging, keyboard detail/return, browser-back');
  console.log('stage inspection context');

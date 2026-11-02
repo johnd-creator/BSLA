@@ -1156,3 +1156,15 @@ New `codex/nadi-pdm-sprint-05` starts from exact988; one Draft PR stacked on117.
 Two bounded response/context helper fixes plus integrated/large-fixture qualification
 and no-skip API→React CI. No active backend/frontend/retained-data/auth/collector
 change. Human UAT, methods, real KPI eligibility, merge and activation remain separate.
+
+
+## 2 November 2026 — WO/SR classification reconciliation
+
+NADI-MAXIMO-WO-SR-CLASSIFICATION-01 is an isolated candidate stacked on Draft
+PR118 (`0a10fe10bf2c9cd2158b5c47ed691f8b9404a7a0`). Retained evidence and
+FLOW reference reconciliation support a conservative WO DTO/UI correction; SR
+read authorization remains proposed. No runtime/source/storage activation.
+[Lineage, decisions and preservation](../reliability-cockpit/docs/NADI-WO-SR-CLASSIFICATION-01.md).
+Technical qualification and owner acceptance are independent; final CI/review
+receipts are recorded on the delivery PR. MTBF/MTTR and cross-inspection trends
+remain NOT_ELIGIBLE.

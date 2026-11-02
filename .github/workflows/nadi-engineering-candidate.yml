@@ -83,7 +83,7 @@ jobs:
         working-directory: reliability-cockpit
         env:
           PYTHONPATH: '.:tests'
-        run: python -m unittest test_sprint5_stabilization test_sprint4_foundation test_kpi test_sprint3_evidence test_reliability_mart test_condition_evidence test_projection_acceptance.ProjectionAcceptanceTest test_application_identity test_identity_adapter.AdapterTest test_application_migrations test_attachments test_session_cleanup test_bundle_d_http.RealHttpQaTest test_identity_configuration test_application_access test_attachment_readiness test_qa_limits test_qa_preflight test_qa_release test_bundle_e_rehearsal test_local_authentication test_local_login_http test_live_development test_frontend_preview test_local_development test_local_development_reusable test_source_preservation test_advisory.AdvisoryTest test_advisory_http.AdvisoryHttpTest test_advisory_http.AdvisorySchemaGateTest test_qa_advisory_schema test_integration_status test_phase1_read_integrity test_projection_acceptance.ProjectionPostgresAcceptanceTest test_integration_observations_client test_integration_ui_contract test_reports_ui_contract test_pdm_workbook_contract test_pdm_input.PdmInputTest test_pdm_input.PdmPostgresInputTest test_pdm_sprint02 test_manual_inspection test_inspection_workflow test_auth03_self_identity test_auth03_readiness test_auth03_controller_update test_engineering test_engineering_qa test_recommendation_workflow test_engineering_integrity test_pdm_input_capture test_pdm_work_origin test_pdm_manual_follow_up test_pdm_history_staging test_pdm_workbook_reader test_pdm_history_pilot.HistoryPilotTest test_pdm_complete_plan test_pdm_source_history test_pdm_complete_postgres.CompleteHistoryPostgresTest -v
+        run: python -m unittest test_wo_sr_classification test_sprint5_stabilization test_sprint4_foundation test_kpi test_sprint3_evidence test_reliability_mart test_condition_evidence test_projection_acceptance.ProjectionAcceptanceTest test_application_identity test_identity_adapter.AdapterTest test_application_migrations test_attachments test_session_cleanup test_bundle_d_http.RealHttpQaTest test_identity_configuration test_application_access test_attachment_readiness test_qa_limits test_qa_preflight test_qa_release test_bundle_e_rehearsal test_local_authentication test_local_login_http test_live_development test_frontend_preview test_local_development test_local_development_reusable test_source_preservation test_advisory.AdvisoryTest test_advisory_http.AdvisoryHttpTest test_advisory_http.AdvisorySchemaGateTest test_qa_advisory_schema test_integration_status test_phase1_read_integrity test_projection_acceptance.ProjectionPostgresAcceptanceTest test_integration_observations_client test_integration_ui_contract test_reports_ui_contract test_pdm_workbook_contract test_pdm_input.PdmInputTest test_pdm_input.PdmPostgresInputTest test_pdm_sprint02 test_manual_inspection test_inspection_workflow test_auth03_self_identity test_auth03_readiness test_auth03_controller_update test_engineering test_engineering_qa test_recommendation_workflow test_engineering_integrity test_pdm_input_capture test_pdm_work_origin test_pdm_manual_follow_up test_pdm_history_staging test_pdm_workbook_reader test_pdm_history_pilot.HistoryPilotTest test_pdm_complete_plan test_pdm_source_history test_pdm_complete_postgres.CompleteHistoryPostgresTest -v
       - name: Mandatory API-to-React acceptance (one executed test, zero skips)
         working-directory: reliability-cockpit
         env:
@@ -100,6 +100,11 @@ jobs:
         env:
           PYTHONPATH: .
         run: python ../reliability-cockpit/tests/test_sprint3_maximo_identity.py -v
+      - name: WO and SR classification mapping (synthetic only)
+        working-directory: maximo-collector
+        env:
+          PYTHONPATH: .
+        run: python ../reliability-cockpit/scripts/wo_sr_collector_contract_test.py -v
       - name: Sprint3 proposed offline readiness contracts (not active shared contracts)
         run: python -m unittest discover -s reliability-cockpit/contracts/sprint3/tests -v
       - name: Canonical contracts

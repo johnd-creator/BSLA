@@ -1,3 +1,4 @@
+import {reviewedClassificationHashes} from './wo-sr-preservation.mjs';
 // Sprint scope guard: unchanged pages/boundaries plus six exact reviewed runtime-parity exceptions.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
@@ -58,11 +59,11 @@ const reviewedSprint4 = {
   "reliability-cockpit/contracts/sprint4/README.md": "119a12f3fbfc7faeb9b06d3187579bda8ad88478c086c384c5dd8c80da9f6a68",
   "reliability-cockpit/contracts/sprint4/result.schema.json": "a1e1fe7568ceb6e18c2b89d84f5041f1e87192c3caf2af620ae2d4e26d290ccd"
 };
-const admitted={...reviewedParity,...reviewedSprint2,...reviewedSprint3,...reviewedSprint4};
+const admitted={...reviewedParity,...reviewedSprint2,...reviewedSprint3,...reviewedSprint4,...reviewedClassificationHashes};
 const changed=[...git('diff','--name-only',base,'--',...protectedPaths).trim().split('\n'),...git('ls-files','--others','--exclude-standard','--',...protectedPaths).trim().split('\n')].filter(Boolean);
 for(const path of changed){
  assert.ok(Object.hasOwn(admitted,path),`Unreviewed protected boundary: ${path}`);
  assert.equal(createHash('sha256').update(readFileSync(resolve(root,path))).digest('hex'),admitted[path],`Reviewed bytes changed: ${path}`);
 }
 for(const [path,hash] of Object.entries(admitted))assert.equal(createHash('sha256').update(readFileSync(resolve(root,path))).digest('hex'),hash,`Missing/changed reviewed file: ${path}`);
-console.log(`PASS: ${pages.length} preserved page entries (two exact Sprint3 presentation exceptions); six F23/F24 and three Sprint2 read pins; additive offline Sprint3 contracts/tests; auth/source/runtime unchanged`);
+console.log(`PASS: ${pages.length} preserved page entries (two exact Sprint3 presentation exceptions); six F23/F24 and three Sprint2 read pins; additive offline Sprint3 contracts/tests; four hash-pinned WO classification exceptions; all other auth/source/runtime unchanged`);
