@@ -69,6 +69,7 @@ Read-only verification: owner workbook `person group.xlsx`, sheet FLOW, only
 TABEL/NAMA FLOW/PROCESS/VERSION. Workbook SHA256:
 `721cc324f7a4acb47d6124fd018127b5d21dee44c030a6dadc330548f98e249f`.
 The extracted table below contains no person/group/role/relationship columns.
+The complete bounded WO/SR scan also found WOFLOW, the WO parent reference.
 Workbook versions describe the reference only, not record assignment or active
 configuration. No workflow step proves a source record's current status.
 
@@ -76,6 +77,7 @@ configuration. No workflow step proves a source record's current status.
 | --- | --- | --- | --- | --- | --- |
 | SR | SRFLOW | PARENT | 33 | FLOW!B4:E4 | VERIFIED reference; CANDIDATE record mapping |
 | SR | SR-C | SR TIPE CD,CM DAN FLM | 6 | FLOW!B5:E5 | VERIFIED reference; CANDIDATE record mapping |
+| WORKORDER | WOFLOW | PARENT | 38 | FLOW!B10:E10 | VERIFIED reference; CANDIDATE record mapping |
 | WORKORDER | WOCD-C | WO TIPE CD | 11 | FLOW!B11:E11 | VERIFIED reference; CANDIDATE record mapping |
 | WORKORDER | WOCM-C | WO TIPE CM | 34 | FLOW!B22:E22 | VERIFIED reference; CANDIDATE record mapping |
 | WORKORDER | WOEM | WO TIPE EM (QUICK REPORTING) | 10 | FLOW!B33:E33 | VERIFIED reference; CANDIDATE record mapping |
