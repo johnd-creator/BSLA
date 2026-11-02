@@ -1,0 +1,368 @@
+{
+  "label": "SYNTHETIC ONLY \u00b7 NOT PLANT DATA",
+  "asset": {
+    "canonical_id": "asset:MAXIMO:MXASSET:BSR:IP:SYNTHETIC-03",
+    "contract_version": "1.0",
+    "source_asset_number": "SYNTHETIC-03",
+    "description": "SYNTHETIC ONLY \u00b7 Pump evidence qualification",
+    "status": "OPERATING",
+    "location_ref": "SYNTHETIC-LOCATION",
+    "parent_asset_ref": null,
+    "site_code": "BSR",
+    "organization_code": "IP",
+    "asset_type": "PUMP",
+    "plant": "SYNTHETIC",
+    "unit": "SYNTHETIC-UNIT",
+    "source_updated_at": "2026-01-01T02:03:04+07:00"
+  },
+  "maintenance": [
+    {
+      "canonical_id": "maintenance:SYNTHETIC-0",
+      "contract_version": "1.0",
+      "id": "SYNTHETIC-0",
+      "equipment_id": "asset:MAXIMO:MXASSET:BSR:IP:SYNTHETIC-03",
+      "work_order_id": "WO:SYNTHETIC-SHARED",
+      "event_type": "CM",
+      "status": "COMP",
+      "actual_start": "2026-01-01T02:03:04+07:00",
+      "actual_finish": null,
+      "duration_hours": 0,
+      "labor_hours": null,
+      "downtime_hours": null,
+      "failure_code": null,
+      "source_changed_at": "2026-02-01T10:11:12Z",
+      "site_code": "BSR",
+      "organization_code": "IP"
+    },
+    {
+      "canonical_id": "maintenance:SYNTHETIC-1",
+      "contract_version": "1.0",
+      "id": "SYNTHETIC-1",
+      "equipment_id": "asset:MAXIMO:MXASSET:BSR:IP:SYNTHETIC-03",
+      "work_order_id": "WO:SYNTHETIC-SHARED",
+      "event_type": "PM",
+      "status": "WAPPR",
+      "actual_start": null,
+      "actual_finish": null,
+      "duration_hours": null,
+      "labor_hours": null,
+      "downtime_hours": null,
+      "failure_code": null,
+      "source_changed_at": "2026-02-01T10:11:12Z",
+      "site_code": "BSR",
+      "organization_code": "IP"
+    },
+    {
+      "canonical_id": "maintenance:SYNTHETIC-2",
+      "contract_version": "1.0",
+      "id": "SYNTHETIC-2",
+      "equipment_id": "asset:MAXIMO:MXASSET:BSR:IP:SYNTHETIC-03",
+      "work_order_id": "WO:SYNTHETIC-2",
+      "event_type": "CM",
+      "status": "COMP",
+      "actual_start": "2026-01-01T02:03:04+07:00",
+      "actual_finish": null,
+      "duration_hours": null,
+      "labor_hours": null,
+      "downtime_hours": null,
+      "failure_code": null,
+      "source_changed_at": "2026-02-01T10:11:12Z",
+      "site_code": "BSR",
+      "organization_code": "IP"
+    },
+    {
+      "canonical_id": "maintenance:SYNTHETIC-3",
+      "contract_version": "1.0",
+      "id": "SYNTHETIC-3",
+      "equipment_id": "asset:MAXIMO:MXASSET:BSR:IP:SYNTHETIC-03",
+      "work_order_id": "WO:SYNTHETIC-3",
+      "event_type": "PM",
+      "status": "WAPPR",
+      "actual_start": null,
+      "actual_finish": null,
+      "duration_hours": null,
+      "labor_hours": null,
+      "downtime_hours": null,
+      "failure_code": null,
+      "source_changed_at": "2026-02-01T10:11:12Z",
+      "site_code": "BSR",
+      "organization_code": "IP"
+    },
+    {
+      "canonical_id": "maintenance:SYNTHETIC-4",
+      "contract_version": "1.0",
+      "id": "SYNTHETIC-4",
+      "equipment_id": "asset:MAXIMO:MXASSET:BSR:IP:SYNTHETIC-03",
+      "work_order_id": "WO:SYNTHETIC-4",
+      "event_type": "CM",
+      "status": "COMP",
+      "actual_start": "2026-01-01T02:03:04+07:00",
+      "actual_finish": null,
+      "duration_hours": null,
+      "labor_hours": null,
+      "downtime_hours": null,
+      "failure_code": null,
+      "source_changed_at": "2026-02-01T10:11:12Z",
+      "site_code": "BSR",
+      "organization_code": "IP"
+    }
+  ],
+  "condition": {
+    "canonical_asset_id": "asset:MAXIMO:MXASSET:BSR:IP:SYNTHETIC-03",
+    "mapping_readiness": "MAPPING_VERIFIED",
+    "statuses": [
+      "BAD_QUALITY",
+      "SOURCE_STALE",
+      "UNKNOWN_VALUE"
+    ],
+    "expected_signals": 5,
+    "latest_attempt_at": "2026-01-01T04:05:06+07:00",
+    "collector_last_success_at": "2026-01-01T03:04:05+07:00",
+    "items": [
+      {
+        "evidence": {
+          "contract_version": "1.0",
+          "canonical_asset_id": "asset:MAXIMO:MXASSET:BSR:IP:SYNTHETIC-03",
+          "mapping_id": "mapping:SYNTHETIC",
+          "signal_id": "signal:SYNTHETIC-0",
+          "semantic_name": "synthetic_0",
+          "sources": {
+            "pi": {
+              "pi_source_id": "CENTRAL_PI",
+              "af_server_ref": "SYNTHETIC-AF-SERVER",
+              "af_database_ref": "SYNTHETIC-AF-DB",
+              "af_element_ref": "SYNTHETIC-AF-ELEMENT",
+              "mapping_role": "PRIMARY_EQUIPMENT",
+              "mapping_status": "VERIFIED",
+              "attribute_ref": "SYNTHETIC-ATTRIBUTE-0",
+              "attribute_name": "SYNTHETIC"
+            }
+          },
+          "value_type": "NUMERIC",
+          "value": 0,
+          "unit": "mm/s",
+          "source_timestamp": "2026-01-01T02:03:04+07:00",
+          "collected_at": "2026-01-01T03:04:05+07:00",
+          "quality_good": false,
+          "quality_questionable": true,
+          "quality_substituted": null,
+          "quality_annotated": false,
+          "evidence_status": "BAD_QUALITY",
+          "provenance": {
+            "selection_evidence_ref": "SYNTHETIC-SIGNAL-APPROVAL",
+            "selection_approved_by": "SYNTHETIC-REVIEWER",
+            "selection_approved_at": "2025-12-31T00:00:00Z",
+            "source_boundary": "GOVERNED_PI_SOURCE"
+          }
+        },
+        "projected_at": "2026-01-01T04:05:06+07:00",
+        "statuses": [
+          "BAD_QUALITY",
+          "SOURCE_STALE"
+        ],
+        "freshness": {
+          "collector": "COLLECTOR_CURRENT",
+          "source": "SOURCE_STALE",
+          "projection": "PROJECTION_UNKNOWN",
+          "mapping": "MAPPING_VERIFIED"
+        }
+      },
+      {
+        "evidence": {
+          "contract_version": "1.0",
+          "canonical_asset_id": "asset:MAXIMO:MXASSET:BSR:IP:SYNTHETIC-03",
+          "mapping_id": "mapping:SYNTHETIC",
+          "signal_id": "signal:SYNTHETIC-1",
+          "semantic_name": "synthetic_1",
+          "sources": {
+            "pi": {
+              "pi_source_id": "CENTRAL_PI",
+              "af_server_ref": "SYNTHETIC-AF-SERVER",
+              "af_database_ref": "SYNTHETIC-AF-DB",
+              "af_element_ref": "SYNTHETIC-AF-ELEMENT",
+              "mapping_role": "PRIMARY_EQUIPMENT",
+              "mapping_status": "VERIFIED",
+              "attribute_ref": "SYNTHETIC-ATTRIBUTE-1",
+              "attribute_name": "SYNTHETIC"
+            }
+          },
+          "value_type": "BOOLEAN",
+          "value": false,
+          "unit": null,
+          "source_timestamp": "2026-01-01T02:03:04+07:00",
+          "collected_at": "2026-01-01T03:04:05+07:00",
+          "quality_good": true,
+          "quality_questionable": false,
+          "quality_substituted": null,
+          "quality_annotated": false,
+          "evidence_status": "EVIDENCE_AVAILABLE",
+          "provenance": {
+            "selection_evidence_ref": "SYNTHETIC-SIGNAL-APPROVAL",
+            "selection_approved_by": "SYNTHETIC-REVIEWER",
+            "selection_approved_at": "2025-12-31T00:00:00Z",
+            "source_boundary": "GOVERNED_PI_SOURCE"
+          }
+        },
+        "projected_at": "2026-01-01T04:05:06+07:00",
+        "statuses": [
+          "EVIDENCE_AVAILABLE",
+          "SOURCE_STALE"
+        ],
+        "freshness": {
+          "collector": "COLLECTOR_CURRENT",
+          "source": "SOURCE_STALE",
+          "projection": "PROJECTION_UNKNOWN",
+          "mapping": "MAPPING_VERIFIED"
+        }
+      },
+      {
+        "evidence": {
+          "contract_version": "1.0",
+          "canonical_asset_id": "asset:MAXIMO:MXASSET:BSR:IP:SYNTHETIC-03",
+          "mapping_id": "mapping:SYNTHETIC",
+          "signal_id": "signal:SYNTHETIC-2",
+          "semantic_name": "synthetic_2",
+          "sources": {
+            "pi": {
+              "pi_source_id": "CENTRAL_PI",
+              "af_server_ref": "SYNTHETIC-AF-SERVER",
+              "af_database_ref": "SYNTHETIC-AF-DB",
+              "af_element_ref": "SYNTHETIC-AF-ELEMENT",
+              "mapping_role": "PRIMARY_EQUIPMENT",
+              "mapping_status": "VERIFIED",
+              "attribute_ref": "SYNTHETIC-ATTRIBUTE-2",
+              "attribute_name": "SYNTHETIC"
+            }
+          },
+          "value_type": "NULL",
+          "value": null,
+          "unit": null,
+          "source_timestamp": null,
+          "collected_at": "2026-01-01T03:04:05+07:00",
+          "quality_good": null,
+          "quality_questionable": false,
+          "quality_substituted": null,
+          "quality_annotated": false,
+          "evidence_status": "UNKNOWN_VALUE",
+          "provenance": {
+            "selection_evidence_ref": "SYNTHETIC-SIGNAL-APPROVAL",
+            "selection_approved_by": "SYNTHETIC-REVIEWER",
+            "selection_approved_at": "2025-12-31T00:00:00Z",
+            "source_boundary": "GOVERNED_PI_SOURCE"
+          }
+        },
+        "projected_at": "2026-01-01T04:05:06+07:00",
+        "statuses": [
+          "UNKNOWN_VALUE",
+          "SOURCE_STALE"
+        ],
+        "freshness": {
+          "collector": "COLLECTOR_CURRENT",
+          "source": "SOURCE_STALE",
+          "projection": "PROJECTION_UNKNOWN",
+          "mapping": "MAPPING_VERIFIED"
+        }
+      },
+      {
+        "evidence": {
+          "contract_version": "1.0",
+          "canonical_asset_id": "asset:MAXIMO:MXASSET:BSR:IP:SYNTHETIC-03",
+          "mapping_id": "mapping:SYNTHETIC",
+          "signal_id": "signal:SYNTHETIC-3",
+          "semantic_name": "synthetic_3",
+          "sources": {
+            "pi": {
+              "pi_source_id": "CENTRAL_PI",
+              "af_server_ref": "SYNTHETIC-AF-SERVER",
+              "af_database_ref": "SYNTHETIC-AF-DB",
+              "af_element_ref": "SYNTHETIC-AF-ELEMENT",
+              "mapping_role": "PRIMARY_EQUIPMENT",
+              "mapping_status": "VERIFIED",
+              "attribute_ref": "SYNTHETIC-ATTRIBUTE-3",
+              "attribute_name": "SYNTHETIC"
+            }
+          },
+          "value_type": "TEXT",
+          "value": "SYNTHETIC:raw text",
+          "unit": null,
+          "source_timestamp": "2026-01-01T02:03:04+07:00",
+          "collected_at": "2026-01-01T03:04:05+07:00",
+          "quality_good": true,
+          "quality_questionable": false,
+          "quality_substituted": null,
+          "quality_annotated": false,
+          "evidence_status": "EVIDENCE_AVAILABLE",
+          "provenance": {
+            "selection_evidence_ref": "SYNTHETIC-SIGNAL-APPROVAL",
+            "selection_approved_by": "SYNTHETIC-REVIEWER",
+            "selection_approved_at": "2025-12-31T00:00:00Z",
+            "source_boundary": "GOVERNED_PI_SOURCE"
+          }
+        },
+        "projected_at": "2026-01-01T04:05:06+07:00",
+        "statuses": [
+          "EVIDENCE_AVAILABLE",
+          "SOURCE_STALE"
+        ],
+        "freshness": {
+          "collector": "COLLECTOR_CURRENT",
+          "source": "SOURCE_STALE",
+          "projection": "PROJECTION_UNKNOWN",
+          "mapping": "MAPPING_VERIFIED"
+        }
+      },
+      {
+        "evidence": {
+          "contract_version": "1.0",
+          "canonical_asset_id": "asset:MAXIMO:MXASSET:BSR:IP:SYNTHETIC-03",
+          "mapping_id": "mapping:SYNTHETIC",
+          "signal_id": "signal:SYNTHETIC-4",
+          "semantic_name": "synthetic_4",
+          "sources": {
+            "pi": {
+              "pi_source_id": "CENTRAL_PI",
+              "af_server_ref": "SYNTHETIC-AF-SERVER",
+              "af_database_ref": "SYNTHETIC-AF-DB",
+              "af_element_ref": "SYNTHETIC-AF-ELEMENT",
+              "mapping_role": "PRIMARY_EQUIPMENT",
+              "mapping_status": "VERIFIED",
+              "attribute_ref": "SYNTHETIC-ATTRIBUTE-4",
+              "attribute_name": "SYNTHETIC"
+            }
+          },
+          "value_type": "DIGITAL_STATE",
+          "value": {
+            "name": "SYNTHETIC:State",
+            "code": 0,
+            "is_system": false
+          },
+          "unit": null,
+          "source_timestamp": "2026-01-01T02:03:04+07:00",
+          "collected_at": "2026-01-01T03:04:05+07:00",
+          "quality_good": true,
+          "quality_questionable": false,
+          "quality_substituted": null,
+          "quality_annotated": false,
+          "evidence_status": "EVIDENCE_AVAILABLE",
+          "provenance": {
+            "selection_evidence_ref": "SYNTHETIC-SIGNAL-APPROVAL",
+            "selection_approved_by": "SYNTHETIC-REVIEWER",
+            "selection_approved_at": "2025-12-31T00:00:00Z",
+            "source_boundary": "GOVERNED_PI_SOURCE"
+          }
+        },
+        "projected_at": "2026-01-01T04:05:06+07:00",
+        "statuses": [
+          "EVIDENCE_AVAILABLE",
+          "SOURCE_STALE"
+        ],
+        "freshness": {
+          "collector": "COLLECTOR_CURRENT",
+          "source": "SOURCE_STALE",
+          "projection": "PROJECTION_UNKNOWN",
+          "mapping": "MAPPING_VERIFIED"
+        }
+      }
+    ]
+  }
+}

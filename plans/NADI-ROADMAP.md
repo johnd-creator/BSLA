@@ -1140,3 +1140,15 @@ The Product Owner consolidated blueprint/Sprint/parity and conditional local
 acceptance into PR114 based on main; PR113 is superseded without merge. Phase0–5
 history and engineering gates remain. [One current acceptance report](../reliability-cockpit/docs/NADI-PDM-SPRINT1-ONE-PR-DELIVERY.md)
 separates exact-source/CI qualification from authenticated local activation and PO UX.
+
+
+### 1 November 2026 — integrated Sprint3 development qualification
+
+Sprint3 implements read-only exactasset Maximo/approved PI evidence navigation in
+one [stacked Draft PR116](https://github.com/johnd-creator/reliability-knowledge-starter/pull/116),
+parent PR115 exact3a01e842. [Delivery and preservation](../reliability-cockpit/docs/NADI-PDM-SPRINT-03-DELIVERY.md)
+retain Phase0–5 history, current phase/source approval boundaries and F01–F24.
+Sprint2 remains the active local visual-review candidate; Sprint3 is isolated.
+Next: exact-head technical CI/review → consolidated PO visual review → separately
+requested activation. Full mapping inventory/history/DCS and Sprint4 failure,
+exposure and repair definitions remain gated; no automatic KPI implementation.

@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nadi.invalid/contracts/asset-crosswalk-decision-1",
+  "title": "Read-only source-owner decision input; not a canonical mapping approval",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "canonical_asset_id",
+    "site_code",
+    "organization_code",
+    "maximo_equipment_ref",
+    "pi_af_ref",
+    "pi_signal_ref",
+    "mapping_evidence_ref",
+    "mapping_owner",
+    "mapping_verified_at",
+    "contract_version",
+    "recorded_status",
+    "conditions",
+    "pi_source_ref",
+    "pi_af_server_ref",
+    "pi_af_database_ref"
+  ],
+  "properties": {
+    "canonical_asset_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "site_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "organization_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "maximo_equipment_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "pi_af_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "pi_signal_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "mapping_evidence_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "mapping_owner": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "mapping_verified_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 512,
+      "format": "date-time"
+    },
+    "contract_version": {
+      "const": "sprint3-decision-1"
+    },
+    "recorded_status": {
+      "enum": [
+        "VERIFIED",
+        "CANDIDATE",
+        "UNRESOLVED",
+        "FORBIDDEN"
+      ]
+    },
+    "conditions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "MISSING_IDENTITY",
+          "MISSING_EVIDENCE",
+          "DUPLICATE_IDENTITY",
+          "CONFLICTING_IDENTITY",
+          "SOURCE_FORBIDDEN",
+          "FULL_INVENTORY_NOT_EXPOSED"
+        ]
+      }
+    },
+    "pi_source_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^\\S(?:.*\\S)?$"
+    },
+    "pi_af_server_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^\\S(?:.*\\S)?$"
+    },
+    "pi_af_database_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^\\S(?:.*\\S)?$"
+    }
+  }
+}
