@@ -13,14 +13,15 @@
     "siteid": "BSR",
     "orgid": "IP",
     "eq11": "CS01",
-    "selection": "owner-selected registered pilot and its direct children"
+    "selection": "owner-selected registered pilot and its direct children",
+    "followup_selection": "existing registered CS01 gap roots and verified direct children only"
   },
   "endpoint_read_status": "VERIFIED_IN_BOUNDED_PILOT",
   "parent_filter_status": "VERIFIED_IN_BOUNDED_PILOT",
   "response_status": "HTTP_200",
   "population_coverage": "PARTIAL",
   "hierarchy_role_semantics": "UNKNOWN",
-  "paging_scope": "one bounded page per query; full traversal not claimed",
+  "paging_scope": "bounded gap-root queries; capped groups refined until selected subset exhausted; global population not claimed",
   "field_types": {
     "assetnum": [
       "string"
@@ -66,8 +67,19 @@
     "Source change time is distinct from retrieval time and ingestion freshness."
   ],
   "source_business_writes": false,
-  "collector_or_mart_writes": false,
+  "collector_or_mart_writes": true,
   "permissions_expanded": false,
   "raw_examples_published": false,
-  "evidence_custody": "private owner-controlled receipt; no credentials/cookies/tokens persisted"
+  "evidence_custody": "private owner-controlled receipt; no credentials/cookies/tokens persisted",
+  "followup_status": "SCOPED_SOURCE_RECONCILIATION_AND_NORMAL_APPEND_PASS",
+  "parent_in_filter_status": "VERIFIED_WITH_EXACT_RETURNED_PARENT_GUARD",
+  "write_scope": "new technical Equipment/AssetMaster only, normal existing writers; initial status history and explicitly partial run",
+  "global_source_cursor_advanced": false,
+  "global_projection_cursor_advanced": false,
+  "registry_membership_changed": false,
+  "old_records_and_ledger_fingerprints_preserved": true,
+  "independent_isolated_rehearsal": "PASS",
+  "raw_source_packet_persisted": false,
+  "followup_verified_date": "2026-11-03",
+  "followup_date_timezone": "Asia/Jakarta"
 }

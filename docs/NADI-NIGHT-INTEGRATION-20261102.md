@@ -41,7 +41,7 @@ build failed because a type-only import preceded the client directive. Restoring
 the directive order and its exact hash pin preserves emitted API JavaScript; full
 local build and new exact-head CI passed. Failed runs remain historical evidence.
 
-## Source hierarchy verification
+## Initial source hierarchy verification
 
 The [retained hierarchy candidate](../reliability-cockpit/docs/NADI-ASSET-HIERARCHY-01.md)
 is useful source implementation, not a full source-population refresh. The owner
@@ -69,11 +69,35 @@ Roles remain UNKNOWN. The new [sanitized knowledge receipt](../maximo-knowledge/
 contains field types and method/scope evidence without raw examples. Excel, ID
 prefixes and missing retained edges are not semantic substitutes.
 
-Full-population acquisition still needs an owner-scoped, bounded existing-Collector
-plan: approved unit/object scope, request/page/response budgets, nonoverlap with
-the current owner, source completeness criteria, private evidence and controlled
-existing-store projection. Do not use a destructive recollect, automatically
-import a Registry snapshot, broaden source permission or infer role labels.
+### Subsequent scoped source reconciliation and normal ingestion — 3 November WIB
+
+The owner-authorized follow-up went beyond the pilot. All existing registered CS01
+roots whose retained child flag was true but had no retained direct children were
+queried through the same credential-owning worker. Exact parent-IN predicates,
+BSR/IP/CS01 guards and bounded server pagination were verified. Capped parent
+groups were split into smaller groups and read again until the selected gap-root
+set was reconciled without remaining capped groups or unread roots. This is the
+named approved subset, not full Maximo, other units or global hierarchy coverage.
+
+Previously unretained child IDs were fetched with the full existing allowlisted
+asset projection. The packet remained in memory between the source client and
+normal writer. Fresh private pg_dump and independent network-none PostgreSQL
+restore passed. That exact packet then passed the existing SyncService/mapper/
+CollectorStore and MartWriter path on the isolated restored store before it was
+admitted to the existing owner database. Only new technical Equipment/AssetMaster
+rows and their normal initial status observations were appended. The acquisition
+run is explicitly PARTIAL and cursor-free; no global source or projection cursor
+was advanced by this operation. No Registry membership or hierarchy role was
+created. The source children flags were retained without assigning semantic roles.
+
+Private before/after fingerprints prove preservation of old Equipment/AssetMaster,
+old status history, Registry, mappings, selections, schema ledger and asset cursors.
+The original WO worker and projector continued their own schedules; no service was
+restarted. The temporary restore was removed and all existing containers rechecked.
+Raw identities, counts, retained evidence and recovery bytes remain private. No
+Excel import, destructive recollect, source permission expansion, schema change,
+WO backfill or canonical classification correction occurred. Full-population and
+role acceptance remain PARTIAL/UNKNOWN beyond this bounded subset.
 
 ## Runtime, recovery and acceptance
 
@@ -82,8 +106,9 @@ Official read-only status reports frontend and Engineering at
 `sha256:2b4d766c49666bd236ec45325c9a498c1dc86ffe3857bdf95455a42f34fcf766`
 with the same119ba2f revision. All35 service roles and all34 unrelated exact
 container identities/images/start/state/restart/ports remain preserved. No service
-transition, controller installation, account/grant write, migration, retained-data
-backfill or source recollection was performed. The existing WO worker continues
+transition, controller installation, account/grant write, migration, retained-WO
+backfill or destructive source recollection was performed. The scoped normal
+asset append above is a separate authorized data operation. The existing WO worker continues
 its own bounded schedule; source update timestamps alone are not sync freshness.
 
 The unchanged official controller stops PR120 at
@@ -96,8 +121,9 @@ by this work. Engineer technical-hierarchy scope is also not silently added.
 Before any future cutover, prepare a separately reviewed exact controller/service
 plan, obtain the required service-owner approval and refresh all mandatory gates:
 issuer/Engineer session, source/ownership/versions, DB/ledger/aggregates, backup,
-independent isolated restore, preservation and rollback. Fresh backup/restore and
-live PR120/122 UAT were not run after this STOP. Original PR119 source/image and
+independent isolated restore, preservation and rollback. Fresh activation backup/restore and
+live PR120/122 UAT were not run after this STOP. The later asset-ingestion
+backup/isolated restore qualifies only that append and is not reused as a cutover gate. Original PR119 source/image and
 sealed recovery evidence remain retained; this is not a fresh activation-ready
 claim. M02/Q01–Q10, operational KPI eligibility and PO decisions are unchanged.
 Logbook PdM remains HOLD.

@@ -1237,3 +1237,16 @@ source checkpoints only. The bounded live Maximo pilot verifies the existing
 read path without importing data; full hierarchy population and role semantics
 remain PARTIAL/UNKNOWN. Runtime remains PR119; Phase1, M02/Q01–Q10 and PO/operational
 acceptance do not advance. Logbook PdM remains HOLD.
+
+
+### Scoped source-ingestion follow-up — 2026-11-03 WIB
+
+The approved registered CS01 gap-root subset was paged against Maximo, with capped
+groups refined until that subset was exhausted. New technical child rows passed
+fresh private backup/independent isolated restore and exact-packet normal-writer
+rehearsal before append to the existing Maximo-owned Collector/Mart. Old master,
+Registry, mapping, ledger and asset-cursor fingerprints remain unchanged; the run
+is PARTIAL and does not advance global cursors. No Registry import, role inference,
+WO backfill, source write or service change. Full population/role acceptance stays
+PARTIAL/UNKNOWN and local PR120 activation stays BLOCKED. Evidence and cardinalities
+remain private; see the [integrated source report](../docs/NADI-NIGHT-INTEGRATION-20261102.md) for the bounded method.
