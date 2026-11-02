@@ -24,5 +24,5 @@ const temp=mkdtempSync(join(tmpdir(),'nadi-s4-check-'));try{
  const url=new URL(m.performanceHref('asset:SYNTHETIC:A&B','2026-01-01T00:00:00+07:00','2026-02-01T00:00:00+07:00'),'https://fixture.invalid');assert.equal(url.pathname,'/reports');assert.equal(url.searchParams.get('rp_asset'),'asset:SYNTHETIC:A&B');assert.equal(url.searchParams.get('report_view'),'reliability');
  assert(m.prerequisites.some(p=>p.input==='Active repair dan restoration'&&p.status==='MISSING'));
  assert(m.prerequisites.some(p=>p.input==='Functional failure event'&&p.status==='MISSING'));assert(m.prerequisites.some(p=>p.input==='Operating exposure (jam)'&&p.status==='MISSING'));
- console.log('Sprint4 UI/scope PASS: authorized Asset only, safe period/context, no app engine/fixture import, four hash-pinned WO classification exceptions; all other legacy/source/auth/28routes/5navigation bytes unchanged');
+ console.log('Sprint4 UI/scope PASS: authorized Asset only, safe period/context, no app engine/fixture import, hash-pinned WO classification/detail and future-projection exceptions; all other legacy/source/auth/28routes/5navigation bytes unchanged');
 }finally{rmSync(temp,{recursive:true,force:true});}

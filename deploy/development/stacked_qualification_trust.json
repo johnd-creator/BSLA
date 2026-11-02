@@ -1,0 +1,16 @@
+{
+  "files": {
+    ".github/scripts/maximo_ci/qualify.py": "dce8635fda844daef49e2d9aba513629b5df1e09bebbc7939fc833a07724e5a5",
+    ".github/scripts/maximo_ci/run_offline.py": "57e2e54206052e54c0875cd2266f68778ca0c9b74e2843f84b3b2e7e1ceb567c",
+    ".github/scripts/maximo_ci/run_rehearsal.py": "984247cddee75f13ad80e82cf02957139809e8a7cb2d5291574e08c3d26e2205",
+    ".github/scripts/maximo_ci/tests/test_qualification.py": "d38993c964addc3df6d4686af7ae672eed9e658c28024e7b1c9e5d2d748c9c9d",
+    ".github/scripts/maximo_ci/tests/test_rehearsal.py": "db0891e90fdc25d709d4fd4d3b70e2605119f334dee3a942e5a46b406f32299f",
+    ".github/scripts/maximo_stacked_ci/main-policy-pins.json": "c69afc64d7ac06897c57dec0e2adb79eb6f563614a4224b8b166e7e33e64c346",
+    ".github/scripts/maximo_stacked_ci/qualify.py": "3e57933066b80b85dd4b0a07dd536761e8caf075b1af513d777ec5b2c7c46102",
+    ".github/scripts/maximo_stacked_ci/tests/test_stacked.py": "b672a4b5ab767f4fa9a3119581551bb33214ec2a079fe93c4d969e3978db3864",
+    ".github/workflows/nadi-maximo-collector.yml": "29fd2e60c30e10e1756d1fcbb2e2d2ff60f6a9b55ba90dae1437e5e473892d82",
+    ".github/workflows/nadi-maximo-stacked-development.yml": "3e28bb8997e3fdd3bce27c279c2e7a6a08ee9dcb17f183fa53642520ce9783a4"
+  },
+  "purpose": "LOCAL_DEVELOPMENT_ONLY",
+  "reviewed_tooling_baseline": "345a4a3f4a7a72d309c0f2ee2a6eea20bdecabc9"
+}

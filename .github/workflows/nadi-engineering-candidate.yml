@@ -74,6 +74,11 @@ jobs:
         env:
           PYTHONPATH: '.:tests'
         run: python -m unittest test_pdm_source_interpretation -v
+      - name: Separate Factual READ private administration and scoped local policy
+        working-directory: reliability-cockpit
+        env:
+          PYTHONPATH: '.:tests'
+        run: python -m unittest test_factual_read_entitlements test_factual_read_controller test_local_activation_qualification -v
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '22'
@@ -83,7 +88,7 @@ jobs:
         working-directory: reliability-cockpit
         env:
           PYTHONPATH: '.:tests'
-        run: python -m unittest test_wo_sr_classification test_sprint5_stabilization test_sprint4_foundation test_kpi test_sprint3_evidence test_reliability_mart test_condition_evidence test_projection_acceptance.ProjectionAcceptanceTest test_application_identity test_identity_adapter.AdapterTest test_application_migrations test_attachments test_session_cleanup test_bundle_d_http.RealHttpQaTest test_identity_configuration test_application_access test_attachment_readiness test_qa_limits test_qa_preflight test_qa_release test_bundle_e_rehearsal test_local_authentication test_local_login_http test_live_development test_frontend_preview test_local_development test_local_development_reusable test_source_preservation test_advisory.AdvisoryTest test_advisory_http.AdvisoryHttpTest test_advisory_http.AdvisorySchemaGateTest test_qa_advisory_schema test_integration_status test_phase1_read_integrity test_projection_acceptance.ProjectionPostgresAcceptanceTest test_integration_observations_client test_integration_ui_contract test_reports_ui_contract test_pdm_workbook_contract test_pdm_input.PdmInputTest test_pdm_input.PdmPostgresInputTest test_pdm_sprint02 test_manual_inspection test_inspection_workflow test_auth03_self_identity test_auth03_readiness test_auth03_controller_update test_engineering test_engineering_qa test_recommendation_workflow test_engineering_integrity test_pdm_input_capture test_pdm_work_origin test_pdm_manual_follow_up test_pdm_history_staging test_pdm_workbook_reader test_pdm_history_pilot.HistoryPilotTest test_pdm_complete_plan test_pdm_source_history test_pdm_complete_postgres.CompleteHistoryPostgresTest -v
+        run: python -m unittest test_wo_detail test_wo_sr_classification test_sprint5_stabilization test_sprint4_foundation test_kpi test_sprint3_evidence test_reliability_mart test_condition_evidence test_projection_acceptance.ProjectionAcceptanceTest test_application_identity test_identity_adapter.AdapterTest test_application_migrations test_attachments test_session_cleanup test_bundle_d_http.RealHttpQaTest test_identity_configuration test_application_access test_attachment_readiness test_qa_limits test_qa_preflight test_qa_release test_bundle_e_rehearsal test_local_authentication test_local_login_http test_live_development test_frontend_preview test_local_development test_local_development_reusable test_source_preservation test_advisory.AdvisoryTest test_advisory_http.AdvisoryHttpTest test_advisory_http.AdvisorySchemaGateTest test_qa_advisory_schema test_integration_status test_phase1_read_integrity test_projection_acceptance.ProjectionPostgresAcceptanceTest test_integration_observations_client test_integration_ui_contract test_reports_ui_contract test_pdm_workbook_contract test_pdm_input.PdmInputTest test_pdm_input.PdmPostgresInputTest test_pdm_sprint02 test_manual_inspection test_inspection_workflow test_auth03_self_identity test_auth03_readiness test_auth03_controller_update test_engineering test_engineering_qa test_recommendation_workflow test_engineering_integrity test_pdm_input_capture test_pdm_work_origin test_pdm_manual_follow_up test_pdm_history_staging test_pdm_workbook_reader test_pdm_history_pilot.HistoryPilotTest test_pdm_complete_plan test_pdm_source_history test_pdm_complete_postgres.CompleteHistoryPostgresTest -v
       - name: Mandatory API-to-React acceptance (one executed test, zero skips)
         working-directory: reliability-cockpit
         env:
@@ -104,7 +109,10 @@ jobs:
         working-directory: maximo-collector
         env:
           PYTHONPATH: .
-        run: python ../reliability-cockpit/scripts/wo_sr_collector_contract_test.py -v
+        run: |
+          python ../reliability-cockpit/scripts/wo_sr_collector_contract_test.py -v
+          python -m unittest discover -s tests -p test_wo_detail_lineage.py -v
+          python -m unittest discover -s tests -p test_local_mart_projector.py -v
       - name: Sprint3 proposed offline readiness contracts (not active shared contracts)
         run: python -m unittest discover -s reliability-cockpit/contracts/sprint3/tests -v
       - name: Canonical contracts
@@ -120,6 +128,13 @@ jobs:
       - name: Render actual source interpretation components with sanitized values
         working-directory: reliability-cockpit/web
         run: node scripts/pdm-source-interpretation-check.mjs
+      - name: WO detail rendering and clock semantics
+        working-directory: reliability-cockpit/web
+        run: |
+          node scripts/wo-detail-check.mjs
+          npx eslint lib/wo-date.ts
+          cd ..
+          PYTHONPATH=.:tests python scripts/wo_detail_react_acceptance.py
       - name: Build actual PdM package test components
         working-directory: reliability-cockpit/web
         run: node scripts/pdm-follow-up-browser-bundle.mjs "$RUNNER_TEMP/nadi-pdm-package"
@@ -159,9 +174,11 @@ jobs:
           node-version: '22'
       - run: npm ci
       - run: npm run check:engineering && npm run check:phase2 && npm run check:workflow && npm run check:http-qa && npm run check:bounded-http && npm run check:bounded-proxy && npm run check:local-auth && npm run check:global-auth && npm run check:factual-policy && npm run check:product-safety
+      - run: npm run check:factual-read
       - run: npm run check:ux && npm run check:eng-product && npm run check:engineering-fixes && npm run check:pdm-input && npm run check:integration && npm run check:reports && npm run lint
       - run: npm run check:sprint5
       - run: npm run check:reliability-performance
+      - run: node scripts/wo-detail-check.mjs && npx eslint lib/wo-date.ts
       - run: npm run check:asset-evidence
       - run: npx tsc --noEmit
       - run: npm run build
@@ -181,6 +198,8 @@ jobs:
           NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/login-visual-browser.mjs
           NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/experience-browser.mjs
           NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/asset-evidence-browser.mjs
+          NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/factual-read-browser.mjs
+          NADI_SYNTHETIC_REGISTERED_READ=1 NADI_BROWSER_OUTPUT=/tmp/nadi-factual-registered-synthetic-browser NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/factual-read-browser.mjs
           NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/reliability-performance-browser.mjs
           NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/sprint5-integrated-browser.mjs
           node scripts/sprint5-gallery.mjs

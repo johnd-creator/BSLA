@@ -42,6 +42,12 @@ def _timestamp(member: Mapping[str, Any], key: str) -> str | None:
     return parsed.isoformat()
 
 
+def _retained_clock(member: Mapping[str, Any], key: str) -> str | None:
+    parsed = _timestamp(member, key)
+    value = member.get(key)
+    return value if parsed is not None and isinstance(value, str) else parsed
+
+
 def _provenance(
     source_object: str,
     source_record_id: str,
@@ -135,6 +141,7 @@ def maintenance_event_from_payload(member: Mapping[str, Any]) -> dict[str, Any]:
         "source_changed_at": changed,
         "downtime_hours": oslc_pop_number(member, "downtime"),
         "labor_hours": oslc_pop_number(member, "actlabhrs"),
+        "failure_code": _text(member, "failurecode"),
         "site_code": site,
         "organization_code": organization,
         "provenance": _provenance("MXWODETAIL", wonum, site, organization, application=None, source_number=wonum, source_updated_at=changed),
@@ -144,6 +151,9 @@ def maintenance_event_from_payload(member: Mapping[str, Any]) -> dict[str, Any]:
             "worktype": work_type, "status": _text(member, "status"),
             "actstart": _timestamp(member, "actstart"), "actfinish": _timestamp(member, "actfinish"),
             "changedate": changed, "downtime": oslc_pop_number(member, "downtime"),
+            "reportdate": _retained_clock(member, "reportdate"),
+            "schedstart": _retained_clock(member, "schedstart"),
+            "schedfinish": _retained_clock(member, "schedfinish"),
         }},
     }
 

@@ -15,7 +15,7 @@ const reviewedSprint3Pages = {
   "reliability-cockpit/web/app/(workspace)/assets/page.tsx": "787bbdee909841de5157fe80809dcdd4ce333a24af7f8d85738cbed40b325570",
   "reliability-cockpit/web/app/(workspace)/assets/[...canonicalId]/page.tsx": "2d8e040fa7a753fdf443cae0aa40fa8b00d28aa8a7d2a842d428addacf8c0df6"
 };
-for (const page of pages) {if(Object.hasOwn(reviewedSprint3Pages,page))assert.equal(createHash('sha256').update(readFileSync(resolve(root,page))).digest('hex'),reviewedSprint3Pages[page],page);else assert.equal(readFileSync(resolve(root,page),'utf8'),git('show',`${base}:${page}`),`${page} changed`);}
+for (const page of pages) {if(Object.hasOwn(reviewedClassificationHashes,page))assert.equal(createHash('sha256').update(readFileSync(resolve(root,page))).digest('hex'),reviewedClassificationHashes[page],page);else if(Object.hasOwn(reviewedSprint3Pages,page))assert.equal(createHash('sha256').update(readFileSync(resolve(root,page))).digest('hex'),reviewedSprint3Pages[page],page);else assert.equal(readFileSync(resolve(root,page),'utf8'),git('show',`${base}:${page}`),`${page} changed`);}
 const protectedPaths = ['reliability-cockpit/src', 'reliability-cockpit/migrations', 'reliability-cockpit/application-migrations', 'reliability-data-contracts', 'reliability-cockpit/contracts', 'maximo-collector', 'pi-collector', 'cems-collector', 'deploy/development', 'reliability-cockpit/web/middleware.ts', 'reliability-cockpit/web/app/api', ...['pdm-input.ts', 'pdm-capture.ts', 'product-records.ts', 'engineering-http.ts'].map(p => `reliability-cockpit/web/lib/${p}`), ...['PdmDraftContext.tsx', 'useQaRecords.ts', 'usePdmCommand.ts'].map(p => `reliability-cockpit/web/components/${p}`)];
 const reviewedParity = {
   "reliability-cockpit/src/services/local_authentication.py": "cac45c151340fe3c5074d29bfbc1e6f3d8c77b98c5efa3369e5e3975c8fb542c",
@@ -66,4 +66,4 @@ for(const path of changed){
  assert.equal(createHash('sha256').update(readFileSync(resolve(root,path))).digest('hex'),admitted[path],`Reviewed bytes changed: ${path}`);
 }
 for(const [path,hash] of Object.entries(admitted))assert.equal(createHash('sha256').update(readFileSync(resolve(root,path))).digest('hex'),hash,`Missing/changed reviewed file: ${path}`);
-console.log(`PASS: ${pages.length} preserved page entries (two exact Sprint3 presentation exceptions); six F23/F24 and three Sprint2 read pins; additive offline Sprint3 contracts/tests; four hash-pinned WO classification exceptions; all other auth/source/runtime unchanged`);
+console.log(`PASS: ${pages.length} preserved page entries with exact reviewed exceptions; six F23/F24 and three Sprint2 read pins; historical WO classification/detail and new Factual READ hashes; all remaining protected boundaries unchanged`);

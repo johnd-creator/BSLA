@@ -566,6 +566,7 @@ class LocalDevelopment:
     def preflight(self, root, ref):
         release = self.release()
         root, sha = self.resolve(root,ref)
+        self.factual_read_environment(root,required=getattr(self,'require_factual_read',False))
         if self.c.active(self.c.LEGACY_WEB):
             raise RuntimeError('COMPETING_FRONTEND')
         previous = self.previous()
@@ -596,7 +597,7 @@ class LocalDevelopment:
         value = {'root':str(root),'sha':sha,'backend_sha':sha,'ref':ref,'node':pin,
                  'previous':previous,'db_container_id':db['Id'],'workflow_sha':release,
                  'fixture_contract':contract,'pair_contract':pair,
-                 'config_path':previous['config_path']}
+                 'config_path':previous['config_path'],'factual_read_required':bool(getattr(self,'require_factual_read',False))}
         value['fixture'] = self.fixture_probe(value)
         value['config_hash'] = digest(previous['config_path'])
         value['accounts_hash'] = digest(private(previous['config_path'])['accounts_file'])
@@ -664,7 +665,57 @@ class LocalDevelopment:
             '--property=TasksMax=256','--property=UMask=0077','--property=KillMode=control-group','--property=TimeoutStopSec=20',
             '/usr/bin/env','-i',*self.environment(Path(root).parents[0] if Path(root).name=='reliability-cockpit' else Path(root).parents[1]),*extra,*command])
 
+    def factual_read_environment(self, root, required=False):
+        # Stable application-owned state, outside all source/worktree/DB restores.
+        # Presence does not issue a grant; only the separately approved private CLI does.
+        import stat
+        if not required:return []
+        # root has already passed the controller's exact reviewed source seal.
+        schema=Path(root)/'reliability-cockpit/src/services/factual_read_entitlements.py'
+        if not schema.is_file():raise RuntimeError('FACTUAL_READ_FEATURE_NOT_AVAILABLE')
+        policy=self.c.STATE/'factual-read-120'/'grants.ndjson'
+        if not policy.exists() and not policy.is_symlink():raise RuntimeError('APPROVED_FACTUAL_READ_POLICY_REQUIRED')
+        parent=policy.parent.lstat()
+        if (policy.parent.resolve()!=policy.parent or not stat.S_ISDIR(parent.st_mode) or
+                parent.st_uid!=os.getuid() or stat.S_IMODE(parent.st_mode)!=0o700):
+            raise RuntimeError('PRIVATE_FACTUAL_POLICY_DIRECTORY_REQUIRED')
+        fd=os.open(policy,os.O_RDONLY|os.O_NOFOLLOW|os.O_NONBLOCK)
+        try:
+            s=os.fstat(fd)
+            if not stat.S_ISREG(s.st_mode) or s.st_uid!=os.getuid() or s.st_nlink!=1 or stat.S_IMODE(s.st_mode)!=0o600 or s.st_size>4*1024*1024:
+                raise RuntimeError('PRIVATE_FACTUAL_POLICY_FILE_REQUIRED')
+            chunks=[];total=0
+            while True:
+                chunk=os.read(fd,min(65536,4*1024*1024+1-total))
+                if not chunk:break
+                chunks.append(chunk);total+=len(chunk)
+                if total>4*1024*1024:raise RuntimeError('PRIVATE_FACTUAL_POLICY_FILE_REQUIRED')
+        finally:os.close(fd)
+        import importlib.util
+        spec=importlib.util.spec_from_file_location('reviewed_local_factual_read_schema',schema)
+        module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+        events=module.decode(b''.join(chunks))
+        approval_bytes=module.private_read(policy.parent/'activation-approval.json')
+        approval=json.loads(approval_bytes)
+        fields={'schema_version','expected_head','action','grant_id','subject','assets','capabilities','not_before','expires_at','actor','approval_ref','operator_ref'}
+        if (set(approval) not in (fields,fields|{'scope_kind'}) or type(approval['schema_version']) is not int or approval['schema_version']!=1 or
+                approval_bytes!=(module.canonical(approval)+'\n').encode() or approval['action']!='ISSUE'):
+            raise RuntimeError('EXACT_FACTUAL_ACTIVATION_APPROVAL_REQUIRED')
+        event=next((e for e in reversed(events) if e['grant_id']==approval['grant_id']),None)
+        from datetime import datetime,timezone,timedelta
+        now=datetime.now(timezone.utc)
+        if any(module.timestamp(e['at'])>now+timedelta(seconds=5) for e in events):
+            raise RuntimeError('FACTUAL_POLICY_CLOCK_REGRESSION')
+        if (not event or event['action']!='ISSUE' or set(event['capabilities'])!=module.CAPABILITIES or
+                event.get('scope_kind','EXACT_ASSETS')!=approval.get('scope_kind','EXACT_ASSETS') or
+                any(event[key]!=approval[key] for key in fields-{'schema_version','expected_head'}) or
+                event['previous_sha256']!=approval['expected_head'] or
+                not module.timestamp(event['not_before'])<=now<module.timestamp(event['expires_at'])):
+            raise RuntimeError('ACTIVE_EXACT_FACTUAL_ENTITLEMENT_REQUIRED')
+        return ['NADI_FACTUAL_READ_POLICY_FILE='+str(policy)]
+
     def start_pair(self, value):
+        factual_extra=self.factual_read_environment(value['root'],required=value.get('factual_read_required',False))
         root=Path(value['root']);web=root/'reliability-cockpit/web'
         self.start('nadi-live-api',root/'reliability-cockpit',
             [str(self.c.STATE/'python-runtime/bin/python'),'-m','uvicorn','local_fixture:create_app','--factory','--host','127.0.0.1','--port','13036',
@@ -674,7 +725,7 @@ class LocalDevelopment:
             ['NODE_ENV=development','NEXT_TELEMETRY_DISABLED=1','NODE_OPTIONS=--max-old-space-size=4096',
              'NADI_LIVE_DEV=true','NADI_PRIMARY_FRONTEND=true','NADI_ENGINEERING_WORKSPACE_ENABLED=true',
              'NADI_ENGINEERING_DEMO_ENABLED=true','NADI_ENGINEERING_QA_ENABLED=true','NADI_QA_BACKEND_URL=http://127.0.0.1:13036',
-             'COCKPIT_API_BASE=http://127.0.0.1:8000','NADI_DEV_LAUNCHED_SHA='+value['sha']], '6G')
+             'COCKPIT_API_BASE=http://127.0.0.1:8000','NADI_DEV_LAUNCHED_SHA='+value['sha'],*factual_extra], '6G')
 
     def readiness(self, value, session_file=None):
         release=self.release()

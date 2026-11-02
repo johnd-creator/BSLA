@@ -635,3 +635,20 @@ visual architecture. [Private synthetic review package](../../reliability-cockpi
 and [PO/engineer checklist](../../reliability-cockpit/docs/NADI-SPRINT5-UAT-CHECKLIST.md)
 record exact candidate, screen purposes/states and limitations. Screenshots/axe
 are automated evidence only; preferences and human acceptance remain pending.
+
+
+## 2 November 2026 — UI-01/02 Engineer Factual READ candidate
+
+The revised PR120 candidate renders authenticated non-portfolio users a scoped
+Beranda component with permitted Registry/retained-WO counts and exact Asset links.
+Dataset403 remains distinct from page access; unavailable/restricted states are
+explicit. Register totals and paging use authorized assets before serialization.
+Existing admin overview, Asset filter/return context and PdM AUTHOR navigation
+remain. Synthetic390/768/1440 light/dark checks are not live Engineer acceptance.
+[Requirements and gate report](../../reliability-cockpit/docs/NADI-PR120-FINAL-UNBLOCK-01.md).
+
+Owner scope amendment: UI-01/02 now also support all registered BSR/IP assets under
+the three independent READ capabilities. Label this population explicitly, show
+the top-ten WO activity ranking as a bounded table, and link to the complete
+paginated Register. Do not render unrelated ADMIN domain metrics for this grant.
+Synthetic qualification remains separate from real Engineer UAT.

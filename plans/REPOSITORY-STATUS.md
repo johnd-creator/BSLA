@@ -1168,3 +1168,36 @@ read authorization remains proposed. No runtime/source/storage activation.
 Technical qualification and owner acceptance are independent; final CI/review
 receipts are recorded on the delivery PR. MTBF/MTTR and cross-inspection trends
 remain NOT_ELIGIBLE.
+
+
+## 2 November 2026 — NADI-WO-DETAIL-ENHANCEMENT-01 candidate
+
+Stacked on Draft PR119 (`119ba2f1472facedd71433d65b74f3b7d64a6434`):
+WO identity/status, six-group source detail, explicit Asia/Jakarta presentation,
+original ISO audit text and precise missing/unmapped/unverified/unexposed states.
+Additive allowlisted read detail and tested future local projection correction
+retain report/schedule/failure scalars without schema changes. Existing actual
+dates remain unavailable in the audited WO path; no source acquisition or
+operational reprojection is authorized. MTBF/MTTR remain NOT_ELIGIBLE.
+Implementation/synthetic qualification, exact-head CI, local activation and owner
+UAT are separate milestones. Activation is conditional on all mandatory gates;
+no current claim of deployment, merge or PO acceptance.
+[Requirements, lineage and boundaries](../reliability-cockpit/docs/NADI-WO-DETAIL-ENHANCEMENT-01.md).
+
+
+## 2 November 2026 — PR120 FINAL-UNBLOCK revised implementation
+
+PR12049ff is the immutable baseline, not the eventual new source HEAD. Separate
+read-only entitlements, scoped home/register/WO readers and a local CI equivalence
+verifier are implemented in its existing task branch. Independent review and final
+exact-head CI are recorded at delivery. PR121's reviewed nonprivileged qualification
+profile must pin the new candidate. Original main-only failures remain failures.
+PR119 stays active pending explicit grant/local-policy approval and fresh recovery/
+activation/UAT gates. No grant, account, source collection or retained-data change.
+[Integrated report](../reliability-cockpit/docs/NADI-PR120-FINAL-UNBLOCK-01.md).
+
+2 November owner amendment: registered BSR/IP Dashboard/Asset/Maintenance READ is
+approved beyond one asset. PR120's explicit scope, SQL-only Asset/WO summary and
+complete paginated Register require new exact-head qualification and a new
+Factual image;49ff image reuse is superseded. PR119 remains the running rollback
+baseline pending required approvals, session, recovery and real UAT.

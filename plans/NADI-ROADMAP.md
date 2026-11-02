@@ -1188,3 +1188,34 @@ read authorization remains proposed. No runtime/source/storage activation.
 Technical qualification and owner acceptance are independent; final CI/review
 receipts are recorded on the delivery PR. MTBF/MTTR and cross-inspection trends
 remain NOT_ELIGIBLE.
+
+
+## 2 November 2026 — NADI-WO-DETAIL-ENHANCEMENT-01 candidate
+
+Stacked on Draft PR119 (`119ba2f1472facedd71433d65b74f3b7d64a6434`):
+WO identity/status, six-group source detail, explicit Asia/Jakarta presentation,
+original ISO audit text and precise missing/unmapped/unverified/unexposed states.
+Additive allowlisted read detail and tested future local projection correction
+retain report/schedule/failure scalars without schema changes. Existing actual
+dates remain unavailable in the audited WO path; no source acquisition or
+operational reprojection is authorized. MTBF/MTTR remain NOT_ELIGIBLE.
+Implementation/synthetic qualification, exact-head CI, local activation and owner
+UAT are separate milestones. Activation is conditional on all mandatory gates;
+no current claim of deployment, merge or PO acceptance.
+[Requirements, lineage and boundaries](../reliability-cockpit/docs/NADI-WO-DETAIL-ENHANCEMENT-01.md).
+
+
+## 2 November 2026 — PR120 revised access/activation candidate
+
+The task adds separately owned Factual READ permissions and scoped Beranda/Asset/WO
+readers, without changing Engineering write scope or domain eligibility. Local-only
+stacked CI recognition is a separately approved policy; production main qualification
+remains unchanged. Source/testing, grant approval, installation, local activation and
+real UAT remain separate milestones. No Phase advancement, method approval or new
+PdM Log Book is inferred. [Owning report](../reliability-cockpit/docs/NADI-PR120-FINAL-UNBLOCK-01.md).
+
+Owner amendment, 2 November 2026: approved Dashboard/Asset/Maintenance READ across
+the registered BSR/IP population supersedes the initial one-asset proposal. PR120
+adds an explicit registered scope and maintenance-only aggregate read model. This
+is candidate implementation, not merged/visible/accepted scope; all activation,
+recovery and actual UAT gates remain. No additional roadmap phase is implied.

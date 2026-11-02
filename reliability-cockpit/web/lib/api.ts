@@ -47,6 +47,7 @@ export interface WorkClassificationView {
 }
 export interface MaintenanceEventView {
   classification?: WorkClassificationView | null;
+  source_detail?: {work_order_number: string | null; asset_number: string | null; reported_at: string | null; scheduled_start: string | null; scheduled_finish: string | null} | null;
   canonical_id: string; contract_version: string; id: string; equipment_id: string; work_order_id: string | null; event_type: string | null;
   status: string | null; actual_start: string | null; actual_finish: string | null; duration_hours: number | null; labor_hours: number | null;
   downtime_hours: number | null; failure_code: string | null; source_changed_at: string | null; site_code: string; organization_code: string;
@@ -296,6 +297,7 @@ export const cockpitApi = {
 };
 
 export const reliabilityApi = {
+  scopedOverview: () => get<import('./factual-read-contract').ScopedFactualOverview>("/v1/reliability/scoped-overview"),
   decisionOverview: (windowDays: 7 | 30 | 90 = 30) => get<DecisionOverviewView>(`/v1/reliability/decision-overview?window_days=${windowDays}`),
   assetHealthOverview: () => get<AssetHealthOverviewView>("/v1/reliability/asset-health/overview"),
   fmeaOverview: () => get<FmeaOverviewView>("/v1/reliability/fmea/overview"),

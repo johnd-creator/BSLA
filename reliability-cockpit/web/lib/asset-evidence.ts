@@ -28,13 +28,13 @@ export function evidenceError(error: unknown): string {
   return 'Evidence tidak tersedia atau respons tidak memenuhi kontrak. Coba lagi; jangan menarik kesimpulan kondisi.';
 }
 // Validate the bounded response before rendering; never silently discard a duplicate.
-export function validateMaintenance(page: Page<MaintenanceEventView>, asset: string, offset: number) {
+export function validateMaintenance(page: Page<MaintenanceEventView>, asset: string, offset: number, expectedLimit = EVIDENCE_LIMIT) {
   const seen = new Set<string>();
-  if (!page || !Array.isArray(page.items) || page.items.length > EVIDENCE_LIMIT || !page.meta ||
-    page.meta.offset !== offset || page.meta.limit !== EVIDENCE_LIMIT || !Number.isSafeInteger(page.meta.total) ||
+  if (!Number.isSafeInteger(expectedLimit) || expectedLimit < 1 || expectedLimit > 200 || !page || !Array.isArray(page.items) || page.items.length > expectedLimit || !page.meta ||
+    page.meta.offset !== offset || page.meta.limit !== expectedLimit || !Number.isSafeInteger(page.meta.total) ||
     page.meta.total < 0 || typeof page.meta.has_more !== 'boolean' ||
     page.meta.total < offset + page.items.length && page.items.length > 0) throw new Error('Invalid page');
-  if (page.items.length !== Math.min(EVIDENCE_LIMIT,Math.max(0,page.meta.total-offset)) || page.meta.has_more !== (offset+page.items.length < page.meta.total)) throw new Error('Incomplete page proof');
+  if (page.items.length !== Math.min(expectedLimit,Math.max(0,page.meta.total-offset)) || page.meta.has_more !== (offset+page.items.length < page.meta.total)) throw new Error('Incomplete page proof');
   const nullableText = (value: unknown) => value === null || typeof value === 'string';
   // MaintenanceView permits naive source datetimes. Validate calendar structure
   // only; preserve the original text and never assert an inferred source zone.
@@ -49,6 +49,10 @@ export function validateMaintenance(page: Page<MaintenanceEventView>, asset: str
       typeof row.canonical_id !== 'string' || !row.canonical_id || seen.has(row.canonical_id) || row.equipment_id !== asset ||
       row.site_code !== 'BSR' || row.organization_code !== 'IP') throw new Error('Invalid source identity');
     const c = row.classification;
+    const detail = row.source_detail;
+    if (detail != null && (typeof detail !== 'object' || Array.isArray(detail) ||
+      ![detail.work_order_number,detail.asset_number].every(value => value === null || typeof value === 'string' && value.trim().length > 0 && value.length <= 200) ||
+      ![detail.reported_at,detail.scheduled_start,detail.scheduled_finish].every(clock))) throw new Error('Invalid source detail');
     if (c != null && (typeof c !== 'object' || Array.isArray(c) ||
       ![c.raw_work_type,c.canonical_category,c.description,c.workflow_name,c.workflow_version].every(nullableText) ||
       !['CANONICAL_SUPPORTED','UNMAPPED','MISSING_RETAINED_TYPE','CANONICAL_ONLY'].includes(c.state) ||

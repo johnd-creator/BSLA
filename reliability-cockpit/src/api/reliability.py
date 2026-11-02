@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+import re
 from typing import Generic, Literal, TypeVar
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -15,6 +16,7 @@ from src.repositories.mart_database import MartDatabase, MartDatabaseConfigError
 from src.repositories.mart_reader import MartQueryRepository, QueryPage
 from src.services.asset_af_mapping import AssetAfMappingResolution
 from src.services.reliability import ReliabilityQueryService, TimelineEvent
+from src.services.registered_maintenance_overview import registered_maintenance_overview as registered_maintenance_read
 
 router = APIRouter(prefix="/v1/reliability", tags=["reliability-mart"])
 Sort = Literal["updated_desc", "updated_asc", "status", "date_desc", "date_asc", "created_desc", "created_asc"]
@@ -51,6 +53,35 @@ class AssetView(BaseModel):
     source_updated_at: datetime | None = None
 
 
+class RegisteredReadScope(BaseModel):
+    site_code: Literal["BSR"] = "BSR"
+    organization_code: Literal["IP"] = "IP"
+    kind: Literal["REGISTERED_BSR_IP"] = "REGISTERED_BSR_IP"
+
+
+class RegisteredMaintenanceSummary(BaseModel):
+    registered_assets: int = Field(ge=0)
+    maintenance_events: int = Field(ge=0)
+    assets_with_maintenance: int = Field(ge=0)
+
+
+class RegisteredMaintenanceAsset(BaseModel):
+    canonical_id: str
+    source_asset_number: str | None = None
+    description: str | None = None
+    maintenance_events: int = Field(ge=1)
+    latest_retained_activity: datetime | None = None
+
+
+class RegisteredMaintenanceOverview(BaseModel):
+    scope: RegisteredReadScope
+    as_of: datetime
+    summary: RegisteredMaintenanceSummary
+    assets: list[RegisteredMaintenanceAsset] = Field(max_length=10)
+    restricted_sections: list[str]
+    operational_kpis: Literal["NOT_ELIGIBLE"]
+
+
 class WorkClassificationView(BaseModel):
     raw_work_type: str | None = None
     canonical_category: str | None = None
@@ -64,6 +95,16 @@ class WorkClassificationView(BaseModel):
     status_state: Literal["AVAILABLE", "MISSING_RETAINED_STATUS"]
 
 
+class MaintenanceSourceDetailView(BaseModel):
+    """Allowlisted retained scalars; no legacy-store join or source acquisition."""
+
+    work_order_number: str | None = None
+    asset_number: str | None = None
+    reported_at: str | None = None
+    scheduled_start: str | None = None
+    scheduled_finish: str | None = None
+
+
 class MaintenanceView(BaseModel):
     canonical_id: str
     contract_version: str
@@ -72,6 +113,7 @@ class MaintenanceView(BaseModel):
     work_order_id: str | None = None
     event_type: str | None = None
     classification: WorkClassificationView | None = None
+    source_detail: MaintenanceSourceDetailView | None = None
     status: str | None = None
     actual_start: datetime | None = None
     actual_finish: datetime | None = None
@@ -737,7 +779,32 @@ def _maintenance(row) -> MaintenanceView:
         confidence="VERIFIED" if raw and canonical == raw else "UNRESOLVED",
         status_state="AVAILABLE" if isinstance(row.status, str) and row.status.strip() else "MISSING_RETAINED_STATUS",
     )
-    return MaintenanceView.model_validate({**{k: getattr(row, k) for k in MaintenanceView.model_fields if k != "classification"}, "classification": classification})
+    def scalar(key: str) -> str | None:
+        value = maximo.get(key)
+        return value if isinstance(value, str) and value.strip() and len(value) <= 200 else None
+
+    def clock(key: str) -> str | None:
+        value = scalar(key)
+        if value is None or not re.fullmatch(
+            r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])?", value
+        ):
+            return None
+        try:
+            datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError:
+            return None
+        # Preserve the original offset, fractional precision and naive clocks.
+        return value
+
+    detail = MaintenanceSourceDetailView(
+        work_order_number=scalar("wonum"), asset_number=scalar("assetnum"),
+        reported_at=clock("reportdate"), scheduled_start=clock("schedstart"),
+        scheduled_finish=clock("schedfinish"),
+    )
+    return MaintenanceView.model_validate({
+        **{k: getattr(row, k) for k in MaintenanceView.model_fields if k not in {"classification", "source_detail"}},
+        "classification": classification, "source_detail": detail,
+    })
 
 
 def _fmea(row) -> FmeaView:
@@ -970,6 +1037,11 @@ def list_assets(
 @router.get("/registry", response_model=RegistryView, summary="Current registered Reliability Asset snapshot")
 def registry(service: ReliabilityQueryService = Depends(_service)) -> RegistryView:
     return RegistryView(**service.repository.registry_summary())
+
+
+@router.get("/registered-maintenance-overview", response_model=RegisteredMaintenanceOverview, summary="Registry BSR/IP Asset and retained WO summary only")
+def registered_maintenance_overview(service: ReliabilityQueryService = Depends(_service)) -> RegisteredMaintenanceOverview:
+    return RegisteredMaintenanceOverview(**registered_maintenance_read(service.repository.database))
 
 
 @router.get("/decision-overview", response_model=DecisionOverviewView, summary="Bounded factual Reliability decision overview")

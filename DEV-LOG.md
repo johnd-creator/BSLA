@@ -1216,3 +1216,74 @@ read authorization remains proposed. No runtime/source/storage activation.
 Technical qualification and owner acceptance are independent; final CI/review
 receipts are recorded on the delivery PR. MTBF/MTTR and cross-inspection trends
 remain NOT_ELIGIBLE.
+
+
+## 2 November 2026 — NADI-WO-DETAIL-ENHANCEMENT-01 candidate
+
+Stacked on Draft PR119 (`119ba2f1472facedd71433d65b74f3b7d64a6434`):
+WO identity/status, six-group source detail, explicit Asia/Jakarta presentation,
+original ISO audit text and precise missing/unmapped/unverified/unexposed states.
+Additive allowlisted read detail and tested future local projection correction
+retain report/schedule/failure scalars without schema changes. Existing actual
+dates remain unavailable in the audited WO path; no source acquisition or
+operational reprojection is authorized. MTBF/MTTR remain NOT_ELIGIBLE.
+Implementation/synthetic qualification, exact-head CI, local activation and owner
+UAT are separate milestones. Activation is conditional on all mandatory gates;
+no current claim of deployment, merge or PO acceptance.
+[Requirements, lineage and boundaries](reliability-cockpit/docs/NADI-WO-DETAIL-ENHANCEMENT-01.md).
+
+
+### WO detail qualification correction and activation hold — 2 November 2026
+
+Draft PR120 is stacked on PR119. Independent source/security review and isolated
+WO compatibility/rendering qualification passed; the full local backend suite
+runs with the declared optional workbook test dependencies in disposable /tmp,
+without changing operational environments. An inherited PdM browser fixture shared
+one mutable actor across author/reviewer tabs. Its correction binds fixture
+identity per tab, deliberately refreshes the retained reviewer while the author
+works, and preserves the full CSRF/revision/independent-review/role-loss assertions.
+This changes synthetic test behavior only; product/auth source is unchanged.
+
+Local activation remains stopped before service mutation: legitimate engineer
+Asset access is denied by the existing factual capability boundary, and the
+separate Maximo CI selector permits main-target PRs only while this task requires
+a stack on PR119. No grants or CI selector policy were broadened. Final exact-head
+backend/frontend results belong to PR120 and owner-private receipts. No fresh
+operational backup/restore/transition is claimed for this blocked attempt; those
+gates must run afresh after blockers are resolved. Runtime remains PR119, actual
+WO browser UAT is pending, and source retrieval/reprojection needs separate
+approval. Operational aggregates and screenshots remain private.
+
+
+## 2 November 2026 — NADI-PR120-FINAL-UNBLOCK-01 revised candidate
+
+Implemented immutable-subject Factual READ ledger/private administration, scoped
+Beranda/Register/Maintenance readers and distinct local-development qualification
+recognition. Engineering AUTHOR scope, existing admin portfolio behavior, account/
+demo parity and production main-only gate remain. Independent review findings on
+typed/page proof, directory identity, legacy access, sorting and uncertain commit
+were corrected with synthetic regressions. Local qualification includes private
+ledger/SQLite mutation tests, intercepted actual-component Engineer journey and
+read-only verification of original PR121 hosted evidence; final immutable review/CI
+are recorded at handoff. Actual grant issuance, policy recognition, controller
+installation, fresh operational recovery, cutover and real UAT remain separately
+gated. PR119 is retained. [Report](reliability-cockpit/docs/NADI-PR120-FINAL-UNBLOCK-01.md).
+
+## 2 November 2026 — owner-approved registered-population READ amendment
+
+The owner approved Dashboard, Asset and Maintenance READ beyond one asset. Added
+explicit REGISTERED_BSR_IP ledger/approval/revoke binding, whole Registry server
+pagination and a dedicated SQL aggregate/ranking read model over Registry/Asset/WO
+only. The Engineer remains AUTHOR with unchanged Engineering write scope. The
+existing ADMIN dashboard and unrelated domain boundaries remain. Synthetic tests
+cover >20 assets, full counts, foreign/unregistered denial, expiry/revoke races,
+uneven counts, zero-WO assets and no unrelated domain SQL. Exact-head CI/review and
+a new Factual image are required; prior49ff image reuse is no longer compatible.
+Grant issuance, local-policy/controller approval, fresh Engineer session/recovery,
+service transition and real browser UAT remain separately gated. PR119 retained.
+
+Recovery compatibility refinement: placed the registered Asset/WO query in its own
+read-only service module and restored the repository tree to PR119 bytes. The
+existing controller fixture/recovery contract and all prior methods stay intact;
+no new compatibility exception or persistence change. CI/review/image seals follow
+the new immutable head before any activation.
