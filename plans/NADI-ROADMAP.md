@@ -1228,3 +1228,12 @@ hermetic scope/API and synthetic browser verification. Live visibility, hosted
 exact-head qualification, merge and PO acceptance require separate evidence.
 Retained gaps and role semantics remain unresolved; no collection, Registry
 import, grant change or phase advancement is claimed. Logbook PdM remains HOLD.
+
+## NADI source integration 2026-11-02
+
+Owner-authorized Sprint/WO source integration PR114–120 and hierarchy PR122 is
+MERGED. [Evidence and remaining gates](../docs/NADI-NIGHT-INTEGRATION-20261102.md) supersede earlier open/draft
+source checkpoints only. The bounded live Maximo pilot verifies the existing
+read path without importing data; full hierarchy population and role semantics
+remain PARTIAL/UNKNOWN. Runtime remains PR119; Phase1, M02/Q01–Q10 and PO/operational
+acceptance do not advance. Logbook PdM remains HOLD.

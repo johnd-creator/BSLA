@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "task": "NADI-ASSET-HIERARCHY-01",
+  "verified_at": "2026-11-02",
+  "system": "MAXIMO",
+  "object_structure": "mxapiasset",
+  "endpoint": "/oslc/os/mxapiasset",
+  "business_methods": [
+    "GET"
+  ],
+  "authentication_exception": "existing login mechanism, exact /j_security_check only",
+  "scope": {
+    "siteid": "BSR",
+    "orgid": "IP",
+    "eq11": "CS01",
+    "selection": "owner-selected registered pilot and its direct children"
+  },
+  "endpoint_read_status": "VERIFIED_IN_BOUNDED_PILOT",
+  "parent_filter_status": "VERIFIED_IN_BOUNDED_PILOT",
+  "response_status": "HTTP_200",
+  "population_coverage": "PARTIAL",
+  "hierarchy_role_semantics": "UNKNOWN",
+  "paging_scope": "one bounded page per query; full traversal not claimed",
+  "field_types": {
+    "assetnum": [
+      "string"
+    ],
+    "siteid": [
+      "string"
+    ],
+    "orgid": [
+      "string"
+    ],
+    "eq11": [
+      "string"
+    ],
+    "parent": [
+      "string"
+    ],
+    "ancestor": [
+      "string"
+    ],
+    "children": [
+      "boolean"
+    ],
+    "hierarchypath": [
+      "string",
+      "null"
+    ],
+    "mainthierchy": [
+      "boolean"
+    ],
+    "assettype": [
+      "string"
+    ],
+    "status": [
+      "string"
+    ],
+    "changedate": [
+      "string"
+    ]
+  },
+  "semantic_limits": [
+    "Do not infer system/equipment/component role from boolean flags, ID prefixes or Excel.",
+    "Do not parse hierarchypath as a canonical path solely from its name.",
+    "Source change time is distinct from retrieval time and ingestion freshness."
+  ],
+  "source_business_writes": false,
+  "collector_or_mart_writes": false,
+  "permissions_expanded": false,
+  "raw_examples_published": false,
+  "evidence_custody": "private owner-controlled receipt; no credentials/cookies/tokens persisted"
+}

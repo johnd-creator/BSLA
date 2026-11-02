@@ -1,5 +1,7 @@
 # NADI — project context
 
+Current source/runtime checkpoint: [2 November integration](docs/NADI-NIGHT-INTEGRATION-20261102.md). Earlier dated sections retain historical scope.
+
 Updated: 2026-10-10 · NADI-DOC-FOUNDATION-01. Start here after [AGENTS.md](AGENTS.md).
 
 **NADI — Reliability Data Platform** supports reliability engineering and asset
@@ -104,3 +106,11 @@ not import Excel or expand Registry/Engineer grants. Coverage remains PARTIAL;
 source role semantics remain UNKNOWN. Implementation/testing, merge, deployment
 and Product Owner acceptance remain separate. Local activation is still stopped
 at the official PR120 source-compatibility gate; Logbook PdM remains HOLD.
+
+## NADI source integration 2026-11-02
+
+PR114–120 and122 are MERGED with exact-head CI and independent review. The
+[reconciled checkpoint](docs/NADI-NIGHT-INTEGRATION-20261102.md) distinguishes merged source, the authorized
+bounded live Maximo hierarchy read, partial population/UNKNOWN roles and unchanged
+PR119 runtime. Local activation is BLOCKED at the official controller source gate;
+no grant or service transition occurred. Logbook PdM remains HOLD.

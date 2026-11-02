@@ -1,5 +1,7 @@
 # Repository status and debt — PLATFORM-ROADMAP-001
 
+Current source/runtime checkpoint: [2 November integration](../docs/NADI-NIGHT-INTEGRATION-20261102.md). Earlier dated sections retain historical scope.
+
 ## 1 November2026 — Sprint4 isolated Reliability Performance foundation
 
 [Draft PR117](https://github.com/johnd-creator/reliability-knowledge-starter/pull/117)
@@ -40,7 +42,7 @@ is valid but freshness expired, and official session proof expired. No Sprint2
 cutover, account change, import, source call or operational service restart occurred.
 Pending human method/comparability and later activation gates are explicit.
 
-Latest verified source checkpoint: [19 October 2026 — PR105 integration](#19-october-2026--verified-pr105-source-integration-and-next-batch). Historical runtime/policy checkpoints below retain their dated scope.
+Latest verified source checkpoint: [NADI source integration 2026-11-02](#nadi-source-integration-2026-11-02). Historical source/runtime/policy checkpoints below retain their dated scope.
 
 ## Source-free 72h review — 12 Oktober 2026
 
@@ -1210,3 +1212,12 @@ source ownership, existing Registry/Engineering authorities and historical scope
 fences. Parent/child context is read-only and explicitly partial. Local runtime
 remains PR119; no cutover or PO acceptance is inferred from source work. The
 official PR120 controller source gate remains a separate blocking condition.
+
+## NADI source integration 2026-11-02
+
+Source main at00aaeda1d3b89141fd20c870277addc03c29a231 contains owner-authorized
+ordinary merges PR114–120 and122; [exact source/CI matrix](../docs/NADI-NIGHT-INTEGRATION-20261102.md). PR121 is
+held Draft as an obsolete task-pinned profile. Other historical/recovery stacks
+remain outside this merge scope. Runtime/controller/data/grants remain separate:
+original PR119 is still active and activation BLOCKED. Maximo read-only hierarchy
+pilot PASS is not a full ingestion or canonical role approval.

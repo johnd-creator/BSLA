@@ -91,3 +91,13 @@ objects; only the target master is inaccessible:
 
 Granting READ sigoption (scoped to BSR) on these underlying objects will make
 them discoverable and join-testable on the next run.
+
+## 2026-11-02 hierarchy read verification
+
+A bounded authenticated BSR/IP/CS01 pilot verified the existing MXAPIASSET
+parent-child filter and retained relationship match. See the [sanitized field/type
+receipt](../discovery/nadi-hierarchy-read-verification-20261102.json) and the
+[platform checkpoint](../../docs/NADI-NIGHT-INTEGRATION-20261102.md). No raw plant
+example is published. `mainthierchy` boolean and `hierarchypath` string do not
+establish canonical role/path semantics; system/equipment/component stays UNKNOWN.
+No full-population coverage, permission expansion or local ingestion is claimed.

@@ -1300,3 +1300,18 @@ gateway denial/revocation checks and synthetic 390/768/1440px keyboard/drill/bac
 and axe checks pass. Hosted CI, independent final review, merge and PO/live UAT
 remain separate gates. The original PR120 READ manifest and historical F01–F24
 pins are preserved through finite exact hierarchy exceptions. Logbook PdM HOLD.
+
+
+## NADI source integration 2026-11-02
+
+Owner-authorized dependency-ordered merges PR114–120 and122 completed, each final
+merge tree sealed against its qualified source. [Reconciled source/runtime and
+Maximo read evidence](docs/NADI-NIGHT-INTEGRATION-20261102.md) records exact heads, CI, the assertion-preserving
+synthetic actor correction and directive-order build repair. PR120 canonical
+Maximo main-policy qualification passes on its actual main-target exact head;
+no selector/production policy changed. A bounded live Maximo pilot uses existing
+worker auth under BSR/IP/CS01, matches retained parent evidence and writes no
+source business/Collector/Mart data. Raw evidence stays private; population remains
+PARTIAL and roles UNKNOWN. All35 existing services are preserved, localhost stays
+original PR119, and the official source-compatibility STOP is retained. Fresh
+activation backup/restore/UAT and grant issuance were not performed. Logbook HOLD.
