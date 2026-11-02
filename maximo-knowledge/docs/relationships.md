@@ -91,3 +91,26 @@ objects; only the target master is inaccessible:
 
 Granting READ sigoption (scoped to BSR) on these underlying objects will make
 them discoverable and join-testable on the next run.
+
+## 2026-11-02 hierarchy read verification
+
+A bounded authenticated BSR/IP/CS01 pilot verified the existing MXAPIASSET
+parent-child filter and retained relationship match. See the [sanitized field/type
+receipt](../discovery/nadi-hierarchy-read-verification-20261102.json) and the
+[platform checkpoint](../../docs/NADI-NIGHT-INTEGRATION-20261102.md). No raw plant
+example is published. `mainthierchy` boolean and `hierarchypath` string do not
+establish canonical role/path semantics; system/equipment/component stays UNKNOWN.
+No full-population coverage, permission expansion or local ingestion is claimed.
+
+
+### Scoped source-ingestion follow-up — 2026-11-03 WIB
+
+The approved registered CS01 gap-root subset was paged against Maximo, with capped
+groups refined until that subset was exhausted. New technical child rows passed
+fresh private backup/independent isolated restore and exact-packet normal-writer
+rehearsal before append to the existing Maximo-owned Collector/Mart. Old master,
+Registry, mapping, ledger and asset-cursor fingerprints remain unchanged; the run
+is PARTIAL and does not advance global cursors. No Registry import, role inference,
+WO backfill, source write or service change. Full population/role acceptance stays
+PARTIAL/UNKNOWN and local PR120 activation stays BLOCKED. Evidence and cardinalities
+remain private; see the [integrated source report](../../docs/NADI-NIGHT-INTEGRATION-20261102.md) for the bounded method.
