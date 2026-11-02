@@ -1,4 +1,4 @@
-import {reviewedClassificationPaths} from './wo-sr-preservation.mjs';
+import {reviewedClassificationPaths,reviewedClassificationHashes} from './wo-sr-preservation.mjs';
 // Immutable Sprint5 preservation boundary; only the reviewed corrupt-response helper changes.
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
@@ -11,7 +11,7 @@ const protectedPaths=['reliability-cockpit/src','reliability-cockpit/migrations'
 const exception='reliability-cockpit/web/lib/asset-evidence.ts';
 const changed=git('-C',root,'diff','--name-only',base,'--',...protectedPaths).split('\n').filter(Boolean).filter(path => path === exception || !reviewedClassificationPaths.includes(path));
 assert.deepEqual(changed,[exception],'unexpected runtime/auth/store/source/contract mutation');
-assert.equal(createHash('sha256').update(readFileSync(root+'/'+exception)).digest('hex'),'f7c38766b41ce29d546c5fd318d6644adbc7d97f847a96782c2f38d726ab511b');
+assert.equal(createHash('sha256').update(readFileSync(root+'/'+exception)).digest('hex'),reviewedClassificationHashes[exception]);
 assert.equal(git('-C',root,'ls-files','--others','--exclude-standard','--',...protectedPaths),'');
 assert.equal(git('-C',root,'merge-base',base,'HEAD'),base);
-console.log('Sprint5 preservation PASS: four hash-pinned classification exceptions; all other backend/components,28 routes,5 navigation, auth, contracts, schema, collectors and controller unchanged');
+console.log('Sprint5 preservation PASS: hash-pinned WO detail exceptions; all other backend/components,28 routes,5 navigation, auth, contracts, schema, collectors and controller unchanged');

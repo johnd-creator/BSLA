@@ -15,4 +15,4 @@ const emit=source=>ts.transpileModule(source,{compilerOptions:{module:ts.ModuleK
 const api='reliability-cockpit/web/lib/api.ts';assert.equal(emit(readFileSync(root+'/'+api,'utf8')),emit(git('show',base+':'+api)),'API emitted code changed; only existing DTO types are authorized');
 const pages=git('ls-tree','-r','--name-only',base,'reliability-cockpit/web/app').trim().split('\n').filter(x=>x.endsWith('/page.tsx'));
 assert.equal(pages.length,28);assert.equal(git('ls-files','--others','--exclude-standard','--','reliability-cockpit/web/app').trim(),'','no parallel app routes');
-console.log('Sprint3 preservation PASS: F01–F24 four hash-pinned WO classification exceptions; all other source/auth/session/runtime/collector/retained schema/5-primary navigation unchanged; API emitted JS identical;28 routes retained');
+console.log('Sprint3 preservation PASS: F01–F24 hash-pinned WO classification/detail and future-projection exceptions; all other source/auth/session/runtime/collector/retained schema/5-primary navigation unchanged; API emitted JS identical;28 routes retained');

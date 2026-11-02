@@ -8,4 +8,4 @@ export default tseslint.config({
   extends: [...tseslint.configs.recommended],
   plugins: { "react-hooks": hooks, "jsx-a11y": a11y },
   rules: { ...hooks.configs.recommended.rules, ...a11y.configs.recommended.rules, "jsx-a11y/no-noninteractive-tabindex": ["error", { roles: ["region"] }] },
-});
+}, {files: ["lib/wo-date.ts"], extends: [...tseslint.configs.recommended]});

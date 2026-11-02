@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+import re
 from typing import Generic, Literal, TypeVar
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -64,6 +65,16 @@ class WorkClassificationView(BaseModel):
     status_state: Literal["AVAILABLE", "MISSING_RETAINED_STATUS"]
 
 
+class MaintenanceSourceDetailView(BaseModel):
+    """Allowlisted retained scalars; no legacy-store join or source acquisition."""
+
+    work_order_number: str | None = None
+    asset_number: str | None = None
+    reported_at: str | None = None
+    scheduled_start: str | None = None
+    scheduled_finish: str | None = None
+
+
 class MaintenanceView(BaseModel):
     canonical_id: str
     contract_version: str
@@ -72,6 +83,7 @@ class MaintenanceView(BaseModel):
     work_order_id: str | None = None
     event_type: str | None = None
     classification: WorkClassificationView | None = None
+    source_detail: MaintenanceSourceDetailView | None = None
     status: str | None = None
     actual_start: datetime | None = None
     actual_finish: datetime | None = None
@@ -737,7 +749,32 @@ def _maintenance(row) -> MaintenanceView:
         confidence="VERIFIED" if raw and canonical == raw else "UNRESOLVED",
         status_state="AVAILABLE" if isinstance(row.status, str) and row.status.strip() else "MISSING_RETAINED_STATUS",
     )
-    return MaintenanceView.model_validate({**{k: getattr(row, k) for k in MaintenanceView.model_fields if k != "classification"}, "classification": classification})
+    def scalar(key: str) -> str | None:
+        value = maximo.get(key)
+        return value if isinstance(value, str) and value.strip() and len(value) <= 200 else None
+
+    def clock(key: str) -> str | None:
+        value = scalar(key)
+        if value is None or not re.fullmatch(
+            r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])?", value
+        ):
+            return None
+        try:
+            datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError:
+            return None
+        # Preserve the original offset, fractional precision and naive clocks.
+        return value
+
+    detail = MaintenanceSourceDetailView(
+        work_order_number=scalar("wonum"), asset_number=scalar("assetnum"),
+        reported_at=clock("reportdate"), scheduled_start=clock("schedstart"),
+        scheduled_finish=clock("schedfinish"),
+    )
+    return MaintenanceView.model_validate({
+        **{k: getattr(row, k) for k in MaintenanceView.model_fields if k not in {"classification", "source_detail"}},
+        "classification": classification, "source_detail": detail,
+    })
 
 
 def _fmea(row) -> FmeaView:

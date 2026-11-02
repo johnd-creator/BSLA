@@ -49,6 +49,10 @@ export function validateMaintenance(page: Page<MaintenanceEventView>, asset: str
       typeof row.canonical_id !== 'string' || !row.canonical_id || seen.has(row.canonical_id) || row.equipment_id !== asset ||
       row.site_code !== 'BSR' || row.organization_code !== 'IP') throw new Error('Invalid source identity');
     const c = row.classification;
+    const detail = row.source_detail;
+    if (detail != null && (typeof detail !== 'object' || Array.isArray(detail) ||
+      ![detail.work_order_number,detail.asset_number].every(value => value === null || typeof value === 'string' && value.trim().length > 0 && value.length <= 200) ||
+      ![detail.reported_at,detail.scheduled_start,detail.scheduled_finish].every(clock))) throw new Error('Invalid source detail');
     if (c != null && (typeof c !== 'object' || Array.isArray(c) ||
       ![c.raw_work_type,c.canonical_category,c.description,c.workflow_name,c.workflow_version].every(nullableText) ||
       !['CANONICAL_SUPPORTED','UNMAPPED','MISSING_RETAINED_TYPE','CANONICAL_ONLY'].includes(c.state) ||
