@@ -1,5 +1,18 @@
 # Repository status and debt — PLATFORM-ROADMAP-001
 
+## 1 November2026 — Sprint4 isolated Reliability Performance foundation
+
+[Draft PR117](https://github.com/johnd-creator/reliability-knowledge-starter/pull/117)
+preserves unmerged PR116 exact3778584→115→114 ancestry. Main verifiedf1fc4e8.
+[Technical delivery](../reliability-cockpit/docs/NADI-PDM-SPRINT-04-DELIVERY.md) and
+PR117 final receipt distinguish candidate implementation/CI/review from actual
+method/source/PO approval, merge or activation. Existing active shared contracts,
+collectors, retained schema/data and authentication are unchanged. Official local
+status before/after preserves Sprint2 front/backend3a01e842 on HTTPS3000; no Sprint4
+promotion. Reliability Performance remains operationally NOT_ELIGIBLE. Legacy KPI
+meanings are retained with a source-backed documentation correction. Sprint5 has
+only a proposed handoff, not implementation authorization.
+
 ## 1 November 2026 — Sprint3 isolated asset-evidence candidate
 
 [Draft PR116](https://github.com/johnd-creator/reliability-knowledge-starter/pull/116)

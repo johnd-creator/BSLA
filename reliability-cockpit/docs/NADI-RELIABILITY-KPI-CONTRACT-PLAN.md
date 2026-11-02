@@ -59,3 +59,13 @@ Crosswalk kandidat harus memuat canonical Asset identity + site/org, source alia
 Reuse [Asset↔AF governance](asset-af-mapping-admin.md): internal reviewed operator flow, bukan public mutation API. Import current mapping hanya menerima allowlisted CENTRAL_PI alias dan schema existing; **jangan** menyelipkan DCS alias ke field AF. DCS extension perlu contract/version/owner review terlebih dahulu dan tetap di owning store existing. Candidate→independent verification→approved bounded import→read-only consumer adalah gate terpisah; belum ada automatic mapping atau canonical trend join.
 
 Output discovery yang direncanakan: sanitized inventory, exact-source crosswalk candidates, unresolved list, signed unit/time/quality/comparability evidence, contract diff proposal dan bounded execution request. Semua tetap proposal sampai disetujui; tidak ada asset auto-registration, data migration, collector restart atau backfill tersirat.
+
+## Sprint4 offline foundation authorization — 1 November2026
+
+The Product Owner explicitly authorizes isolated candidate models, deterministic
+synthetic MTBF/MTTR calculations and technical qualification. This supersedes the
+older future-implementation sequencing only within this offline scope; no engineer
+policy, source/semantic approval, operational calculation or activation is granted.
+See [Sprint4 delivery](NADI-PDM-SPRINT-04-DELIVERY.md). Correction to the opening
+legacy CM description: [the source audit](kpi.md#1-november2026--source-audit-correction-behavior-preserved)
+records that actual legacy code counts any truthy failure_code, without CM checking.

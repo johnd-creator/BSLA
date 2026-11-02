@@ -1,0 +1,60 @@
+{
+  "label": "SYNTHETIC ONLY",
+  "checks": [
+    "repeat selection reloads without stuck state; no portfolio fetch on performance deep link",
+    "lazy authorized activity/detail uses unchanged exactasset contract, no failure join",
+    "401/403/503 states preserve access/error distinction, no previous asset leakage",
+    "scope change synchronously hides old identity and dataset",
+    "existing Reports catalog and exact period/asset context survive return and browser back/forward",
+    "offline numerical reference visible only in explicitly test-only demonstrator"
+  ],
+  "shots": [
+    "01-performance-empty.png",
+    "02-performance-readiness.png",
+    "03-authorized-activity-source.png",
+    "04-performance-403.png",
+    "05-loading.png",
+    "06-readiness-390-light.png",
+    "06-readiness-390-dark.png",
+    "06-readiness-1440-light.png",
+    "06-readiness-1440-dark.png",
+    "07-synthetic-reference.png"
+  ],
+  "accessibility": [
+    {
+      "name": "desktop readiness",
+      "violations": 0
+    },
+    {
+      "name": "readiness 390 light",
+      "violations": 0
+    },
+    {
+      "name": "readiness 390 dark",
+      "violations": 0
+    },
+    {
+      "name": "readiness 768 light",
+      "violations": 0
+    },
+    {
+      "name": "readiness 768 dark",
+      "violations": 0
+    },
+    {
+      "name": "readiness 1440 light",
+      "violations": 0
+    },
+    {
+      "name": "readiness 1440 dark",
+      "violations": 0
+    },
+    {
+      "name": "synthetic reference",
+      "violations": 0
+    }
+  ],
+  "requests": 63,
+  "errors": [],
+  "operational_eligibility": "NOT_ELIGIBLE"
+}

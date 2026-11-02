@@ -613,3 +613,15 @@ section anchors support Back/Forward without discard; mandatory warnings/errors
 remain visible. Synthetic 390/768/1440/1920 light/dark evidence supports review,
 not live visibility, method approval or PO UX acceptance. F23/F24 parity gates
 require a separate compatibility/activation task.
+
+
+## Sprint4 readiness candidate — 1 November2026
+
+Five primary navigation entries and existing report catalog remain. Laporan adds
+Kinerja Reliabilitas as a contextual subview: exactasset/explicit period → eligibility
+and owner decisions → optional authorized activity/source detail → return with
+URL context. MTBF/MTTR say Belum dapat dihitung / NOT_ELIGIBLE. No real numerical
+result, health grade or traffic-light state. Numerical reference screenshots are
+clearly labelled test-only components, disconnected from application imports.
+[Candidate gallery and limits](../../reliability-cockpit/docs/NADI-PDM-SPRINT-04-DELIVERY.md).
+This implementation does not constitute PO or engineer method acceptance.

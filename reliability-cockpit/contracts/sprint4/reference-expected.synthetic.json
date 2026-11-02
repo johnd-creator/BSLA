@@ -1,0 +1,17 @@
+{
+  "label": "SYNTHETIC ONLY \u2014 independently hand-calculated reference",
+  "mtbf": {
+    "numerator_hours": "600",
+    "denominator": 2,
+    "value": "300"
+  },
+  "mttr": {
+    "numerator_hours": "4",
+    "denominator": 2,
+    "value": "2"
+  },
+  "total_outage_A_hours": "4",
+  "waiting_A_hours": "2",
+  "active_A_hours": "2",
+  "operational_eligibility": "NOT_ELIGIBLE"
+}

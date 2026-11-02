@@ -1172,3 +1172,21 @@ bytes. Both jobs and independent final-head review are required again.
 - Official read-only status before/after: active Sprint2 pair3a, samecontroller/
   retained-store readiness. Human PO/method/mapping approval remains pending.
 - [Complete delivery](reliability-cockpit/docs/NADI-PDM-SPRINT-03-DELIVERY.md).
+
+
+## 2026-11-01 — NADI-PDM-SPRINT-04 isolated foundation
+
+- One stacked Draft PR117, basePR116 exact3778584; no merge, activation or production.
+- Versioned candidate input/result contracts and pure synthetic MTBF/MTTR with
+  explicit identity, quality, revision, window and active-repair/exposure gates.
+  Operational KPI always NOT_ELIGIBLE; legacy source/semantics unchanged.
+- Laporan readiness subview reuses exact authorized Asset/maintenance GETs; no
+  calculator endpoint, synthetic app import, retained store/schema/auth/collector change.
+-36 foundation +9 legacy tests, existing full regression checkpoint844 (220 local
+  optional-environment skips),19 frontend gates/build/tsc;10 synthetic screenshots
+  and8 automated WCAG states. Final immutable CI/review receipts on PR117.
+- Independent review repairs cover UTC/IANA overflow, strict offsets, deterministic
+  Decimal/microsecond durations, outage/wait/episode contradictions, false per-asset
+  evidence availability and non-vacuous import protection.
+- [Delivery/decision register](reliability-cockpit/docs/NADI-PDM-SPRINT-04-DELIVERY.md),
+  [proposed Sprint5 handoff](reliability-cockpit/docs/NADI-SPRINT5-STABILIZATION-HANDOFF.md).
