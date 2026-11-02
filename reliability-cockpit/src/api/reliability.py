@@ -51,6 +51,19 @@ class AssetView(BaseModel):
     source_updated_at: datetime | None = None
 
 
+class WorkClassificationView(BaseModel):
+    raw_work_type: str | None = None
+    canonical_category: str | None = None
+    state: Literal["CANONICAL_SUPPORTED", "UNMAPPED", "MISSING_RETAINED_TYPE", "CANONICAL_ONLY"]
+    origin: Literal["RETAINED_MAXIMO_WORKTYPE", "CANONICAL_EVENT_TYPE", "NOT_AVAILABLE"]
+    confidence: Literal["VERIFIED", "UNRESOLVED"]
+    description: str | None = None
+    workflow_name: str | None = None
+    workflow_version: str | None = None
+    workflow_state: Literal["NOT_AVAILABLE"] = "NOT_AVAILABLE"
+    status_state: Literal["AVAILABLE", "MISSING_RETAINED_STATUS"]
+
+
 class MaintenanceView(BaseModel):
     canonical_id: str
     contract_version: str
@@ -58,6 +71,7 @@ class MaintenanceView(BaseModel):
     equipment_id: str
     work_order_id: str | None = None
     event_type: str | None = None
+    classification: WorkClassificationView | None = None
     status: str | None = None
     actual_start: datetime | None = None
     actual_finish: datetime | None = None
@@ -709,7 +723,21 @@ def _mapping_response(resolution: AssetAfMappingResolution) -> AssetAfMappingRes
 
 
 def _maintenance(row) -> MaintenanceView:
-    return MaintenanceView.model_validate({k: getattr(row, k) for k in MaintenanceView.model_fields})
+    # Expose only reviewed scalar fields, never the vendor JSON or provenance.
+    source = row.sources if isinstance(row.sources, dict) else {}
+    maximo = source.get("maximo")
+    maximo = maximo if isinstance(maximo, dict) else {}
+    value = maximo.get("worktype")
+    raw = value if isinstance(value, str) and value.strip() else None
+    canonical = row.event_type if isinstance(row.event_type, str) and row.event_type.strip() else None
+    state = ("CANONICAL_SUPPORTED" if canonical else "UNMAPPED") if raw else ("CANONICAL_ONLY" if canonical else "MISSING_RETAINED_TYPE")
+    classification = WorkClassificationView(
+        raw_work_type=raw, canonical_category=canonical, state=state,
+        origin="RETAINED_MAXIMO_WORKTYPE" if raw else "CANONICAL_EVENT_TYPE" if canonical else "NOT_AVAILABLE",
+        confidence="VERIFIED" if raw and canonical == raw else "UNRESOLVED",
+        status_state="AVAILABLE" if isinstance(row.status, str) and row.status.strip() else "MISSING_RETAINED_STATUS",
+    )
+    return MaintenanceView.model_validate({**{k: getattr(row, k) for k in MaintenanceView.model_fields if k != "classification"}, "classification": classification})
 
 
 def _fmea(row) -> FmeaView:

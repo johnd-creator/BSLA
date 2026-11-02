@@ -37,7 +37,16 @@ export interface AssetView {
   location_ref: string | null; parent_asset_ref: string | null; site_code: string; organization_code: string; asset_type: string | null;
   plant: string | null; unit: string | null; source_updated_at: string | null;
 }
+export interface WorkClassificationView {
+  raw_work_type: string | null; canonical_category: string | null;
+  state: 'CANONICAL_SUPPORTED' | 'UNMAPPED' | 'MISSING_RETAINED_TYPE' | 'CANONICAL_ONLY';
+  origin: 'RETAINED_MAXIMO_WORKTYPE' | 'CANONICAL_EVENT_TYPE' | 'NOT_AVAILABLE';
+  confidence: 'VERIFIED' | 'UNRESOLVED'; description: string | null;
+  workflow_name: string | null; workflow_version: string | null; workflow_state: 'NOT_AVAILABLE';
+  status_state: 'AVAILABLE' | 'MISSING_RETAINED_STATUS';
+}
 export interface MaintenanceEventView {
+  classification?: WorkClassificationView | null;
   canonical_id: string; contract_version: string; id: string; equipment_id: string; work_order_id: string | null; event_type: string | null;
   status: string | null; actual_start: string | null; actual_finish: string | null; duration_hours: number | null; labor_hours: number | null;
   downtime_hours: number | null; failure_code: string | null; source_changed_at: string | null; site_code: string; organization_code: string;

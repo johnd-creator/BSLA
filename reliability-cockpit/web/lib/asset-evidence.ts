@@ -48,6 +48,24 @@ export function validateMaintenance(page: Page<MaintenanceEventView>, asset: str
       ![row.duration_hours,row.labor_hours,row.downtime_hours].every(value => value === null || typeof value === 'number' && Number.isFinite(value)) ||
       typeof row.canonical_id !== 'string' || !row.canonical_id || seen.has(row.canonical_id) || row.equipment_id !== asset ||
       row.site_code !== 'BSR' || row.organization_code !== 'IP') throw new Error('Invalid source identity');
+    const c = row.classification;
+    if (c != null && (typeof c !== 'object' || Array.isArray(c) ||
+      ![c.raw_work_type,c.canonical_category,c.description,c.workflow_name,c.workflow_version].every(nullableText) ||
+      !['CANONICAL_SUPPORTED','UNMAPPED','MISSING_RETAINED_TYPE','CANONICAL_ONLY'].includes(c.state) ||
+      !['RETAINED_MAXIMO_WORKTYPE','CANONICAL_EVENT_TYPE','NOT_AVAILABLE'].includes(c.origin) ||
+      !['VERIFIED','UNRESOLVED'].includes(c.confidence) || c.workflow_state !== 'NOT_AVAILABLE' ||
+      !['AVAILABLE','MISSING_RETAINED_STATUS'].includes(c.status_state))) throw new Error('Invalid classification');
+    if (c != null) {
+      const raw = typeof c.raw_work_type === 'string' && c.raw_work_type.trim() ? c.raw_work_type : null;
+      const canonical = row.event_type?.trim() ? row.event_type : null;
+      const state = raw ? (canonical ? 'CANONICAL_SUPPORTED' : 'UNMAPPED') : (canonical ? 'CANONICAL_ONLY' : 'MISSING_RETAINED_TYPE');
+      const origin = raw ? 'RETAINED_MAXIMO_WORKTYPE' : canonical ? 'CANONICAL_EVENT_TYPE' : 'NOT_AVAILABLE';
+      const confidence = raw && raw === canonical ? 'VERIFIED' : 'UNRESOLVED';
+      const status = row.status?.trim() ? 'AVAILABLE' : 'MISSING_RETAINED_STATUS';
+      if (c.raw_work_type !== raw || c.canonical_category !== canonical || c.state !== state || c.origin !== origin ||
+        c.confidence !== confidence || c.status_state !== status || c.description !== null ||
+        c.workflow_name !== null || c.workflow_version !== null) throw new Error('Contradictory classification');
+    }
     seen.add(row.canonical_id);
   }
   return page;
