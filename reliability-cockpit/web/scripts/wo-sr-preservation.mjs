@@ -12,3 +12,5 @@ const exceptions={
 };
 for(const [path,hash] of Object.entries(exceptions))assert.equal(createHash('sha256').update(readFileSync(root+'/'+path)).digest('hex'),hash,'unreviewed classification change: '+path);
 export const reviewedClassificationPaths=Object.keys(exceptions);
+
+export const reviewedClassificationHashes=exceptions;
