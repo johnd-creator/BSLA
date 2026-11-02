@@ -1045,3 +1045,20 @@ review passed. Portable synthetic controller/installer/PostgreSQL checks are add
 to the exact-head candidate workflow. Publication/testing is separate from live
 installation, migration, SQL privilege changes, activation and import; none of those
 live actions is performed by this support package. See the owning activation proposal.
+
+
+## 2 November 2026 — NADI-PR120-ACTIVATION-BLOCKER-FIX-01
+
+Prepared a separately reviewed, nonprivileged stacked-development Maximo evidence
+workflow pinning PR120 `49ff4d1088a96673f85070bcaa1f293b5810f8f4` and PR119
+`119ba2f1472facedd71433d65b74f3b7d64a6434`. Production main-only workflow,
+selector and required runners remain byte-identical; PR120 source/base unchanged.
+Local exact-candidate Collector206/contracts14/rehearsals6 and nine new negative
+tests PASS; supported GitHub matrix and mandatory-policy recognition remain
+separate delivery gates. Independent source review found no actionable blocker.
+Engineer session verified, but real Factual access remains denied. An owner-selected
+asset resolves uniquely in the retained Registry. Private least-privilege proposal
+requires separate read entitlement administration/enforcement and explicit grant
+approval; no account, grant or source data changed. PR119 remains active; new
+backup/restore/cutover and real WO UAT remain stopped.
+[Audit and policy boundaries](docs/ci/NADI-PR120-ACTIVATION-BLOCKER-FIX-01.md).

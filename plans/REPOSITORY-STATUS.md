@@ -1088,3 +1088,15 @@ binding is in delivery evidence. Revalidated full seven-source import/readback/
 recovery plus131 Python tests (19 prerequisite skips) and23 native importer/
 migration/auth tests. No publication or live activation/import.
 [Scope and next gates](../reliability-cockpit/docs/nadi-pdm-complete-history-01.md).
+
+
+## 2 November 2026 — PR120 activation blocker support
+
+PR120 exact `49ff4d1088a96673f85070bcaa1f293b5810f8f4` remains stacked on
+PR119 and is not activated. Separate development-only Maximo qualification support
+is proposed against main, preserving its main-target production gate unchanged.
+Source implementation/testing, GitHub qualification, policy recognition and runtime
+acceptance remain distinct. Engineer session PASS does not grant real Asset reads;
+a private owner-scoped Factual READ proposal awaits a separately reviewed mechanism
+and explicit grant authorization. PR119 runtime is retained.
+[Detailed scope and remaining gates](../docs/ci/NADI-PR120-ACTIVATION-BLOCKER-FIX-01.md).

@@ -1,0 +1,130 @@
+name: NADI Maximo stacked development qualification
+on:
+  pull_request:
+    paths:
+      - '.github/qualification/maximo-stacked-development.json'
+      - '.github/scripts/maximo_stacked_ci/**'
+      - '.github/workflows/nadi-maximo-stacked-development.yml'
+      - 'docs/ci/NADI-PR120-ACTIVATION-BLOCKER-FIX-01.md'
+permissions:
+  contents: read
+concurrency:
+  group: maximo-stacked-development-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+env:
+  TOOLS_SHA: ${{ github.event.pull_request.head.sha }}
+  REQUESTER_PR: ${{ github.event.pull_request.number }}
+jobs:
+  select:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      sha: ${{ steps.select.outputs.sha }}
+      base_sha: ${{ steps.select.outputs.base_sha }}
+      profile_sha256: ${{ steps.select.outputs.profile_sha256 }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ env.TOOLS_SHA }}
+          path: ci-tools
+          persist-credentials: false
+      - id: select
+        name: Verify reviewed tooling PR and exact stacked candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python ci-tools/.github/scripts/maximo_stacked_ci/qualify.py select
+  qualify:
+    needs: select
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.12']
+    env:
+      TESTED_SHA: ${{ needs.select.outputs.sha }}
+      BASE_SHA: ${{ needs.select.outputs.base_sha }}
+      CI_WORKFLOW_SHA: ${{ github.workflow_sha }}
+      CI_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ env.TOOLS_SHA }}
+          path: ci-tools
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ env.TESTED_SHA }}
+          path: source
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Exact source and dependency ancestry
+        run: python ci-tools/.github/scripts/maximo_stacked_ci/qualify.py checkout --source source
+      - name: Install declared offline test dependencies
+        run: python -m pip install ./source/maximo-collector PyYAML==6.0.3
+      - name: Preserved main and new development negative regressions
+        run: |
+          python -m unittest discover -s ci-tools/.github/scripts/maximo_ci/tests -v
+          python -m unittest discover -s ci-tools/.github/scripts/maximo_stacked_ci/tests -v
+      - name: Complete Collector suite including projection and WO lineage, zero skips
+        run: >-
+          python ci-tools/.github/scripts/maximo_ci/run_offline.py
+          --root source/maximo-collector --sha "$TESTED_SHA"
+          --report "$RUNNER_TEMP/collector-${{ matrix.python }}.json"
+      - name: Complete shared source contracts, zero skips
+        run: >-
+          python ci-tools/.github/scripts/maximo_ci/run_offline.py
+          --root source/reliability-data-contracts --sha "$TESTED_SHA"
+          --report "$RUNNER_TEMP/contracts-${{ matrix.python }}.json"
+      - name: All six private disposable recovery rehearsals
+        run: >-
+          python ci-tools/.github/scripts/maximo_ci/run_rehearsal.py
+          --root source/maximo-collector --sha "$TESTED_SHA"
+          --report "$RUNNER_TEMP/rehearsal-${{ matrix.python }}.json"
+      - name: Verify candidate unchanged after qualification
+        if: ${{ always() }}
+        run: python ci-tools/.github/scripts/maximo_stacked_ci/qualify.py checkout --source source
+      - name: Preserve synthetic qualification receipts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: stacked-development-${{ matrix.python }}-${{ needs.select.outputs.sha }}
+          path: |
+            ${{ runner.temp }}/collector-${{ matrix.python }}.json
+            ${{ runner.temp }}/contracts-${{ matrix.python }}.json
+            ${{ runner.temp }}/rehearsal-${{ matrix.python }}.json
+          if-no-files-found: error
+  development-gate:
+    name: Maximo stacked development evidence gate
+    needs: [select, qualify]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ env.TOOLS_SHA }}
+          path: ci-tools
+          persist-credentials: false
+      - name: Refuse any failed skipped or incomplete matrix
+        env:
+          SELECTION_RESULT: ${{ needs.select.result }}
+          MATRIX_RESULT: ${{ needs.qualify.result }}
+        run: |
+          test "$SELECTION_RESULT" = success
+          test "$MATRIX_RESULT" = success
+      - name: Fresh metadata recheck without executing candidate code
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TESTED_SHA: ${{ needs.select.outputs.sha }}
+          BASE_SHA: ${{ needs.select.outputs.base_sha }}
+          PROFILE_SHA256: ${{ needs.select.outputs.profile_sha256 }}
+        run: python ci-tools/.github/scripts/maximo_stacked_ci/qualify.py recheck >> "$GITHUB_STEP_SUMMARY"
