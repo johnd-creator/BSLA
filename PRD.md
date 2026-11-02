@@ -520,3 +520,11 @@ allowlists. This does not grant ADMIN, other domains or broader Engineering writ
 Beranda uses only scoped Asset/WO aggregates; the full Register retains server-side
 filters/counts/pagination. Actual grant issuance and local activation remain gated;
 this amendment records scope approval, not runtime visibility or UAT acceptance.
+
+## FR-02 hierarchy context — 2026-11-02 candidate
+
+NADI-ASSET-HIERARCHY-01 extends FR-02 with bounded retained Maximo parent/child
+context under an exact registered BSR/IP root. Technical nodes remain distinct
+from Registry membership. Missing edges and unverified system/equipment/component
+roles remain explicit; no source acquisition or permission expansion is implied.
+See [candidate contract and verification](reliability-cockpit/docs/NADI-ASSET-HIERARCHY-01.md).

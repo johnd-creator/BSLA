@@ -1287,3 +1287,16 @@ read-only service module and restored the repository tree to PR119 bytes. The
 existing controller fixture/recovery contract and all prior methods stay intact;
 no new compatibility exception or persistence change. CI/review/image seals follow
 the new immutable head before any activation.
+
+
+## 2026-11-02 — NADI-ASSET-HIERARCHY-01 candidate
+
+Implemented a lazy Asset Detail hierarchy panel and SELECT-only retained Maximo
+parent traversal under an exact registered BSR/IP root. Technical context never
+becomes Registry membership; missing/cyclic/over-depth edges and unverified roles
+remain explicit. No Excel import, source request, collector/schema/data write,
+grant expansion or local service transition. Twelve hermetic scope/API tests,
+gateway denial/revocation checks and synthetic 390/768/1440px keyboard/drill/back
+and axe checks pass. Hosted CI, independent final review, merge and PO/live UAT
+remain separate gates. The original PR120 READ manifest and historical F01–F24
+pins are preserved through finite exact hierarchy exceptions. Logbook PdM HOLD.
