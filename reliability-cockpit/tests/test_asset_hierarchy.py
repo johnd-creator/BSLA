@@ -112,6 +112,30 @@ class HierarchyTest(unittest.TestCase):
         self.assertIsNone(page.node.parent_asset_ref)
         self.assertNotIn("SECRET",page.model_dump_json())
 
+    def test_cycle_and_excess_depth_cannot_authorize_a_descendant(self):
+        with Session(self.database.engine) as s:
+            s.get(Asset,PREFIX+"PART-A").parent_asset_ref=PREFIX+"SUBPART"
+            s.commit()
+        self.statements.clear()
+        self.assertIsNone(read_hierarchy(self.database,PREFIX+"ROOT",node_ref=PREFIX+"PART-A"))
+        self.assertFalse(any("count(" in sql.lower() for sql in self.statements))
+        parent="ROOT"
+        for n in range(MAX_DEPTH+1):
+            name=f"CHILD-{n}"
+            self.add(name,parent=parent)
+            parent=name
+        self.statements.clear()
+        self.assertIsNone(read_hierarchy(self.database,PREFIX+"ROOT",node_ref=PREFIX+parent))
+        self.assertLessEqual(len(self.statements),MAX_DEPTH+2)
+        self.assertFalse(any("count(" in sql.lower() for sql in self.statements))
+
+    def test_non_boolean_source_flags_remain_unknown(self):
+        for value in [1,0,"true","false",None]:
+            with Session(self.database.engine) as s:
+                s.get(Asset,PREFIX+"ROOT").sources={"maximo":{"children":value}}
+                s.commit()
+            self.assertIsNone(read_hierarchy(self.database,PREFIX+"ROOT").node.source_has_children)
+
     def test_invalid_identifiers_and_pages_fail_closed(self):
         for ref in ["", "../ROOT", "asset:OTHER:ROOT",PREFIX+"bad%2fref"]:
             self.assertIsNone(read_hierarchy(self.database,ref))

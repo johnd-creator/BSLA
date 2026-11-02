@@ -1219,3 +1219,12 @@ the registered BSR/IP population supersedes the initial one-asset proposal. PR12
 adds an explicit registered scope and maintenance-only aggregate read model. This
 is candidate implementation, not merged/visible/accepted scope; all activation,
 recovery and actual UAT gates remain. No additional roadmap phase is implied.
+
+## 2026-11-02 asset hierarchy implementation checkpoint
+
+FR-02 / UI-03 [NADI-ASSET-HIERARCHY-01](../reliability-cockpit/docs/NADI-ASSET-HIERARCHY-01.md)
+is an implementation candidate for bounded retained Maximo hierarchy, with
+hermetic scope/API and synthetic browser verification. Live visibility, hosted
+exact-head qualification, merge and PO acceptance require separate evidence.
+Retained gaps and role semantics remain unresolved; no collection, Registry
+import, grant change or phase advancement is claimed. Logbook PdM remains HOLD.

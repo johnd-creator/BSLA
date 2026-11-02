@@ -14,6 +14,7 @@ try{
  const narrow={subject:'local:synthetic-author',roles:['AUTHOR'],asset_ids:[root]};
  assert.equal(factualAccess(path,new URLSearchParams(),admin),null);
  assert.equal(factualAccess(path,new URLSearchParams(),narrow),'PORTFOLIO_SCOPE_DENIED');
+ assert.equal(factualAccess(['v1','reliability','assets',root],new URLSearchParams('node_ref='+root),admin),'QUERY_DENIED');
  assert.equal(factualAccess(path,new URLSearchParams(),{...admin,subject:'local:other-admin'}),'PORTFOLIO_SCOPE_DENIED');
  for(const query of ['node_ref=asset:MAXIMO:MXASSET:OTHER:IP:HIDDEN','node_ref=bad%0aref','node_ref=A&node_ref=B','offset=10001','limit=51','asset_ref='+root,'sort=status']){
   assert(factualAccess(path,new URLSearchParams(query),admin),query);

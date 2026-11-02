@@ -1201,3 +1201,12 @@ approved beyond one asset. PR120's explicit scope, SQL-only Asset/WO summary and
 complete paginated Register require new exact-head qualification and a new
 Factual image;49ff image reuse is superseded. PR119 remains the running rollback
 baseline pending required approvals, session, recovery and real UAT.
+
+## 2026-11-02 retained hierarchy candidate and runtime boundary
+
+[NADI-ASSET-HIERARCHY-01](../reliability-cockpit/docs/NADI-ASSET-HIERARCHY-01.md) is
+developed in an isolated task worktree against reviewed PR120 source. It preserves
+source ownership, existing Registry/Engineering authorities and historical scope
+fences. Parent/child context is read-only and explicitly partial. Local runtime
+remains PR119; no cutover or PO acceptance is inferred from source work. The
+official PR120 controller source gate remains a separate blocking condition.

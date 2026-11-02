@@ -652,3 +652,13 @@ the three independent READ capabilities. Label this population explicitly, show
 the top-ten WO activity ranking as a bounded table, and link to the complete
 paginated Register. Do not render unrelated ADMIN domain metrics for this grant.
 Synthetic qualification remains separate from real Engineer UAT.
+
+## UI-03 retained hierarchy — 2026-11-02 candidate
+
+Asset Detail Overview adds an optional native disclosure for retained Maximo
+parents and children, loaded only on opening. Keep the registered-root path, raw
+type/status, technical membership labels, PARTIAL coverage and source time basis
+visible. Empty retained children, access denied and unavailable backend are
+distinct; keyboard drill/back and bounded child paging preserve the same root.
+No health color, inferred hierarchy role or automatic Registry membership is added.
+[Scope and validation](../../reliability-cockpit/docs/NADI-ASSET-HIERARCHY-01.md).

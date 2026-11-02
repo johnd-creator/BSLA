@@ -95,3 +95,12 @@ with isolated full-source qualification: 7 workbooks/200 sheets/173,147 populate
 cells/25,278 navigable source groups. RAW/provisional content stays distinct from
 canonical trends and human inspections. Migration 007 and full-history demo-target
 activation/import are not applied. [Scope and evidence](reliability-cockpit/docs/nadi-pdm-complete-history-01.md).
+
+## 2026-11-02 retained Maximo hierarchy candidate
+
+[NADI-ASSET-HIERARCHY-01](reliability-cockpit/docs/NADI-ASSET-HIERARCHY-01.md) adds
+SELECT-only, registered-root hierarchy context from retained Maximo edges. It does
+not import Excel or expand Registry/Engineer grants. Coverage remains PARTIAL;
+source role semantics remain UNKNOWN. Implementation/testing, merge, deployment
+and Product Owner acceptance remain separate. Local activation is still stopped
+at the official PR120 source-compatibility gate; Logbook PdM remains HOLD.
