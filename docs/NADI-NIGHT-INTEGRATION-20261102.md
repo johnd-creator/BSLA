@@ -127,3 +127,16 @@ backup/isolated restore qualifies only that append and is not reused as a cutove
 sealed recovery evidence remain retained; this is not a fresh activation-ready
 claim. M02/Q01–Q10, operational KPI eligibility and PO decisions are unchanged.
 Logbook PdM remains HOLD.
+
+
+### Unit-filter limit after gap-set reconciliation
+
+Private set comparison confirms that every remaining registered gap belongs to
+the source-queried and exhausted initial gap set: no unread root or capped group
+remains for that subset. The `eq11=CS01` predicate filters each returned child row,
+not merely the selected parent's membership. A legitimate child with a different
+or absent unit value can therefore be excluded by this approved query. Whether
+unit data, relationship semantics or source visibility explains the remaining
+discrepancy is UNKNOWN; no cross-unit request or permission expansion was performed.
+This is a source discrepancy requiring owner verification, not proof of leaf
+status or complete hierarchy. Evidence identities and cardinalities remain private.
