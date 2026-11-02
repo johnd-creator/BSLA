@@ -28,13 +28,13 @@ export function evidenceError(error: unknown): string {
   return 'Evidence tidak tersedia atau respons tidak memenuhi kontrak. Coba lagi; jangan menarik kesimpulan kondisi.';
 }
 // Validate the bounded response before rendering; never silently discard a duplicate.
-export function validateMaintenance(page: Page<MaintenanceEventView>, asset: string, offset: number) {
+export function validateMaintenance(page: Page<MaintenanceEventView>, asset: string, offset: number, expectedLimit = EVIDENCE_LIMIT) {
   const seen = new Set<string>();
-  if (!page || !Array.isArray(page.items) || page.items.length > EVIDENCE_LIMIT || !page.meta ||
-    page.meta.offset !== offset || page.meta.limit !== EVIDENCE_LIMIT || !Number.isSafeInteger(page.meta.total) ||
+  if (!Number.isSafeInteger(expectedLimit) || expectedLimit < 1 || expectedLimit > 200 || !page || !Array.isArray(page.items) || page.items.length > expectedLimit || !page.meta ||
+    page.meta.offset !== offset || page.meta.limit !== expectedLimit || !Number.isSafeInteger(page.meta.total) ||
     page.meta.total < 0 || typeof page.meta.has_more !== 'boolean' ||
     page.meta.total < offset + page.items.length && page.items.length > 0) throw new Error('Invalid page');
-  if (page.items.length !== Math.min(EVIDENCE_LIMIT,Math.max(0,page.meta.total-offset)) || page.meta.has_more !== (offset+page.items.length < page.meta.total)) throw new Error('Incomplete page proof');
+  if (page.items.length !== Math.min(expectedLimit,Math.max(0,page.meta.total-offset)) || page.meta.has_more !== (offset+page.items.length < page.meta.total)) throw new Error('Incomplete page proof');
   const nullableText = (value: unknown) => value === null || typeof value === 'string';
   // MaintenanceView permits naive source datetimes. Validate calendar structure
   // only; preserve the original text and never assert an inferred source zone.

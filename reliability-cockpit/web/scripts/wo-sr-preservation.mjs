@@ -1,5 +1,6 @@
 // Hash-pinned authorized WO/SR exceptions; historical assertions remain active.
 import {reviewedWoDetailHashes} from './wo-detail-preservation.mjs';
+import {reviewedFactualReadHashes} from './factual-read-preservation.mjs';
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import {readFileSync} from 'node:fs';
@@ -12,7 +13,8 @@ const exceptions={
   "reliability-cockpit/web/components/AssetMaintenanceEvidence.tsx": "0faa448e9995d085ff2aeaebe571f3187f37841253d8c8336ff8cd8a2f7c2c95"
 };
 for(const [path,hash] of Object.entries(exceptions))assert.equal(createHash('sha256').update(execFileSync('git',['-C',root,'show','119ba2f1472facedd71433d65b74f3b7d64a6434:'+path])).digest('hex'),hash,'historical classification pin changed: '+path);
-const current={...exceptions,...reviewedWoDetailHashes};
+for(const [path,hash] of Object.entries(reviewedWoDetailHashes))assert.equal(createHash('sha256').update(execFileSync('git',['-C',root,'show','49ff4d1088a96673f85070bcaa1f293b5810f8f4:'+path])).digest('hex'),hash,'historical WO detail pin changed: '+path);
+const current={...exceptions,...reviewedWoDetailHashes,...reviewedFactualReadHashes};
 for(const [path,hash] of Object.entries(current))assert.equal(createHash('sha256').update(readFileSync(root+'/'+path)).digest('hex'),hash,'unreviewed WO detail change: '+path);
 export const reviewedClassificationPaths=Object.keys(current);
 

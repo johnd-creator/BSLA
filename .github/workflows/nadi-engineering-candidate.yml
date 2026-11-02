@@ -74,6 +74,11 @@ jobs:
         env:
           PYTHONPATH: '.:tests'
         run: python -m unittest test_pdm_source_interpretation -v
+      - name: Separate Factual READ private administration and scoped local policy
+        working-directory: reliability-cockpit
+        env:
+          PYTHONPATH: '.:tests'
+        run: python -m unittest test_factual_read_entitlements test_factual_read_controller test_local_activation_qualification -v
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '22'
@@ -169,6 +174,7 @@ jobs:
           node-version: '22'
       - run: npm ci
       - run: npm run check:engineering && npm run check:phase2 && npm run check:workflow && npm run check:http-qa && npm run check:bounded-http && npm run check:bounded-proxy && npm run check:local-auth && npm run check:global-auth && npm run check:factual-policy && npm run check:product-safety
+      - run: npm run check:factual-read
       - run: npm run check:ux && npm run check:eng-product && npm run check:engineering-fixes && npm run check:pdm-input && npm run check:integration && npm run check:reports && npm run lint
       - run: npm run check:sprint5
       - run: npm run check:reliability-performance
@@ -192,6 +198,7 @@ jobs:
           NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/login-visual-browser.mjs
           NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/experience-browser.mjs
           NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/asset-evidence-browser.mjs
+          NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/factual-read-browser.mjs
           NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/reliability-performance-browser.mjs
           NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/sprint5-integrated-browser.mjs
           node scripts/sprint5-gallery.mjs

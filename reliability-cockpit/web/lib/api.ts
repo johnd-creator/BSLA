@@ -297,6 +297,7 @@ export const cockpitApi = {
 };
 
 export const reliabilityApi = {
+  scopedOverview: () => get<import('./factual-read-contract').ScopedFactualOverview>("/v1/reliability/scoped-overview"),
   decisionOverview: (windowDays: 7 | 30 | 90 = 30) => get<DecisionOverviewView>(`/v1/reliability/decision-overview?window_days=${windowDays}`),
   assetHealthOverview: () => get<AssetHealthOverviewView>("/v1/reliability/asset-health/overview"),
   fmeaOverview: () => get<FmeaOverviewView>("/v1/reliability/fmea/overview"),

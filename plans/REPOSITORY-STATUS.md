@@ -1183,3 +1183,15 @@ Implementation/synthetic qualification, exact-head CI, local activation and owne
 UAT are separate milestones. Activation is conditional on all mandatory gates;
 no current claim of deployment, merge or PO acceptance.
 [Requirements, lineage and boundaries](../reliability-cockpit/docs/NADI-WO-DETAIL-ENHANCEMENT-01.md).
+
+
+## 2 November 2026 — PR120 FINAL-UNBLOCK revised implementation
+
+PR12049ff is the immutable baseline, not the eventual new source HEAD. Separate
+read-only entitlements, scoped home/register/WO readers and a local CI equivalence
+verifier are implemented in its existing task branch. Independent review and final
+exact-head CI are recorded at delivery. PR121's reviewed nonprivileged qualification
+profile must pin the new candidate. Original main-only failures remain failures.
+PR119 stays active pending explicit grant/local-policy approval and fresh recovery/
+activation/UAT gates. No grant, account, source collection or retained-data change.
+[Integrated report](../reliability-cockpit/docs/NADI-PR120-FINAL-UNBLOCK-01.md).

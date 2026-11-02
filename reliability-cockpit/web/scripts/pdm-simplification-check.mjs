@@ -66,4 +66,4 @@ for(const path of changed){
  assert.equal(createHash('sha256').update(readFileSync(resolve(root,path))).digest('hex'),admitted[path],`Reviewed bytes changed: ${path}`);
 }
 for(const [path,hash] of Object.entries(admitted))assert.equal(createHash('sha256').update(readFileSync(resolve(root,path))).digest('hex'),hash,`Missing/changed reviewed file: ${path}`);
-console.log(`PASS: ${pages.length} preserved page entries (two exact Sprint3 presentation exceptions); six F23/F24 and three Sprint2 read pins; additive offline Sprint3 contracts/tests; hash-pinned WO classification/detail and future-projection exceptions; all remaining auth/source/runtime boundaries unchanged`);
+console.log(`PASS: ${pages.length} preserved page entries with exact reviewed exceptions; six F23/F24 and three Sprint2 read pins; historical WO classification/detail and new Factual READ hashes; all remaining protected boundaries unchanged`);

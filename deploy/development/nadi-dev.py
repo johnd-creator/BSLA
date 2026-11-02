@@ -298,7 +298,10 @@ def main():
     parser.add_argument('--recovery-receipt', help='Owner-private independently prepared recovery receipt')
     parser.add_argument('--recovery-receipt-sha256', help='Exact reviewed recovery receipt digest')
     parser.add_argument('--acceptance-session-file', help='Private existing-session proof required for preserved paired acceptance')
+    parser.add_argument('--require-factual-read', action='store_true', help='Explicit task-scoped active owner-approved Factual READ gate; does not issue a grant')
     args = parser.parse_args()
+    if args.require_factual_read and args.command not in ('local-preflight','local-select'):
+        raise RuntimeError('FACTUAL_READ_APPROVAL_SELECTION_ONLY')
     if (args.preservation or args.preservation_sha256) and args.command != 'local-prepare-recovery':
         raise RuntimeError('PRESERVATION_APPROVAL_PREPARATION_ONLY')
     if args.acceptance_session_file and args.command not in ('local-select','local-rollback'):
@@ -325,6 +328,7 @@ def main():
         print(json.dumps(local_controller().status(session_file=args.session_file), indent=2)); return
     if args.command.startswith('local-'):
         manager = local_controller()
+        manager.require_factual_read=args.require_factual_read
         manager.acceptance_session_file=args.acceptance_session_file
         if args.recovery_receipt:
             manager.preservation={'receipt':args.recovery_receipt,'receipt_sha256':args.recovery_receipt_sha256}

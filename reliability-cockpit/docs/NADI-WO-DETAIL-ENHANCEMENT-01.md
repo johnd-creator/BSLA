@@ -136,3 +136,14 @@ not real WO UAT, and technical activation is not Product Owner acceptance.
 
 No merge, QA/production deployment, schema migration, source acquisition, retained
 backfill, grant expansion, polling change or Log Book PdM implementation.
+
+
+## 2 November 2026 — revised Engineer access integration
+
+The owner subsequently authorized implementation of independent Factual READ,
+scoped Beranda and local-only CI equivalence in the existing PR120 branch. Exact49ff
+remains the WO-detail baseline; changed source requires new exact-head CI/review.
+No ordinary AUTHOR asset expansion or ADMIN UAT substitution is used. Grant issuance
+and local-policy recognition require explicit approval; PR119 remains active while
+those gates are outstanding. [Integrated task](NADI-PR120-FINAL-UNBLOCK-01.md) owns
+the revised access mechanism and later conditional activation evidence.

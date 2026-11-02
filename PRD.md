@@ -498,3 +498,16 @@ Implementation/synthetic qualification, exact-head CI, local activation and owne
 UAT are separate milestones. Activation is conditional on all mandatory gates;
 no current claim of deployment, merge or PO acceptance.
 [Requirements, lineage and boundaries](reliability-cockpit/docs/NADI-WO-DETAIL-ENHANCEMENT-01.md).
+
+
+## 2 November 2026 — proposed scoped Engineer Factual READ (PR120 revised)
+
+NADI-PR120-FINAL-UNBLOCK-01 extends FR-01/02/03 with three independent read
+capabilities for an immutable identity and exact approved canonical BSR/IP allowlist.
+Beranda page access is separate from dataset access; scoped retained counts never
+confer portfolio totals or Engineering AUTHOR write scope. Expiry/revocation and
+private audited owner administration are required. Existing ADMIN dashboard and
+PdM permissions remain. MTBF/MTTR, health and cross-inspection prerequisites remain
+NOT_ELIGIBLE. This is candidate implementation, not a global role matrix, issued
+grant, activated runtime or engineer/PO acceptance.
+[Mechanism, tests and remaining gates](reliability-cockpit/docs/NADI-PR120-FINAL-UNBLOCK-01.md).

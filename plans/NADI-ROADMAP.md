@@ -1203,3 +1203,13 @@ Implementation/synthetic qualification, exact-head CI, local activation and owne
 UAT are separate milestones. Activation is conditional on all mandatory gates;
 no current claim of deployment, merge or PO acceptance.
 [Requirements, lineage and boundaries](../reliability-cockpit/docs/NADI-WO-DETAIL-ENHANCEMENT-01.md).
+
+
+## 2 November 2026 — PR120 revised access/activation candidate
+
+The task adds separately owned Factual READ permissions and scoped Beranda/Asset/WO
+readers, without changing Engineering write scope or domain eligibility. Local-only
+stacked CI recognition is a separately approved policy; production main qualification
+remains unchanged. Source/testing, grant approval, installation, local activation and
+real UAT remain separate milestones. No Phase advancement, method approval or new
+PdM Log Book is inferred. [Owning report](../reliability-cockpit/docs/NADI-PR120-FINAL-UNBLOCK-01.md).

@@ -1253,3 +1253,18 @@ operational backup/restore/transition is claimed for this blocked attempt; those
 gates must run afresh after blockers are resolved. Runtime remains PR119, actual
 WO browser UAT is pending, and source retrieval/reprojection needs separate
 approval. Operational aggregates and screenshots remain private.
+
+
+## 2 November 2026 — NADI-PR120-FINAL-UNBLOCK-01 revised candidate
+
+Implemented immutable-subject Factual READ ledger/private administration, scoped
+Beranda/Register/Maintenance readers and distinct local-development qualification
+recognition. Engineering AUTHOR scope, existing admin portfolio behavior, account/
+demo parity and production main-only gate remain. Independent review findings on
+typed/page proof, directory identity, legacy access, sorting and uncertain commit
+were corrected with synthetic regressions. Local qualification includes private
+ledger/SQLite mutation tests, intercepted actual-component Engineer journey and
+read-only verification of original PR121 hosted evidence; final immutable review/CI
+are recorded at handoff. Actual grant issuance, policy recognition, controller
+installation, fresh operational recovery, cutover and real UAT remain separately
+gated. PR119 is retained. [Report](reliability-cockpit/docs/NADI-PR120-FINAL-UNBLOCK-01.md).

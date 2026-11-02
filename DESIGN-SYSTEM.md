@@ -235,3 +235,13 @@ contextual disclosures. Input Pengukuran is the register's primary action; revie
 uses an explicit decision and server-authorized action. Existing neutral pending/
 unknown/provisional semantics remain. [Synthetic responsive/light-dark evidence](reliability-cockpit/docs/evidence/nadi-pdm-simplification-sprint-01/README.md)
 is candidate review material; PO visual acceptance and runtime activation are pending.
+
+
+## 2 November 2026 — scoped Beranda candidate
+
+NADI-PR120-FINAL-UNBLOCK-01 reuses existing PageHeader, scope bar, StatCard, table,
+restricted/error states and light/dark responsive tokens. Engineer counts carry
+authorized retained-population labels and explicit restricted sections; ADMIN
+portfolio presentation stays unchanged. No new reference image, fabricated KPI or
+condition score is introduced. Synthetic visual qualification and real owner UAT
+remain separate. [Scope](reliability-cockpit/docs/NADI-PR120-FINAL-UNBLOCK-01.md).
