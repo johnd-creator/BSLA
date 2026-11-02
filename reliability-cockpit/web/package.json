@@ -26,7 +26,8 @@
     "check:engineering-fixes": "node scripts/frozen-case-evidence-check.mjs && node scripts/recommendation-draft-check.mjs",
     "check:source-interpretation": "node scripts/pdm-source-interpretation-check.mjs",
     "check:asset-evidence": "node scripts/asset-evidence-check.mjs && node scripts/asset-evidence-preservation.mjs",
-    "check:reliability-performance": "node scripts/reliability-performance-check.mjs"
+    "check:reliability-performance": "node scripts/reliability-performance-check.mjs",
+    "check:sprint5": "node scripts/sprint5-preservation.mjs"
   },
   "dependencies": {
     "next": "^15.5.9",

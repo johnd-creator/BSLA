@@ -1190,3 +1190,17 @@ bytes. Both jobs and independent final-head review are required again.
   evidence availability and non-vacuous import protection.
 - [Delivery/decision register](reliability-cockpit/docs/NADI-PDM-SPRINT-04-DELIVERY.md),
   [proposed Sprint5 handoff](reliability-cockpit/docs/NADI-SPRINT5-STABILIZATION-HANDOFF.md).
+
+
+## 2026-11-01 — NADI-PDM-SPRINT-05 integrated stabilization
+
+- Exact baselinePR117988af8d verified; isolated Sprint5 branch, one stacked Draft PR.
+- Confirmed P2 response-render and history-return defects fixed in one helper.
+- New actual-component cross-sprint navigation/late-response/corrupt-state tests;
+  SQLite population/query/payload/memory receipts; mandatory previously skipped
+  API→React test now executes after npm dependencies and fails CI on any skip.
+- Public repository means new synthetic screenshots stay owner-private, no PNG
+  upload/commit. [Delivery](reliability-cockpit/docs/NADI-PDM-SPRINT-05-DELIVERY.md)
+  binds final exact-head CI/independent review through its single PR receipt.
+- No merge, activation, source acquisition, retained data/schema/account/session
+  or collector changes. Sprint2 remains available; human UAT/methods remain pending.

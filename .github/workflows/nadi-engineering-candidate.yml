@@ -74,11 +74,21 @@ jobs:
         env:
           PYTHONPATH: '.:tests'
         run: python -m unittest test_pdm_source_interpretation -v
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Install React acceptance dependencies before backend suite
+        run: npm ci --prefix reliability-cockpit/web
       - name: Application and trusted HTTP acceptance
         working-directory: reliability-cockpit
         env:
           PYTHONPATH: '.:tests'
-        run: python -m unittest test_sprint4_foundation test_kpi test_sprint3_evidence test_reliability_mart test_condition_evidence test_projection_acceptance.ProjectionAcceptanceTest test_application_identity test_identity_adapter.AdapterTest test_application_migrations test_attachments test_session_cleanup test_bundle_d_http.RealHttpQaTest test_identity_configuration test_application_access test_attachment_readiness test_qa_limits test_qa_preflight test_qa_release test_bundle_e_rehearsal test_local_authentication test_local_login_http test_live_development test_frontend_preview test_local_development test_local_development_reusable test_source_preservation test_advisory.AdvisoryTest test_advisory_http.AdvisoryHttpTest test_advisory_http.AdvisorySchemaGateTest test_qa_advisory_schema test_integration_status test_phase1_read_integrity test_projection_acceptance.ProjectionPostgresAcceptanceTest test_integration_observations_client test_integration_ui_contract test_reports_ui_contract test_pdm_workbook_contract test_pdm_input.PdmInputTest test_pdm_input.PdmPostgresInputTest test_pdm_sprint02 test_manual_inspection test_inspection_workflow test_auth03_self_identity test_auth03_readiness test_auth03_controller_update test_engineering test_engineering_qa test_recommendation_workflow test_engineering_integrity test_pdm_input_capture test_pdm_work_origin test_pdm_manual_follow_up test_pdm_history_staging test_pdm_workbook_reader test_pdm_history_pilot.HistoryPilotTest test_pdm_complete_plan test_pdm_source_history test_pdm_complete_postgres.CompleteHistoryPostgresTest -v
+        run: python -m unittest test_sprint5_stabilization test_sprint4_foundation test_kpi test_sprint3_evidence test_reliability_mart test_condition_evidence test_projection_acceptance.ProjectionAcceptanceTest test_application_identity test_identity_adapter.AdapterTest test_application_migrations test_attachments test_session_cleanup test_bundle_d_http.RealHttpQaTest test_identity_configuration test_application_access test_attachment_readiness test_qa_limits test_qa_preflight test_qa_release test_bundle_e_rehearsal test_local_authentication test_local_login_http test_live_development test_frontend_preview test_local_development test_local_development_reusable test_source_preservation test_advisory.AdvisoryTest test_advisory_http.AdvisoryHttpTest test_advisory_http.AdvisorySchemaGateTest test_qa_advisory_schema test_integration_status test_phase1_read_integrity test_projection_acceptance.ProjectionPostgresAcceptanceTest test_integration_observations_client test_integration_ui_contract test_reports_ui_contract test_pdm_workbook_contract test_pdm_input.PdmInputTest test_pdm_input.PdmPostgresInputTest test_pdm_sprint02 test_manual_inspection test_inspection_workflow test_auth03_self_identity test_auth03_readiness test_auth03_controller_update test_engineering test_engineering_qa test_recommendation_workflow test_engineering_integrity test_pdm_input_capture test_pdm_work_origin test_pdm_manual_follow_up test_pdm_history_staging test_pdm_workbook_reader test_pdm_history_pilot.HistoryPilotTest test_pdm_complete_plan test_pdm_source_history test_pdm_complete_postgres.CompleteHistoryPostgresTest -v
+      - name: Mandatory API-to-React acceptance (one executed test, zero skips)
+        working-directory: reliability-cockpit
+        env:
+          PYTHONPATH: '.:tests'
+        run: python web/scripts/sprint5-react-acceptance.py
       - name: Exact historical bridge and installer support qualification
         working-directory: reliability-cockpit
         env:
@@ -100,7 +110,6 @@ jobs:
           node-version: '22'
       - name: Install isolated PdM browser test dependencies
         run: |
-          npm ci --prefix reliability-cockpit/web
           python -m pip install playwright==1.63.0
           python -m playwright install --with-deps chromium
       - name: Render actual source interpretation components with sanitized values
@@ -116,6 +125,15 @@ jobs:
         run: |
           python web/scripts/pdm-auth-browser-check.py --bundle "$RUNNER_TEMP/nadi-pdm-package/candidate.js" --report "$RUNNER_TEMP/nadi-pdm-package/auth-results.json"
           python web/scripts/pdm-origin-api-browser-check.py --bundle "$RUNNER_TEMP/nadi-pdm-package/candidate.js" --css "$RUNNER_TEMP/nadi-pdm-package/candidate.css" --report "$RUNNER_TEMP/nadi-pdm-package/api-results.json"
+      - name: Preserve synthetic population and executed React receipts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: sprint5-backend-evidence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            /tmp/nadi-sprint05/performance.json
+            /tmp/nadi-sprint05/react-acceptance.json
+          if-no-files-found: error
   frontend:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -137,6 +155,7 @@ jobs:
       - run: npm ci
       - run: npm run check:engineering && npm run check:phase2 && npm run check:workflow && npm run check:http-qa && npm run check:bounded-http && npm run check:bounded-proxy && npm run check:local-auth && npm run check:global-auth && npm run check:factual-policy && npm run check:product-safety
       - run: npm run check:ux && npm run check:eng-product && npm run check:engineering-fixes && npm run check:pdm-input && npm run check:integration && npm run check:reports && npm run lint
+      - run: npm run check:sprint5
       - run: npm run check:reliability-performance
       - run: npm run check:asset-evidence
       - run: npx tsc --noEmit
@@ -158,18 +177,27 @@ jobs:
           NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/experience-browser.mjs
           NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/asset-evidence-browser.mjs
           NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/reliability-performance-browser.mjs
+          NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" node scripts/sprint5-integrated-browser.mjs
+          node scripts/sprint5-gallery.mjs
           NADI_AXE_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/@axe-core/playwright/dist/index.mjs" NADI_PLAYWRIGHT_MODULE="$RUNNER_TEMP/nadi-browser/node_modules/playwright/index.mjs" NADI_SOURCE_INTERPRETATION_ACCEPTANCE=1 node scripts/pdm-simplification-browser.mjs
-      - name: Preserve synthetic Sprint3 screenshots and qualification receipt
+      - name: Preserve non-image Sprint3 synthetic qualification receipt
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: sprint3-synthetic-evidence-${{ github.event.pull_request.head.sha || github.sha }}
-          path: /tmp/nadi-sprint03/browser
+          path: /tmp/nadi-sprint03/browser/results.json
           if-no-files-found: warn
-      - name: Preserve synthetic Sprint4 qualification screenshots
+      - name: Preserve non-image Sprint4 synthetic qualification receipt
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: sprint4-synthetic-evidence-${{ github.event.pull_request.head.sha || github.sha }}
-          path: /tmp/nadi-sprint04/browser
+          path: /tmp/nadi-sprint04/browser/results.json
           if-no-files-found: warn
+      - name: Preserve non-image synthetic Sprint5 qualification receipt
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: sprint5-synthetic-evidence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/nadi-sprint05/browser/results.json
+          if-no-files-found: error

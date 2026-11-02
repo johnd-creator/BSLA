@@ -39,3 +39,13 @@ Sprint4, approve methods, merge dependencies or alter source/retained services.
 No live MTBF/MTTR publication, background evaluation, export, scheduler, production
 source request, acquisition/backfill or framework migration is planned implicitly.
 Legacy KPIs retain their exact earlier meanings until a separately reviewed change.
+
+
+## 1 November2026 — subsequent owner authorization
+
+The owner separately authorized NADI-PDM-SPRINT-05 integrated stabilization on
+exact PR117988af8d, using synthetic/disposable qualification and a stacked Draft
+PR. [Current Sprint5 delivery](NADI-PDM-SPRINT-05-DELIVERY.md) and
+[human UAT checklist](NADI-SPRINT5-UAT-CHECKLIST.md) supersede only the historical
+not-started scheduling state. Every engineering/source policy, human acceptance
+and future activation gate above remains pending and unapproved.

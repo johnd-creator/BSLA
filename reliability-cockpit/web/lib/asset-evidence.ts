@@ -35,8 +35,18 @@ export function validateMaintenance(page: Page<MaintenanceEventView>, asset: str
     page.meta.total < 0 || typeof page.meta.has_more !== 'boolean' ||
     page.meta.total < offset + page.items.length && page.items.length > 0) throw new Error('Invalid page');
   if (page.items.length !== Math.min(EVIDENCE_LIMIT,Math.max(0,page.meta.total-offset)) || page.meta.has_more !== (offset+page.items.length < page.meta.total)) throw new Error('Incomplete page proof');
+  const nullableText = (value: unknown) => value === null || typeof value === 'string';
+  // MaintenanceView permits naive source datetimes. Validate calendar structure
+  // only; preserve the original text and never assert an inferred source zone.
+  const clock = (value: unknown) => value === null || typeof value === 'string' &&
+    (preciseInstant(value) || /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?$/.test(value) && preciseInstant(value + 'Z'));
   for (const row of page.items) {
-    if (typeof row.canonical_id !== 'string' || !row.canonical_id || seen.has(row.canonical_id) || row.equipment_id !== asset ||
+    if (!row || typeof row !== 'object' || Array.isArray(row) ||
+      ![row.id,row.contract_version].every(value => typeof value === 'string' && value.length > 0) ||
+      ![row.work_order_id,row.event_type,row.status,row.failure_code].every(nullableText) ||
+      ![row.actual_start,row.actual_finish,row.source_changed_at].every(clock) ||
+      ![row.duration_hours,row.labor_hours,row.downtime_hours].every(value => value === null || typeof value === 'number' && Number.isFinite(value)) ||
+      typeof row.canonical_id !== 'string' || !row.canonical_id || seen.has(row.canonical_id) || row.equipment_id !== asset ||
       row.site_code !== 'BSR' || row.organization_code !== 'IP') throw new Error('Invalid source identity');
     seen.add(row.canonical_id);
   }
@@ -85,7 +95,7 @@ export function validateCondition(data: AssetConditionEvidence, asset: string) {
   return data;
 }
 // Generated links have a closed set of same-origin destinations. No arbitrary return URL.
-const pdmOriginKeys = ['search','asset_id','method','status','since','until','per_page','pdm_offset'] as const;
+const pdmOriginKeys = ['search','asset_id','method','status','since','until','per_page','pdm_offset','pdm_view','history_kind','from_inspection','point','quantity','event_offset','event_limit'] as const;
 export function inspectionAssetHref(asset: string, inspection: string, origin = new URLSearchParams()) {
   const q = new URLSearchParams();
   if (validRecordId(inspection)) q.set('inspection',inspection);
