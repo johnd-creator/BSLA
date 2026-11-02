@@ -1268,3 +1268,16 @@ read-only verification of original PR121 hosted evidence; final immutable review
 are recorded at handoff. Actual grant issuance, policy recognition, controller
 installation, fresh operational recovery, cutover and real UAT remain separately
 gated. PR119 is retained. [Report](reliability-cockpit/docs/NADI-PR120-FINAL-UNBLOCK-01.md).
+
+## 2 November 2026 — owner-approved registered-population READ amendment
+
+The owner approved Dashboard, Asset and Maintenance READ beyond one asset. Added
+explicit REGISTERED_BSR_IP ledger/approval/revoke binding, whole Registry server
+pagination and a dedicated SQL aggregate/ranking read model over Registry/Asset/WO
+only. The Engineer remains AUTHOR with unchanged Engineering write scope. The
+existing ADMIN dashboard and unrelated domain boundaries remain. Synthetic tests
+cover >20 assets, full counts, foreign/unregistered denial, expiry/revoke races,
+uneven counts, zero-WO assets and no unrelated domain SQL. Exact-head CI/review and
+a new Factual image are required; prior49ff image reuse is no longer compatible.
+Grant issuance, local-policy/controller approval, fresh Engineer session/recovery,
+service transition and real browser UAT remain separately gated. PR119 retained.

@@ -245,3 +245,8 @@ authorized retained-population labels and explicit restricted sections; ADMIN
 portfolio presentation stays unchanged. No new reference image, fabricated KPI or
 condition score is introduced. Synthetic visual qualification and real owner UAT
 remain separate. [Scope](reliability-cockpit/docs/NADI-PR120-FINAL-UNBLOCK-01.md).
+
+The owner-approved registered BSR/IP READ variant explicitly labels the complete
+Registry population and the top-ten retained WO activity table. It reuses these
+components and preserves restricted domain states, NOT_ELIGIBLE and the original
+ADMIN dashboard. The complete Asset Register remains paginated.

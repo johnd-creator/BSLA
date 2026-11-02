@@ -511,3 +511,12 @@ PdM permissions remain. MTBF/MTTR, health and cross-inspection prerequisites rem
 NOT_ELIGIBLE. This is candidate implementation, not a global role matrix, issued
 grant, activated runtime or engineer/PO acceptance.
 [Mechanism, tests and remaining gates](reliability-cockpit/docs/NADI-PR120-FINAL-UNBLOCK-01.md).
+
+### Owner amendment — registered BSR/IP READ, 2 November 2026
+
+The owner approved Dashboard/Asset/Maintenance READ beyond a single asset. FR-01/02/03
+therefore support explicit registered-population BSR/IP scope as well as exact
+allowlists. This does not grant ADMIN, other domains or broader Engineering writes.
+Beranda uses only scoped Asset/WO aggregates; the full Register retains server-side
+filters/counts/pagination. Actual grant issuance and local activation remain gated;
+this amendment records scope approval, not runtime visibility or UAT acceptance.

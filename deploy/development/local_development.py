@@ -698,7 +698,7 @@ class LocalDevelopment:
         approval_bytes=module.private_read(policy.parent/'activation-approval.json')
         approval=json.loads(approval_bytes)
         fields={'schema_version','expected_head','action','grant_id','subject','assets','capabilities','not_before','expires_at','actor','approval_ref','operator_ref'}
-        if (set(approval)!=fields or type(approval['schema_version']) is not int or approval['schema_version']!=1 or
+        if (set(approval) not in (fields,fields|{'scope_kind'}) or type(approval['schema_version']) is not int or approval['schema_version']!=1 or
                 approval_bytes!=(module.canonical(approval)+'\n').encode() or approval['action']!='ISSUE'):
             raise RuntimeError('EXACT_FACTUAL_ACTIVATION_APPROVAL_REQUIRED')
         event=next((e for e in reversed(events) if e['grant_id']==approval['grant_id']),None)
@@ -707,6 +707,7 @@ class LocalDevelopment:
         if any(module.timestamp(e['at'])>now+timedelta(seconds=5) for e in events):
             raise RuntimeError('FACTUAL_POLICY_CLOCK_REGRESSION')
         if (not event or event['action']!='ISSUE' or set(event['capabilities'])!=module.CAPABILITIES or
+                event.get('scope_kind','EXACT_ASSETS')!=approval.get('scope_kind','EXACT_ASSETS') or
                 any(event[key]!=approval[key] for key in fields-{'schema_version','expected_head'}) or
                 event['previous_sha256']!=approval['expected_head'] or
                 not module.timestamp(event['not_before'])<=now<module.timestamp(event['expires_at'])):

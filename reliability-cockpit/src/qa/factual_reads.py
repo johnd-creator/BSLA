@@ -36,7 +36,7 @@ def load_approval(path, digest):
     if sha256(data).hexdigest() != digest:
         raise ValueError("OWNER_APPROVAL_DIGEST_MISMATCH")
     approval = json.loads(data)
-    if (not isinstance(approval, dict) or set(approval) != APPROVAL_FIELDS
+    if (not isinstance(approval, dict) or set(approval) not in (APPROVAL_FIELDS, APPROVAL_FIELDS | {"scope_kind"})
             or type(approval["schema_version"]) is not int or approval["schema_version"] != 1):
         raise ValueError("OWNER_APPROVAL_REQUIRED")
     # The reviewed bytes must be canonical; duplicate keys/non-finite values cannot hide.
@@ -46,7 +46,8 @@ def load_approval(path, digest):
 
 
 def registry_asset(asset_id):
-    url = "http://127.0.0.1:8000/v1/reliability/assets/" + quote(asset_id, safe="")
+    # None validates the fixed Registry service, never enumerates assets or grants '*'.
+    url = "http://127.0.0.1:8000/v1/reliability/" + ("registry" if asset_id is None else "assets/" + quote(asset_id, safe=""))
     class NoRedirect(urllib.request.HTTPRedirectHandler):
         def redirect_request(self, *args):
             raise ValueError("REGISTRY_REDIRECT_DENIED")
@@ -61,7 +62,7 @@ def registry_asset(asset_id):
 
 
 def plan_only(approval, ledger, *, now):
-    if set(approval) != APPROVAL_FIELDS or type(approval["schema_version"]) is not int or approval["schema_version"] != 1:
+    if set(approval) not in (APPROVAL_FIELDS, APPROVAL_FIELDS | {"scope_kind"}) or type(approval["schema_version"]) is not int or approval["schema_version"] != 1:
         raise ValueError("OWNER_APPROVAL_REQUIRED")
     events = decode(private_read(Path(ledger), missing=True))
     event = {k:v for k,v in approval.items() if k not in {"schema_version", "expected_head"}}
@@ -97,6 +98,12 @@ def administer(provider, actor, approval, ledger, *, now, lookup=registry_asset,
                 active_assets.update(old["assets"])
         if len(active_assets) > 20:
             raise ValueError("FACTUAL_ASSET_ALLOWLIST_BOUND_EXCEEDED")
+        if event.get("scope_kind") == "REGISTERED_BSR_IP":
+            registry = lookup(None)
+            if (registry.get("source") != "MAXIMO_LIST_OF_ASSETS"
+                    or type(registry.get("registered_asset_count")) is not int
+                    or registry["registered_asset_count"] < 1):
+                raise ValueError("REGISTERED_BSR_IP_POPULATION_REQUIRED")
         for asset_id in event["assets"]:
             asset = lookup(asset_id)
             if asset.get("canonical_id") != asset_id or asset.get("site_code") != "BSR" or asset.get("organization_code") != "IP":

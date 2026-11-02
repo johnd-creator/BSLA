@@ -52,6 +52,35 @@ class AssetView(BaseModel):
     source_updated_at: datetime | None = None
 
 
+class RegisteredReadScope(BaseModel):
+    site_code: Literal["BSR"] = "BSR"
+    organization_code: Literal["IP"] = "IP"
+    kind: Literal["REGISTERED_BSR_IP"] = "REGISTERED_BSR_IP"
+
+
+class RegisteredMaintenanceSummary(BaseModel):
+    registered_assets: int = Field(ge=0)
+    maintenance_events: int = Field(ge=0)
+    assets_with_maintenance: int = Field(ge=0)
+
+
+class RegisteredMaintenanceAsset(BaseModel):
+    canonical_id: str
+    source_asset_number: str | None = None
+    description: str | None = None
+    maintenance_events: int = Field(ge=1)
+    latest_retained_activity: datetime | None = None
+
+
+class RegisteredMaintenanceOverview(BaseModel):
+    scope: RegisteredReadScope
+    as_of: datetime
+    summary: RegisteredMaintenanceSummary
+    assets: list[RegisteredMaintenanceAsset] = Field(max_length=10)
+    restricted_sections: list[str]
+    operational_kpis: Literal["NOT_ELIGIBLE"]
+
+
 class WorkClassificationView(BaseModel):
     raw_work_type: str | None = None
     canonical_category: str | None = None
@@ -1007,6 +1036,11 @@ def list_assets(
 @router.get("/registry", response_model=RegistryView, summary="Current registered Reliability Asset snapshot")
 def registry(service: ReliabilityQueryService = Depends(_service)) -> RegistryView:
     return RegistryView(**service.repository.registry_summary())
+
+
+@router.get("/registered-maintenance-overview", response_model=RegisteredMaintenanceOverview, summary="Registry BSR/IP Asset and retained WO summary only")
+def registered_maintenance_overview(service: ReliabilityQueryService = Depends(_service)) -> RegisteredMaintenanceOverview:
+    return RegisteredMaintenanceOverview(**service.repository.registered_maintenance_overview())
 
 
 @router.get("/decision-overview", response_model=DecisionOverviewView, summary="Bounded factual Reliability decision overview")

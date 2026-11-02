@@ -32,15 +32,25 @@ class FactualReadControllerTest(unittest.TestCase):
         # Older source rollback ignores new policy and leaves it untouched.
         self.assertEqual(self.manager.factual_read_environment(self.state/'old-pr119'),[])
 
-    def policy(self):
+    def policy(self, registered=False):
         root=self.state/'factual-read-120';root.mkdir(mode=0o700)
         file=root/'grants.ndjson';now=datetime.now(timezone.utc).replace(microsecond=0)
         event=dict(action='ISSUE',grant_id='synthetic-grant',subject='local:synthetic-engineer',assets=['asset:MAXIMO:MXASSET:BSR:IP:SYNTHETIC-A'],capabilities=sorted(CAPABILITIES),not_before=instant(now),expires_at=instant(now+timedelta(hours=1)),actor=ISSUER,approval_ref='synthetic-owner',operator_ref='synthetic-operator',at=instant(now))
+        if registered:event.update(assets=[],scope_kind='REGISTERED_BSR_IP')
         append_event(file,event,expected_head=ZERO)
         approval={k:v for k,v in event.items() if k!='at'}
         approval.update(schema_version=1,expected_head=ZERO)
         a=root/'activation-approval.json';a.write_text(canonical(approval)+'\n');a.chmod(0o600)
         return file
+
+    def test_registered_approval_cannot_be_substituted_for_exact_asset_approval(self):
+        import json
+        file=self.policy(registered=True)
+        self.assertEqual(self.manager.factual_read_environment(self.root,required=True),['NADI_FACTUAL_READ_POLICY_FILE='+str(file)])
+        approval_file=file.parent/'activation-approval.json'
+        approval=json.loads(approval_file.read_text());approval.pop('scope_kind')
+        approval_file.write_text(canonical(approval)+'\n')
+        with self.assertRaises(RuntimeError):self.manager.factual_read_environment(self.root,required=True)
 
     def test_exact_stable_private_state_bound_to_frontend_only(self):
         file=self.policy()

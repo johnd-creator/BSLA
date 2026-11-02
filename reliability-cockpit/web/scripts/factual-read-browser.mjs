@@ -14,7 +14,7 @@ const row={...fixture.maintenance[0],actual_start:null,actual_finish:null,classi
 const identity={subject:'local:synthetic-engineer',username:'synthetic_engineer',roles:['AUTHOR'],asset_ids:['asset:DEMO-001'],csrf_token:'SYNTHETIC_CSRF_ONLY'};
 const browser=await chromium.launch({headless:true}),ctx=await browser.newContext({viewport:{width:1440,height:1080}}),page=await ctx.newPage();
 page.setDefaultTimeout(12000);
-const requests=[],errors=[],checks=[],shots=[];let signedIn=false,mode='permitted';
+const requests=[],errors=[],checks=[],shots=[],registered=process.env.NADI_SYNTHETIC_REGISTERED_READ==='1';let signedIn=false,mode='permitted';
 page.on('pageerror',e=>errors.push(e.message));
 const note=(name,yes)=>{assert(yes,name);checks.push(name);};
 await ctx.route('**/*',async route=>{
@@ -34,7 +34,7 @@ await ctx.route('**/*',async route=>{
  assert.equal(r.method(),'GET');const path=decodeURIComponent(u.pathname.replace('/api/cockpit','')),offset=Number(u.searchParams.get('offset')??0),limit=Number(u.searchParams.get('limit')??50);
  const denied=()=>route.fulfill({status:403,json:{detail:{code:'FACTUAL_SCOPE_GRANT_REQUIRED'}}});
  if(mode==='restricted'||path.includes(foreign)||u.searchParams.get('asset_ref')===foreign)return denied();
- if(path==='/v1/reliability/scoped-overview')return route.fulfill({json:{scope:{site_code:'BSR',organization_code:'IP',kind:'FACTUAL_ASSET_ALLOWLIST'},as_of:'2026-11-02T10:00:00Z',summary:{registered_assets:1,maintenance_events:1,assets_with_maintenance:1},assets:[{canonical_id:asset,source_asset_number:fixture.asset.source_asset_number,description:'SYNTHETIC permitted asset',maintenance_events:1,latest_retained_activity:row.source_changed_at}],restricted_sections:['PORTFOLIO_AGGREGATES','FMEA_HEALTH_PI','CROSS_INSPECTION_TRENDS'],operational_kpis:'NOT_ELIGIBLE'}});
+ if(path==='/v1/reliability/scoped-overview')return route.fulfill({json:{scope:{site_code:'BSR',organization_code:'IP',kind:registered?'REGISTERED_BSR_IP':'FACTUAL_ASSET_ALLOWLIST'},as_of:'2026-11-02T10:00:00Z',summary:{registered_assets:registered?845:1,maintenance_events:1,assets_with_maintenance:1},assets:[{canonical_id:asset,source_asset_number:fixture.asset.source_asset_number,description:'SYNTHETIC permitted asset',maintenance_events:1,latest_retained_activity:row.source_changed_at}],restricted_sections:['FMEA_HEALTH_PI','CROSS_INSPECTION_TRENDS'],operational_kpis:'NOT_ELIGIBLE'}});
  if(path==='/v1/reliability/assets')return route.fulfill({json:{items:offset?[]:[fixture.asset],meta:{total:1,offset,limit,has_more:false}}});
  if(path==='/v1/reliability/assets/'+asset)return route.fulfill({json:fixture.asset});
  if(path==='/v1/reliability/maintenance-events'&&u.searchParams.get('asset_ref')===asset)return route.fulfill({json:{items:offset?[]:[row],meta:{total:1,offset,limit,has_more:false}}});
@@ -45,6 +45,7 @@ try{
  await page.goto(base+'/login');await page.locator('input[name="username"]').fill('synthetic_engineer');await page.locator('input[name="password"]').fill('SYNTHETIC_ONLY_NOT_A_REAL_PASSWORD');await page.getByRole('button',{name:'Masuk',exact:true}).click();
  await page.getByRole('heading',{name:'Ringkasan Eksekutif',exact:true}).waitFor();await page.getByText('SYNTHETIC permitted asset',{exact:true}).waitFor();note('Login→Beranda actual components under AUTHOR and a separate read scope',new URL(page.url()).pathname==='/');await screenshot('01-engineer-scoped-home');
  note('explicit restricted sections and NOT_ELIGIBLE shown',await page.getByText('NOT_ELIGIBLE',{exact:true}).isVisible());
+ if(registered){note('registered population scope and top10 limitation explicit',await page.getByText('Seluruh aset terdaftar BSR/IP',{exact:true}).isVisible()&&await page.getByRole('heading',{name:'10 aset dengan WO tersimpan terbanyak'}).isVisible());}
  for(const href of ['/assets','/pdm','/action-board','/reports'])note('existing navigation '+href,await page.locator('a[href="'+href+'"]').count()>0);
  await page.getByRole('link',{name:'Buka Aset →',exact:true}).click();await page.getByRole('link',{name:fixture.asset.source_asset_number,exact:true}).first().waitFor();
  note('Asset Register contains only permitted asset',await page.locator('table tbody tr').count()===1);await screenshot('02-engineer-register');

@@ -1195,3 +1195,9 @@ profile must pin the new candidate. Original main-only failures remain failures.
 PR119 stays active pending explicit grant/local-policy approval and fresh recovery/
 activation/UAT gates. No grant, account, source collection or retained-data change.
 [Integrated report](../reliability-cockpit/docs/NADI-PR120-FINAL-UNBLOCK-01.md).
+
+2 November owner amendment: registered BSR/IP Dashboard/Asset/Maintenance READ is
+approved beyond one asset. PR120's explicit scope, SQL-only Asset/WO summary and
+complete paginated Register require new exact-head qualification and a new
+Factual image;49ff image reuse is superseded. PR119 remains the running rollback
+baseline pending required approvals, session, recovery and real UAT.

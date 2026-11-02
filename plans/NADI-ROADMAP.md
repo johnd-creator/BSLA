@@ -1213,3 +1213,9 @@ stacked CI recognition is a separately approved policy; production main qualific
 remains unchanged. Source/testing, grant approval, installation, local activation and
 real UAT remain separate milestones. No Phase advancement, method approval or new
 PdM Log Book is inferred. [Owning report](../reliability-cockpit/docs/NADI-PR120-FINAL-UNBLOCK-01.md).
+
+Owner amendment, 2 November 2026: approved Dashboard/Asset/Maintenance READ across
+the registered BSR/IP population supersedes the initial one-asset proposal. PR120
+adds an explicit registered scope and maintenance-only aggregate read model. This
+is candidate implementation, not merged/visible/accepted scope; all activation,
+recovery and actual UAT gates remain. No additional roadmap phase is implied.

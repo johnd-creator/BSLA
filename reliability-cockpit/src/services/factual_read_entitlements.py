@@ -45,7 +45,7 @@ def instant(value):
 
 
 def validate_event(e):
-    if not isinstance(e, dict) or set(e) != FIELDS:
+    if not isinstance(e, dict) or set(e) not in (FIELDS, FIELDS | {"scope_kind"}):
         raise ValueError("FACTUAL_POLICY_FIELDS_INVALID")
     if e["action"] not in {"ISSUE", "REVOKE"} or type(e["version"]) is not int or e["version"] < 1:
         raise ValueError("FACTUAL_POLICY_EVENT_INVALID")
@@ -61,7 +61,11 @@ def validate_event(e):
         if not isinstance(e[key], str) or not re.fullmatch(r"[A-Za-z0-9_.:-]{1,160}", e[key]):
             raise ValueError("FACTUAL_POLICY_REFERENCE_INVALID")
     assets, caps = e["assets"], e["capabilities"]
-    if (not isinstance(assets, list) or not 1 <= len(assets) <= 20
+    scope = e.get("scope_kind", "EXACT_ASSETS")
+    if scope not in {"EXACT_ASSETS", "REGISTERED_BSR_IP"}:
+        raise ValueError("FACTUAL_POLICY_SCOPE_INVALID")
+    if (not isinstance(assets, list) or (scope == "REGISTERED_BSR_IP" and assets != [])
+            or (scope == "EXACT_ASSETS" and not 1 <= len(assets) <= 20)
             or any(not isinstance(a, str) or not re.fullmatch(r"asset:MAXIMO:MXASSET:BSR:IP:[A-Za-z0-9_.-]{1,120}", a) for a in assets)
             or assets != sorted(set(assets))):
         raise ValueError("FACTUAL_POLICY_ASSETS_INVALID")
@@ -98,7 +102,7 @@ def decode(data):
         if e["action"] == "ISSUE":
             if old or sum(x["action"] == "ISSUE" for x in events) >= MAX_ISSUES:
                 raise ValueError("FACTUAL_POLICY_ISSUE_DENIED")
-        elif not old or old["action"] != "ISSUE" or any(e[k] != old[k] for k in
+        elif not old or old["action"] != "ISSUE" or e.get("scope_kind", "EXACT_ASSETS") != old.get("scope_kind", "EXACT_ASSETS") or any(e[k] != old[k] for k in
                 ("subject", "assets", "capabilities", "not_before", "expires_at")):
             raise ValueError("FACTUAL_POLICY_REVOKE_DENIED")
         if events and timestamp(e["at"]) < timestamp(events[-1]["at"]):

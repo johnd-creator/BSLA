@@ -18,7 +18,9 @@ No automatic merge, migration, source acquisition, retained backfill or PdM Log 
 
 Capabilities are `FACTUAL_DASHBOARD_READ`, `FACTUAL_ASSET_READ` and
 `FACTUAL_MAINTENANCE_READ`. They bind an immutable local authenticated subject to
-an exact canonical BSR/IP Registry allowlist. They never enter `session.asset_ids`,
+an exact canonical BSR/IP Registry allowlist or explicit `REGISTERED_BSR_IP` scope.
+The latter permits every current registered BSR/IP asset, without asset enumeration
+or a wildcard canonical identity. They never enter `session.asset_ids`,
 Engineering Principal roles/scope, SQL grants or source credentials. No public
 privileged endpoint is added. Existing ADMIN portfolio behavior and legacy granted
 asset reads retain their original authorization path; a bad new ledger does not
@@ -29,8 +31,11 @@ state path `state/factual-read-120/grants.ndjson`. It is outside source releases
 database backups and worktrees. Each ISSUE/REVOKE records version, prior hash,
 grant ID, beneficiary, assets/capabilities, UTC not-before/absolute expiry,
 authenticated approving/issuing actor, owner approval reference and operator
-reference. At most 24 hours per issue, 20 simultaneously authorized assets per
-subject, 200 issues/400 events; bounded encoding reserves revocation capacity.
+reference. At most 24 hours per issue, 20 simultaneously exact-allowlisted assets
+per subject or the separately approved registered-population scope, 200 issues/400
+events; bounded encoding reserves revocation capacity. The optional closed enum
+`scope_kind` is hash-bound; registered scope requires an empty `assets` list and
+cannot be substituted during revoke or controller activation approval.
 Unknown fields, duplicate/noncanonical keys, invalid dates, wildcard/foreign scope,
 non-READ capabilities, corrupt chains and reissued IDs are rejected.
 
@@ -39,7 +44,8 @@ existing `LocalIdentityProvider`. Apply requires a fresh authenticated approved
 portfolio issuer with current ADMIN, not an arbitrary ADMIN username. This local
 CLI pins the official loopback application directory host/port/database/role and
 checks actual database/current user; a restored copy is not an identity authority.
-It verifies target AUTHOR identity and exact Registry membership. The actor's
+It verifies target AUTHOR identity and exact Registry membership, or the existing
+owning Registry service for an explicitly approved registered-population issue. The actor's
 Engineering asset grants are not expanded or reused as Factual delegation scope.
 
 An exact owner-private approval file and its SHA256 bind operation, grant ID,
@@ -73,7 +79,12 @@ The Beranda page separates page access from dataset authorization. The existing
 approved portfolio principal still renders `ExecutiveOverview`. Other authenticated
 users render `ScopedExecutiveOverview`: permitted counts and exact Asset links, or
 an explicit restricted/unavailable state. The server-only scoped-overview read model
-is composed from exact existing Asset and asset-filtered Maintenance endpoints.
+is composed from exact existing Asset and asset-filtered Maintenance endpoints
+for an exact allowlist. A registered-population grant uses the dedicated bounded
+`registered-maintenance-overview` read model: three aggregate/ranking SQL queries
+over only Registry, Asset and WO, scoped before counts and serialization. The
+retained totals cover all registered BSR/IP assets; the table is explicitly the
+top ten by retained WO count. The complete Register retains native pagination.
 No portfolio `decision-overview`, context or integration totals are fetched.
 
 Counts describe authorized retained records, not complete operational history.
@@ -82,7 +93,9 @@ are no invented KPI values or synthetic production metrics. Navigation to Aset,
 PdM, Tindak Lanjut and Laporan remains present under the original rules.
 
 Register authorization precedes every exact lookup, filter, total, sort and page.
-No broad Registry query is made then filtered client-side. Exact Asset/BSR/IP identity,
+The registered scope uses the owning API's Registry+BSR/IP SQL joins before
+filter/count/page, without a per-asset fan-out or client-side scope filtering.
+Exact Asset/BSR/IP identity,
 safe typed scalar fields and clock structure are validated before serialization;
 foreign parent references are withheld. Zoned clocks sort by instant with stable
 identity ties; naive/unknown clock semantics remain explicit. Scope/paging proof,
@@ -166,8 +179,10 @@ service/source ownership, fresh private backups, independent isolated restore,
 DB/ledger/count/source seals and preservation of all35 service roles. None can be
 borrowed from a historical PR119 acceptance. Failure stops the attempt.
 
-Prefer the existing exact49ff Factual candidate image for the unchanged PR120 WO DTO
-contract, and the new exact frontend/Engineering pair through the official controller;
+The registered-population extension changes Factual API/repository source. The
+previous49ff Factual image cannot serve its new contract and must not be reused
+or relabeled. Build and seal a new Factual image at the final reviewed PR120 head,
+with the same exact frontend/Engineering pair through the official controller;
 report each service's actual source SHA separately. No extra permanent Factual API,
 ports, database or Compose project. Roll back services/source to pinned PR119 on a
 mandatory post-cutover failure; never restore retained stores or old grant state.
@@ -176,3 +191,14 @@ Real Engineer Beranda→Asset→Maintenance→WO UAT and private factual screens
 NOT RUN while owner approval remains outstanding. Synthetic screenshots are never
 represented as real plant acceptance. Runtime/grant/backup/restore receipts and the
 precise remaining owner decisions are recorded privately at handoff.
+
+## Owner scope amendment — 2 November 2026
+
+The owner explicitly approved Dashboard, Asset and Maintenance READ across the
+registered population, superseding the initial one-asset proposal. This authorizes
+the three READ capabilities for all Registry BSR/IP assets, at the previously
+proposed maximum24-hour validity, without ADMIN or broader Engineering write
+scope. Grant issuance, CI-policy/controller approval, fresh session, recovery,
+service-level image plan and actual UAT remain separately evidenced gates.
+Other sites/orgs, unregistered technical assets, general portfolio/domain routes
+and all writes remain restricted. Existing ADMIN dashboard source is unchanged.

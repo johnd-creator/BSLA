@@ -1,7 +1,7 @@
 import {hasPortfolioRead,portfolioRoutes} from './factual-policy';
 import {readBounded} from './bounded-http';
 import {localGuardEnabled,verifyLocalSession,PRIVATE_HEADERS,type LocalSession} from './local-session';
-import {EMPTY_FACTUAL_READ,factualAssets,readFactualRead,sameFactualRead,recordFactualRead,type FactualReadSnapshot,type FactualPolicyReader,type FactualReadAuditor} from './factual-read-policy';
+import {EMPTY_FACTUAL_READ,canonicalBsrAsset,factualAssets,registeredRead,readFactualRead,sameFactualRead,recordFactualRead,type FactualReadSnapshot,type FactualPolicyReader,type FactualReadAuditor} from './factual-read-policy';
 import {scopedAsset,scopedMaintenancePage,scopedOverview,scopedRegister} from './factual-scoped-reader';
 const assetSuffixes=new Set(['','context','condition-evidence','integration-status','timeline','fmea','health-assessments','health/latest']);
 const collections=new Set(['maintenance-events','fmea','asset-health','overhauls']);
@@ -18,14 +18,15 @@ export function factualAccess(path:string[],params:URLSearchParams,session:Local
  if(path[0]!=='v1'||path[1]!=='reliability')return 'FACTUAL_SCOPE_GRANT_REQUIRED';
  if(!hasPortfolioRead(session)){
   const assets=factualAssets(read,['FACTUAL_ASSET_READ']);
-  if(path.join('/')==='v1/reliability/scoped-overview')return params.size===0&&factualAssets(read,['FACTUAL_DASHBOARD_READ','FACTUAL_ASSET_READ','FACTUAL_MAINTENANCE_READ']).length?null:'FACTUAL_SCOPE_GRANT_REQUIRED';
-  if(path.join('/')==='v1/reliability/assets'&&assets.length){
+  const registered=registeredRead(read,['FACTUAL_ASSET_READ']);
+  if(path.join('/')==='v1/reliability/scoped-overview')return params.size===0&&(registeredRead(read,['FACTUAL_DASHBOARD_READ','FACTUAL_ASSET_READ','FACTUAL_MAINTENANCE_READ'])||factualAssets(read,['FACTUAL_DASHBOARD_READ','FACTUAL_ASSET_READ','FACTUAL_MAINTENANCE_READ']).length)?null:'FACTUAL_SCOPE_GRANT_REQUIRED';
+  if(path.join('/')==='v1/reliability/assets'&&(assets.length||registered)){
    for(const key of params.keys())if(!['offset','limit','sort','status','unit','asset_type','site_code','organization_code'].includes(key))return 'QUERY_DENIED';
    if(params.has('sort')&&!['updated_desc','updated_asc','status'].includes(params.get('sort')!))return 'QUERY_DENIED';
    return null;
   }
-  if(path.length===4&&path[2]==='assets'&&assets.includes(path[3]))return params.size===0?null:'QUERY_DENIED';
-  if(path.length===3&&path[2]==='maintenance-events'&&factualAssets(read,['FACTUAL_ASSET_READ','FACTUAL_MAINTENANCE_READ']).includes(params.get('asset_ref')??'')){
+  if(path.length===4&&path[2]==='assets'&&(assets.includes(path[3])||registered&&canonicalBsrAsset(path[3])))return params.size===0?null:'QUERY_DENIED';
+  if(path.length===3&&path[2]==='maintenance-events'&&(factualAssets(read,['FACTUAL_ASSET_READ','FACTUAL_MAINTENANCE_READ']).includes(params.get('asset_ref')??'')||registeredRead(read,['FACTUAL_ASSET_READ','FACTUAL_MAINTENANCE_READ'])&&canonicalBsrAsset(params.get('asset_ref')??''))){
    for(const key of params.keys())if(!['asset_ref','offset','limit','sort','work_order_id','status','event_type','date_from','date_to','site_code','organization_code'].includes(key))return 'QUERY_DENIED';
    return null;
   }
@@ -62,11 +63,11 @@ export async function factualGateway(request:Request,path:string[],requestFetch:
  try{
   if(request.signal.aborted)controller.abort();
   const scoped=!hasPortfolioRead(who.session),route=path.join('/');
-  const direct=scoped&&path.length===4&&path[2]==='assets'&&factualAssets(read,['FACTUAL_ASSET_READ']).includes(path[3]);
+  const direct=scoped&&path.length===4&&path[2]==='assets'&&(factualAssets(read,['FACTUAL_ASSET_READ']).includes(path[3])||registeredRead(read,['FACTUAL_ASSET_READ']));
   let bytes:Uint8Array,status=200;
   if(scoped&&route==='v1/reliability/assets')bytes=new TextEncoder().encode(JSON.stringify(await scopedRegister(url.searchParams,read,requestFetch,controller.signal)));
   else if(scoped&&route==='v1/reliability/scoped-overview')bytes=new TextEncoder().encode(JSON.stringify(await scopedOverview(read,requestFetch,controller.signal)));
-  else if(direct)bytes=new TextEncoder().encode(JSON.stringify(await scopedAsset(path[3],factualAssets(read,['FACTUAL_ASSET_READ']),requestFetch,controller.signal)));
+  else if(direct)bytes=new TextEncoder().encode(JSON.stringify(await scopedAsset(path[3],registeredRead(read,['FACTUAL_ASSET_READ'])?null:factualAssets(read,['FACTUAL_ASSET_READ']),requestFetch,controller.signal)));
   else{
   const assetId=path[0]==='v1'&&path[1]==='reliability'&&path[2]==='assets'&&path.length>=4?path[3]:url.searchParams.get('asset_ref');
   if(assetId){
@@ -82,7 +83,7 @@ export async function factualGateway(request:Request,path:string[],requestFetch:
   const type=upstream.headers.get('content-type')??'';
   if(!type.toLowerCase().startsWith('application/json'))return denied('UPSTREAM_TYPE_DENIED',502);
   bytes=await readBounded(upstream.body,2*1024*1024,controller.signal);status=upstream.status;
-  if(scoped&&route==='v1/reliability/maintenance-events'&&factualAssets(read,['FACTUAL_ASSET_READ','FACTUAL_MAINTENANCE_READ']).includes(url.searchParams.get('asset_ref')??'')&&status===200){
+  if(scoped&&usesReadPolicy&&route==='v1/reliability/maintenance-events'&&status===200){
    const page=scopedMaintenancePage(JSON.parse(new TextDecoder().decode(bytes)),url.searchParams.get('asset_ref')!,Number(url.searchParams.get('offset')??0),Number(url.searchParams.get('limit')??50));
    bytes=new TextEncoder().encode(JSON.stringify(page));
   }
@@ -98,5 +99,5 @@ export async function factualGateway(request:Request,path:string[],requestFetch:
    if(!sameFactualRead(finalRead,policyReader(final.session.subject)))return denied('ASSET_SCOPE_DENIED',403);
   }
   return new Response(bytes as BodyInit,{status,headers:{...PRIVATE_HEADERS,'Content-Type':'application/json'}});
- }catch{return denied('FACTUAL_UPSTREAM_UNAVAILABLE',503);}finally{clearTimeout(timer);request.signal.removeEventListener('abort',abort);}
+ }catch(error){return error instanceof Error&&error.message==='ASSET_SCOPE_DENIED'?denied('ASSET_SCOPE_DENIED',403):denied('FACTUAL_UPSTREAM_UNAVAILABLE',503);}finally{clearTimeout(timer);request.signal.removeEventListener('abort',abort);}
 }

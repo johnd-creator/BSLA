@@ -8,8 +8,8 @@ import {createHash} from 'node:crypto';
 import {FACTUAL_READ_CAPABILITIES,type FactualReadCapability} from './factual-read-contract';
 const ZERO='0'.repeat(64),MAX_BYTES=4*1024*1024,ISSUER='local:c759c2d1-19a4-4291-9b66-9218dbd12dea';
 const FIELDS=['action','version','previous_sha256','grant_id','subject','assets','capabilities','not_before','expires_at','actor','approval_ref','operator_ref','at','sha256'].sort();
-type Event={action:'ISSUE'|'REVOKE';version:number;previous_sha256:string;grant_id:string;subject:string;assets:string[];capabilities:FactualReadCapability[];not_before:string;expires_at:string;actor:string;approval_ref:string;operator_ref:string;at:string;sha256:string};
-export type FactualReadSnapshot={head:string;version:number;permissions:Record<string,FactualReadCapability[]>};
+type Event={action:'ISSUE'|'REVOKE';version:number;previous_sha256:string;grant_id:string;subject:string;assets:string[];scope_kind?:'EXACT_ASSETS'|'REGISTERED_BSR_IP';capabilities:FactualReadCapability[];not_before:string;expires_at:string;actor:string;approval_ref:string;operator_ref:string;at:string;sha256:string};
+export type FactualReadSnapshot={head:string;version:number;permissions:Record<string,FactualReadCapability[]>;registered?:FactualReadCapability[]};
 export type FactualPolicyReader=(subject:string)=>FactualReadSnapshot;
 export type FactualReadAuditor=(subject:string,snapshot:FactualReadSnapshot,requestUrl:string)=>void;
 export const EMPTY_FACTUAL_READ:FactualReadSnapshot={head:ZERO,version:0,permissions:{}};
@@ -31,12 +31,14 @@ export function parseFactualRead(data:string,subject:string,now=Date.now()):Fact
  const states=new Map<string,Event>();
  for(const line of lines.slice(1)){
   const e:Event=JSON.parse(line);
-  if(!e||Array.isArray(e)||canonical(Object.keys(e).sort())!==canonical(FIELDS)||canonical(e)!==line)return fail();
+  if(!e||Array.isArray(e)||![canonical(FIELDS),canonical([...FIELDS,'scope_kind'].sort())].includes(canonical(Object.keys(e).sort()))||canonical(e)!==line)return fail();
   if(!['ISSUE','REVOKE'].includes(e.action)||!Number.isSafeInteger(e.version)||e.version!==version+1||e.previous_sha256!==previous||!/^[a-f0-9]{64}$/.test(e.sha256))return fail();
   for(const key of ['subject','actor'] as const)if(typeof e[key]!=='string'||!/^local:[A-Za-z0-9-]{1,150}$/.test(e[key]))return fail();
   if(e.actor!==ISSUER||e.subject===e.actor)return fail();
   for(const key of ['grant_id','approval_ref','operator_ref'] as const)if(typeof e[key]!=='string'||! /^[A-Za-z0-9_.:-]{1,160}$/.test(e[key]))return fail();
-  if(!strings(e.assets)||e.assets.length<1||e.assets.length>20||e.assets.some(a=>!/^asset:MAXIMO:MXASSET:BSR:IP:[A-Za-z0-9_.-]{1,120}$/.test(a)))return fail();
+  if(Object.hasOwn(e,'scope_kind')&&!['EXACT_ASSETS','REGISTERED_BSR_IP'].includes(e.scope_kind!))return fail();
+  const scope=e.scope_kind??'EXACT_ASSETS';
+  if(!['EXACT_ASSETS','REGISTERED_BSR_IP'].includes(scope)||!strings(e.assets)||(scope==='REGISTERED_BSR_IP'?e.assets.length!==0:e.assets.length<1||e.assets.length>20)||e.assets.some(a=>!/^asset:MAXIMO:MXASSET:BSR:IP:[A-Za-z0-9_.-]{1,120}$/.test(a)))return fail();
   if(!strings(e.capabilities)||!e.capabilities.length||e.capabilities.some(c=>!(FACTUAL_READ_CAPABILITIES as readonly string[]).includes(c)))return fail();
   const start=time(e.not_before),end=time(e.expires_at),at=time(e.at);
   if(end<=start||end-start>86400000||at<lastTime||at>now+5000||e.action==='ISSUE'&&(at<start||at-start>3600000))return fail();
@@ -44,15 +46,17 @@ export function parseFactualRead(data:string,subject:string,now=Date.now()):Fact
   if(createHash('sha256').update(canonical(unsigned)).digest('hex')!==e.sha256)return fail();
   const old=states.get(e.grant_id);
   if(e.action==='ISSUE'){if(old||++issues>200)return fail();}
-  else if(!old||old.action!=='ISSUE'||(['subject','assets','capabilities','not_before','expires_at'] as const).some(k=>canonical(e[k])!==canonical(old[k])))return fail();
+  else if(!old||old.action!=='ISSUE'||(e.scope_kind??'EXACT_ASSETS')!==(old.scope_kind??'EXACT_ASSETS')||(['subject','assets','capabilities','not_before','expires_at'] as const).some(k=>canonical(e[k])!==canonical(old[k])))return fail();
   states.set(e.grant_id,e);previous=e.sha256;version=e.version;lastTime=at;
  }
  const permissions:Record<string,FactualReadCapability[]>={};
+ const registered=new Set<FactualReadCapability>();
  for(const e of states.values())if(e.action==='ISSUE'&&e.subject===subject&&time(e.not_before)<=now&&now<time(e.expires_at)){
+  if(e.scope_kind==='REGISTERED_BSR_IP')for(const cap of e.capabilities)registered.add(cap);
   for(const asset of e.assets)permissions[asset]=[...new Set([...(permissions[asset]??[]),...e.capabilities])].sort();
  }
  if(Object.keys(permissions).length>20)return fail(); // bounded exact lookups, never a portfolio fan-out
- return {head:previous,version,permissions};
+ return {head:previous,version,permissions,...(registered.size?{registered:[...registered].sort()}:{})};
 }
 export function readFactualRead(subject:string):FactualReadSnapshot {
  const name=process.env.NADI_FACTUAL_READ_POLICY_FILE;if(!name)return EMPTY_FACTUAL_READ;
@@ -70,8 +74,12 @@ export function readFactualRead(subject:string):FactualReadSnapshot {
 export function factualAssets(snapshot:FactualReadSnapshot,required:FactualReadCapability[]):string[]{
  return Object.keys(snapshot.permissions).filter(id=>required.every(cap=>snapshot.permissions[id].includes(cap))).sort();
 }
+export function registeredRead(snapshot:FactualReadSnapshot,required:FactualReadCapability[]):boolean{
+ return required.every(cap=>(snapshot.registered??[]).includes(cap));
+}
+export function canonicalBsrAsset(id:string):boolean{return /^asset:MAXIMO:MXASSET:BSR:IP:[A-Za-z0-9_.-]{1,120}$/.test(id);}
 export function sameFactualRead(a:FactualReadSnapshot,b:FactualReadSnapshot):boolean{
- return a.head===b.head&&a.version===b.version&&canonical(a.permissions)===canonical(b.permissions);
+ return a.head===b.head&&a.version===b.version&&canonical(a.permissions)===canonical(b.permissions)&&canonical(a.registered??[])===canonical(b.registered??[]);
 }
 export function recordFactualRead(subject:string,snapshot:FactualReadSnapshot,requestUrl:string):void{
  const policy=process.env.NADI_FACTUAL_READ_POLICY_FILE;if(!policy)throw new Error('PRIVATE_FACTUAL_READ_AUDIT_REQUIRED');

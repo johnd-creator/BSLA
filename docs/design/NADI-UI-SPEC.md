@@ -646,3 +646,9 @@ explicit. Register totals and paging use authorized assets before serialization.
 Existing admin overview, Asset filter/return context and PdM AUTHOR navigation
 remain. Synthetic390/768/1440 light/dark checks are not live Engineer acceptance.
 [Requirements and gate report](../../reliability-cockpit/docs/NADI-PR120-FINAL-UNBLOCK-01.md).
+
+Owner scope amendment: UI-01/02 now also support all registered BSR/IP assets under
+the three independent READ capabilities. Label this population explicitly, show
+the top-ten WO activity ranking as a bounded table, and link to the complete
+paginated Register. Do not render unrelated ADMIN domain metrics for this grant.
+Synthetic qualification remains separate from real Engineer UAT.

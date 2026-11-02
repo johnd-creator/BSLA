@@ -66,6 +66,34 @@ class FactualReadEntitlementsTest(unittest.TestCase):
         self.assertFalse(self.path.exists())
         self.assertEqual(list(self.provider.db.iterdump()), before)
 
+    def test_registered_scope_is_explicit_read_only_reversible_and_bounded(self):
+        before = list(self.provider.db.iterdump())
+        approval = {**self.approval, "assets":[], "scope_kind":"REGISTERED_BSR_IP"}
+        calls = []
+        def lookup(value):
+            calls.append(value)
+            return {"source":"MAXIMO_LIST_OF_ASSETS", "registered_asset_count":845}
+        result = self.run_admin(approval, lookup=lookup, apply=True)
+        self.assertEqual(calls, [None])  # No per-asset fan-out / account scope mutation.
+        self.assertEqual(decode(private_read(self.path))[0]["scope_kind"], "REGISTERED_BSR_IP")
+        revoke = {**approval, "action":"REVOKE", "expected_head":result["head_sha256"]}
+        for fields in [{"scope_kind":"EXACT_ASSETS", "assets":[ASSET]}, {"scope_kind":None}]:
+            with self.assertRaises(ValueError):self.run_admin({**revoke, **fields}, apply=True)
+        self.run_admin(revoke, now=NOW+timedelta(minutes=1), apply=True)
+        self.assertEqual(decode(private_read(self.path))[-1]["action"], "REVOKE")
+        self.assertEqual(list(self.provider.db.iterdump()), before)
+
+    def test_registered_scope_rejects_wildcards_foreign_scope_and_unverified_registry(self):
+        for fields in [{"scope_kind":"REGISTERED_BSR_IP", "assets":[ASSET]},
+                       {"scope_kind":"ALL", "assets":[]}, {"scope_kind":None},
+                       {"scope_kind":"REGISTERED_BSR_IP", "assets":["*"]}]:
+            with self.assertRaises((ValueError, TypeError)):self.run_admin({**self.approval, **fields}, apply=True)
+        for metadata in [{"source":"OTHER", "registered_asset_count":845},
+                         {"source":"MAXIMO_LIST_OF_ASSETS", "registered_asset_count":True},
+                         {"source":"MAXIMO_LIST_OF_ASSETS", "registered_asset_count":0}]:
+            with self.assertRaises(ValueError):self.run_admin({**self.approval,"assets":[],"scope_kind":"REGISTERED_BSR_IP"},lookup=lambda _:metadata,apply=True)
+        self.assertFalse(self.path.exists())
+
     def test_issue_revoke_audit_and_engineering_write_scope_unchanged(self):
         before = list(self.provider.db.iterdump())
         receipt = self.run_admin(apply=True)
