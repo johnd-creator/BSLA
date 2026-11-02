@@ -84,5 +84,32 @@
   "followup_date_timezone": "Asia/Jakarta",
   "followup_remaining_gap_set_check": "all remaining gaps are in the queried/exhausted initial subset; no pending root or capped group",
   "unit_filter_limit": "eq11=CS01 applies to returned child row; different/missing child unit can be excluded; actual cause UNKNOWN",
-  "source_discrepancy_status": "OWNER_VERIFICATION_REQUIRED_WITHOUT_SCOPE_EXPANSION"
+  "source_discrepancy_status": "SCOPED_FILTER_EFFECT_VERIFIED_CHILD_STORED_UNIT_UNKNOWN",
+  "read_only_unit_exception": {
+    "task": "NADI-HIERARCHY-CHILD-UNIT-READ-20261103",
+    "verified_date": "2026-11-03",
+    "authorization": "specific owner-approved finite parent allowlist; BSR/IP without child eq11 predicate; no routine-policy change",
+    "coverage": "selected parent queries and source-advertised pages exhausted; no global or transactional completeness claim",
+    "paired_CS01_result": "no returned children for same selected parents",
+    "child_eq11_presence": "ABSENT_IN_RESPONSES",
+    "child_stored_unit": "UNKNOWN",
+    "field_selection_control": "CS01 visible on selected parents; eq11 absent on observed child samples under reduced projection",
+    "default_collector_scope_unchanged": true,
+    "ingestion_authorized_or_performed": false,
+    "registry_changed": false,
+    "grant_or_credentials_changed": false,
+    "runtime_changed": false,
+    "hierarchy_roles": "UNKNOWN",
+    "domain_owner_description": [
+      "unnamed level above system",
+      "system",
+      "subsystem",
+      "asset",
+      "equipment"
+    ],
+    "domain_description_is_verified_Maximo_mapping": false,
+    "registry_members_are_all_physical_roots": false,
+    "previous_discrepancy_status": "OWNER_VERIFICATION_REQUIRED_WITHOUT_SCOPE_EXPANSION",
+    "raw_evidence_and_cardinalities": "private"
+  }
 }

@@ -1234,3 +1234,18 @@ is PARTIAL and does not advance global cursors. No Registry import, role inferen
 WO backfill, source write or service change. Full population/role acceptance stays
 PARTIAL/UNKNOWN and local PR120 activation stays BLOCKED. Evidence and cardinalities
 remain private; see the [integrated source report](../docs/NADI-NIGHT-INTEGRATION-20261102.md) for the bounded method.
+
+
+### NADI-HIERARCHY-CHILD-UNIT-READ-20261103 — source investigation
+
+The explicitly approved finite BSR/IP parent investigation without a child unit
+predicate is complete. A paired CS01 query reproduces exclusion of the discovered
+relations; child eq11 remains absent in API responses, not verified as stored null,
+empty or another unit. Projection controls, pagination/deduplication and preservation
+checks passed. This read did not ingest data or change default Collector scope,
+Registry, grants, credentials or services. Earlier approved technical-row append
+is separate. Runtime stays PR119; controller admission and candidate live UAT remain
+blocked. PR121 is Draft/superseded and Logbook PdM HOLD. Domain input describes an
+unnamed tier above system, then system/subsystem/asset/equipment; source role mapping
+is UNKNOWN and Registry membership does not imply physical roots. See [source report](../docs/NADI-NIGHT-INTEGRATION-20261102.md)
+for method and limits; raw evidence and counts remain private.

@@ -140,3 +140,55 @@ unit data, relationship semantics or source visibility explains the remaining
 discrepancy is UNKNOWN; no cross-unit request or permission expansion was performed.
 This is a source discrepancy requiring owner verification, not proof of leaf
 status or complete hierarchy. Evidence identities and cardinalities remain private.
+
+
+## NADI-HIERARCHY-CHILD-UNIT-READ-20261103 — scoped read exception
+
+The owner explicitly authorized a finite read-only investigation of the previously
+unresolved registered parent allowlist in BSR/IP, omitting only the child-row unit
+predicate. This was a one-task exception, not a change to the default Collector
+equipment scope, credential, grant, configuration or ingestion policy.
+
+All selected parents were covered by exhausted traversals; capped groups were
+refined or resumed, with no unfinished parent or paging continuation. The same
+parent population returned direct children without the child unit predicate and
+none with the CS01 predicate restored. This reproduces the query-filter effect;
+it does not establish a child's stored unit as null, blank or another unit.
+In the returned child records, eq11 was absent. Explicit null, empty string,
+other nonblank unit and unavailable field are distinct states. A same-object,
+same-credential projection control exposed CS01 on selected parents while eq11
+remained absent on already observed child samples with a smaller field selection.
+The actual stored unit and reason for omission remain UNKNOWN. Do not coalesce
+the parent's unit into the child's source fact or broaden grants to guess it.
+
+Paging used the existing GET-only client, source-origin checks, response/rate caps,
+finite parent predicates, request/time budgets and WO-owner idle windows. A safe
+numeric next-page counter could resume the same query/field selection; no raw
+session URL, cookie, token or auth header was retained. Duplicate observations
+were reconciled by exact source identity, with no conflicting relationship/unit
+observations. This is scoped API traversal, not a transactional global snapshot.
+
+No investigated child was ingested by this read. The earlier separately approved
+technical-row append remains a different operation; Registry, Equipment/AssetMaster,
+status history, mappings, ledger, asset cursors/runs and existing containers are
+preserved. Live services remain PR119 and candidate activation remains stopped at
+the controller source/recovery compatibility gate. PR121 remains Draft/superseded;
+Logbook PdM remains HOLD. Counts, identities and evidence remain private.
+
+Two local diagnostics initially exited with code1: an isolated synthetic test
+context omitted the urlparse import, and a comm-only docker top format omitted
+the PID column required by Docker. Both were corrected and their checks passed.
+Those diagnostics sent no Maximo requests and performed no database operations;
+all actual investigation business GETs succeeded. These are not source failures.
+
+The owner describes an unnamed level above system, then system -> subsystem ->
+asset -> equipment. This is domain input, not verified Maximo role metadata.
+Preserve the source parent-child structure without imposing a two-level taxonomy,
+mapping workbook S/E/C labels, or treating Registry members as physical roots.
+A registered node can start an authorized view and still have source ancestors.
+Depth and semantic role are independent; role mapping and global coverage remain
+UNKNOWN/PARTIAL. Excel remains a reference and was not imported.
+
+Next safe work is a separately reviewed eligibility/scope plan for any future
+ingestion of children with unavailable source units. The read exception does not
+authorize that ingestion, new membership, role assignment or service activation.
