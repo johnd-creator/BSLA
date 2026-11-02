@@ -31,10 +31,10 @@ try{
  }
  const run=(p,reader=()=>snapshot,fetcher=fakeFetch,method='GET')=>factualGateway(request(p,method),p.split('?')[0].split('/'),fetcher,true,reader,()=>{});
  const registeredIssue=event({scope_kind:'REGISTERED_BSR_IP',assets:[]}),registeredLedger='{"schema_version":1}\n'+canonical(registeredIssue)+'\n',registered=parseFactualRead(registeredLedger,subject);
- const overview={scope:{kind:'REGISTERED_BSR_IP',site_code:'BSR',organization_code:'IP'},as_of:stamp(now),summary:{registered_assets:845,maintenance_events:37678,assets_with_maintenance:1},assets:[{canonical_id:asset,source_asset_number:'SYNTHETIC-A',description:'SYNTHETIC registry activity',maintenance_events:37678,latest_retained_activity:null}],operational_kpis:'NOT_ELIGIBLE',restricted_sections:[],secret:{must_not_leak:999}};
+ const overview={scope:{kind:'REGISTERED_BSR_IP',site_code:'BSR',organization_code:'IP'},as_of:stamp(now),summary:{registered_assets:137,maintenance_events:9123,assets_with_maintenance:1},assets:[{canonical_id:asset,source_asset_number:'SYNTHETIC-A',description:'SYNTHETIC registry activity',maintenance_events:9123,latest_retained_activity:null}],operational_kpis:'NOT_ELIGIBLE',restricted_sections:[],secret:{must_not_leak:999}};
  function registeredFetch(url){const u=new URL(url);
   if(u.pathname==='/v1/reliability/registered-maintenance-overview')return Response.json(overview);
-  if(u.pathname==='/v1/reliability/assets'){const offset=Number(u.searchParams.get('offset')??0),limit=Number(u.searchParams.get('limit')??50),total=u.searchParams.get('status')==='NONE'?0:845;
+  if(u.pathname==='/v1/reliability/assets'){const offset=Number(u.searchParams.get('offset')??0),limit=Number(u.searchParams.get('limit')??50),total=u.searchParams.get('status')==='NONE'?0:137;
    return Response.json({items:Array.from({length:Math.min(limit,Math.max(0,total-offset))},(_,i)=>({canonical_id:asset.replace('SYNTHETIC-A','SYNTHETIC-'+(offset+i)),contract_version:'1',source_asset_number:'SYNTHETIC-'+(offset+i),description:'SYNTHETIC',status:'ACTIVE',location_ref:null,parent_asset_ref:foreign,site_code:'BSR',organization_code:'IP',asset_type:null,plant:null,unit:null,source_updated_at:null})),meta:{offset,limit,total,has_more:offset+limit<total}});
   }
   if(decodeURIComponent(u.pathname).endsWith('/'+foreign))return Response.json({detail:'not registered'},{status:404});
@@ -52,9 +52,9 @@ try{
  });
  await check('whole Registry server pagination above20 and maintenance-only totals use bounded queries',async()=>{
   let queries=0;const fetcher=url=>{if(new URL(url).port==='8000')queries++;return registeredFetch(url);};
-  let response=await run('v1/reliability/assets?offset=840&limit=5',()=>registered,fetcher);assert.equal(response.status,200);let p=await response.json();assert.equal(p.meta.total,845);assert.equal(p.items.length,5);assert.equal(p.meta.has_more,false);assert.equal(queries,1);assert(p.items.every(a=>a.parent_asset_ref===null));
+  let response=await run('v1/reliability/assets?offset=132&limit=5',()=>registered,fetcher);assert.equal(response.status,200);let p=await response.json();assert.equal(p.meta.total,137);assert.equal(p.items.length,5);assert.equal(p.meta.has_more,false);assert.equal(queries,1);assert(p.items.every(a=>a.parent_asset_ref===null));
   response=await run('v1/reliability/assets?status=NONE',()=>registered,fetcher);assert.equal((await response.json()).meta.total,0);
-  response=await run('v1/reliability/scoped-overview',()=>registered,fetcher);assert.equal(response.status,200);p=await response.json();assert.equal(p.summary.registered_assets,845);assert.equal(p.summary.maintenance_events,37678);assert.equal(p.scope.kind,'REGISTERED_BSR_IP');assert(!JSON.stringify(p).includes('must_not_leak'));assert.equal(queries,3);
+  response=await run('v1/reliability/scoped-overview',()=>registered,fetcher);assert.equal(response.status,200);p=await response.json();assert.equal(p.summary.registered_assets,137);assert.equal(p.summary.maintenance_events,9123);assert.equal(p.scope.kind,'REGISTERED_BSR_IP');assert(!JSON.stringify(p).includes('must_not_leak'));assert.equal(queries,3);
  });
  await check('registered assets still need live membership; foreign domains and writes remain denied',async()=>{
   assert.equal((await run('v1/reliability/assets/'+asset,()=>registered,registeredFetch)).status,200);
@@ -68,7 +68,7 @@ try{
  await check('registered capabilities are separate and in-flight revocation suppresses all data',async()=>{
   const limited={...registered,registered:['FACTUAL_DASHBOARD_READ']};
   for(const path of ['assets','scoped-overview','maintenance-events?asset_ref='+asset])assert.equal((await run('v1/reliability/'+path,()=>limited,registeredFetch)).status,403);
-  for(const path of ['assets','scoped-overview','maintenance-events?asset_ref='+asset]){let reads=0;const response=await run('v1/reliability/'+path,()=>++reads===1?registered:{...registered,registered:[]},registeredFetch);assert.equal(response.status,403);assert(!(await response.text()).includes('37678'));}
+  for(const path of ['assets','scoped-overview','maintenance-events?asset_ref='+asset]){let reads=0;const response=await run('v1/reliability/'+path,()=>++reads===1?registered:{...registered,registered:[]},registeredFetch);assert.equal(response.status,403);assert(!(await response.text()).includes('9123'));}
   for(const patch of [{scope:{...overview.scope,site_code:'OTHER'}},{summary:{...overview.summary,maintenance_events:0}},{assets:[{...overview.assets[0],canonical_id:foreign.replace(':BSR:',':OTHER:')}]},{assets:[{...overview.assets[0],description:{secret:999}}]}]){
    const fetcher=url=>new URL(url).pathname==='/v1/reliability/registered-maintenance-overview'?Response.json({...overview,...patch}):registeredFetch(url);
    assert.equal((await run('v1/reliability/scoped-overview',()=>registered,fetcher)).status,503);

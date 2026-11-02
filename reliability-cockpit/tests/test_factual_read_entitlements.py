@@ -72,7 +72,7 @@ class FactualReadEntitlementsTest(unittest.TestCase):
         calls = []
         def lookup(value):
             calls.append(value)
-            return {"source":"MAXIMO_LIST_OF_ASSETS", "registered_asset_count":845}
+            return {"source":"MAXIMO_LIST_OF_ASSETS", "registered_asset_count":137}
         result = self.run_admin(approval, lookup=lookup, apply=True)
         self.assertEqual(calls, [None])  # No per-asset fan-out / account scope mutation.
         self.assertEqual(decode(private_read(self.path))[0]["scope_kind"], "REGISTERED_BSR_IP")
@@ -88,7 +88,7 @@ class FactualReadEntitlementsTest(unittest.TestCase):
                        {"scope_kind":"ALL", "assets":[]}, {"scope_kind":None},
                        {"scope_kind":"REGISTERED_BSR_IP", "assets":["*"]}]:
             with self.assertRaises((ValueError, TypeError)):self.run_admin({**self.approval, **fields}, apply=True)
-        for metadata in [{"source":"OTHER", "registered_asset_count":845},
+        for metadata in [{"source":"OTHER", "registered_asset_count":137},
                          {"source":"MAXIMO_LIST_OF_ASSETS", "registered_asset_count":True},
                          {"source":"MAXIMO_LIST_OF_ASSETS", "registered_asset_count":0}]:
             with self.assertRaises(ValueError):self.run_admin({**self.approval,"assets":[],"scope_kind":"REGISTERED_BSR_IP"},lookup=lambda _:metadata,apply=True)
