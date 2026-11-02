@@ -47,6 +47,8 @@ try {
   check('register known instant in WIB '+timezoneId,await p.locator('.pdm-register').getByText('21 Oktober 2026, 06.30.00 WIB',{exact:true}).isVisible());
   await button('Buka inspeksi').click();await p.locator('.product-record-detail').waitFor();
   check('detail same instant as list '+timezoneId,await p.locator('.asset-facts').getByText('21 Oktober 2026, 06.30.00 WIB',{exact:true}).count()===2);
+  check('record provenance starts secondary without hiding measurement time '+timezoneId,!await p.locator('.inspection-provenance').getByText('20 Oktober 2026, 22.15.00 WIB',{exact:true}).isVisible());
+  await p.locator('.inspection-provenance > summary').click();
   check('application revision crosses to correct WIB day '+timezoneId,await p.locator('.asset-facts').getByText('20 Oktober 2026, 22.15.00 WIB',{exact:true}).isVisible());
   const original=p.locator('.asset-facts details').first();await original.locator('summary').click();
   check('original ISO available in detail '+timezoneId,await original.getByText(instant,{exact:true}).isVisible());
@@ -66,7 +68,7 @@ try {
   check('source list shows date-only without invented midnight '+timezoneId,await register.getByText('3 Januari 2019',{exact:true}).isVisible());
   check('source datetime retains reported WIT '+timezoneId,await register.getByText('3 Januari 2019, 00.15 WIT',{exact:true}).isVisible());
   check('source list clearly labels ambiguous local and time '+timezoneId,await register.getByText('3 Januari 2019, 14.30 zona waktu belum diketahui',{exact:true}).isVisible()&&await register.getByText('14.30 · tanggal dan zona waktu belum diketahui',{exact:true}).isVisible());
-  await button('Buka inspeksi').click();await p.locator('.pdm-source-clock').first().waitFor();
+  await button('Buka inspeksi').click();await p.getByText('Data sumber provisional · nilai asli, formula & provenance',{exact:true}).click();await p.locator('.pdm-source-clock').first().waitFor();
   const clock=p.locator('.pdm-source-clock').first();
   check('source detail same date as list '+timezoneId,await clock.getByText('3 Januari 2019',{exact:true}).isVisible());
   await clock.locator('summary').click();
@@ -77,6 +79,7 @@ try {
    if(timezoneId==='America/Los_Angeles'){await p.screenshot({path:out+'/source-detail-'+width+'.png',fullPage:true});await clock.screenshot({path:out+'/source-clock-'+width+'.png'});}
   }
   await button('Baca riwayat').click();await p.getByText('Baca isi revisi 1',{exact:true}).click();
+  await p.locator('details[open] .product-record-detail').getByText('Data sumber provisional · nilai asli, formula & provenance',{exact:true}).click();
   check('source immutable revision same date '+timezoneId,await p.locator('details[open] .product-record-detail .pdm-source-clock').first().getByText('3 Januari 2019',{exact:true}).isVisible());
   await button('Ubah draf inspeksi').click();
   const explicit=p.getByLabel('Nilai waktu eksplisit',{exact:true}).first();

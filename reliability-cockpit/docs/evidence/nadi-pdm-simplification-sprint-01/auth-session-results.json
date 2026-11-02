@@ -1,0 +1,83 @@
+{
+  "results": [
+    {
+      "scenario": "same identity focus: AuthenticatedWorkspace hides private view, outer provider retains exact workbook draft, real form recovers",
+      "status": "PASS",
+      "writes": 0,
+      "navigations": 1
+    },
+    {
+      "scenario": "pending create\u2192auth checking\u2192same identity\u2192late200 consumes completion and selects exact persisted record once",
+      "status": "PASS",
+      "writes": 1,
+      "navigations": 1
+    },
+    {
+      "scenario": "committed create/lost ACK\u2192auth checking\u2192same identity\u2192503\u2192recovered retry reuses exact ID and one record",
+      "status": "PASS",
+      "writes": 2,
+      "navigations": 1
+    },
+    {
+      "scenario": "global draft A\u2192explicit record B: rejected Edit preserves A; resume A exact; accepted discard opens B; pristine cancel does not save",
+      "status": "PASS",
+      "writes": 0,
+      "navigations": 1
+    },
+    {
+      "scenario": "transient503 retry: private views stay closed until same identity verified, exact draft retained without full reload",
+      "status": "PASS",
+      "writes": 0,
+      "navigations": 1
+    },
+    {
+      "scenario": "pending lostACK\u2192auth503\u2192retry retains lock/receipt; final503\u2192sameID retry persists one record",
+      "status": "PASS",
+      "writes": 2,
+      "navigations": 1
+    },
+    {
+      "scenario": "bounded capture listing requests1 and honest server pagination advances offset1 without changing proxy budget",
+      "status": "PASS",
+      "writes": 2,
+      "navigations": 1
+    },
+    {
+      "scenario": "actual textareas preserve multiline source, metadata and raw-clock strings in POST and reopened editor",
+      "status": "PASS",
+      "writes": 1,
+      "navigations": 1
+    },
+    {
+      "scenario": "changed subject reloads workspace and destroys old private capture recovery",
+      "status": "PASS",
+      "writes": 0,
+      "navigations": 2
+    },
+    {
+      "scenario": "changed role reloads workspace and destroys old private capture recovery",
+      "status": "PASS",
+      "writes": 0,
+      "navigations": 2
+    },
+    {
+      "scenario": "changed asset scope reloads workspace and destroys old private capture recovery",
+      "status": "PASS",
+      "writes": 0,
+      "navigations": 2
+    },
+    {
+      "scenario": "session401 closes private workspace and navigates login with destroyed capture cache",
+      "status": "PASS",
+      "writes": 0,
+      "navigations": 2
+    },
+    {
+      "scenario": "session403 closes private workspace and navigates login with destroyed capture cache",
+      "status": "PASS",
+      "writes": 0,
+      "navigations": 2
+    }
+  ],
+  "scope": "actual imported components; synthetic .invalid interception only; no local QA/primary runtime/network"
+}

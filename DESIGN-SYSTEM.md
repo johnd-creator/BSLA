@@ -226,3 +226,12 @@ raw proofs in explicit details. Unknown unit/date/mapping remains visible; empty
 values differ from zero. Byte-bounded field paging and mobile wrapping preserve
 access to long proofs. No new global tokens or chart semantics are approved.
 [Candidate UI/evidence](reliability-cockpit/docs/nadi-pdm-complete-history-01.md).
+
+## PdM simplification Sprint 1 — 31 October 2026 candidate
+
+Reuse the accepted Experience foundation: five primary links and existing utility
+navigation, compact population/page facts, continuous A–D editor sections and
+contextual disclosures. Input Pengukuran is the register's primary action; review
+uses an explicit decision and server-authorized action. Existing neutral pending/
+unknown/provisional semantics remain. [Synthetic responsive/light-dark evidence](reliability-cockpit/docs/evidence/nadi-pdm-simplification-sprint-01/README.md)
+is candidate review material; PO visual acceptance and runtime activation are pending.

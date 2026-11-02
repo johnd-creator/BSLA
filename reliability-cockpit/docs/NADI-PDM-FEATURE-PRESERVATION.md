@@ -1,0 +1,34 @@
+# Existing feature preservation matrix
+
+Exact main baseline and runtime exception are in [audit](NADI-PDM-REPOSITORY-AUDIT.md). Rows are preservation obligations, **not newly executed acceptance tests**. Components are under `reliability-cockpit/web/components/` unless a path prefix indicates `src/`, `web/lib/`, `web/app/` or `docs/`; test modules under `reliability-cockpit/tests/`. Runtime paths are source runtime privat only, not claimed merged. Tests are existing evidence/check targets and do not independently prove every UX requirement.
+
+| ID | Capability / invariant | Source anchor | Existing regression anchor | Proposed entry / obligation |
+| --- | --- | --- | --- | --- |
+| F01 | Native multi-point entry, typed values/zero/null, ≤100 rows | PdmMeasurementForm.tsx; lib/pdm-input.ts | test_pdm_input.py | Editor; payload unchanged |
+| F02 | Provisional workbook transcription, native/capture exclusivity, literal units/clocks | PdmCaptureEditor.tsx; domain/pdm_input_capture.py | test_pdm_input_capture.py | Editor source mode; no canonical promotion |
+| F03 | Work origin union, conditional department, unknown legacy origin | PdmWorkOriginDetail.tsx; domain/manual_inspection.py | test_pdm_work_origin.py | Editor/detail/history retain exact text |
+| F04 | Human analysis, optional follow-up requiring analysis, clear optional fields | PdmFollowUpEditor.tsx; PdmFollowUpDetail.tsx | test_pdm_manual_follow_up.py | Detail; narrative is not Recommendation |
+| F05 | Reported-unverified SR exact text, max10, no source lookup/write | PdmFollowUpEditor.tsx | test_pdm_manual_follow_up.py | Detail/Tindak Lanjut; not WO |
+| F06 | Server asset/method/status/search/date filters and bounded population paging | PdmCenter.tsx; services/human_records.py | test_pdm_input.py | Register; current limit/budget unchanged |
+| F07 | Native measurement-history and constrained single-revision raw scatter | PdmHistory.tsx; lib/pdm-input.ts | test_pdm_input.py | History; no interpolation/cross-inspection joining |
+| F08 | Raw source history, workbook/sheet/status/kind filters, keyset/byte field pages | PdmSourceHistory.tsx; services/pdm_source_history.py | test_pdm_source_history.py | Source history; scoped owner/asset checks |
+| F09 | 173147 physical proof preservation,25278 groups,source/profile/alias/batch/receipt immutability | services/pdm_complete_plan.py; repositories/pdm_source_history.py | test_pdm_complete_plan.py; test_pdm_complete_postgres.py | Archive; no reimport, relabel-as-inspections or editing raw |
+| F10 | Independent inspection review, contributor exclusions, revise lifecycle | PdmInspectionWorkflow.tsx; services/human_records.py | test_inspection_workflow.py | Detail state actions; server owns permissions |
+| F11 | Native approved inspection→Case exact frozen revision; partial link retry | PdmInspectionWorkflow.tsx; services/reviewed_inspection_evidence.py | test_inspection_workflow.py; test_engineering_integrity.py | Contextual Case entry; no automatic creation |
+| F12 | Provisional input excluded from Case evidence and native plot after approval | domain/pdm_input_capture.py; services/reviewed_inspection_evidence.py | test_pdm_input_capture.py | Visible reason; no bypass |
+| F13 | Case register/create/edit/investigation/evidence/review/history | CaseWorkspace.tsx; CaseForm.tsx; FrozenCaseEvidence.tsx | test_engineering.py; test_engineering_integrity.py | Tindak Lanjut and native inspection context; direct paths retained |
+| F14 | Recommendation draft/review/reopen/local lifecycle and frozen existing-WO reference | RecommendationWorkspace.tsx; services/recommendation.py | test_recommendation_workflow.py | Tindak Lanjut; no source command |
+| F15 | Advisory versioned review/publication and authorized Inbox/ACK | AdvisoryWorkspace.tsx; services/advisory.py | test_advisory.py; test_advisory_http.py | Contextual authorized link; no claim operational distribution |
+| F16 | CAS, lost-ACK receipts, immutable revisions/audit actors | usePdmCommand.ts; repositories/human_records.py | test_manual_inspection.py; test_pdm_manual_follow_up.py | All workflows; no success before receipt/readback |
+| F17 | In-memory draft/same-session recovery, scope-change clearing/unsaved guard | PdmDraftContext.tsx; useUnsavedDraftGuard.ts | web/scripts/pdm-auth-browser-check.py | Editor/navigation; no browser persistence expansion |
+| F18 | Session-derived identity,CSRF/Origin,RBAC,asset visibility | services/local_authentication.py; api/application_session.py | test_local_authentication.py; test_application_access.py | All entries; no new engineer role or implicit grants |
+| F19 | Evidence metadata vs actual attachment custody separation | InspectionDetail.tsx; services/attachments.py | test_attachments.py | Detail; no implicit upload activation |
+| F20 | Asset Registry and six detail views, technical equipment distinction | app/(workspace)/assets/[...canonicalId]/page.tsx | test_reliability_mart.py | Aset; exact identity, no fuzzy join |
+| F21 | Maintenance/investigation/FMEA/health/overhaul and unresolved global RCFA | web/lib/navigation.ts; docs/nadi-kpi-evidence-catalog.md | test_reliability_mart.py | Aset/report/utilities; all routes retained |
+| F22 | Existing overview/reports/coverage/integration/data trust | ReportsCenter.tsx; SystemIntegrationCenter.tsx | test_reports_ui_contract.py; test_integration_ui_contract.py | Beranda/Laporan/utilities; factual semantics intact |
+| F23 | Runtime-only source interpretation with separate nonpersisted estimate | runtime-only:services/pdm_source_interpretation.py; PdmSourceInterpretation.tsx | runtime-only:test_pdm_source_interpretation.py | Keep raw/provenance/disclosure; no new estimate or KPI/Case reuse |
+| F24 | Runtime-only demo-account policy plus existing controller compatibility | runtime-only:services/local_demo_accounts.py; local_authentication.py | runtime-only:test_demo_account_management.py | Outside Sprint1 changes; source-parity release gate |
+
+Every row must remain reachable to the same authorized actor, preserve existing serialized data/history and fail-closed behavior. No backend rewrite, endpoint removal or hidden access expansion is accepted as a navigation change. For F23/F24 first reconcile the runtime source before any later release; this docs branch does not integrate that code.
+
+Future Sprint1 checks: source diff allowlist frontend presentation only; all exact legacy DTO/hash witness tests; create/readback/edit/clear/lost-ACK/CAS; author/independent reviewer/scope revoked; native Case success vs capture denial; audit/deep link; empty/error/denied/loading/unknown; desktop1440/mobile390 and light/dark/keyboard; retained raw source pages and estimate disclosures. Use disposable fixtures, never operational DDL/data mutation. PO records approval separately from CI, merge and activation.

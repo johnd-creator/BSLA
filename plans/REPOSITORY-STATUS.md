@@ -1088,3 +1088,21 @@ binding is in delivery evidence. Revalidated full seven-source import/readback/
 recovery plus131 Python tests (19 prerequisite skips) and23 native importer/
 migration/auth tests. No publication or live activation/import.
 [Scope and next gates](../reliability-cockpit/docs/nadi-pdm-complete-history-01.md).
+
+## 31 October 2026 — PdM simplification Sprint 1 candidate
+
+Main f1fc4e8b and OPEN/DRAFT PR113 exact2437fdb were reverified. Isolated branch
+`codex/nadi-pdm-simplification-sprint-01` is stacked on PR113 for S1-01–S1-05;
+PR113 is unchanged and PR107 stays separate. [Implementation, tests and preservation](../reliability-cockpit/docs/NADI-PDM-SIMPLIFICATION-SPRINT-01.md).
+All 28 page entries and protected backend/auth/DTO/source/controller boundaries
+remain unchanged. Synthetic/disposable qualification is separate from exact-head
+CI and PO UAT. No merge, deployment, active DB/account/session/collector change.
+Runtime-only F23/F24 are preserved locally and remain release compatibility gates.
+
+## 31 October 2026 — consolidated Sprint 1 delivery
+
+PR114 now targets main and retains blueprint2437fdb plus Sprint6549516 history.
+PR113 CLOSED_SUPERSEDED/unmerged; PR107 untouched. Reviewed F23/F24 source parity
+changes the original frontend-only scope through six pinned exceptions; the
+[one delivery report](../reliability-cockpit/docs/NADI-PDM-SPRINT1-ONE-PR-DELIVERY.md)
+is the current source/CI/live gate authority. Original dated reports stay historical.

@@ -97,7 +97,11 @@ def create_app():
     fixture.pi.setUp()
     fixture.pi.project(fixture.pi.source_document({'synthetic-current': {'Timestamp': '1970-01-01T00:00:00Z'}}))
     fixture.asset, fixture.mart = ASSET_ID, fixture.pi.reader()
-    provider = LocalIdentityProvider(fixture.store)
+    demo_profile = None
+    if config.get('demo_password_profile'):
+        from src.services.local_demo_accounts import load_demo_profile
+        demo_profile = load_demo_profile(config['demo_password_profile'], fixture.engine)
+    provider = LocalIdentityProvider(fixture.store, demo_profile=demo_profile)
     accounts = private_json(config['accounts_file'])
     for name in ['admin', 'engineer', 'reviewer', 'outsider']:
         if not provider.current_grant(accounts[name]['user_id']):

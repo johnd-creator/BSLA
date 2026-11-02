@@ -602,3 +602,14 @@ sample links. AUTHOR ownership/current asset authority governs RAW visibility.
 Date-only claims do not gain midnight or a timezone. Unknown claims remain RAW;
 list summaries hand off long raw claims to detail without fabricating substitutes.
 Canonical trend UI remains independent. [Qualification and limits](../../reliability-cockpit/docs/nadi-pdm-complete-history-01.md).
+
+## UI-04 / shared shell — Sprint 1 candidate, 31 October 2026
+
+[Implementation](../../reliability-cockpit/docs/NADI-PDM-SIMPLIFICATION-SPRINT-01.md)
+applies PR113's five primary entries, distinct Pengukuran Asli/Sumber Excel, compact
+Register, continuous four-section editor and contextual independent review/optional
+Case. All 28 existing page files/URLs and trusted contracts remain. Dirty draft
+section anchors support Back/Forward without discard; mandatory warnings/errors
+remain visible. Synthetic 390/768/1440/1920 light/dark evidence supports review,
+not live visibility, method approval or PO UX acceptance. F23/F24 parity gates
+require a separate compatibility/activation task.

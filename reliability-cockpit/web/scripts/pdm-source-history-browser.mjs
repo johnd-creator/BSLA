@@ -34,7 +34,7 @@ try{
  check('Indonesian source date with date-only precision',await p.getByText('3 Januari 2019',{exact:true}).isVisible());
  check('provisional and unmapped context explicit',(await p.textContent('main')).includes('belum menjadi measurement kanonis'));
  await p.getByRole('button',{name:'Baca kelompok sumber',exact:true}).click();await p.getByRole('region',{name:'Detail kelompok sumber'}).waitFor();
- check('zero and null remain distinct',(await p.locator('section[aria-label="Detail kelompok sumber"] tbody tr').first().locator('td').nth(1).textContent()).startsWith('0')&&(await p.locator('section[aria-label="Detail kelompok sumber"] tbody tr').nth(1).locator('td').nth(1).textContent()).startsWith('Tidak ada nilai'));
+ check('zero and null remain distinct',(await p.locator('section[aria-label="Detail kelompok sumber"] tbody tr').first().locator('td').nth(1).textContent()).startsWith('0')&&(await p.locator('section[aria-label="Detail kelompok sumber"] tbody tr').nth(1).locator('td').nth(1).textContent()).startsWith('Kosong'));
  check('unknown unit is explicit',await p.getByText('Unit belum diketahui',{exact:false}).count()===2);
  await p.getByText('Alasan, versi dan jejak sumber',{exact:true}).click();
  check('conflicting raw date remains accessible',(await p.textContent('main')).includes(clock.raw_value));
@@ -43,7 +43,7 @@ try{
   await p.setViewportSize({width,height:1100});check('no page overflow '+width,await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await p.screenshot({path:out+'/detail-'+width+'.png',fullPage:true});
  }
  await p.getByRole('button',{name:'Nilai berikutnya',exact:true}).click();await p.getByRole('cell',{name:/RAW text retained/}).waitFor();check('detail advances actual byte-bounded cursor',requests.some(r=>r.path.endsWith(event.event_key)&&r.query.includes('offset=2')));
- await p.getByRole('button',{name:'Nilai sebelumnya',exact:true}).click();await p.getByRole('cell',{name:/Tidak ada nilai/}).waitFor();
+ await p.getByRole('button',{name:'Nilai sebelumnya',exact:true}).click();await p.getByRole('cell',{name:/Kosong/}).waitFor();
  await p.getByRole('button',{name:'Halaman berikutnya',exact:true}).click();await p.getByRole('cell',{name:/^Baris RAW \/ konteks sumber/}).waitFor();check('source keyset next page navigable',await p.getByText('Tanggal sumber belum diketahui',{exact:true}).isVisible());
  for(const [value,text] of [['forbidden','Akun ini tidak memiliki akses ke riwayat sumber.'],['unavailable','Riwayat sumber belum disiapkan pada backend ini.'],['expired','Sesi berakhir. Silakan masuk kembali.']]){
   mode=value;await p.reload();await p.getByText(text,{exact:true}).waitFor();check('access/schema/session distinction '+value,true);

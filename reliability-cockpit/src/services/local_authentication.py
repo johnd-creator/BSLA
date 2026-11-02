@@ -16,6 +16,7 @@ from argon2 import PasswordHasher, Type
 from argon2.exceptions import VerificationError, InvalidHashError
 from sqlalchemy import (MetaData, Table, Column, String, Text, Boolean, Integer,
                         DateTime, JSON, select, update, text)
+from sqlalchemy.exc import IntegrityError
 from src.domain.engineering import Principal, Role, EngineeringError
 from src.services.application_identity import IdentityGrant
 
@@ -75,11 +76,21 @@ def lock_key(subject):
 
 
 class LocalIdentityProvider:
-    def __init__(self, store, *, policy=None, clock=None):
+    def __init__(self, store, *, policy=None, clock=None, demo_profile=None):
         if store.engine.dialect.name != "postgresql":
             raise EngineeringError("POSTGRESQL_REQUIRED", 503)
         self.engine = store.engine
         self.policy = policy or PasswordPolicy()
+        self.demo_profile = demo_profile
+        if demo_profile is not None:
+            from src.services.local_demo_accounts import DemoPasswordProfile
+            if not isinstance(demo_profile, DemoPasswordProfile):
+                raise EngineeringError('VERIFIED_LOCAL_DEMO_PROFILE_REQUIRED', 503)
+            if self.policy.minimum_length != 15:
+                raise EngineeringError('DEMO_PROFILE_STANDARD_POLICY_REQUIRED', 503)
+            demo_profile.check_target(self.engine)
+            with self.engine.connect() as c:
+                demo_profile.verify(c)
         self.clock = clock or (lambda: datetime.now(timezone.utc))
         self.hasher = PasswordHasher(time_cost=3, memory_cost=65536, parallelism=4, type=Type.ID)
         self._dummy = self.hasher.hash(secrets.token_urlsafe(32))
@@ -136,6 +147,14 @@ class LocalIdentityProvider:
         except (VerificationError, InvalidHashError):
             return False
 
+    def _replacement_password(self, c, row, value):
+        if self.demo_profile is not None and self.demo_profile.applies(c, row):
+            if (not isinstance(value, str) or not 8 <= len(value) <= self.policy.maximum_length
+                    or len(value.encode('utf-8')) > 1024 or not value.strip()):
+                raise EngineeringError('PASSWORD_POLICY_DENIED', 400)
+            return value
+        return self.policy.password(value)
+
     def authenticate(self, username, password, *, new_password=None):
         # Generic failure for malformed, absent, disabled and locked accounts.
         try:
@@ -163,12 +182,18 @@ class LocalIdentityProvider:
                     else:
                         c.execute(BUDGET.insert().values(budget_id="global", attempts=1, window_start=now))
                     identity = c.scalar(select(ACCOUNT.c.user_id).where(ACCOUNT.c.username == name))
-                    if identity:
-                        c.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": lock_key(identity)})
+                    # Coordinate rename/create without locking a newly reused name
+                    # under the old identity. All directory locks share one order.
+                    for subject in sorted({'username:'+name, *([identity] if identity else [])}):
+                        c.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": lock_key(subject)})
                     row = c.execute(select(ACCOUNT).where(ACCOUNT.c.username == name).with_for_update()).mappings().first()
-                    eligible = bool(row and row["active"] and (not row["locked_until"] or row["locked_until"] <= now))
+                    eligible = bool(row and row['user_id'] == identity and row["active"]
+                                    and (not row["locked_until"] or row["locked_until"] <= now))
                     verified = self._verify(row["password_hash"] if eligible else self._dummy,
                                             password if bounded else secrets.token_urlsafe(32))
+                    if eligible and verified and self.demo_profile is not None:
+                        if row['user_id'] in dict(self.demo_profile.identities).values():
+                            self.demo_profile.verify(c)
                     if not bounded or not eligible or not verified:
                         if eligible:
                             attempts = row["failed_attempts"] + 1
@@ -179,7 +204,7 @@ class LocalIdentityProvider:
                         failure = EngineeringError("INVALID_CREDENTIALS", 401)
                     elif new_password is not None:
                         try:
-                            self.policy.password(new_password)
+                            self._replacement_password(c, row, new_password)
                         except EngineeringError as error:
                             failure = error
                         if not failure:
@@ -261,14 +286,17 @@ class LocalIdentityProvider:
             raise EngineeringError("INVALID_ACCOUNT_INPUT", 400)
         if active is not None and type(active) is not bool:
             raise EngineeringError("INVALID_ACCOUNT_INPUT", 400)
-        if password is not None:
-            self.policy.password(password)
         with self._locks(actor.principal.principal_id if isinstance(actor, IdentityGrant) else "", target) as c:
             row = c.execute(select(ACCOUNT).where(ACCOUNT.c.user_id == target).with_for_update()).mappings().first()
             if not row:
                 raise EngineeringError("NOT_FOUND", 404)
             new_roles, new_assets = self._scope(roles if roles is not None else row["roles"], assets if assets is not None else row["asset_ids"])
             self._authorize(c, actor, frozenset(row["asset_ids"]) | frozenset(new_assets))
+            if (self.demo_profile is not None and target in dict(self.demo_profile.identities).values()
+                    and (new_roles != sorted(row['roles']) or new_assets != sorted(row['asset_ids']))):
+                raise EngineeringError('DEMO_PROFILE_SCOPE_CHANGE_FORBIDDEN', 409)
+            if password is not None:
+                self._replacement_password(c, row, password)
             changes = {"grant_version":row["grant_version"]+1, "updated_at":self.clock()}
             if active is not None:
                 changes["active"] = active
@@ -291,6 +319,28 @@ class LocalIdentityProvider:
                     self._audit(c, actor.principal.principal_id, target, action)
             if not any((active is not None, password is not None, roles is not None, assets is not None, revoke)):
                 raise EngineeringError("INVALID_ACCOUNT_INPUT", 400)
+
+    def rename_account(self, actor, target, *, expected_username, new_username):
+        """Private ADMIN CAS; ownership and credentials stay on the same UUID."""
+        if not isinstance(target, str) or not target or len(target) > 160:
+            raise EngineeringError('INVALID_ACCOUNT_INPUT', 400)
+        old, new = normalize_username(expected_username), normalize_username(new_username)
+        try:
+            with self._locks(actor.principal.principal_id if isinstance(actor, IdentityGrant) else '',
+                             target, 'username:'+old, 'username:'+new) as c:
+                row = c.execute(select(ACCOUNT).where(ACCOUNT.c.user_id == target).with_for_update()).mappings().first()
+                if not row:
+                    raise EngineeringError('NOT_FOUND', 404)
+                self._authorize(c, actor, frozenset(row['asset_ids']))
+                if row['username'] != old:
+                    raise EngineeringError('ACCOUNT_NAME_CHANGED', 409)
+                if old == new or c.scalar(select(ACCOUNT.c.user_id).where(ACCOUNT.c.username == new)):
+                    raise EngineeringError('ACCOUNT_CONFLICT', 409)
+                c.execute(update(ACCOUNT).where(ACCOUNT.c.user_id == target).values(
+                    username=new, grant_version=row['grant_version']+1, updated_at=self.clock()))
+                self._audit(c, actor.principal.principal_id, target, 'ACCOUNT_RENAMED')
+        except IntegrityError:
+            raise EngineeringError('ACCOUNT_CONFLICT', 409) from None
 
     def security_events(self, actor, *, limit=50, offset=0):
         if type(limit) is not int or type(offset) is not int or not 1 <= limit <= 100 or not 0 <= offset <= 10000:

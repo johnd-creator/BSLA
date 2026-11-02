@@ -1045,3 +1045,77 @@ review passed. Portable synthetic controller/installer/PostgreSQL checks are add
 to the exact-head candidate workflow. Publication/testing is separate from live
 installation, migration, SQL privilege changes, activation and import; none of those
 live actions is performed by this support package. See the owning activation proposal.
+
+## 31 October 2026 — NADI-PDM-SIMPLIFICATION-SPRINT-01
+
+Implemented authorized S1-01–S1-05 in an isolated branch on reviewed blueprint
+2437fdb (PR113). Five primary work areas, separate native/Excel history, A–D editor
+and contextual review/optional Case preserve existing payloads and services.
+Independent review corrections include query/hash preservation, exact active-route
+semantics, primary-action hierarchy and dirty editor anchor Back/Forward.
+Synthetic component, draft/session and disposable UI/API qualification completed;
+publication/immutable CI binding lives in the Draft PR handoff.
+[Report and F01–F24 evidence](reliability-cockpit/docs/NADI-PDM-SIMPLIFICATION-SPRINT-01.md).
+No runtime activation/merge or operational data/source change. PO visual acceptance
+and runtime-only F23/F24 parity remain pending.
+
+### Sprint 1 CI follow-up — 31 October 2026
+
+First exact-head backend passed; frontend exposed an existing date test expecting
+record provenance before opening its new disclosure. Updated that interaction
+without changing date assertions or product code; all42 date checks,56 existing
+login/logout checks and reports browser suite pass locally. Final delivery requires
+both CI jobs on the subsequent exact SHA; no runtime or source-system action.
+
+## 31 October 2026 — Sprint 1 one-PR integration
+
+PR114 retargeted to main with all blueprint/Sprint commits retained; PR113 closed
+unmerged as superseded, PR107 excluded. Minimal reviewed F23/F24 parity incorporated
+without private runtime reports/samples. Source/hash scope guard, synthetic tests,
+private official source seal, independent recovery and fresh backup qualification
+prepare conditional single-pair activation. No cutover is claimed; session proof
+and final immutable CI/acceptance remain separate. [Current report](reliability-cockpit/docs/NADI-PDM-SPRINT1-ONE-PR-DELIVERY.md).
+
+### 2026-11-01 — PR114 focused UX acceptance corrections
+
+NADI-PR114-UX-ACCEPTANCE-FIX-01 updates the existing Sprint1 branch only: compact
+PdM register (synthetic1440×900 row752.91–884.70px versus977.09–1108.89px),
+scannable detail with visible manual analysis and preserved raw/provenance fields,
+and typed Beranda403/401/retryable error presentation. Source baseline39da859;
+exact final SHA/CI are bound in PR114, not inferred from these measurements.
+No backend/schema/collector/account changes; current live pair remains39da859
+until all conditional activation gates, including legitimate session proof, pass.
+
+The first focused-fix hosted run exposed two legacy browser assertions that expected
+full IDs always visible. Updated those tests to open the new native identity
+ disclosures, then retain exact persisted-record and offset1/limit1 assertions.
+All13 local auth/draft/late-ACK/pagination scenarios pass without relaxing identity,
+receipt or authorization checks. Final exact-head CI remains required on the repair.
+
+The subsequent frontend run exposed one remaining button-descendant ID selector.
+Adapted it to the exact-ID row disclosure and added exact URL identity readback.
+Source-clock tests now open source disclosures in both current and immutable
+revision views before preserving every existing date/raw assertion. Local native
+input/keyboard/review checks and42 timezone/source-date browser checks pass.
+These are fixture-journey adaptations only; production implementation remains the
+reviewed e05d016 delta. Both hosted jobs must pass again at the final test head.
+
+The hosted full-row900px guard then exposed cross-runner margin insufficiency.
+Kept that guard intact and compacted non-essential container spacing further;
+time-basis help and inspector identity remain available through native disclosures.
+Final local register geometry701.91–833.70px provides66px bottom margin at1440×900.
+Measurement waits for fonts/finite animations to settle; numeric diagnostics expose
+runner differences. This supersedes the earlier local geometry, not its history.
+
+The next hosted backend passed; frontend identified an ambiguous descendant
+summary selector after time-basis help moved inside advanced filters. The keyboard
+test now selects the direct parent summary and also explicitly opens the nested
+time-basis guidance by keyboard before checking collapse/main-search preservation.
+No production source changed in this test repair; both hosted jobs remain required
+again on its final immutable head.
+
+The local full input regression also exposed a fixture identity race: closing the
+author tab could focus the retained reviewer tab before the global synthetic
+identity returned to reviewer. Restore the reviewer fixture identity before that
+focus event; retain every independent-review/new-rationale/revision assertion.
+This changes no application authentication or production behavior.

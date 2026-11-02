@@ -1,5 +1,16 @@
 # NADI product roadmap — main quest
 
+## 31 October 2026 — PdM product reset proposal
+
+**Documentation proposal; no implementation, activation or phase completion.**
+Verified main f1fc4e8b395691a17fe6d986bf14c772d37c1f2c contains PR105/106/108–112; PR107 remains OPEN. Development runtime is a different local source lokal yang berbeda. Historical entries below, including their “current” wording and source checkpoints, retain their dated scope.
+
+Start with [the Product Owner blueprint](../reliability-cockpit/docs/NADI-PDM-PRODUCT-BLUEPRINT.md). Proposed execution priority: make the existing engineer workflow understandable → bounded frontend presentation Sprint1 → engineer validation/offline crosswalk inventory → contract-first reliability KPI planning. Three pillars: Data Integration, PdM Center, Reliability Performance. Five entry points: Beranda, Aset, PdM Center, Tindak Lanjut, Laporan.
+
+[Roadmap/Linear mapping and Sprint1](../reliability-cockpit/docs/NADI-PDM-ROADMAP-AND-SPRINT-1.md) retains Phase0–5/M01–M07/UX history, existing Engineering/Recommendation/review/audit services and pending F03/field/operational gates. No Linear issues were created. Existing historical archive counts are not inspection counts or canonical evidence; runtime parity must be resolved before any later authorized deployment. Phase statuses are not recertified here.
+
+### Retained historical roadmap and acceptance checkpoints
+
 Latest verified source checkpoint: [19 October 2026 — PR105 integration](#19-october-2026--verified-pr105-source-integration-and-next-batch). Historical runtime/policy checkpoints below retain their dated scope.
 
 ## Source-free 72h review — 12 Oktober 2026
@@ -1097,3 +1108,21 @@ Next: independent final review and authorized publication/CI, then separately
 approved migration/controller activation and full-history demo adapter/import.
 Canonical mapping, historical chart, engineering qualification and cloud transfer
 remain distinct future acceptance. [Evidence](../reliability-cockpit/docs/nadi-pdm-complete-history-01.md).
+
+### NADI-PDM-SIMPLIFICATION-SPRINT-01 — 31 October 2026 isolated candidate
+
+The Product Owner accepted the PR113 blueprint direction and authorized S1-01–S1-05
+frontend implementation/testing/Draft PR. [Sprint evidence](../reliability-cockpit/docs/NADI-PDM-SIMPLIFICATION-SPRINT-01.md)
+records five-entry navigation, Register/history/editor/detail simplification and
+optional contextual Engineering. Implementation/testing, exact-head CI, senior
+review, PO visual acceptance, merge and active visibility remain distinct.
+No Phase0–5 history, source engineering gate, F03/PR107 or future KPI plan changes.
+Next: senior review → PO UX acceptance → separately authorized F23/F24 runtime
+compatibility and activation. Localhost remains on its existing preview.
+
+### Sprint 1 one-PR integration — 31 October 2026
+
+The Product Owner consolidated blueprint/Sprint/parity and conditional local
+acceptance into PR114 based on main; PR113 is superseded without merge. Phase0–5
+history and engineering gates remain. [One current acceptance report](../reliability-cockpit/docs/NADI-PDM-SPRINT1-ONE-PR-DELIVERY.md)
+separates exact-source/CI qualification from authenticated local activation and PO UX.

@@ -1,0 +1,465 @@
+{
+  "label": "SYNTHETIC actual components; intercepted .invalid origin only; not live plant/runtime",
+  "baseline_sha": "2437fdb3b12f8ab63d56236dbb532caa7e39b671",
+  "widths": [
+    390,
+    768,
+    1440,
+    1920
+  ],
+  "themes": [
+    "light",
+    "dark"
+  ],
+  "images": [
+    {
+      "path": "before/case-handoff-dark-1440.png",
+      "sha256": "10a19628c08ee804510b30cdcb6d7e0e59320439c6a00e515a045e4b823178c6"
+    },
+    {
+      "path": "before/case-handoff-dark-1920.png",
+      "sha256": "e4594ac3f9a57a1e2b2bffb338495c1d89639338a4c175c094f9d87fe84beb38"
+    },
+    {
+      "path": "before/case-handoff-dark-390.png",
+      "sha256": "5307ae94dd53e66ee0c8e53ef8ce5a83eb9bd24e07ba90c4a08c78405110aad7"
+    },
+    {
+      "path": "before/case-handoff-dark-768.png",
+      "sha256": "4098303b64a415a7ce8832c18354e33638ed286932cecc862be81829919dac39"
+    },
+    {
+      "path": "before/case-handoff-light-1440.png",
+      "sha256": "878a2505cf5a2f3f51549ddde8c886d6b91a2504341ec080f93f37b64c11aac4"
+    },
+    {
+      "path": "before/case-handoff-light-1920.png",
+      "sha256": "9c410720ad42f9f10fce353db532cb7581104bf822a79a324c2dc7b16fcd0c04"
+    },
+    {
+      "path": "before/case-handoff-light-390.png",
+      "sha256": "90b12b87ed9adb5c0aebe3774f9c7d829588c6d7f8c16f31eb408d81d54549d0"
+    },
+    {
+      "path": "before/case-handoff-light-768.png",
+      "sha256": "b1356bdbc701c19edd9e39fe0954a1a560fc927cd717d36bbe151169eed2065b"
+    },
+    {
+      "path": "before/excel-history-dark-1440.png",
+      "sha256": "dcd01005681e1cce20c37779ed61c2f2ff1795c16395e26425626c502be581cd"
+    },
+    {
+      "path": "before/excel-history-dark-1920.png",
+      "sha256": "81a6931f574d38ddda8f46326635283fa8a2669f3223003b2f14c07d3a9e420f"
+    },
+    {
+      "path": "before/excel-history-dark-390.png",
+      "sha256": "d6b2e0992bb4c062e4fe224513e7ea3aceebc83858b3edb5f035a4e03e705062"
+    },
+    {
+      "path": "before/excel-history-dark-768.png",
+      "sha256": "d69f5a341cf3e34461ec4708459653c6b200fdc58c4031f600f0f976e9ab7a95"
+    },
+    {
+      "path": "before/excel-history-light-1440.png",
+      "sha256": "1b908758226ffad0385b6d47ff93e065065c4575f69401b12ecd9bda46b9f59e"
+    },
+    {
+      "path": "before/excel-history-light-1920.png",
+      "sha256": "751d5d2cc200672149a37bee716c2bce9fbabe4b2764b8e4ffa9c337951ba351"
+    },
+    {
+      "path": "before/excel-history-light-390.png",
+      "sha256": "dea2d03ce2c89184185373b09b103fd00976c2bb901af41159f9e97645a4d994"
+    },
+    {
+      "path": "before/excel-history-light-768.png",
+      "sha256": "07ab9f35d669aeb00ee622fe29c24d28c4c17d569490f79ae441b4f1b3f213a5"
+    },
+    {
+      "path": "before/inspection-detail-dark-1440.png",
+      "sha256": "5b2acd52ca590489a41809fb6a0f15e6850e66afe3c5422a5c1c6ae3546c1172"
+    },
+    {
+      "path": "before/inspection-detail-dark-1920.png",
+      "sha256": "391951f9c7739a8174f45b1ab88a363247ccb66aaa524e73a7a1d4dd7c3dabdd"
+    },
+    {
+      "path": "before/inspection-detail-dark-390.png",
+      "sha256": "119533a226c5c40216ba12861e7fc529a3974a2c907f3084f2a5a1743a635b8e"
+    },
+    {
+      "path": "before/inspection-detail-dark-768.png",
+      "sha256": "a38f0c2617adecd2f3105700a9c54614a8f30f58e3c4e14e3e187e262437593d"
+    },
+    {
+      "path": "before/inspection-detail-light-1440.png",
+      "sha256": "6dcd0d3cd72e5f67f52735e2a96e476a093fcaf0d1c81e032c115ab40dcf3b62"
+    },
+    {
+      "path": "before/inspection-detail-light-1920.png",
+      "sha256": "7c26d919985e0b3e08ad06390597eb679a30a04a8f80b50b25c0b46f4c223e34"
+    },
+    {
+      "path": "before/inspection-detail-light-390.png",
+      "sha256": "8f9d11ebc630d48c76a704414aeb86c6b91400d78b4acce9fec8fadbfc8749b0"
+    },
+    {
+      "path": "before/inspection-detail-light-768.png",
+      "sha256": "859c1406f4c75317e3989b671537bf6af2fbe49b27166b6f15541cdfe2c1b8db"
+    },
+    {
+      "path": "before/measurement-editor-dark-1440.png",
+      "sha256": "b2c798ba7dff2dc4a7d596a3307dec1e9f8bab2f471247c267d7bcd00070da25"
+    },
+    {
+      "path": "before/measurement-editor-dark-1920.png",
+      "sha256": "a844ae4217ab92d2f5c62048eba00e290d135368a417c98fa221442f60f20800"
+    },
+    {
+      "path": "before/measurement-editor-dark-390.png",
+      "sha256": "80eff6738a974c4a030b86912c0045b219e63bc2a98d5d20c152648cfd83c9fc"
+    },
+    {
+      "path": "before/measurement-editor-dark-768.png",
+      "sha256": "b8f00498f758200dc12901ab513047c39002cc7a8e54c778934acdedb0d04b0a"
+    },
+    {
+      "path": "before/measurement-editor-light-1440.png",
+      "sha256": "79b0af1743bad937e4fa4741e025504dbf61ab460ec036bbd28a1a76e2a185f3"
+    },
+    {
+      "path": "before/measurement-editor-light-1920.png",
+      "sha256": "86bd8773cd91d9ef15c5404c263217a27a74fad7794f6461b3c94480a41976b2"
+    },
+    {
+      "path": "before/measurement-editor-light-390.png",
+      "sha256": "4b05a8bf9169762dac13908baa7a1fad2a0b80e5de327b4a59d19ef552d8be7d"
+    },
+    {
+      "path": "before/measurement-editor-light-768.png",
+      "sha256": "37cfec0b88e745835ec7e6553809b041f00af15cdd1dcc847a4506bfc0156ff7"
+    },
+    {
+      "path": "before/native-history-dark-1440.png",
+      "sha256": "bc2d046d9d11d8c63bd7995b076074bbc748957f1daf5e103136a2eed3c55c0e"
+    },
+    {
+      "path": "before/native-history-dark-1920.png",
+      "sha256": "6d78626894dc83a54efaa8d39a47bb003218b7c274573e80c36a3b1f4deddc34"
+    },
+    {
+      "path": "before/native-history-dark-390.png",
+      "sha256": "29787fc14f9732d89c1532410dce8a688ae4f4c059748b9c47b7dd93eebecef7"
+    },
+    {
+      "path": "before/native-history-dark-768.png",
+      "sha256": "379cff23c560f9501205fff40280f5dd5cf5843125db754217769c633fe05a27"
+    },
+    {
+      "path": "before/native-history-light-1440.png",
+      "sha256": "f5730113c9f9e32aab3322238560f9e2217c1e2dceaf41c32280b70222b63c13"
+    },
+    {
+      "path": "before/native-history-light-1920.png",
+      "sha256": "dc336affe3e13fd9c15345099577127b4442933c45a47d96082669687c61453f"
+    },
+    {
+      "path": "before/native-history-light-390.png",
+      "sha256": "05a86018a78da09aea6fd494cbc61dc05d64be1f2db17ea4bf5c850b4419b5e3"
+    },
+    {
+      "path": "before/native-history-light-768.png",
+      "sha256": "d76813367901b97251f2f5008444cbb7648e11c8da424893e4506d4f48674c63"
+    },
+    {
+      "path": "before/navigation-dark-1440.png",
+      "sha256": "6095ad2bb06ad77be9fdb96c4fcd4e00732210b224bb1b9371a780da340d2dd8"
+    },
+    {
+      "path": "before/navigation-dark-1920.png",
+      "sha256": "956caa25dde185e5bca66020cfb7c3030cf81e3b0d9e522c6224838c9d13b8aa"
+    },
+    {
+      "path": "before/navigation-dark-390.png",
+      "sha256": "71458acb358f3298ea21f553303e1702737966a29d027908b858da5301dd3470"
+    },
+    {
+      "path": "before/navigation-dark-768.png",
+      "sha256": "0da4a3a6d0dd55b357d3bff04f312c8d1c3a91c935c4d1dce8644e612aaa449d"
+    },
+    {
+      "path": "before/navigation-light-1440.png",
+      "sha256": "3cb76c881d7146ade2d96379771965f2f67f3f19068c9097034b142d5ec1de8f"
+    },
+    {
+      "path": "before/navigation-light-1920.png",
+      "sha256": "6eb015339d5f0d4c7e6f3262bca21a95897e6eadbab7d3f0875d90b6e222a66f"
+    },
+    {
+      "path": "before/navigation-light-390.png",
+      "sha256": "05eefea192e62a3efb63aa1d92415b61cb6e8831a486446aa7fb498ab9898732"
+    },
+    {
+      "path": "before/navigation-light-768.png",
+      "sha256": "d7db157666bd4f27b9249f3eabdccccd48a0f7f4e2adc95ca8dae08990abacd0"
+    },
+    {
+      "path": "before/pdm-register-dark-1440.png",
+      "sha256": "7a05e3540fcee0b52353f10b6d73f2e02649486616906e61c71d7f9fa649f4da"
+    },
+    {
+      "path": "before/pdm-register-dark-1920.png",
+      "sha256": "123736be89d134bd1e0fbe09a17557c6c3ca9720f372e945bdd22263113232c0"
+    },
+    {
+      "path": "before/pdm-register-dark-390.png",
+      "sha256": "b3aadfc13dfd5da3fa073917eef916c30f095831bcf28b774496b4d6b122fa93"
+    },
+    {
+      "path": "before/pdm-register-dark-768.png",
+      "sha256": "7249d832c6cce837989326721d291948c532b3835ee00de02a6cd952113f3570"
+    },
+    {
+      "path": "before/pdm-register-light-1440.png",
+      "sha256": "5d662ab474e4d58b454c4221b9c86bf04353b69b56211778d99cb8fc47e44fb1"
+    },
+    {
+      "path": "before/pdm-register-light-1920.png",
+      "sha256": "31b393bf9356b80286cbe7911f5b712d9eac90cfeee60e19a6fcbf4883e6366b"
+    },
+    {
+      "path": "before/pdm-register-light-390.png",
+      "sha256": "b9bc6e01601b548a9ac08e16b712113d37e2ce14d486c3c9e0b3f58aa2e242a1"
+    },
+    {
+      "path": "before/pdm-register-light-768.png",
+      "sha256": "56abdda6f836ee237a98d34ef5c35aeae1ba31d17b0d019b07360c00c6a0d9b9"
+    },
+    {
+      "path": "after/case-handoff-dark-1440.png",
+      "sha256": "f474ab565ed00eebb810babd233b1212cd3d3f1f57c2f114b63ca43f04ca33bf"
+    },
+    {
+      "path": "after/case-handoff-dark-1920.png",
+      "sha256": "2d2223b2ad2baa3eb2d956622a7e0d3559085b573ddb0ff1ceb3a22e2a544c16"
+    },
+    {
+      "path": "after/case-handoff-dark-390.png",
+      "sha256": "30b4e079bf589feb48e473759133280f1589f79a9a1b57d3deee2d4966782474"
+    },
+    {
+      "path": "after/case-handoff-dark-768.png",
+      "sha256": "8560c145964eec01e765b1c76d6887a1d8d21bf490f99569433f5b76f1cfa8c3"
+    },
+    {
+      "path": "after/case-handoff-light-1440.png",
+      "sha256": "fff41b8e64db86ae72102598c04eba6a1186409ec2a2a2e53e7d9677bf02ca36"
+    },
+    {
+      "path": "after/case-handoff-light-1920.png",
+      "sha256": "e32ea604d5fefdaf487fe215ea3fe2c3086f90e6886bdad3626b85b410f85223"
+    },
+    {
+      "path": "after/case-handoff-light-390.png",
+      "sha256": "41680da2d4bd805d82f7f31ffef210d5acda68d69f4136cd8af1f88ecb57f5d3"
+    },
+    {
+      "path": "after/case-handoff-light-768.png",
+      "sha256": "14961581217340220d6e95a23d866f7595c23b8680612c2cd4ab7844534c6055"
+    },
+    {
+      "path": "after/excel-history-dark-1440.png",
+      "sha256": "d7b2b66bd3c0505bcda5aa622975f93651bae6e2df012a328d2e572da0710afd"
+    },
+    {
+      "path": "after/excel-history-dark-1920.png",
+      "sha256": "d9f74e1b61f9a45783aa693a59ced3203f2e2afa9a2a275e0a87af065a3fe40d"
+    },
+    {
+      "path": "after/excel-history-dark-390.png",
+      "sha256": "395e927fbdd0866c9bc8f6c1a89ddb66c698ffb685452687aa5f59699a4d6244"
+    },
+    {
+      "path": "after/excel-history-dark-768.png",
+      "sha256": "c3b915c1ea70e235e8002f1214588855a077daff7294f516e779f33731b96bf9"
+    },
+    {
+      "path": "after/excel-history-light-1440.png",
+      "sha256": "5f8c346d315488a712fbc15355547f04de190be30545529d3cec427ac2c17d66"
+    },
+    {
+      "path": "after/excel-history-light-1920.png",
+      "sha256": "35dbed869c05047148a68f353a9fa4717203d93446bbfe63c59db1e2ab21132f"
+    },
+    {
+      "path": "after/excel-history-light-390.png",
+      "sha256": "383c3110d7d7c55bdb9ba9d1d7e7abeebfcacc85468607e9aa7269edb7c4794b"
+    },
+    {
+      "path": "after/excel-history-light-768.png",
+      "sha256": "6f435a2ec0a99a9e74783278b483b10ba39dfe683c49df486b5895ed0ae98606"
+    },
+    {
+      "path": "after/inspection-detail-dark-1440.png",
+      "sha256": "855fa340ffab1c141de3b68feadb5c87661dbf6e4af5950f477863c0d2bd2958"
+    },
+    {
+      "path": "after/inspection-detail-dark-1920.png",
+      "sha256": "e6480eae12f8c5d06ab044c1c0b75addec35c26477bd1a525a51ec5411864d82"
+    },
+    {
+      "path": "after/inspection-detail-dark-390.png",
+      "sha256": "3ffdecffbd1ed57c098cc7e7f3ea8fe2e858af15c543f5f6fe3cd8e0192860a8"
+    },
+    {
+      "path": "after/inspection-detail-dark-768.png",
+      "sha256": "6cc484fd23684caeaffa403c2f8872703bc88cbfc1e062ba9bda544bc4dba45d"
+    },
+    {
+      "path": "after/inspection-detail-light-1440.png",
+      "sha256": "cdcbc07c55f57c71608ff3a1c06fdc615808e674c6d5b96ca4fcddf18a107e55"
+    },
+    {
+      "path": "after/inspection-detail-light-1920.png",
+      "sha256": "4ac76c97abf9ccb42489df185a02ccbbd4e421a53daef26e5083295797c1c718"
+    },
+    {
+      "path": "after/inspection-detail-light-390.png",
+      "sha256": "c742111aa8699ee7ade6f3f643eb12f0bd600614d2279acc31e86bcebae9ca0b"
+    },
+    {
+      "path": "after/inspection-detail-light-768.png",
+      "sha256": "624d998a2f8cc511ba9c4f5a5167fd4ab13921fecb45ba435e2ff6884c260983"
+    },
+    {
+      "path": "after/measurement-editor-dark-1440.png",
+      "sha256": "ffee876c1ba55ff6a5035edbd6d781e760f2c85447bbb6ab3074c31b5208bc06"
+    },
+    {
+      "path": "after/measurement-editor-dark-1920.png",
+      "sha256": "d3f3c06ca65b33dcca2827aae5835a419ef731e3806c0357d7a672c6fb04beea"
+    },
+    {
+      "path": "after/measurement-editor-dark-390.png",
+      "sha256": "a5c08e12caea779a04ec1c2d33b848b64382af680a4517ae6c4176050fbe32a6"
+    },
+    {
+      "path": "after/measurement-editor-dark-768.png",
+      "sha256": "941f4cec72dcfc15b3404953b02567d2ac17be99e71926c7bf94acf93b543358"
+    },
+    {
+      "path": "after/measurement-editor-light-1440.png",
+      "sha256": "810b8d5ed86a9fc819a613886b79c4ed9a7d9acfcb5cb3d2a9324b3dc8ab5dd1"
+    },
+    {
+      "path": "after/measurement-editor-light-1920.png",
+      "sha256": "4b50c272ee0c19d3581951e6cb1a0884e469ab6a853db2cd6eab886bff705f7d"
+    },
+    {
+      "path": "after/measurement-editor-light-390.png",
+      "sha256": "da8ca86069e6b2f32b9279e6bd10a62f5b5f3016dd4314605725cc911e8ed164"
+    },
+    {
+      "path": "after/measurement-editor-light-768.png",
+      "sha256": "a93a527501a1db0c3a75f04cc442c27c25fef100a59653ab13c920c24e5172a0"
+    },
+    {
+      "path": "after/native-history-dark-1440.png",
+      "sha256": "e09252fc00a5200d4cf4c22e5a4e58f415ccd228f60a34742860e1afa6011404"
+    },
+    {
+      "path": "after/native-history-dark-1920.png",
+      "sha256": "c222babc52fcfe4f851036d2249c3947ea7a99c64be9e1f8adc435f4863cabf7"
+    },
+    {
+      "path": "after/native-history-dark-390.png",
+      "sha256": "da9da5e944c042d0a880996f10fdb64355150d4c0baa650e933eb2a584cec186"
+    },
+    {
+      "path": "after/native-history-dark-768.png",
+      "sha256": "698037b545ae6f72b677d560a8a4c9bf1541cd204cb4007a261c85e837a629df"
+    },
+    {
+      "path": "after/native-history-light-1440.png",
+      "sha256": "b5d9a375c17b325905610e3795e072b23da6898a6bf86dca93c4b9a904391cea"
+    },
+    {
+      "path": "after/native-history-light-1920.png",
+      "sha256": "8ffacd0c5639d710d1ccafe1cba02d5325ce33469a6740d160306283341b3718"
+    },
+    {
+      "path": "after/native-history-light-390.png",
+      "sha256": "c226473e38ef96671da9fc5460a1b26cde61447dd9890a5eccd27df3b3667a7b"
+    },
+    {
+      "path": "after/native-history-light-768.png",
+      "sha256": "55156f1c42e3d0d9b178d9b3fed545de54d14ca5bd8be57ff5d5dd01016b6deb"
+    },
+    {
+      "path": "after/navigation-dark-1440.png",
+      "sha256": "9e40173ba29499cba8e45f1cdd42c8d893365e0f5855161a82e7de291c18013d"
+    },
+    {
+      "path": "after/navigation-dark-1920.png",
+      "sha256": "e091c0e6d1e9104389779ed96da73c1ba7a7aee0dc7c6359ec6ff5f2580a16fd"
+    },
+    {
+      "path": "after/navigation-dark-390.png",
+      "sha256": "39e7c9fe2307c96ca1aed953726c1e6d691ca14f615b270d99bf0f180e908f1d"
+    },
+    {
+      "path": "after/navigation-dark-768.png",
+      "sha256": "e746b87595b599789bd5609ac55e50e88822500a9400256819cc05ccae05b8b5"
+    },
+    {
+      "path": "after/navigation-light-1440.png",
+      "sha256": "dc5fd3b0f3fe201ffbdd6691d1296f6cbc6a0c3699329b046f1852ff6c347bc8"
+    },
+    {
+      "path": "after/navigation-light-1920.png",
+      "sha256": "3662da90dbaf3e60cc7fa6729deedc8bda09e121f7e630bf7354bcbded1ec053"
+    },
+    {
+      "path": "after/navigation-light-390.png",
+      "sha256": "00b1e80f6d607808c90e90400cd5307f77d0b0941dc66f8bbd819dc7a00537b2"
+    },
+    {
+      "path": "after/navigation-light-768.png",
+      "sha256": "678332cb30855269b0e752c60b4547f29b13c4d4b9b3e214090f2cdd37d2a1e7"
+    },
+    {
+      "path": "after/pdm-register-dark-1440.png",
+      "sha256": "ea6be901bd2195e811943032ca22ee5dda735502c2d613c7857ae51d0bea871e"
+    },
+    {
+      "path": "after/pdm-register-dark-1920.png",
+      "sha256": "b88cf2fa8f1e3b684e533c570db44497b390367df63260ff8343ea3d5ed1d4a6"
+    },
+    {
+      "path": "after/pdm-register-dark-390.png",
+      "sha256": "37deea0a722fd7a44b3987a940b55520e155d985aff3aa4deb3b1770d2d52829"
+    },
+    {
+      "path": "after/pdm-register-dark-768.png",
+      "sha256": "1ff05990f54993ae0f9de029f2e9b45c89000b25f0e0a8902dab767cc57c4915"
+    },
+    {
+      "path": "after/pdm-register-light-1440.png",
+      "sha256": "42e9f9c6411e5cfb8665d2df80b8cd96575279a7d516abefd6fce473cf367aa6"
+    },
+    {
+      "path": "after/pdm-register-light-1920.png",
+      "sha256": "4b7af9ad483f2e39ae71da84cbc7abb7aec8f35d7efe32294fc73ff5ac677e4b"
+    },
+    {
+      "path": "after/pdm-register-light-390.png",
+      "sha256": "be3eedf55836955242fb61e506c6287929d4cfb2a74c1f8a1700aba5c395bb21"
+    },
+    {
+      "path": "after/pdm-register-light-768.png",
+      "sha256": "12e0fcf3651ad28accd7f0f7a4db14ccdc5a7d8489c7866edacc0b0bad853171"
+    }
+  ],
+  "common_fixture_setup_sha256": "d765db6b68c63d03751aa2b4f066b3530e5a43d0c9fdf97ce1d6d59d2572c212"
+}

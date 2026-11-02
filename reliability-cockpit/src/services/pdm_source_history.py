@@ -9,6 +9,7 @@ from sqlalchemy import select, func, or_, inspect
 from src.domain.engineering import Role, EngineeringError
 from src.repositories.pdm_source_history import Source, Profile, Cell, Event, Alias, Batch, TABLES
 from src.repositories.human_records import RevisionRow
+from src.services.pdm_source_interpretation import requested_cells, interpret, rule
 
 
 def canonical(value):
@@ -89,16 +90,26 @@ class SourceHistoryService:
     def detail(self, actor, event_key, *, offset=0, limit=25):
         self.page(limit, event_key)
         if type(offset) is not int or not 0 <= offset <= 10000: raise EngineeringError('INVALID_PAGINATION', 422)
+        scope = self.scope(actor)
         with self.engine.connect() as c:
-            row = c.execute(select(Event, Source.c.document.label('source_document')).join(Source).where(*self.scope(actor), Event.c.event_key == event_key)).mappings().first()
+            row = c.execute(select(Event, Source.c.document.label('source_document')).join(Source).where(*scope, Event.c.event_key == event_key)).mappings().first()
             if not row: raise EngineeringError('NOT_FOUND', 404)
             profile = c.scalar(select(Profile.c.document).where(Profile.c.profile_hash == row['profile_hash']))
             meta = {field['id']: field for field in profile['fields']}
             refs = row['document']['fields']; chosen = refs[offset:offset+limit]
             addresses = set(row['document']['clock_cells'])
+            addresses.update(requested_cells(row))
             for ref in chosen:
                 addresses.add(ref['cell']); field = meta.get(ref['field_id'], {})
                 addresses.update(field.get('header_cells', [])); addresses.update(field.get('unit_cells', []))
+            anchors = []
+            if rule(row) == 'BC43' and row['position'] == 23 and any(f['cell'] == 'L23' for f in chosen):
+                anchors = c.execute(select(Event).where(*scope, Event.c.source_sha == row['source_sha'],
+                    Event.c.sheet_index == row['sheet_index'], Event.c.profile_hash == row['profile_hash'],
+                    Event.c.profile_id == row['profile_id'], Event.c.axis == 'ROW', Event.c.position.in_([22, 24])).limit(3)).mappings().all()
+                # Neighbor values need their own authorized event, not just shared source bytes.
+                if len(anchors) == 2 and {a['position'] for a in anchors} == {22, 24}:
+                    addresses.update({'A22', 'L22', 'A24', 'L24'})
             cells = {r['coordinate']: r['document'] for r in c.execute(select(Cell).where(Cell.c.source_sha == row['source_sha'], Cell.c.sheet_index == row['sheet_index'], Cell.c.coordinate.in_(addresses))).mappings()}
             def proof(address): return {'coordinate': address, **cells.get(address, {'raw_value': None, 'presence': 'NO_POPULATED_CELL_IN_COMPLETE_SOURCE_CENSUS'})}
             fields = []
@@ -122,8 +133,10 @@ class SourceHistoryService:
                       'has_more': offset+len(fields) < len(refs), 'clock_evidence': [proof(a) for a in row['document']['clock_cells']],
                       'aliases': aliases, 'profile_version': profile['version'], 'classification_hash': row['classification_hash'],
                       'editable': False, 'canonical_eligible': False}
+            result['derived_interpretation'] = interpret(row, fields, cells, anchors)
             while len(canonical(result).encode()) > RESPONSE_BYTES and len(fields)>1:
                 fields.pop(); result['limit']=len(fields); result['has_more']=offset+len(fields)<len(refs)
+                result['derived_interpretation'] = interpret(row, fields, cells, anchors)
             if len(canonical(result).encode()) > RESPONSE_BYTES: raise EngineeringError('HISTORY_RESPONSE_BOUND', 413)
             result['next_offset']=offset+len(fields) if result['has_more'] else None
             result['previous_offset']=max(0,offset-limit) if offset else None
