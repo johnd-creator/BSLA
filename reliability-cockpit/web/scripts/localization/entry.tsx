@@ -27,6 +27,7 @@ import Trust from '../../app/(workspace)/data-quality/page';
 import WorkOrders from '../../app/(workspace)/work-orders/page';
 import Equipment from '../../app/(workspace)/equipment/[id]/page';
 import fixture from '../../fixtures/ux-bundle-b.json';
+import PdmTrendDemonstrator from '../../fixtures/PdmTrendDemonstrator';
 const path=location.pathname;
 const pages:Record<string,React.ReactNode>={
  '/':<Executive/>, '/login':<Login expired={new URLSearchParams(location.search).get('expired')==='1'} returnTo={new URLSearchParams(location.search).get('returnTo')??undefined}/>, '/panduan/istilah':<Glossary/>,
@@ -35,6 +36,7 @@ const pages:Record<string,React.ReactNode>={
  '/engineering':<Engineering/>, '/engineering/lab':<Phase2/>, '/engineering/workflow':<EngineeringWorkflow/>,
  '/recommendations':<Recommendations qaEnabled/>, '/action-board':<Recommendations qaEnabled board/>,
  '/pdm':<Pdm qaEnabled/>, '/assets':<Assets/>, '/asset-health':<Health/>, '/maintenance':<Maintenance/>,
+ '/__synthetic/pdm-trend':<PdmTrendDemonstrator/>,
  '/maintenance/investigation':<Investigation/>, '/fmea':<Fmea/>, '/rcfa':<Rcfa/>, '/overhauls':<Overhaul/>,
  '/data-quality':<Trust/>, '/work-orders':<WorkOrders/>, '/equipment/DEMO':<Equipment params={Promise.resolve({id:'DEMO'})}/>, '/engineering/qa':<EngineeringQa/>,
 };

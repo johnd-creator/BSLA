@@ -1,109 +1,80 @@
-# Lembar diskusi engineer — Input pengukuran PdM NADI
+# Lembar keputusan engineer — kesiapan M02
 
-15 Oktober 2026 · Kandidat v0.1 · **Siap dibahas, belum disetujui engineer.**
-Tujuan: memastikan form merekam pengukuran yang benar, sebelum membahas tren atau
-penilaian kondisi. Semua keputusan masih **PENDING_ENGINEER_VALIDATION**.
+Revisi Sprint 2 · 1 November 2026. Paket diskusi ringkas, **bukan sign-off**.
+Seluruh keputusan di bawah tetap PENDING_ENGINEER_VALIDATION. Rincian pertanyaan,
+alias K1–K9 dan koordinat sumber ada pada [matriks authoritative](nadi-pdm-eng-validation-01.md).
+Tidak ada nilai plant, identitas privat atau jawaban engineer yang direka.
 
-Tujuh workbook sudah diinventarisasi; tidak perlu memeriksa200 sheet satu per satu.
-Mulai dari **satu profil representatif** yang engineer kenal, catat cakupannya,
-lalu lanjutkan metode lain/asinkron bila waktunya belum tersedia. Ada9 profil
-kandidat,48 label/unit DIRECT dan3 unit temperatur ambigu. DIRECT berarti asal
-label/unit dapat ditelusuri; **bukan definisi pengukuran yang sudah disetujui**.
+## Satu sesi yang dapat diselesaikan
 
-## Identitas sesi dan ruang koreksi
+1. Owner aset dan engineer berwenang memilih **satu keluarga Vibration V/H/A**
+   representatif K4–K7. Custodian menunjukkan bukti yang boleh dilihat; tidak perlu
+   membuka200 sheet. Catat perbedaan/pengecualian titik yang benar-benar ada.
+2. Putuskan G01/G02 dahulu, lalu V01–V05. Cocokkan sketsa titik dengan prosedur,
+   besaran/unit, acquisition, instrumen dan waktu. Label 1V/1H/1A bukan binding fisik.
+3. Catat jawaban per ID dengan owner bukti, scope, metode/versi, keputusan dan tanggal.
+   Pilihan ACCEPTED/REJECTED/DEFERRED hanya diisi setelah keputusan berwenang;
+   bidang kosong atau Codex fixture tidak dianggap persetujuan.
+4. Lanjutkan Tribology, MCSA dan IRT/CEP saat owner/evidence tersedia. P2 boleh
+   ditunda; penundaan tidak membuka tren atau assessment. Simpan revisi keputusan
+   terdahulu beserta alasan pengganti, lalu tautkan ke matriks rinci.
 
-| Isian | Catatan engineer / PO |
-|---|---|
-| Nama/kode engineer yang diizinkan; disiplin | ____________________ |
-| Kewenangan/pemilik keputusan yang dikonfirmasi | ____________________ |
-| Tanggal respons; bukti/prosedur rujukan | ____________________ |
-| Profil K1–K9 / varian yang dibahas | ____________________ |
-| Lingkup yang disetujui untuk dibahas dan pengecualian | ____________________ |
-| Koreksi umum / yang belum diketahui | ____________________ |
+| Identitas sesi | Isian engineer / owner |
+| --- | --- |
+| Engineer, disiplin dan kewenangan terkonfirmasi | — |
+| Owner aset / custodian bukti | — |
+| Keluarga K / lingkup titik dan pengecualian | — |
+| Prosedur/metode versi yang ditelaah | — |
+| Tanggal diskusi / rujukan bukti privat yang diizinkan | — |
 
-Gunakan alias sumber dan bukti tersanitasi. Identitas peralatan riil, nilai plant,
-berkas rahasia serta lokasi privat tetap bersama custodian berwenang. Jangan
-menyalinnya ke GitHub. Bila belum bertemu engineer, isian tetap kosong; PO dapat
-menyiapkan bukti dan pertanyaan tanpa mengisi jawaban atau persetujuan atas namanya.
+## Register keputusan P1 — masing-masing tetap terpisah
 
-## Mulai dari dua keputusan bersama
+Isi `bukti / owner`, `scope`, `metode / versi`, `keputusan / status`, `tanggal`
+dan `pertanyaan tersisa` per baris. Jangan menyalin data sensitif ke GitHub.
 
-- **G01 — Aset:** bukti apa yang memastikan data di keluarga sheet ini milik aset
-  dan lokasi pengukuran/sampling yang benar? NADI sekarang meminta pilihan aset
-  berotorisasi; nama sheet/nomor titik tidak mengikat aset secara otomatis.
-- **G02 — Otoritas/versi:** siapa yang boleh mengesahkan definisi untuk lingkup ini,
-  dan dokumen/prosedur versi apa yang dipakai? Versi template bukan otomatis
-  versi metode. Catat bukti dan tanggal hanya saat benar-benar diberikan.
+| ID | Keputusan yang diperlukan | Bukti / owner | Scope | Metode / versi | Keputusan / status | Tanggal | Pertanyaan tersisa |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| G01 | Binding aset exact dan lokasi sumber | — | — | — | PENDING_ENGINEER_VALIDATION | — | Bukti binding mana? |
+| G02 | Otoritas, prosedur dan batas persetujuan | — | — | — | PENDING_ENGINEER_VALIDATION | — | Siapa berwenang untuk scope ini? |
+| V01 | Lokasi fisik, nomor dan V/H/A yang benar-benar ada | — | — | Vibration / — | PENDING_ENGINEER_VALIDATION | — | Sketsa/rujukan titik? |
+| V02 | Quantity, unit dan RMS/p-p | — | — | Vibration / — | PENDING_ENGINEER_VALIDATION | — | mm/s dan mm/s-rms setara di scope ini? |
+| V03 | Portable/installed/UNKNOWN, acquisition dan bandwidth | — | — | Vibration / — | PENDING_ENGINEER_VALIDATION | — | Bukti pengambilan mana? |
+| V04 | Instrumen, mounting, kalibrasi dan prosedur | — | — | Vibration / — | PENDING_ENGINEER_VALIDATION | — | Berlaku untuk titik yang mana? |
+| V05 | Waktu ukur asli, zona/precision dan operasi | — | — | Vibration / — | PENDING_ENGINEER_VALIDATION | — | Ukur, rekap atau tanggal laporan? |
+| T01 | Titik sampling, equipment dan sampel | — | — | Tribology / — | PENDING_ENGINEER_VALIDATION | — | FAN/MILL scope sama atau berbeda? |
+| T02 | Besaran/unit lab, original vs derived | — | — | Tribology / — | PENDING_ENGINEER_VALIDATION | — | % tidak diasumsikan ppm |
+| T03 | Lab, instrumen dan metode authoritative | — | — | Tribology / — | PENDING_ENGINEER_VALIDATION | — | Rujukan laporan/prosedur? |
+| T04 | Waktu sampling, analisis dan laporan | — | — | Tribology / — | PENDING_ENGINEER_VALIDATION | — | Mana measured-at yang sah? |
+| MC01 | Equipment, fase dan lokasi listrik | — | — | MCSA / — | PENDING_ENGINEER_VALIDATION | — | Binding exact mana? |
+| MC02 | Besaran/unit dan input vs hitung/assessment | — | — | MCSA / — | PENDING_ENGINEER_VALIDATION | — | RMS tidak menebak A/V |
+| MC03 | Acquisition, instrumen, prosedur dan beban | — | — | MCSA / — | PENDING_ENGINEER_VALIDATION | — | Konteks operasi yang diperlukan? |
+| MC04 | Timestamp capture dan zona/precision | — | — | MCSA / — | PENDING_ENGINEER_VALIDATION | — | Tanggal/jam sumber mana? |
+| TH01 | Tiga unit temperatur bearing yang ambigu | — | — | Thermal/CEP / — | PENDING_ENGINEER_VALIDATION | — | Bukti unit masing-masing? |
+| TH02 | Routine thermal vs IRT dan arti IR Window | — | — | IRT/CEP / — | PENDING_ENGINEER_VALIDATION | — | Profil ini benar IRT atau OTHER? |
+| TH03 | Kamera, thermogram, aset/titik/waktu | — | — | IRT / — | PENDING_ENGINEER_VALIDATION | — | Custody belum dibuktikan metadata |
+| TH04 | Reference/ambient, emissivity dan prosedur | — | — | IRT/CEP / — | PENDING_ENGINEER_VALIDATION | — | Apa yang diwajibkan prosedur? |
+| TH05 | Input asli, Delta T/formula dan assessment | — | — | IRT/CEP / — | PENDING_ENGINEER_VALIDATION | — | Kalkulasi/limit membutuhkan keputusan terpisah |
 
-Jawaban/koreksi G01–G02: ______________________________________________________
+## Register P2 — tidak aktif otomatis
 
-## Pertanyaan utama per metode
+| ID | Keputusan lanjutan | Bukti / owner | Scope | Metode / versi | Keputusan / status | Tanggal | Pertanyaan tersisa |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| V06 | Kesetaraan titik/unit/bandwidth/mounting/operasi | — | — | Vibration / — | PENDING_ENGINEER_VALIDATION | — | Kapan dua inspeksi boleh dibandingkan? |
+| T05 | Titik sampling, pelumas dan lab/metode | — | — | Tribology / — | PENDING_ENGINEER_VALIDATION | — | Kapan hasil harus dipisahkan? |
+| MC05 | Fase/lokasi, beban, instrumen/acquisition | — | — | MCSA / — | PENDING_ENGINEER_VALIDATION | — | Kriteria comparability? |
+| TH06 | Reference/Delta T, comparability dan otoritas | — | — | Thermal/IRT / — | PENDING_ENGINEER_VALIDATION | — | Tidak mengaktifkan threshold/grade |
+| X01 | Cadence dan pemicu pengambilan | — | — | Per metode / — | PENDING_ENGINEER_VALIDATION | — | Gap tidak diisi sebagai jadwal harian |
+| X02 | Custody dan izin pemakaian historis | — | — | Per sumber / — | PENDING_ENGINEER_VALIDATION | — | Izin import/custody tetap terpisah |
 
-Contoh di bawah hanya **header/unit sumber**, bukan nilai pembacaan. Kode K dan
-koordinat lengkap tersedia di [matriks rinci](nadi-pdm-eng-validation-01.md#1-bukti-yang-sudah-ada-dan-batas-penggunaannya).
+**Q01–Q10 tetap PENDING.** Review rekam inspeksi ≠ validasi metode ≠ penilaian
+kondisi equipment ≠ izin maintenance. Field `method_version`, APPROVED, grafik
+fixture, label DIRECT atau screenshot bukan keputusan engineer.
 
-| Metode / contoh sumber | Perilaku NADI sekarang | Keputusan yang diminta | ID |
-|---|---|---|---|
-| Vibration — K4/S36: 1V,1H,1A; mm/s-rms. K5–K7: mm/s | Label axis ditampilkan; titik, besaran dan waktu belum diisi otomatis | Nomor dan V/H/A menunjuk posisi apa? Besaran/unit apa yang sah; RMS atau peak-to-peak bila berlaku? Tidak menambah axis yang tidak ada | V01–V02 |
-| Vibration — keluarga yang sama | Tidak menyatukan portable dengan DCS/Bently; konteks instrumen/prosedur berlaku untuk satu inspeksi | Sumber pengambilan, bandwidth, instrumen, mounting dan prosedur apa? Kapan diukur dan kondisi operasi apa yang perlu dicatat? | V03–V05 |
-| Tribology — K1/K2: Viscosity (Cst), Acid Number, Ferrous; Water Content (%) pada K2 | Unit sumber tetap; kolom bercampur formula tidak menjadi pembacaan asli | Sampel berasal dari titik/aset mana? Konfirmasi arti hasil lab dan unit tiap parameter; mana hasil lapor asli dan mana perhitungan? | T01–T02 |
-| Tribology — kolom tanggal/laporan | Waktu tidak ditebak; tidak mengubah % menjadi ppm | Lab/prosedur versi mana? Bedakan waktu ambil sampel, analisis dan laporan; mana yang harus dipakai sebagai waktu pengukuran? | T03–T04 |
-| MCSA — K3: Load (%), Impedance Phase 1 (Ω), Upper Sideband (dB) | Tidak menebak unit RMS atau mengubah Warning/Rotorbar Health menjadi diagnosis | Aset/fase/lokasi listrik mana? Apa besaran/unit yang benar, dan apakah hasilnya pembacaan, perhitungan atau penilaian? | MC01–MC02 |
-| MCSA — acquisition/tanggal | Input manual; waktu/konteks tidak diisi dari dugaan | Instrumen/prosedur, beban dan cara pengambilan apa yang diperlukan? Apa waktu capture asli dan zona waktunya? | MC03–MC04 |
-| CEP — K8: Motor Thrust Brg Temp (1), Motor Inboard Brg Temp (2), Pump Brg Temp (3) | **Ketiga unit tetap kosong.** BASELINE (oC) tidak dianggap bukti unit measurement | Apa unit masing-masing, dan di mana bukti sumber/prosedurnya? Boleh jawab belum diketahui | TH01 |
-| CEP/IR Window — K8/K9; Current (Ampere) | Masih OTHER/CBM provisional, bukan IRT yang disahkan | Monitoring temperatur rutin atau inspeksi termografi? Bila IRT, tunjukkan rujukan kamera, thermogram, titik/waktu dan prosedur; konteks ambient/reference apa yang diperlukan? | TH02–TH04 |
-| CEP — Delta T dan penilaian pada struktur sumber | Tidak dihitung/disalin sebagai nilai asli; tidak ada alarm atau skor baru | Mana input asli dan mana hasil perhitungan/assessment? Apa rujukan asalnya? Persetujuan kalkulasi/limit tetap keputusan lain | TH05 |
+[Contoh Vibration SINTETIS](evidence/nadi-pdm-workbook-02/boiler-three-point-rms-light-1440.png) ·
+[Tribology SINTETIS](evidence/nadi-pdm-workbook-01/area_fan-1440.png) ·
+[MCSA SINTETIS](evidence/nadi-pdm-workbook-01/logsheet_6kv-1440.png) ·
+[CEP SINTETIS](evidence/nadi-pdm-workbook-02/cep-bearing-cbm-light-1440.png).
 
-Jawaban/koreksi Vibration: __________________________________________________
-
-Jawaban/koreksi Tribology: __________________________________________________
-
-Jawaban/koreksi MCSA: _______________________________________________________
-
-Jawaban/koreksi CEP/thermal/IRT: ______________________________________________
-
-## Bahas belakangan bila diperlukan
-
-Keputusan P2 boleh **DEFERRED**; belum dijawab berarti tidak boleh menggabungkan
-seri atau mengaktifkan penilaian. Ini tidak menghalangi diskusi form manual yang
-jujur menampilkan data belum diketahui.
-
-- **V06/T05/MC05/TH06:** kapan dua pengukuran boleh dibandingkan, dan kapan harus
-  dipisah karena titik, besaran/unit, instrumen/prosedur, acquisition atau operasi?
-- **X01:** berkala, saat gejala, atau investigasi? Jangan mengarang jadwal harian.
-- **X02:** siapa custodian dan izin pemakaian historis/bukti diagnostik? Pembahasan
-  ini belum mengizinkan import atau upload lampiran.
-
-Catatan/yang ditunda: _______________________________________________________
-
-## Tutup sesi tanpa kehilangan keputusan
-
-Pindahkan setiap jawaban ke baris ID pada
-[matriks yang dapat diedit](nadi-pdm-eng-validation-01.md#2-matriks-keputusan-yang-dapat-diisi):
-isi koreksi, disposisi ACCEPTED/REJECTED/DEFERRED, bukti, pemilik keputusan,
-versi dan tanggal bila benar-benar disahkan. Jangan memilih ACCEPTED hanya karena
-form sudah berjalan. Jika satu jawaban mencakup beberapa ID, sebutkan setiap ID
-serta cakupan/pengecualiannya; isian lain tetap pending.
-
-Keputusan diterima untuk ID: __________ Bukti: __________ Versi/tanggal: _______
-
-Ditolak/ditunda dan alasannya: ________________________________________________
-
-Engineer/pemilik keputusan yang mengonfirmasi sesuai kewenangan: _______________
-
-**Sesudah sesi:** implementasikan hanya keputusan M02 yang telah disetujui melalui
-task terpisah. Persetujuan rekam inspeksi NADI tidak mengesahkan definisi metode,
-kondisi peralatan, pekerjaan Maximo, historical import atau aktivasi operasional.
-Nol tetap nilai, kosong tetap belum diketahui; pengukuran, observasi, interpretasi
-dan independent review tetap terpisah.
-
-## Bantuan visual opsional
-
-Gambar existing berikut berlabel **DEMO/QA SINTETIS**, bukan nilai workbook asli,
-bukan live acceptance dan bukan bukti engineer approval. Tidak perlu memeriksa
-seluruh screenshot; pilih sesuai metode yang sedang dibahas.
-
-[Contoh Vibration](evidence/nadi-pdm-workbook-02/boiler-three-point-rms-light-1440.png) ·
-[Contoh Tribology](evidence/nadi-pdm-workbook-01/area_fan-1440.png) ·
-[Contoh MCSA](evidence/nadi-pdm-workbook-01/logsheet_6kv-1440.png) ·
-[Contoh CEP](evidence/nadi-pdm-workbook-02/cep-bearing-cbm-light-1440.png).
+Jawaban berwenang berikutnya harus dikaji sebagai kontrak M02 dan comparability
+berversi sebelum implementasi lanjutan. Paket ini tidak menambah metadata bebas,
+registry titik, DTO, canonical mapping, source request, import atau approval runtime.

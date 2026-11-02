@@ -1,5 +1,19 @@
 # NADI product roadmap — main quest
 
+## 1 November 2026 — PdM Sprint2 candidate, no phase advancement
+
+[Sprint2 delivery / issue mapping](../reliability-cockpit/docs/NADI-PDM-SPRINT-02-DELIVERY.md)
+implements bounded Register pages, exact native history navigation, honest graph
+eligibility and disposable independent-review qualification. Branch is stacked on
+unmerged PR114 `aa065af9cef01d8ee3358bcca8fc628ba311ca3a`; main remains
+`f1fc4e8b395691a17fe6d986bf14c772d37c1f2c`. One Draft PR; no merge/cutover.
+Execution priority: complete candidate CI/review → PO bounded workflow evaluation →
+authorized M02 evidence decisions → separately authorized local activation with
+fresh controller/session/recovery/backup gates. Real cross-inspection trend remains
+NOT_ELIGIBLE. All26 method/comparability decisions and Q01–Q10 remain pending.
+Official Phase0–5 and M0–M8 history below is retained; no phase/M02 completion or
+new source/KPI implementation is claimed. No Linear issue was created.
+
 ## 31 October 2026 — PdM product reset proposal
 
 **Documentation proposal; no implementation, activation or phase completion.**

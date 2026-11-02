@@ -32,3 +32,12 @@ Exact main baseline and runtime exception are in [audit](NADI-PDM-REPOSITORY-AUD
 Every row must remain reachable to the same authorized actor, preserve existing serialized data/history and fail-closed behavior. No backend rewrite, endpoint removal or hidden access expansion is accepted as a navigation change. For F23/F24 first reconcile the runtime source before any later release; this docs branch does not integrate that code.
 
 Future Sprint1 checks: source diff allowlist frontend presentation only; all exact legacy DTO/hash witness tests; create/readback/edit/clear/lost-ACK/CAS; author/independent reviewer/scope revoked; native Case success vs capture denial; audit/deep link; empty/error/denied/loading/unknown; desktop1440/mobile390 and light/dark/keyboard; retained raw source pages and estimate disclosures. Use disposable fixtures, never operational DDL/data mutation. PO records approval separately from CI, merge and activation.
+
+## 1 November 2026 — Sprint2 explicit preservation update
+
+The historical proposal above remains dated. Sprint2 introduces only the explicitly
+authorized compatible bounded LIST read change for F06 and contextual presentation
+for F07; see the [final24-row implementation/evidence matrix](NADI-PDM-SPRINT-02-DELIVERY.md#f01f24--exact-preservation-matrix).
+Register default10/options1/5/10 retain the2MiB guard and exact authorized counts.
+The six exact F23/F24 parity pins remain protected. No real cross-inspection trend,
+source acquisition, schema/auth change, human sign-off or runtime cutover is implied.

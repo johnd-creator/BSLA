@@ -1,0 +1,2577 @@
+{
+  "label": "SYNTHETIC actual components; fully intercepted; no live runtime",
+  "baseline": false,
+  "checks": [
+    {
+      "name": "first register row at1440x900",
+      "pass": true,
+      "y": 727.1875,
+      "bottom": 876.984375
+    },
+    "no overflow navigation390light",
+    "no overflow pdm-register390light",
+    "no overflow measurement-editor390light",
+    "no overflow inspection-detail390light",
+    "no overflow native-history390light",
+    "no overflow excel-history390light",
+    "no overflow synthetic-trend390light",
+    "no overflow case-handoff390light",
+    "no overflow navigation390dark",
+    "no overflow pdm-register390dark",
+    "no overflow measurement-editor390dark",
+    "no overflow inspection-detail390dark",
+    "no overflow native-history390dark",
+    "no overflow excel-history390dark",
+    "no overflow synthetic-trend390dark",
+    "no overflow case-handoff390dark",
+    "no overflow navigation768light",
+    "no overflow pdm-register768light",
+    "no overflow measurement-editor768light",
+    "no overflow inspection-detail768light",
+    "no overflow native-history768light",
+    "no overflow excel-history768light",
+    "no overflow synthetic-trend768light",
+    "no overflow case-handoff768light",
+    "no overflow navigation768dark",
+    "no overflow pdm-register768dark",
+    "no overflow measurement-editor768dark",
+    "no overflow inspection-detail768dark",
+    "no overflow native-history768dark",
+    "no overflow excel-history768dark",
+    "no overflow synthetic-trend768dark",
+    "no overflow case-handoff768dark",
+    "no overflow navigation1440light",
+    "no overflow pdm-register1440light",
+    "no overflow measurement-editor1440light",
+    "no overflow inspection-detail1440light",
+    "no overflow native-history1440light",
+    "no overflow excel-history1440light",
+    "no overflow synthetic-trend1440light",
+    "no overflow case-handoff1440light",
+    "no overflow navigation1440dark",
+    "no overflow pdm-register1440dark",
+    "no overflow measurement-editor1440dark",
+    "no overflow inspection-detail1440dark",
+    "no overflow native-history1440dark",
+    "no overflow excel-history1440dark",
+    "no overflow synthetic-trend1440dark",
+    "no overflow case-handoff1440dark",
+    "no overflow navigation1920light",
+    "no overflow pdm-register1920light",
+    "no overflow measurement-editor1920light",
+    "no overflow inspection-detail1920light",
+    "no overflow native-history1920light",
+    "no overflow excel-history1920light",
+    "no overflow synthetic-trend1920light",
+    "no overflow case-handoff1920light",
+    "no overflow navigation1920dark",
+    "no overflow pdm-register1920dark",
+    "no overflow measurement-editor1920dark",
+    "no overflow inspection-detail1920dark",
+    "no overflow native-history1920dark",
+    "no overflow excel-history1920dark",
+    "no overflow synthetic-trend1920dark",
+    "no overflow case-handoff1920dark",
+    "403 has access guidance without outage or retry",
+    "401 follows existing legitimate login renewal",
+    "retryable factual error 503",
+    "retryable factual error 500",
+    "retryable factual error network",
+    "manual analysis visible outside reference disclosures",
+    "actual login component leads authorized synthetic engineer to PdM",
+    "exact five primary entries",
+    "explicit one-inspection compatibility remains",
+    "current page count is not the total inspection population",
+    "five-row next offset exact",
+    "last page23 totals and three pages",
+    "413 exposes recovery without private rows",
+    "actual same-path detail link opens context without navigation",
+    "exact history page and filters survive record return",
+    "Back/Forward restores history context",
+    "native failure semantics 403",
+    "native failure semantics 503",
+    "selection preserves unrelated query and exact record",
+    "Back restores register with query",
+    "Forward restores exact inspection detail",
+    "no competing Input primary on detail",
+    "optional Case uses existing form only after deliberate action",
+    "entry has four continuous sections",
+    "entry has no competing new-input action",
+    "required method version remains visible and focused",
+    "dirty section Back preserves mounted editor without discard",
+    "dirty section Forward preserves draft and section",
+    "cancelled leave preserves draft",
+    "model validation announces failure and retains draft",
+    "native source panel hidden, separate counts",
+    "Excel panel separate and raw zero/null visible",
+    "F23 estimate notice stays visible beside reading",
+    "F23 keyboard disclosure preserves raw blank and low confidence evidence",
+    "Escape closes mobile drawer and returns focus",
+    "only exact utility URL has aria-current page",
+    "no browser exceptions",
+    "WCAG A/AA automated"
+  ],
+  "errors": [],
+  "violations": [],
+  "requests": [
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/action-board",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/recommendations",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/asset-context/asset%3ADEMO-001",
+      "query": "?limit=1",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "?record=inspection%3ADEMO-001",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/inspection%3ADEMO-001",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history/batches",
+      "query": "?after=",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history",
+      "query": "?limit=25&after=",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/__synthetic/pdm-trend",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "?record=inspection%3ADEMO-001",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/inspection%3ADEMO-001",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/action-board",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/recommendations",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/asset-context/asset%3ADEMO-001",
+      "query": "?limit=1",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "?record=inspection%3ADEMO-001",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/inspection%3ADEMO-001",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history/batches",
+      "query": "?after=",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history",
+      "query": "?limit=25&after=",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/__synthetic/pdm-trend",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "?record=inspection%3ADEMO-001",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/inspection%3ADEMO-001",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/action-board",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/recommendations",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/asset-context/asset%3ADEMO-001",
+      "query": "?limit=1",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "?record=inspection%3ADEMO-001",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/inspection%3ADEMO-001",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history/batches",
+      "query": "?after=",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history",
+      "query": "?limit=25&after=",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/__synthetic/pdm-trend",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "?record=inspection%3ADEMO-001",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/inspection%3ADEMO-001",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/action-board",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/recommendations",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/asset-context/asset%3ADEMO-001",
+      "query": "?limit=1",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "?record=inspection%3ADEMO-001",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/inspection%3ADEMO-001",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history/batches",
+      "query": "?after=",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history",
+      "query": "?limit=25&after=",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/__synthetic/pdm-trend",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "?record=inspection%3ADEMO-001",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/inspection%3ADEMO-001",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/action-board",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/recommendations",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/asset-context/asset%3ADEMO-001",
+      "query": "?limit=1",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "?record=inspection%3ADEMO-001",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/inspection%3ADEMO-001",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history/batches",
+      "query": "?after=",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history",
+      "query": "?limit=25&after=",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/__synthetic/pdm-trend",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "?record=inspection%3ADEMO-001",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/inspection%3ADEMO-001",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/action-board",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/recommendations",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/asset-context/asset%3ADEMO-001",
+      "query": "?limit=1",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "?record=inspection%3ADEMO-001",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/inspection%3ADEMO-001",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history/batches",
+      "query": "?after=",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history",
+      "query": "?limit=25&after=",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/__synthetic/pdm-trend",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "?record=inspection%3ADEMO-001",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/inspection%3ADEMO-001",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/action-board",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/recommendations",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/asset-context/asset%3ADEMO-001",
+      "query": "?limit=1",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "?record=inspection%3ADEMO-001",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/inspection%3ADEMO-001",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history/batches",
+      "query": "?after=",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history",
+      "query": "?limit=25&after=",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/__synthetic/pdm-trend",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "?record=inspection%3ADEMO-001",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/inspection%3ADEMO-001",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/action-board",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/recommendations",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/asset-context/asset%3ADEMO-001",
+      "query": "?limit=1",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "?record=inspection%3ADEMO-001",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/inspection%3ADEMO-001",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history/batches",
+      "query": "?after=",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history",
+      "query": "?limit=25&after=",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/__synthetic/pdm-trend",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "?record=inspection%3ADEMO-001",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/inspection%3ADEMO-001",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/cockpit/v1/reliability/decision-overview",
+      "query": "?window_days=30",
+      "method": "GET"
+    },
+    {
+      "path": "/",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/cockpit/v1/reliability/decision-overview",
+      "query": "?window_days=30",
+      "method": "GET"
+    },
+    {
+      "path": "/login",
+      "query": "?expired=1",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/login/logo_nadi-white-cyan.png",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/login/power-plant-night.png",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/cockpit/v1/reliability/decision-overview",
+      "query": "?window_days=30",
+      "method": "GET"
+    },
+    {
+      "path": "/",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/cockpit/v1/reliability/decision-overview",
+      "query": "?window_days=30",
+      "method": "GET"
+    },
+    {
+      "path": "/",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/cockpit/v1/reliability/decision-overview",
+      "query": "?window_days=30",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "?record=inspection%3ADEMO-001",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/inspection%3ADEMO-001",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/login",
+      "query": "?returnTo=%2Fpdm",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/login/logo_nadi-white-cyan.png",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/login/power-plant-night.png",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/auth/login",
+      "query": "",
+      "method": "POST",
+      "body": {
+        "username": "synthetic-engineer",
+        "password": "SYNTHETIC-NOT-A-CREDENTIAL"
+      }
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=1",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=5",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=5&limit=5",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=10&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=20&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=5",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "?record=inspection%3ADEMO-001",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/inspection%3ADEMO-001",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=0&limit=25&asset_id=asset%3ADEMO-001&method=VIBRATION",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10&asset_id=asset%3ADEMO-001&method=VIBRATION",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=0&limit=25&asset_id=asset%3ADEMO-001&method=VIBRATION",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=0&limit=25&asset_id=asset%3ADEMO-001&method=VIBRATION&point=point%3ASYNTHETIC&quantity=synthetic_velocity",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=0&limit=1&asset_id=asset%3ADEMO-001&method=VIBRATION&point=point%3ASYNTHETIC&quantity=synthetic_velocity",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=1&limit=1&asset_id=asset%3ADEMO-001&method=VIBRATION&point=point%3ASYNTHETIC&quantity=synthetic_velocity",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/inspection%3ADEMO-001",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=1&limit=1&asset_id=asset%3ADEMO-001&method=VIBRATION&point=point%3ASYNTHETIC&quantity=synthetic_velocity",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/inspection%3ADEMO-001",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=1&limit=1&asset_id=asset%3ADEMO-001&method=VIBRATION&point=point%3ASYNTHETIC&quantity=synthetic_velocity",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "?pdm_view=history",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "?pdm_view=history",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "?context=SYNTHETIC",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/inspection%3ADEMO-001",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/inspection%3ADEMO-001",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/pdm",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections",
+      "query": "?offset=0&limit=10",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/asset-context/asset%3ADEMO-001",
+      "query": "?limit=1",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/inspections/measurement-history",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history/batches",
+      "query": "?after=",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history",
+      "query": "?limit=25&after=",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/source-history/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/action-board",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/recommendations",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    },
+    {
+      "path": "/recommendations",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.css",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/candidate.js",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/session",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/api/engineering-qa/recommendations",
+      "query": "?offset=0&limit=25",
+      "method": "GET"
+    }
+  ]
+}

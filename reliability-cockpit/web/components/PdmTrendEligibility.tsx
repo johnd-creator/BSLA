@@ -1,0 +1,7 @@
+import type {MeasurementEvent} from '../lib/pdm-input';
+import {historyEligibility} from '../lib/pdm-history';
+import {HelpDetails,TableFrame} from './ui';
+const states={RECORDED:'Tercatat · belum mengesahkan kesetaraan',UNKNOWN:'Belum diketahui',DIFFERENT:'Berbeda · jangan digabungkan',PENDING_ENGINEER_VALIDATION:'Menunggu keputusan engineer'};
+export default function PdmTrendEligibility({events}:{events:MeasurementEvent[]}){
+ return <section className="pdm-trend-eligibility" aria-label="Kelayakan tren lintas inspeksi"><h3>Tren lintas inspeksi belum memenuhi syarat</h3><p>Belum ada kebijakan comparability yang disahkan untuk data ini. Nama titik atau unit yang sama dan status rekam APPROVED tidak cukup. Tabel nilai asli tetap dapat dibaca; grafik di bawah hanya sampel satu inspeksi.</p><HelpDetails title="Bukti yang diperlukan untuk membuka tren"><TableFrame minWidth={560} label="Kelengkapan rujukan sampel dan keputusan tren"><table><thead><tr><th>Rujukan / keputusan</th><th>Status sampel yang dipilih</th></tr></thead><tbody>{historyEligibility(events).map(c=><tr key={c.label}><td>{c.label}</td><td>{states[c.state]}</td></tr>)}</tbody></table></TableFrame><p>Tercatat berarti field tersedia, bukan verifikasi titik fisik, kesetaraan atau persetujuan metode. G01/G02 dan V06/T05/MC05/TH06 masih memerlukan owner bukti, scope, prosedur/versi dan tanggal keputusan. Review rekam, validasi metode, penilaian kondisi dan izin pekerjaan adalah keputusan yang berbeda.</p></HelpDetails></section>;
+}

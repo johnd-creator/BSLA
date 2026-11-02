@@ -19,9 +19,18 @@ const reviewedParity = {
   "reliability-cockpit/src/qa/users.py": "1b4075ffd90185332bccc33ab5b0e1f1596a97d0ade9b5a230983785fa406262",
   "deploy/development/local_fixture.py": "882155448dde67db32bdacda4fe22c3f39df64c8ad5496c598f680e84d329138"
 };
-for (const path of git('diff', '--name-only', base, '--', ...protectedPaths).trim().split('\n').filter(Boolean)) {
- assert.ok(Object.hasOwn(reviewedParity, path), `Unreviewed protected boundary: ${path}`);
- assert.equal(createHash('sha256').update(readFileSync(resolve(root,path))).digest('hex'),reviewedParity[path], `Reviewed parity bytes changed: ${path}`);
+// Sprint2 explicitly authorizes only this compatible bounded read change.
+// Exact bytes remain pinned; DTO/schema/auth/source and the six F23/F24 pins stay protected.
+const reviewedSprint2 = {
+  "reliability-cockpit/src/services/human_records.py": "35e6ec70f1d3862da21db99b5606d702a1f5dd82a4e626dd584875c1d8dc0000",
+  "reliability-cockpit/src/services/pdm_read_budget.py": "cc9bfd952d81f0c6c29de8d4f9eadd103a15138b9b85844447a19c31f224aac0",
+  "reliability-cockpit/web/components/useQaRecords.ts": "59b015a5ae8fc7a57e352f4b16d3ab4855e10bdc8db629c2429ae4c45cba039c"
+};
+const admitted={...reviewedParity,...reviewedSprint2};
+const changed=[...git('diff','--name-only',base,'--',...protectedPaths).trim().split('\n'),...git('ls-files','--others','--exclude-standard','--',...protectedPaths).trim().split('\n')].filter(Boolean);
+for(const path of changed){
+ assert.ok(Object.hasOwn(admitted,path),`Unreviewed protected boundary: ${path}`);
+ assert.equal(createHash('sha256').update(readFileSync(resolve(root,path))).digest('hex'),admitted[path],`Reviewed bytes changed: ${path}`);
 }
-for (const [path,hash] of Object.entries(reviewedParity)) assert.equal(createHash('sha256').update(readFileSync(resolve(root,path))).digest('hex'),hash, `Missing/changed parity file: ${path}`);
-console.log(`PASS: all ${pages.length} page entries byte-identical; only exact reviewed F23/F24 parity is admitted; remaining protected boundaries unchanged`);
+for(const [path,hash] of Object.entries(admitted))assert.equal(createHash('sha256').update(readFileSync(resolve(root,path))).digest('hex'),hash,`Missing/changed reviewed file: ${path}`);
+console.log(`PASS: ${pages.length} unchanged page entries; six exact F23/F24 parity and three bounded Sprint2 read files only; DTO/schema/auth/source unchanged`);
