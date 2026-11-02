@@ -1231,3 +1231,25 @@ Implementation/synthetic qualification, exact-head CI, local activation and owne
 UAT are separate milestones. Activation is conditional on all mandatory gates;
 no current claim of deployment, merge or PO acceptance.
 [Requirements, lineage and boundaries](reliability-cockpit/docs/NADI-WO-DETAIL-ENHANCEMENT-01.md).
+
+
+### WO detail qualification correction and activation hold — 2 November 2026
+
+Draft PR120 is stacked on PR119. Independent source/security review and isolated
+WO compatibility/rendering qualification passed; the full local backend suite
+runs with the declared optional workbook test dependencies in disposable /tmp,
+without changing operational environments. An inherited PdM browser fixture shared
+one mutable actor across author/reviewer tabs. Its correction binds fixture
+identity per tab, deliberately refreshes the retained reviewer while the author
+works, and preserves the full CSRF/revision/independent-review/role-loss assertions.
+This changes synthetic test behavior only; product/auth source is unchanged.
+
+Local activation remains stopped before service mutation: legitimate engineer
+Asset access is denied by the existing factual capability boundary, and the
+separate Maximo CI selector permits main-target PRs only while this task requires
+a stack on PR119. No grants or CI selector policy were broadened. Final exact-head
+backend/frontend results belong to PR120 and owner-private receipts. No fresh
+operational backup/restore/transition is claimed for this blocked attempt; those
+gates must run afresh after blockers are resolved. Runtime remains PR119, actual
+WO browser UAT is pending, and source retrieval/reprojection needs separate
+approval. Operational aggregates and screenshots remain private.
