@@ -90,15 +90,10 @@ const cases = [
     },
   ],
 }));
-const pageOf = (items) => ({
-  items,
-  total: items.length,
-  offset: 0,
-  limit: 25,
-  has_more: false,
-  filter_scope: "AUTHORIZED_POPULATION",
-  event_time_basis: "INSPECTED_AT",
-});
+const pageOf = (items,u) => {
+ const offset=Number(u?.searchParams.get('offset')??0),limit=Number(u?.searchParams.get('limit')??25);
+ return {items:items.slice(offset,offset+limit),total:items.length,offset,limit,has_more:offset+limit<items.length,filter_scope:'AUTHORIZED_POPULATION',event_time_basis:'INSPECTED_AT'};
+};
 const check = (name, value) => {
   assert.ok(value, name);
   checks.push(name);
@@ -206,7 +201,7 @@ await ctx.route("**/*", async (route) => {
     return route.fulfill({
       json: id
         ? {...rows.find((x) => (x.case_id ?? x.record_id) === id),...(resource==="cases"&&newerCaseRevision?{revision:4}:{})}
-        : pageOf(result),
+        : pageOf(result,u),
     });
   }
   return route.fulfill({ status: 404, body: "" });

@@ -67,7 +67,7 @@ Status legend: ✅ verified on this instance · ⛔ forbidden (BMXAA0024E) · �
 | `reported_by` | `reportedby` | string | personid |
 | `supervisor` | `supervisor` | string | |
 | `lead` | `lead` | string | |
-| `failure_code` | — | string | ⊘ not on mxwodetail; from failure reporting (pending) |
+| `failure_code` | `failurecode` | string | Retained direct scalar; MX-015A verified presence. Not a failure event, cause/remedy or verified Failure Code master relationship. |
 | `is_task` | `istask` | boolean | |
 | `parent_wo` | `pctaskid`/`wogroup` | string | task hierarchy |
 | `has_children` | `haschildren` | boolean | |

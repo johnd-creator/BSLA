@@ -613,3 +613,42 @@ section anchors support Back/Forward without discard; mandatory warnings/errors
 remain visible. Synthetic 390/768/1440/1920 light/dark evidence supports review,
 not live visibility, method approval or PO UX acceptance. F23/F24 parity gates
 require a separate compatibility/activation task.
+
+
+## Sprint4 readiness candidate — 1 November2026
+
+Five primary navigation entries and existing report catalog remain. Laporan adds
+Kinerja Reliabilitas as a contextual subview: exactasset/explicit period → eligibility
+and owner decisions → optional authorized activity/source detail → return with
+URL context. MTBF/MTTR say Belum dapat dihitung / NOT_ELIGIBLE. No real numerical
+result, health grade or traffic-light state. Numerical reference screenshots are
+clearly labelled test-only components, disconnected from application imports.
+[Candidate gallery and limits](../../reliability-cockpit/docs/NADI-PDM-SPRINT-04-DELIVERY.md).
+This implementation does not constitute PO or engineer method acceptance.
+
+
+## Sprint5 consolidated review preparation — 1 November2026
+
+Preserve the five primary entries and existing screens. Fix confirmed malformed
+maintenance-response crash and history context loss on evidence return; no new
+visual architecture. [Private synthetic review package](../../reliability-cockpit/docs/NADI-SPRINT5-PRIVATE-REVIEW-PACKAGE.md)
+and [PO/engineer checklist](../../reliability-cockpit/docs/NADI-SPRINT5-UAT-CHECKLIST.md)
+record exact candidate, screen purposes/states and limitations. Screenshots/axe
+are automated evidence only; preferences and human acceptance remain pending.
+
+
+## 2 November 2026 — UI-01/02 Engineer Factual READ candidate
+
+The revised PR120 candidate renders authenticated non-portfolio users a scoped
+Beranda component with permitted Registry/retained-WO counts and exact Asset links.
+Dataset403 remains distinct from page access; unavailable/restricted states are
+explicit. Register totals and paging use authorized assets before serialization.
+Existing admin overview, Asset filter/return context and PdM AUTHOR navigation
+remain. Synthetic390/768/1440 light/dark checks are not live Engineer acceptance.
+[Requirements and gate report](../../reliability-cockpit/docs/NADI-PR120-FINAL-UNBLOCK-01.md).
+
+Owner scope amendment: UI-01/02 now also support all registered BSR/IP assets under
+the three independent READ capabilities. Label this population explicitly, show
+the top-ten WO activity ranking as a bounded table, and link to the complete
+paginated Register. Do not render unrelated ADMIN domain metrics for this grant.
+Synthetic qualification remains separate from real Engineer UAT.

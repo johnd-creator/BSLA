@@ -26,3 +26,12 @@ denominator. Period windows are explicit (`period_start`, `period_end`).
   `work_order.downtime_hours` / `equipment.downtime_total_hours`.
 - `PM_COMPLIANCE` requires `worktype=PM` work orders; scheduled/planned counts
   depend on the PM object (currently forbidden) as an improvement.
+## 1 November2026 — source audit correction, behavior preserved
+
+The earlier CM wording is narrower than actual `_aggregate`: it counts **any
+truthy failure_code** among work orders whose reported_at date lies in the inclusive
+day window; it does not check CM. Missing downtime contributes0 and operating hours
+are the legacy proxy `max(inclusive calendar hours − summed downtime,0)`. Legacy
+MTTR uses total downtime divided by that code-based count. Sprint4 leaves the code,
+store, API and metrics unchanged. These proxies do not meet the proposed qualified
+functional-failure, operating-exposure or active-repair contracts.

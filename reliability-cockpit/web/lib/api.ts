@@ -38,7 +38,17 @@ export interface AssetView {
   location_ref: string | null; parent_asset_ref: string | null; site_code: string; organization_code: string; asset_type: string | null;
   plant: string | null; unit: string | null; source_updated_at: string | null;
 }
+export interface WorkClassificationView {
+  raw_work_type: string | null; canonical_category: string | null;
+  state: 'CANONICAL_SUPPORTED' | 'UNMAPPED' | 'MISSING_RETAINED_TYPE' | 'CANONICAL_ONLY';
+  origin: 'RETAINED_MAXIMO_WORKTYPE' | 'CANONICAL_EVENT_TYPE' | 'NOT_AVAILABLE';
+  confidence: 'VERIFIED' | 'UNRESOLVED'; description: string | null;
+  workflow_name: string | null; workflow_version: string | null; workflow_state: 'NOT_AVAILABLE';
+  status_state: 'AVAILABLE' | 'MISSING_RETAINED_STATUS';
+}
 export interface MaintenanceEventView {
+  classification?: WorkClassificationView | null;
+  source_detail?: {work_order_number: string | null; asset_number: string | null; reported_at: string | null; scheduled_start: string | null; scheduled_finish: string | null} | null;
   canonical_id: string; contract_version: string; id: string; equipment_id: string; work_order_id: string | null; event_type: string | null;
   status: string | null; actual_start: string | null; actual_finish: string | null; duration_hours: number | null; labor_hours: number | null;
   downtime_hours: number | null; failure_code: string | null; source_changed_at: string | null; site_code: string; organization_code: string;
@@ -289,6 +299,7 @@ export const cockpitApi = {
 
 export const reliabilityApi = {
   hierarchy: (rootRef:string,nodeRef:string,offset=0,limit=25) => get<HierarchyView>(`/v1/reliability/assets/${encodeURIComponent(rootRef)}/hierarchy${query({node_ref:nodeRef,offset,limit})}`),
+  scopedOverview: () => get<import('./factual-read-contract').ScopedFactualOverview>("/v1/reliability/scoped-overview"),
   decisionOverview: (windowDays: 7 | 30 | 90 = 30) => get<DecisionOverviewView>(`/v1/reliability/decision-overview?window_days=${windowDays}`),
   assetHealthOverview: () => get<AssetHealthOverviewView>("/v1/reliability/asset-health/overview"),
   fmeaOverview: () => get<FmeaOverviewView>("/v1/reliability/fmea/overview"),
@@ -324,6 +335,13 @@ export interface AssetConditionEvidence {
   collector_last_success_at: string | null;
   items: {
     evidence: {
+      // Existing server DTO lineage; no request/auth/endpoint changes.
+      contract_version: string; canonical_asset_id: string;
+      sources: {pi: {pi_source_id: string; af_server_ref: string; af_database_ref: string;
+        af_element_ref: string; mapping_role: string; mapping_status: string;
+        attribute_ref: string; attribute_name?: string | null}};
+      provenance: {selection_evidence_ref: string; selection_approved_by: string;
+        selection_approved_at: string; source_boundary: string};
       signal_id: string; semantic_name: string; mapping_id: string;
       value: number | string | boolean | { name: string | null; code: number | null; is_system: boolean | null } | null;
       value_type: "NUMERIC" | "TEXT" | "DIGITAL_STATE" | "BOOLEAN" | "NULL";

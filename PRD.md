@@ -441,3 +441,82 @@ estimate and F24 explicit local-demo account policy, retaining raw custody, stan
 authentication and source read-only semantics. No global password-policy reduction
 or automatic diagnosis/Recommendation/WO write. [Current integrated acceptance](reliability-cockpit/docs/NADI-PDM-SPRINT1-ONE-PR-DELIVERY.md)
 records source qualification separately from conditional live and PO acceptance.
+
+
+## 1 November 2026 — PdM Sprint2 bounded usability candidate
+
+S2-01–S2-05 implement the accepted Sprint1 visual direction: Register1/5/10 with
+unchanged2MiB budget, native exact history context and distinct source history,
+honest trend eligibility, compact M02 decisions and a disposable independent-review
+workflow. [Integrated specification and evidence](reliability-cockpit/docs/NADI-PDM-SPRINT-02-DELIVERY.md)
+retains F01–F24. This is a stacked candidate on unmerged PR114 AA; no schema/DTO/
+auth change, new source request, trend policy, live cutover or phase completion.
+Engineer method sign-off and PO acceptance remain PENDING.
+
+
+## 1 November 2026 — FR-02/FR-07 asset evidence candidate
+
+Sprint3 reuses existing exactasset maintenance and approved PI latest contracts,
+adds contextual PdM return links and source/quality/clock disclosures, and preserves
+five primary entries and Engineering workflows. Full mapping inventory is blocked
+by current grants; historian history is NOT_QUALIFIED and KPI readiness remains
+NOT_ELIGIBLE. [Implementation, limits and evidence](reliability-cockpit/docs/NADI-PDM-SPRINT-03-DELIVERY.md)
+are distinct from deferred PO UI/UX, method/source-owner acceptance and activation.
+
+
+## 1 November2026 — Reliability Performance offline foundation (Sprint4)
+
+The Product Owner authorizes versioned candidate failure/exposure/active-repair
+models and deterministic offline synthetic MTBF/MTTR qualification. The Laporan
+subview exposes exactasset/period readiness, missing policy/evidence and authorized
+source activities; it publishes no live KPI and does not call an offline calculator.
+[Scope, decisions and preservation](reliability-cockpit/docs/NADI-PDM-SPRINT-04-DELIVERY.md).
+Source/method approval, consolidated PO visuals and any later activation remain
+separate. Existing legacy metrics are neither replaced nor reinterpreted.
+
+
+## Sprint5 integrated stabilization candidate — 1 November2026
+
+Owner-authorized isolated qualification joins Sprint1–4 journeys and retains
+FR01–10/F01–24. [Sprint5 delivery](reliability-cockpit/docs/NADI-PDM-SPRINT-05-DELIVERY.md)
+and [human UAT checklist](reliability-cockpit/docs/NADI-SPRINT5-UAT-CHECKLIST.md)
+separate automated qualification, PO/engineer acceptance, KPI eligibility, merge
+and activation. Only corrupt-response/return-context helper fixes; no new product
+scope, source mapping/method approval, operational KPI or live change.
+
+
+## 2 November 2026 — NADI-WO-DETAIL-ENHANCEMENT-01 candidate
+
+Stacked on Draft PR119 (`119ba2f1472facedd71433d65b74f3b7d64a6434`):
+WO identity/status, six-group source detail, explicit Asia/Jakarta presentation,
+original ISO audit text and precise missing/unmapped/unverified/unexposed states.
+Additive allowlisted read detail and tested future local projection correction
+retain report/schedule/failure scalars without schema changes. Existing actual
+dates remain unavailable in the audited WO path; no source acquisition or
+operational reprojection is authorized. MTBF/MTTR remain NOT_ELIGIBLE.
+Implementation/synthetic qualification, exact-head CI, local activation and owner
+UAT are separate milestones. Activation is conditional on all mandatory gates;
+no current claim of deployment, merge or PO acceptance.
+[Requirements, lineage and boundaries](reliability-cockpit/docs/NADI-WO-DETAIL-ENHANCEMENT-01.md).
+
+
+## 2 November 2026 — proposed scoped Engineer Factual READ (PR120 revised)
+
+NADI-PR120-FINAL-UNBLOCK-01 extends FR-01/02/03 with three independent read
+capabilities for an immutable identity and exact approved canonical BSR/IP allowlist.
+Beranda page access is separate from dataset access; scoped retained counts never
+confer portfolio totals or Engineering AUTHOR write scope. Expiry/revocation and
+private audited owner administration are required. Existing ADMIN dashboard and
+PdM permissions remain. MTBF/MTTR, health and cross-inspection prerequisites remain
+NOT_ELIGIBLE. This is candidate implementation, not a global role matrix, issued
+grant, activated runtime or engineer/PO acceptance.
+[Mechanism, tests and remaining gates](reliability-cockpit/docs/NADI-PR120-FINAL-UNBLOCK-01.md).
+
+### Owner amendment — registered BSR/IP READ, 2 November 2026
+
+The owner approved Dashboard/Asset/Maintenance READ beyond a single asset. FR-01/02/03
+therefore support explicit registered-population BSR/IP scope as well as exact
+allowlists. This does not grant ADMIN, other domains or broader Engineering writes.
+Beranda uses only scoped Asset/WO aggregates; the full Register retains server-side
+filters/counts/pagination. Actual grant issuance and local activation remain gated;
+this amendment records scope approval, not runtime visibility or UAT acceptance.

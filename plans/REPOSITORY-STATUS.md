@@ -1,5 +1,45 @@
 # Repository status and debt — PLATFORM-ROADMAP-001
 
+## 1 November2026 — Sprint4 isolated Reliability Performance foundation
+
+[Draft PR117](https://github.com/johnd-creator/reliability-knowledge-starter/pull/117)
+preserves unmerged PR116 exact3778584→115→114 ancestry. Main verifiedf1fc4e8.
+[Technical delivery](../reliability-cockpit/docs/NADI-PDM-SPRINT-04-DELIVERY.md) and
+PR117 final receipt distinguish candidate implementation/CI/review from actual
+method/source/PO approval, merge or activation. Existing active shared contracts,
+collectors, retained schema/data and authentication are unchanged. Official local
+status before/after preserves Sprint2 front/backend3a01e842 on HTTPS3000; no Sprint4
+promotion. Reliability Performance remains operationally NOT_ELIGIBLE. Legacy KPI
+meanings are retained with a source-backed documentation correction. Sprint5 has
+only a proposed handoff, not implementation authorization.
+
+## 1 November 2026 — Sprint3 isolated asset-evidence candidate
+
+[Draft PR116](https://github.com/johnd-creator/reliability-knowledge-starter/pull/116)
+is stacked on open Draft PR115 exact3a01e842, itself on open Draft PR114 exactAA.
+Main remainsf1fc4e8 at verification. The [integrated delivery](../reliability-cockpit/docs/NADI-PDM-SPRINT-03-DELIVERY.md)
+records implementation, synthetic qualification, independent review and final-head
+CI receipt separately from PO/engineer approval, merge and activation.
+
+Correction to the earlier pre-activation Sprint2 checkpoint below: the subsequent
+[authorized activation receipt](https://github.com/johnd-creator/reliability-knowledge-starter/pull/115#issuecomment-6555450276)
+records Sprint2 front/back3a at https://localhost:3000. Sprint3 before/after official
+read-only status confirms the same pair/controller/store readiness; no reset,
+activation, source acquisition or service restart in this Sprint3 task. Historical
+Phase0–5/source-policy checkpoints retain their own scope.
+
+## 1 November 2026 — stacked Sprint2 candidate
+
+Main verified `f1fc4e8b395691a17fe6d986bf14c772d37c1f2c`; PR114 OPEN/DRAFT at
+`aa065af9cef01d8ee3358bcca8fc628ba311ca3a`. `codex/nadi-pdm-sprint-02` preserves
+that ancestry and introduces S2-01–S2-05 in one Draft PR. [Delivery and preservation
+evidence](../reliability-cockpit/docs/NADI-PDM-SPRINT-02-DELIVERY.md) separates
+implementation/CI/review from merge/live/engineer/PO decisions. Active front/back
+remain AA. Current/recovery read-only fixture probes match; prior backup integrity
+is valid but freshness expired, and official session proof expired. No Sprint2
+cutover, account change, import, source call or operational service restart occurred.
+Pending human method/comparability and later activation gates are explicit.
+
 Latest verified source checkpoint: [19 October 2026 — PR105 integration](#19-october-2026--verified-pr105-source-integration-and-next-batch). Historical runtime/policy checkpoints below retain their dated scope.
 
 ## Source-free 72h review — 12 Oktober 2026
@@ -1106,3 +1146,58 @@ PR113 CLOSED_SUPERSEDED/unmerged; PR107 untouched. Reviewed F23/F24 source parit
 changes the original frontend-only scope through six pinned exceptions; the
 [one delivery report](../reliability-cockpit/docs/NADI-PDM-SPRINT1-ONE-PR-DELIVERY.md)
 is the current source/CI/live gate authority. Original dated reports stay historical.
+
+
+## 1 November2026 — isolated Sprint5 stabilization
+
+Stack remains114aa→1153a→116377→117988, all OPEN/DRAFT at audit; mainf1fc4e8b.
+New `codex/nadi-pdm-sprint-05` starts from exact988; one Draft PR stacked on117.
+[Final delivery/receipt pointer](../reliability-cockpit/docs/NADI-PDM-SPRINT-05-DELIVERY.md).
+Two bounded response/context helper fixes plus integrated/large-fixture qualification
+and no-skip API→React CI. No active backend/frontend/retained-data/auth/collector
+change. Human UAT, methods, real KPI eligibility, merge and activation remain separate.
+
+
+## 2 November 2026 — WO/SR classification reconciliation
+
+NADI-MAXIMO-WO-SR-CLASSIFICATION-01 is an isolated candidate stacked on Draft
+PR118 (`0a10fe10bf2c9cd2158b5c47ed691f8b9404a7a0`). Retained evidence and
+FLOW reference reconciliation support a conservative WO DTO/UI correction; SR
+read authorization remains proposed. No runtime/source/storage activation.
+[Lineage, decisions and preservation](../reliability-cockpit/docs/NADI-WO-SR-CLASSIFICATION-01.md).
+Technical qualification and owner acceptance are independent; final CI/review
+receipts are recorded on the delivery PR. MTBF/MTTR and cross-inspection trends
+remain NOT_ELIGIBLE.
+
+
+## 2 November 2026 — NADI-WO-DETAIL-ENHANCEMENT-01 candidate
+
+Stacked on Draft PR119 (`119ba2f1472facedd71433d65b74f3b7d64a6434`):
+WO identity/status, six-group source detail, explicit Asia/Jakarta presentation,
+original ISO audit text and precise missing/unmapped/unverified/unexposed states.
+Additive allowlisted read detail and tested future local projection correction
+retain report/schedule/failure scalars without schema changes. Existing actual
+dates remain unavailable in the audited WO path; no source acquisition or
+operational reprojection is authorized. MTBF/MTTR remain NOT_ELIGIBLE.
+Implementation/synthetic qualification, exact-head CI, local activation and owner
+UAT are separate milestones. Activation is conditional on all mandatory gates;
+no current claim of deployment, merge or PO acceptance.
+[Requirements, lineage and boundaries](../reliability-cockpit/docs/NADI-WO-DETAIL-ENHANCEMENT-01.md).
+
+
+## 2 November 2026 — PR120 FINAL-UNBLOCK revised implementation
+
+PR12049ff is the immutable baseline, not the eventual new source HEAD. Separate
+read-only entitlements, scoped home/register/WO readers and a local CI equivalence
+verifier are implemented in its existing task branch. Independent review and final
+exact-head CI are recorded at delivery. PR121's reviewed nonprivileged qualification
+profile must pin the new candidate. Original main-only failures remain failures.
+PR119 stays active pending explicit grant/local-policy approval and fresh recovery/
+activation/UAT gates. No grant, account, source collection or retained-data change.
+[Integrated report](../reliability-cockpit/docs/NADI-PR120-FINAL-UNBLOCK-01.md).
+
+2 November owner amendment: registered BSR/IP Dashboard/Asset/Maintenance READ is
+approved beyond one asset. PR120's explicit scope, SQL-only Asset/WO summary and
+complete paginated Register require new exact-head qualification and a new
+Factual image;49ff image reuse is superseded. PR119 remains the running rollback
+baseline pending required approvals, session, recovery and real UAT.

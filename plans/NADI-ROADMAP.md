@@ -1,5 +1,19 @@
 # NADI product roadmap — main quest
 
+## 1 November 2026 — PdM Sprint2 candidate, no phase advancement
+
+[Sprint2 delivery / issue mapping](../reliability-cockpit/docs/NADI-PDM-SPRINT-02-DELIVERY.md)
+implements bounded Register pages, exact native history navigation, honest graph
+eligibility and disposable independent-review qualification. Branch is stacked on
+unmerged PR114 `aa065af9cef01d8ee3358bcca8fc628ba311ca3a`; main remains
+`f1fc4e8b395691a17fe6d986bf14c772d37c1f2c`. One Draft PR; no merge/cutover.
+Execution priority: complete candidate CI/review → PO bounded workflow evaluation →
+authorized M02 evidence decisions → separately authorized local activation with
+fresh controller/session/recovery/backup gates. Real cross-inspection trend remains
+NOT_ELIGIBLE. All26 method/comparability decisions and Q01–Q10 remain pending.
+Official Phase0–5 and M0–M8 history below is retained; no phase/M02 completion or
+new source/KPI implementation is claimed. No Linear issue was created.
+
 ## 31 October 2026 — PdM product reset proposal
 
 **Documentation proposal; no implementation, activation or phase completion.**
@@ -1126,3 +1140,82 @@ The Product Owner consolidated blueprint/Sprint/parity and conditional local
 acceptance into PR114 based on main; PR113 is superseded without merge. Phase0–5
 history and engineering gates remain. [One current acceptance report](../reliability-cockpit/docs/NADI-PDM-SPRINT1-ONE-PR-DELIVERY.md)
 separates exact-source/CI qualification from authenticated local activation and PO UX.
+
+
+### 1 November 2026 — integrated Sprint3 development qualification
+
+Sprint3 implements read-only exactasset Maximo/approved PI evidence navigation in
+one [stacked Draft PR116](https://github.com/johnd-creator/reliability-knowledge-starter/pull/116),
+parent PR115 exact3a01e842. [Delivery and preservation](../reliability-cockpit/docs/NADI-PDM-SPRINT-03-DELIVERY.md)
+retain Phase0–5 history, current phase/source approval boundaries and F01–F24.
+Sprint2 remains the active local visual-review candidate; Sprint3 is isolated.
+Next: exact-head technical CI/review → consolidated PO visual review → separately
+requested activation. Full mapping inventory/history/DCS and Sprint4 failure,
+exposure and repair definitions remain gated; no automatic KPI implementation.
+
+
+### 1 November2026 — Sprint4 Reliability Performance technical foundation
+
+[Draft PR117](https://github.com/johnd-creator/reliability-knowledge-starter/pull/117)
+is stacked on PR116 exact3778584. [Delivery](../reliability-cockpit/docs/NADI-PDM-SPRINT-04-DELIVERY.md)
+records offline synthetic functional event/exposure/active-repair contracts and
+calculation qualification; Laporan exposes an operationally disabled readiness
+workflow using existing exactasset source access. Phase0–5 history, M0–M8, source
+ownership, M02/comparability and all method decisions remain unchanged/pending.
+Next: exact-head technical CI/review → consolidated PO/source/engineer decisions.
+[Sprint5 handoff](../reliability-cockpit/docs/NADI-SPRINT5-STABILIZATION-HANDOFF.md)
+is a proposal; Sprint5 is not started. No real KPI publication or activation.
+
+
+### 1 November2026 — Sprint5 integrated stabilization candidate
+
+Separate owner task authorizes Sprint5 on exact PR117988af8d. Phase0–5/M0–M8
+history stays unchanged. [Delivery](../reliability-cockpit/docs/NADI-PDM-SPRINT-05-DELIVERY.md)
+qualifies integrated PdM/evidence/disabled-reliability journeys and prepares
+[consolidated human UAT](../reliability-cockpit/docs/NADI-SPRINT5-UAT-CHECKLIST.md).
+Next decision is PO/engineer review; exact-head technical CI/review do not grant
+methods, operational eligibility, merge or local/QA/production activation. Active
+Sprint2 is preserved. No automatic following-sprint implementation.
+
+
+## 2 November 2026 — WO/SR classification reconciliation
+
+NADI-MAXIMO-WO-SR-CLASSIFICATION-01 is an isolated candidate stacked on Draft
+PR118 (`0a10fe10bf2c9cd2158b5c47ed691f8b9404a7a0`). Retained evidence and
+FLOW reference reconciliation support a conservative WO DTO/UI correction; SR
+read authorization remains proposed. No runtime/source/storage activation.
+[Lineage, decisions and preservation](../reliability-cockpit/docs/NADI-WO-SR-CLASSIFICATION-01.md).
+Technical qualification and owner acceptance are independent; final CI/review
+receipts are recorded on the delivery PR. MTBF/MTTR and cross-inspection trends
+remain NOT_ELIGIBLE.
+
+
+## 2 November 2026 — NADI-WO-DETAIL-ENHANCEMENT-01 candidate
+
+Stacked on Draft PR119 (`119ba2f1472facedd71433d65b74f3b7d64a6434`):
+WO identity/status, six-group source detail, explicit Asia/Jakarta presentation,
+original ISO audit text and precise missing/unmapped/unverified/unexposed states.
+Additive allowlisted read detail and tested future local projection correction
+retain report/schedule/failure scalars without schema changes. Existing actual
+dates remain unavailable in the audited WO path; no source acquisition or
+operational reprojection is authorized. MTBF/MTTR remain NOT_ELIGIBLE.
+Implementation/synthetic qualification, exact-head CI, local activation and owner
+UAT are separate milestones. Activation is conditional on all mandatory gates;
+no current claim of deployment, merge or PO acceptance.
+[Requirements, lineage and boundaries](../reliability-cockpit/docs/NADI-WO-DETAIL-ENHANCEMENT-01.md).
+
+
+## 2 November 2026 — PR120 revised access/activation candidate
+
+The task adds separately owned Factual READ permissions and scoped Beranda/Asset/WO
+readers, without changing Engineering write scope or domain eligibility. Local-only
+stacked CI recognition is a separately approved policy; production main qualification
+remains unchanged. Source/testing, grant approval, installation, local activation and
+real UAT remain separate milestones. No Phase advancement, method approval or new
+PdM Log Book is inferred. [Owning report](../reliability-cockpit/docs/NADI-PR120-FINAL-UNBLOCK-01.md).
+
+Owner amendment, 2 November 2026: approved Dashboard/Asset/Maintenance READ across
+the registered BSR/IP population supersedes the initial one-asset proposal. PR120
+adds an explicit registered scope and maintenance-only aggregate read model. This
+is candidate implementation, not merged/visible/accepted scope; all activation,
+recovery and actual UAT gates remain. No additional roadmap phase is implied.

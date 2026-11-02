@@ -1119,3 +1119,171 @@ author tab could focus the retained reviewer tab before the global synthetic
 identity returned to reviewer. Restore the reviewer fixture identity before that
 focus event; retain every independent-review/new-rationale/revision assertion.
 This changes no application authentication or production behavior.
+
+
+## 2026-11-01 — NADI-PDM-SPRINT-02 candidate
+
+Verified mainf1fc4e8 / PR114OPEN-DRAFT exactAA; created isolated stacked
+`codex/nadi-pdm-sprint-02`. S2-01 retains2MiB/offset/auth boundaries with tested
+1/5/10 fixed pages and typed413 recovery. S2-02 exact native history URL/point/
+quantity/event pages stay separate from source Excel counts/proofs. S2-03 keeps
+original same-inspection scatter; no approved comparability exists, so real trends
+remain NOT_ELIGIBLE and seven-point demo is synthetic test-entry only. Existing
+M02 packet now has one26-decision register; all pending, Q01–Q10 unchanged.
+Actual imported UI/trusted API/disposable PG completes independent return/revise/
+resubmit/approve and optional exact-version Case, preserving zero/unit/time and
+zero automatic Cases. No retained data/account/session mutations.
+
+Independent early review found same-path Link state sync and dirty new-entry413
+recovery gaps; both fixed under existing busy/discard/cache rules and covered by
+actual-component regressions. Large-page early rejection now closes the PG server
+cursor explicitly. Boundary tests preserve exact serializer/envelope/Unicode
+budget, private visibility and provisional/native exclusion. Scope checks pin only
+three explicit read files plus six F23/F24 parity files;28 pages unchanged.
+
+Official read-only active/recovery probes match existing schema/ledger/records;
+active front/back remainAA and controller release unchanged. Old private backup
+hash matches but freshness is expired; session proof expired. Fresh cutover gates
+are deferred until separate explicit owner authorization. Full exact-head CI and
+final independent review are recorded in the single Sprint2 Draft PR acceptance
+comment; this log does not claim PO/engineer approval or phase advancement.
+
+
+Sprint2 first hosted head5df6de7 passed backend. Frontend exposed a historical date
+browser fixture returning fixedlimit1 after the app correctly requestedlimit10.
+Aligned date/localization/experience fixture metadata and slices to the actual
+requested bounded page; retained strict product contract validation. Date test
+selects the raw measurement table explicitly alongside the separate eligibility
+checklist. Localization now asserts actual Register rows, preventing an error-state
+screenshot from passing as a translated workspace. No application/runtime bytes
+changed in this test correction; prior matched screenshots retain exact component
+bytes. Both jobs and independent final-head review are required again.
+
+
+## 2026-11-01 — NADI-PDM-SPRINT-03 integrated candidate
+
+- Isolated stacked Draft PR116, parent115 exact3a; no merge/activation/reset/source calls.
+- Exactasset Maximo register/source detail and PI latest original quality/lineage,
+  contextual inspection return, read-only crosswalk decisions and contract-first
+  Sprint4 NOT_ELIGIBLE handoff. Source/auth/controller/schema/collectors unchanged.
+- Synthetic SQL10k,18 contracts,804 backend tests (220 localenvironment skips),18
+  frontend gates/build/typecheck;12 screenshots/7 WCAG states. Independent code
+  review0e31fd2 found no remaining blocker; final docs-head/CI receipt on PR116.
+- Official read-only status before/after: active Sprint2 pair3a, samecontroller/
+  retained-store readiness. Human PO/method/mapping approval remains pending.
+- [Complete delivery](reliability-cockpit/docs/NADI-PDM-SPRINT-03-DELIVERY.md).
+
+
+## 2026-11-01 — NADI-PDM-SPRINT-04 isolated foundation
+
+- One stacked Draft PR117, basePR116 exact3778584; no merge, activation or production.
+- Versioned candidate input/result contracts and pure synthetic MTBF/MTTR with
+  explicit identity, quality, revision, window and active-repair/exposure gates.
+  Operational KPI always NOT_ELIGIBLE; legacy source/semantics unchanged.
+- Laporan readiness subview reuses exact authorized Asset/maintenance GETs; no
+  calculator endpoint, synthetic app import, retained store/schema/auth/collector change.
+-36 foundation +9 legacy tests, existing full regression checkpoint844 (220 local
+  optional-environment skips),19 frontend gates/build/tsc;10 synthetic screenshots
+  and8 automated WCAG states. Final immutable CI/review receipts on PR117.
+- Independent review repairs cover UTC/IANA overflow, strict offsets, deterministic
+  Decimal/microsecond durations, outage/wait/episode contradictions, false per-asset
+  evidence availability and non-vacuous import protection.
+- [Delivery/decision register](reliability-cockpit/docs/NADI-PDM-SPRINT-04-DELIVERY.md),
+  [proposed Sprint5 handoff](reliability-cockpit/docs/NADI-SPRINT5-STABILIZATION-HANDOFF.md).
+
+
+## 2026-11-01 — NADI-PDM-SPRINT-05 integrated stabilization
+
+- Exact baselinePR117988af8d verified; isolated Sprint5 branch, one stacked Draft PR.
+- Confirmed P2 response-render and history-return defects fixed in one helper.
+- New actual-component cross-sprint navigation/late-response/corrupt-state tests;
+  SQLite population/query/payload/memory receipts; mandatory previously skipped
+  API→React test now executes after npm dependencies and fails CI on any skip.
+- Public repository means new synthetic screenshots stay owner-private, no PNG
+  upload/commit. [Delivery](reliability-cockpit/docs/NADI-PDM-SPRINT-05-DELIVERY.md)
+  binds final exact-head CI/independent review through its single PR receipt.
+- No merge, activation, source acquisition, retained data/schema/account/session
+  or collector changes. Sprint2 remains available; human UAT/methods remain pending.
+
+
+## 2 November 2026 — WO/SR classification reconciliation
+
+NADI-MAXIMO-WO-SR-CLASSIFICATION-01 is an isolated candidate stacked on Draft
+PR118 (`0a10fe10bf2c9cd2158b5c47ed691f8b9404a7a0`). Retained evidence and
+FLOW reference reconciliation support a conservative WO DTO/UI correction; SR
+read authorization remains proposed. No runtime/source/storage activation.
+[Lineage, decisions and preservation](reliability-cockpit/docs/NADI-WO-SR-CLASSIFICATION-01.md).
+Technical qualification and owner acceptance are independent; final CI/review
+receipts are recorded on the delivery PR. MTBF/MTTR and cross-inspection trends
+remain NOT_ELIGIBLE.
+
+
+## 2 November 2026 — NADI-WO-DETAIL-ENHANCEMENT-01 candidate
+
+Stacked on Draft PR119 (`119ba2f1472facedd71433d65b74f3b7d64a6434`):
+WO identity/status, six-group source detail, explicit Asia/Jakarta presentation,
+original ISO audit text and precise missing/unmapped/unverified/unexposed states.
+Additive allowlisted read detail and tested future local projection correction
+retain report/schedule/failure scalars without schema changes. Existing actual
+dates remain unavailable in the audited WO path; no source acquisition or
+operational reprojection is authorized. MTBF/MTTR remain NOT_ELIGIBLE.
+Implementation/synthetic qualification, exact-head CI, local activation and owner
+UAT are separate milestones. Activation is conditional on all mandatory gates;
+no current claim of deployment, merge or PO acceptance.
+[Requirements, lineage and boundaries](reliability-cockpit/docs/NADI-WO-DETAIL-ENHANCEMENT-01.md).
+
+
+### WO detail qualification correction and activation hold — 2 November 2026
+
+Draft PR120 is stacked on PR119. Independent source/security review and isolated
+WO compatibility/rendering qualification passed; the full local backend suite
+runs with the declared optional workbook test dependencies in disposable /tmp,
+without changing operational environments. An inherited PdM browser fixture shared
+one mutable actor across author/reviewer tabs. Its correction binds fixture
+identity per tab, deliberately refreshes the retained reviewer while the author
+works, and preserves the full CSRF/revision/independent-review/role-loss assertions.
+This changes synthetic test behavior only; product/auth source is unchanged.
+
+Local activation remains stopped before service mutation: legitimate engineer
+Asset access is denied by the existing factual capability boundary, and the
+separate Maximo CI selector permits main-target PRs only while this task requires
+a stack on PR119. No grants or CI selector policy were broadened. Final exact-head
+backend/frontend results belong to PR120 and owner-private receipts. No fresh
+operational backup/restore/transition is claimed for this blocked attempt; those
+gates must run afresh after blockers are resolved. Runtime remains PR119, actual
+WO browser UAT is pending, and source retrieval/reprojection needs separate
+approval. Operational aggregates and screenshots remain private.
+
+
+## 2 November 2026 — NADI-PR120-FINAL-UNBLOCK-01 revised candidate
+
+Implemented immutable-subject Factual READ ledger/private administration, scoped
+Beranda/Register/Maintenance readers and distinct local-development qualification
+recognition. Engineering AUTHOR scope, existing admin portfolio behavior, account/
+demo parity and production main-only gate remain. Independent review findings on
+typed/page proof, directory identity, legacy access, sorting and uncertain commit
+were corrected with synthetic regressions. Local qualification includes private
+ledger/SQLite mutation tests, intercepted actual-component Engineer journey and
+read-only verification of original PR121 hosted evidence; final immutable review/CI
+are recorded at handoff. Actual grant issuance, policy recognition, controller
+installation, fresh operational recovery, cutover and real UAT remain separately
+gated. PR119 is retained. [Report](reliability-cockpit/docs/NADI-PR120-FINAL-UNBLOCK-01.md).
+
+## 2 November 2026 — owner-approved registered-population READ amendment
+
+The owner approved Dashboard, Asset and Maintenance READ beyond one asset. Added
+explicit REGISTERED_BSR_IP ledger/approval/revoke binding, whole Registry server
+pagination and a dedicated SQL aggregate/ranking read model over Registry/Asset/WO
+only. The Engineer remains AUTHOR with unchanged Engineering write scope. The
+existing ADMIN dashboard and unrelated domain boundaries remain. Synthetic tests
+cover >20 assets, full counts, foreign/unregistered denial, expiry/revoke races,
+uneven counts, zero-WO assets and no unrelated domain SQL. Exact-head CI/review and
+a new Factual image are required; prior49ff image reuse is no longer compatible.
+Grant issuance, local-policy/controller approval, fresh Engineer session/recovery,
+service transition and real browser UAT remain separately gated. PR119 retained.
+
+Recovery compatibility refinement: placed the registered Asset/WO query in its own
+read-only service module and restored the repository tree to PR119 bytes. The
+existing controller fixture/recovery contract and all prior methods stay intact;
+no new compatibility exception or persistence change. CI/review/image seals follow
+the new immutable head before any activation.

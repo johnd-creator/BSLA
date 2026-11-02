@@ -345,33 +345,45 @@ class InspectionService(ReviewedRecordService):
             for key, value in (("canonical_asset_id", asset_id), ("method", method), ("status", status)):
                 if value is not None:
                     where.append(doc[key].as_string() == value)
-            total, items = 0, []
-            for raw in c.scalars(select(doc).where(*where).order_by(RecordRow.record_id).execution_options(yield_per=100)):
-                row = self.visible(actor, raw)
-                text = " ".join((row.record_id, row.canonical_asset_id, row.inspector_ref, *row.observations, *row.interpretations))
-                if search.casefold() not in text.casefold():
-                    continue
-                if not measurements:
-                    events = [row] if in_range(row.inspected_at) else []
-                else:
-                    events = [dict(record_id=row.record_id, revision=row.revision,
-                        canonical_asset_id=row.canonical_asset_id, method=row.method,
-                        method_version=row.method_version, inspector_ref=row.inspector_ref,
-                        status=row.status, review=row.review, measurement_index=index,
-                        measurement=m, field_approval=row.field_approval,
-                        operating_context=row.operating_context, method_extension=row.method_extension,
-                        provenance=row.provenance)
-                        for index, m in enumerate(row.measurements)
-                        if (point is None or m.point_ref == point)
-                        and (quantity is None or m.quantity == quantity) and in_range(m.measured_at)]
-                for event in events:
-                    if offset <= total < offset + limit:
-                        items.append(event)
-                    total += 1
-            return dict(items=items, total=total, offset=offset, limit=limit,
+            total, items, item_bytes = 0, [], 2  # JSON array brackets.
+            with c.scalars(select(doc).where(*where).order_by(RecordRow.record_id).execution_options(yield_per=100)) as records:
+                for raw in records:
+                    row = self.visible(actor, raw)
+                    text = " ".join((row.record_id, row.canonical_asset_id, row.inspector_ref, *row.observations, *row.interpretations))
+                    if search.casefold() not in text.casefold():
+                        continue
+                    if not measurements:
+                        events = [row] if in_range(row.inspected_at) else []
+                    else:
+                        events = [dict(record_id=row.record_id, revision=row.revision,
+                            canonical_asset_id=row.canonical_asset_id, method=row.method,
+                            method_version=row.method_version, inspector_ref=row.inspector_ref,
+                            status=row.status, review=row.review, measurement_index=index,
+                            measurement=m, field_approval=row.field_approval,
+                            operating_context=row.operating_context, method_extension=row.method_extension,
+                            provenance=row.provenance)
+                            for index, m in enumerate(row.measurements)
+                            if (point is None or m.point_ref == point)
+                            and (quantity is None or m.quantity == quantity) and in_range(m.measured_at)]
+                    for event in events:
+                        if offset <= total < offset + limit:
+                            if not measurements:
+                                # Bound retained page models incrementally, then check
+                                # the complete actual wire envelope below. Never return
+                                # a partial page or alter offset/limit/count semantics.
+                                from src.services.pdm_read_budget import wire_size, require_page_budget
+                                item_bytes += wire_size(event) + (1 if items else 0)
+                                require_page_budget(item_bytes)
+                            items.append(event)
+                        total += 1
+            page = dict(items=items, total=total, offset=offset, limit=limit,
                         has_more=offset + limit < total,
                         filter_scope="AUTHORIZED_POPULATION",
                         event_time_basis="MEASURED_AT" if measurements else "INSPECTED_AT")
+            if not measurements:
+                from src.services.pdm_read_budget import bounded_inspection_page
+                return bounded_inspection_page(page)
+            return page
         return self.repo.transact(read)
 
     def list(self, actor, **filters):

@@ -26,6 +26,7 @@ from src.repositories.mart_models import (
 )
 from src.repositories.mart_reader import MartQueryRepository
 from src.services.reliability import ReliabilityQueryService
+from src.services.registered_maintenance_overview import registered_maintenance_overview
 
 
 NOW = datetime(2026, 1, 15, 12, 0, tzinfo=timezone.utc)
@@ -165,6 +166,72 @@ class ReliabilityMartReadTest(unittest.TestCase):
                 session.execute(insert(AssetMasterMart).values(canonical_id="blocked"))
             with self.assertRaises(AttributeError):
                 session.commit  # type: ignore[attr-defined]
+
+
+class RegisteredMaintenanceOverviewTest(unittest.TestCase):
+    def setUp(self):
+        self.database = MartDatabase(MartDbConfig(dsn="sqlite+pysqlite:///:memory:"))
+        MartBase.metadata.create_all(self.database.engine)
+        self.repository = MartQueryRepository(self.database)
+        with Session(self.database.engine) as session:
+            for i in range(30):
+                number = f"SYNTHETIC-{i:02d}"
+                asset = f"asset:MAXIMO:MXASSET:BSR:IP:{number}"
+                session.add(AssetMasterMart(**_common(asset, "MXASSET"), source_asset_number=number, description=number))
+                session.add(ReliabilityAssetRegistryMart(asset_ref=asset, source_asset_number=number, site_code="BSR", organization_code="IP", registry_source="SYNTHETIC", snapshot_sha256="a"*64, snapshot_row_count=30, snapshot_imported_at=NOW))
+                if i < 29:session.add(MaintenanceEventMart(**_common(f"maintenance:{i}", "MXWODETAIL"), id=str(i), equipment_id=asset, actual_start=NOW))
+            for i in range(3):
+                session.add(MaintenanceEventMart(**_common(f"maintenance:repeat-{i}", "MXWODETAIL"), id=f"repeat-{i}", equipment_id="asset:MAXIMO:MXASSET:BSR:IP:SYNTHETIC-00", actual_start=None, source_changed_at=NOW+timedelta(days=1)))
+            foreign = "asset:MAXIMO:MXASSET:OTHER:IP:FOREIGN"
+            session.add(ReliabilityAssetRegistryMart(asset_ref=foreign, source_asset_number="FOREIGN", site_code="OTHER", organization_code="IP", registry_source="SYNTHETIC", snapshot_sha256="a"*64, snapshot_row_count=1, snapshot_imported_at=NOW))
+            for i, asset in enumerate([foreign, TECHNICAL_ASSET, "asset:MAXIMO:MXASSET:BSR:IP:SYNTHETIC-00"]):
+                fields = _common(f"maintenance:excluded-{i}", "MXWODETAIL")
+                if i == 2:fields["organization_code"] = "OTHER"
+                session.add(MaintenanceEventMart(**fields, id=f"excluded-{i}", equipment_id=asset, actual_start=NOW))
+            session.commit()
+
+    def tearDown(self):self.database.engine.dispose()
+
+    def test_full_registry_counts_and_top_ten_exclude_unregistered_foreign_and_wrong_wo_scope(self):
+        result = registered_maintenance_overview(self.database)
+        self.assertEqual(result["summary"], {"registered_assets":30,"maintenance_events":32,"assets_with_maintenance":29})
+        self.assertEqual(result["scope"]["kind"], "REGISTERED_BSR_IP")
+        self.assertEqual(len(result["assets"]), 10)
+        self.assertEqual(result["assets"][0]["maintenance_events"], 4)
+        self.assertEqual(result["assets"][0]["latest_retained_activity"].replace(tzinfo=timezone.utc), NOW+timedelta(days=1))
+        self.assertNotIn("SYNTHETIC-29", [r["source_asset_number"] for r in result["assets"]])
+        self.assertTrue(all("SYNTHETIC-" in row["canonical_id"] for row in result["assets"]))
+        self.assertEqual(self.repository.list_assets(offset=20, limit=10).total, 30)
+        self.assertEqual(len(self.repository.list_assets(offset=20, limit=10).items), 10)
+        self.assertIsNone(self.repository.get_asset(TECHNICAL_ASSET))
+        body = reliability_api.registered_maintenance_overview(service=ReliabilityQueryService(self.repository))
+        self.assertEqual(body.summary.maintenance_events, 32)
+        self.assertEqual(body.operational_kpis, "NOT_ELIGIBLE")
+
+    def test_queries_are_aggregate_only_and_never_touch_unrelated_domains(self):
+        from sqlalchemy import event
+        statements = []
+        def record(conn, cursor, statement, parameters, context, executemany):statements.append(statement.lower())
+        event.listen(self.database.engine, "before_cursor_execute", record)
+        try:
+            with patch.object(self.repository, "integrity_summary", side_effect=AssertionError("unrelated query")), patch.object(self.repository, "decision_overview", side_effect=AssertionError("ADMIN query")):
+                registered_maintenance_overview(self.database)
+        finally:event.remove(self.database.engine, "before_cursor_execute", record)
+        self.assertEqual(len(statements), 3)
+        for sql in statements:
+            self.assertTrue(sql.lstrip().startswith("select"))
+            for table in ["fmea_assessment","asset_health_assessment","rcfa_analysis","overhaul_event","asset_af_mapping"]:self.assertNotIn(table, sql)
+            self.assertIn("reliability_asset_registry", sql)
+        self.assertIn("limit", statements[-1])
+
+    def test_empty_registry_returns_zero_without_placeholder_rows(self):
+        empty = MartDatabase(MartDbConfig(dsn="sqlite+pysqlite:///:memory:"))
+        try:
+            MartBase.metadata.create_all(empty.engine)
+            result = registered_maintenance_overview(empty)
+            self.assertEqual(result["summary"], {"registered_assets":0,"maintenance_events":0,"assets_with_maintenance":0})
+            self.assertEqual(result["assets"], [])
+        finally:empty.engine.dispose()
 
 
 class ReliabilityMartApiTest(unittest.TestCase):

@@ -150,12 +150,15 @@ def _work_order_payload(row: models.WorkOrderOrm) -> dict[str, Any] | None:
         "orgid": ORGANIZATION_CODE,
         "status": row.status,
         "worktype": row.work_type,
-        "reportdate": _timestamp_value(row.reported_at),
-        "schedstart": _timestamp_value(row.scheduled_start),
-        "schedfinish": _timestamp_value(row.scheduled_finish),
+        # New retained source clocks keep uncertainty in disposable/naive stores.
+        # Existing source_changed_at normalization is outside this correction.
+        "reportdate": row.reported_at.isoformat() if row.reported_at else None,
+        "schedstart": row.scheduled_start.isoformat() if row.scheduled_start else None,
+        "schedfinish": row.scheduled_finish.isoformat() if row.scheduled_finish else None,
         "changedate": _timestamp_value(row.source_changed_at),
         "downtime": row.downtime_hours,
         "actlabhrs": row.actual_labor_hours,
+        "failurecode": row.failure_code,
         # The local operational schema does not retain actstart/actfinish.
         "actstart": None,
         "actfinish": None,

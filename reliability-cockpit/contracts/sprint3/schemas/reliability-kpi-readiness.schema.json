@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nadi.invalid/contracts/reliability-kpi-readiness-1",
+  "title": "Sprint4 prerequisite inventory; no KPI result or approval",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "equipment_identity",
+    "observation_period",
+    "failure_event_identity",
+    "failure_source_traceability",
+    "preventive_corrective_definition",
+    "failure_vs_maintenance_definition",
+    "operating_exposure_hours",
+    "exposure_source_quality",
+    "failure_start",
+    "repair_start",
+    "repair_end",
+    "active_repair_vs_total_outage",
+    "incomplete_timestamps_policy",
+    "overlap_policy",
+    "reopened_work_order_policy",
+    "duplicate_event_policy",
+    "repeated_status_update_policy"
+  ],
+  "properties": {
+    "equipment_identity": {
+      "$ref": "#/$defs/input"
+    },
+    "observation_period": {
+      "$ref": "#/$defs/input"
+    },
+    "failure_event_identity": {
+      "$ref": "#/$defs/input"
+    },
+    "failure_source_traceability": {
+      "$ref": "#/$defs/input"
+    },
+    "preventive_corrective_definition": {
+      "$ref": "#/$defs/input"
+    },
+    "failure_vs_maintenance_definition": {
+      "$ref": "#/$defs/input"
+    },
+    "operating_exposure_hours": {
+      "$ref": "#/$defs/input"
+    },
+    "exposure_source_quality": {
+      "$ref": "#/$defs/input"
+    },
+    "failure_start": {
+      "$ref": "#/$defs/input"
+    },
+    "repair_start": {
+      "$ref": "#/$defs/input"
+    },
+    "repair_end": {
+      "$ref": "#/$defs/input"
+    },
+    "active_repair_vs_total_outage": {
+      "$ref": "#/$defs/input"
+    },
+    "incomplete_timestamps_policy": {
+      "$ref": "#/$defs/input"
+    },
+    "overlap_policy": {
+      "$ref": "#/$defs/input"
+    },
+    "reopened_work_order_policy": {
+      "$ref": "#/$defs/input"
+    },
+    "duplicate_event_policy": {
+      "$ref": "#/$defs/input"
+    },
+    "repeated_status_update_policy": {
+      "$ref": "#/$defs/input"
+    }
+  },
+  "$defs": {
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "evidence_ref",
+        "owner",
+        "definition_version"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "AVAILABLE_VERIFIED",
+            "AVAILABLE_UNAPPROVED",
+            "MISSING",
+            "BLOCKED"
+          ]
+        },
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "owner": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "definition_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 512
+        }
+      }
+    }
+  }
+}
