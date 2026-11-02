@@ -81,5 +81,8 @@
   "independent_isolated_rehearsal": "PASS",
   "raw_source_packet_persisted": false,
   "followup_verified_date": "2026-11-03",
-  "followup_date_timezone": "Asia/Jakarta"
+  "followup_date_timezone": "Asia/Jakarta",
+  "followup_remaining_gap_set_check": "all remaining gaps are in the queried/exhausted initial subset; no pending root or capped group",
+  "unit_filter_limit": "eq11=CS01 applies to returned child row; different/missing child unit can be excluded; actual cause UNKNOWN",
+  "source_discrepancy_status": "OWNER_VERIFICATION_REQUIRED_WITHOUT_SCOPE_EXPANSION"
 }
