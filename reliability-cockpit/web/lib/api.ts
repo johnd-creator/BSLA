@@ -1,5 +1,5 @@
-import type {HierarchyView} from './asset-hierarchy';
 "use client";
+import type {HierarchyView} from './asset-hierarchy';
 
 /** Typed clients for the legacy Cockpit store and canonical Reliability Mart. */
 
