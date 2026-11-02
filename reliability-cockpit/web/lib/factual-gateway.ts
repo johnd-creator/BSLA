@@ -3,7 +3,7 @@ import {readBounded} from './bounded-http';
 import {localGuardEnabled,verifyLocalSession,PRIVATE_HEADERS,type LocalSession} from './local-session';
 const assetSuffixes=new Set(['','context','condition-evidence','integration-status','timeline','fmea','health-assessments','health/latest']);
 const collections=new Set(['maintenance-events','fmea','asset-health','overhauls']);
-const queryKeys=new Set(['offset','limit','sort','asset_ref','asset_number','status','unit','asset_type','site_code','organization_code','lifecycle_status','source_number','source_failure_code','updated_from','updated_to','created_from','created_to','category','description','workorder_ref','source_work_order_number','planned_from','planned_to','actual_from','actual_to','window_days','min_events','work_order_id','event_type','date_from','date_to']);
+const queryKeys=new Set(['offset','limit','sort','asset_ref','asset_number','status','unit','asset_type','site_code','organization_code','lifecycle_status','source_number','source_failure_code','updated_from','updated_to','created_from','created_to','category','description','workorder_ref','source_work_order_number','planned_from','planned_to','actual_from','actual_to','window_days','min_events','work_order_id','event_type','date_from','date_to','node_ref']);
 export function factualAccess(path:string[],params:URLSearchParams,session:LocalSession):string|null {
  if(path.some(s=>!s||s==='.'||s==='..'||/[\\/\u0000-\u0020\u007f%]/.test(s)))return 'PATH_DENIED';
  for(const [key,value] of params){
@@ -14,6 +14,15 @@ export function factualAccess(path:string[],params:URLSearchParams,session:Local
  if((params.has('site_code')&&params.get('site_code')!=='BSR')||(params.has('organization_code')&&params.get('organization_code')!=='IP'))return 'PORTFOLIO_SCOPE_DENIED';
  if(path.join('/')==='health'&&params.size===0)return null;
  if(path[0]!=='v1'||path[1]!=='reliability')return 'FACTUAL_SCOPE_GRANT_REQUIRED';
+ if(path.length===5&&path[2]==='assets'&&path[4]==='hierarchy'){
+  if(!hasPortfolioRead(session))return 'PORTFOLIO_SCOPE_DENIED';
+  const canonical=/^asset:MAXIMO:MXASSET:BSR:IP:[A-Za-z0-9_.-]{1,120}$/;
+  if(!canonical.test(path[3]))return 'ASSET_SCOPE_DENIED';
+  for(const key of params.keys())if(!['node_ref','offset','limit'].includes(key))return 'QUERY_DENIED';
+  if(params.has('node_ref')&&!canonical.test(params.get('node_ref')!))return 'QUERY_DENIED';
+  if(params.has('limit')&&+params.get('limit')!>50||params.has('offset')&&+params.get('offset')!>10000)return 'QUERY_DENIED';
+  return null;
+ }
  if(path[2]==='assets'&&path.length>=4&&assetSuffixes.has(path.slice(4).join('/'))){
   if(params.has('asset_ref')&&params.get('asset_ref')!==path[3])return 'ASSET_SCOPE_DENIED';
   // Context/integration DTOs also contain portfolio totals: exact asset grant alone is insufficient.

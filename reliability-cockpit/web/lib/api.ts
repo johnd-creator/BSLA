@@ -1,3 +1,4 @@
+import type {HierarchyView} from './asset-hierarchy';
 "use client";
 
 /** Typed clients for the legacy Cockpit store and canonical Reliability Mart. */
@@ -287,6 +288,7 @@ export const cockpitApi = {
 };
 
 export const reliabilityApi = {
+  hierarchy: (rootRef:string,nodeRef:string,offset=0,limit=25) => get<HierarchyView>(`/v1/reliability/assets/${encodeURIComponent(rootRef)}/hierarchy${query({node_ref:nodeRef,offset,limit})}`),
   decisionOverview: (windowDays: 7 | 30 | 90 = 30) => get<DecisionOverviewView>(`/v1/reliability/decision-overview?window_days=${windowDays}`),
   assetHealthOverview: () => get<AssetHealthOverviewView>("/v1/reliability/asset-health/overview"),
   fmeaOverview: () => get<FmeaOverviewView>("/v1/reliability/fmea/overview"),

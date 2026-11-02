@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.exc import SQLAlchemyError
 
 from src.services.condition_query import AssetConditionEvidence, ConditionQueryService
+from src.services.asset_hierarchy import HierarchyView, read_hierarchy
 from src.domain.asset_af_mapping import AssetAfMapping
 from src.repositories.mart_database import MartDatabase, MartDatabaseConfigError, get_mart_database
 from src.repositories.mart_reader import MartQueryRepository, QueryPage
@@ -991,6 +992,23 @@ def get_asset(canonical_id: str, service: ReliabilityQueryService = Depends(_ser
     if row is None:
         raise HTTPException(status_code=404, detail="asset not found")
     return _asset(row)
+
+
+@router.get("/assets/{canonical_id}/hierarchy", response_model=HierarchyView, summary="Partial retained Maximo hierarchy context")
+def asset_hierarchy(
+    canonical_id: str,
+    node_ref: str | None = Query(None, max_length=200),
+    offset: int = Query(0, ge=0, le=10000),
+    limit: int = Query(25, ge=1, le=50),
+    db: MartDatabase = Depends(_db),
+) -> HierarchyView:
+    try:
+        result = read_hierarchy(db, canonical_id, node_ref=node_ref, offset=offset, limit=limit)
+    except (SQLAlchemyError, ValueError) as error:
+        raise HTTPException(status_code=503, detail="Retained hierarchy is unavailable") from error
+    if result is None:
+        raise HTTPException(status_code=404, detail="Registered hierarchy context not found")
+    return result
 
 
 @router.get("/assets/{canonical_id}/condition-evidence", response_model=AssetConditionEvidence)

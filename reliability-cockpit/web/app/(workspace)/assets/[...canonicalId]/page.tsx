@@ -5,6 +5,7 @@ import Link from "next/link";
 import IntegrationStatusPanel from "@/components/IntegrationStatusPanel";
 import ConditionEvidencePanel from "@/components/ConditionEvidencePanel";
 import AssetHealthSummary from "@/components/AssetHealthSummary";
+import AssetHierarchy from "@/components/AssetHierarchy";
 import { use, useEffect, useState } from "react";
 import {
   ApiError,
@@ -248,6 +249,7 @@ export default function AssetDetailPage({ params }: { params: Promise<{ canonica
     <nav className="asset-tabs" aria-label={idText("Asset workspace tabs")}>{tabs.map((item) => <button key={item.id} type="button" aria-current={tab === item.id ? "page" : undefined} className={tab === item.id ? "asset-tab active" : "asset-tab"} onClick={() => selectTab(item.id)}>{item.label}</button>)}</nav>
 
     {tab === "overview" && <><AssetHealthSummary asset={asset} context={context} maintenanceCount={counts?.maintenance ?? null} assessmentCount={counts?.health ?? null} onMaintenance={() => selectTab("maintenance")} /><ConditionEvidencePanel canonicalId={canonicalId}/></>}
+    {tab === "overview" && <AssetHierarchy key={canonicalId} canonicalId={canonicalId}/>}
     {tab === "overview" && contextUnavailable && <ErrorState message={idText("Additional asset context unavailable")} onRetry={() => setRefresh(value => value + 1)} />}
     {tab === "overview" && context && counts && <details className="section-card advanced-evidence"><summary>{idText("Additional factual evidence — FMEA, assessments, overhaul and integration")}</summary>
       <section className="stat-grid asset-stat-grid"><StatCard label={idText("Maintenance Events")} value={formatNumber(counts.maintenance)} detail={idText("Asset-scoped Mart total")} tone="accent" /><StatCard label={idText("FMEA Assessments")} value={formatNumber(counts.fmea)} detail={idText("Asset-scoped Mart total")} /><StatCard label={idText("Asset Health")} value={formatNumber(counts.health)} detail={idText("Asset-scoped Mart total")} /><StatCard label="Overhauls" value={formatNumber(counts.overhaul)} detail={idText("Resolved Asset relationship")} tone="muted" /></section>
