@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "purpose": "stacked-local-development-only",
+  "repository": "johnd-creator/reliability-knowledge-starter",
+  "target_pr": 120,
+  "target_sha": "49ff4d1088a96673f85070bcaa1f293b5810f8f4",
+  "base_pr": 119,
+  "base_sha": "119ba2f1472facedd71433d65b74f3b7d64a6434"
+}
