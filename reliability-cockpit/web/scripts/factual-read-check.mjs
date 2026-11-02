@@ -94,11 +94,11 @@ try{
   }
  });
  await check('multi-asset ordering compares zoned instants and keeps unknown clocks last',async()=>{
-  const ids=['A','B','C','D'].map(n=>asset.replace('SYNTHETIC-A','SYNTHETIC-'+n));
-  const clocks=['2026-11-02T10:00:00+07:00','2026-11-02T04:00:00Z',null,'2026-11-02T12:00:00'];
+  const ids=['A','B','C','D','E'].map(n=>asset.replace('SYNTHETIC-A','SYNTHETIC-'+n));
+  const clocks=['2026-11-02T10:00:00+07:00','2026-11-02T04:00:00Z',null,'2026-11-02T12:00:00','2026-11-02T08:00:00-00:00'];
   const multi={...snapshot,permissions:Object.fromEntries(ids.map(id=>[id,caps]))};
   const fetcher=async url=>{const response=await fakeFetch(url),p=await response.json(),id=decodeURIComponent(new URL(url).pathname.split('/').at(-1));p.source_asset_number=id.split(':').at(-1);p.source_updated_at=clocks[ids.indexOf(id)];return Response.json(p);};
-  for(const [sort,expected] of [['updated_desc',[ids[1],ids[0],ids[3],ids[2]]],['updated_asc',[ids[0],ids[1],ids[3],ids[2]]]]){
+  for(const [sort,expected] of [['updated_desc',[ids[1],ids[0],ids[3],ids[4],ids[2]]],['updated_asc',[ids[0],ids[1],ids[4],ids[3],ids[2]]]]){
    const page=await scopedRegister(new URLSearchParams({sort}),multi,fetcher,new AbortController().signal);assert.deepEqual(page.items.map(a=>a.canonical_id),expected);
   }
  });

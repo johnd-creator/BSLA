@@ -59,7 +59,7 @@ export async function scopedRegister(params:URLSearchParams,snapshot:FactualRead
   if(left==null||right==null)return left===right?a.canonical_id.localeCompare(b.canonical_id):left==null?1:-1;
   // Offset-aware source clocks compare as instants. Naive clocks retain unknown zone;
   // keep them after verified instants and use literal ordering only within that group.
-  const zoned=(value:string)=>preciseInstant(value)?Date.parse(value):null;
+  const zoned=(value:string)=>!value.endsWith('-00:00')&&preciseInstant(value)?Date.parse(value):null;
   const l=sort==='status'?null:zoned(left),r=sort==='status'?null:zoned(right);
   if(sort!=='status'&&(l===null)!==(r===null))return l===null?1:-1;
   const result=l!==null&&r!==null?l-r:left===right?0:left<right?-1:1;
