@@ -202,3 +202,11 @@ scope. Grant issuance, CI-policy/controller approval, fresh session, recovery,
 service-level image plan and actual UAT remain separately evidenced gates.
 Other sites/orgs, unregistered technical assets, general portfolio/domain routes
 and all writes remain restricted. Existing ADMIN dashboard source is unchanged.
+
+### Recovery compatibility refinement
+
+The new SQL read model lives in `src/services/registered_maintenance_overview.py`.
+The entire repository/persistence tree remains byte-identical to PR119, retaining
+the official controller fixture/recovery boundary without an additional exception.
+SQL predicates, counts/ranking, DTO and authorization behavior are unchanged.
+The final immutable head/image and exact-head qualification advance accordingly.

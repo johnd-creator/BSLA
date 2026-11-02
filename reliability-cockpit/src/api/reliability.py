@@ -16,6 +16,7 @@ from src.repositories.mart_database import MartDatabase, MartDatabaseConfigError
 from src.repositories.mart_reader import MartQueryRepository, QueryPage
 from src.services.asset_af_mapping import AssetAfMappingResolution
 from src.services.reliability import ReliabilityQueryService, TimelineEvent
+from src.services.registered_maintenance_overview import registered_maintenance_overview as registered_maintenance_read
 
 router = APIRouter(prefix="/v1/reliability", tags=["reliability-mart"])
 Sort = Literal["updated_desc", "updated_asc", "status", "date_desc", "date_asc", "created_desc", "created_asc"]
@@ -1040,7 +1041,7 @@ def registry(service: ReliabilityQueryService = Depends(_service)) -> RegistryVi
 
 @router.get("/registered-maintenance-overview", response_model=RegisteredMaintenanceOverview, summary="Registry BSR/IP Asset and retained WO summary only")
 def registered_maintenance_overview(service: ReliabilityQueryService = Depends(_service)) -> RegisteredMaintenanceOverview:
-    return RegisteredMaintenanceOverview(**service.repository.registered_maintenance_overview())
+    return RegisteredMaintenanceOverview(**registered_maintenance_read(service.repository.database))
 
 
 @router.get("/decision-overview", response_model=DecisionOverviewView, summary="Bounded factual Reliability decision overview")

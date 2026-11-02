@@ -26,6 +26,7 @@ from src.repositories.mart_models import (
 )
 from src.repositories.mart_reader import MartQueryRepository
 from src.services.reliability import ReliabilityQueryService
+from src.services.registered_maintenance_overview import registered_maintenance_overview
 
 
 NOW = datetime(2026, 1, 15, 12, 0, tzinfo=timezone.utc)
@@ -192,7 +193,7 @@ class RegisteredMaintenanceOverviewTest(unittest.TestCase):
     def tearDown(self):self.database.engine.dispose()
 
     def test_full_registry_counts_and_top_ten_exclude_unregistered_foreign_and_wrong_wo_scope(self):
-        result = self.repository.registered_maintenance_overview()
+        result = registered_maintenance_overview(self.database)
         self.assertEqual(result["summary"], {"registered_assets":30,"maintenance_events":32,"assets_with_maintenance":29})
         self.assertEqual(result["scope"]["kind"], "REGISTERED_BSR_IP")
         self.assertEqual(len(result["assets"]), 10)
@@ -214,7 +215,7 @@ class RegisteredMaintenanceOverviewTest(unittest.TestCase):
         event.listen(self.database.engine, "before_cursor_execute", record)
         try:
             with patch.object(self.repository, "integrity_summary", side_effect=AssertionError("unrelated query")), patch.object(self.repository, "decision_overview", side_effect=AssertionError("ADMIN query")):
-                self.repository.registered_maintenance_overview()
+                registered_maintenance_overview(self.database)
         finally:event.remove(self.database.engine, "before_cursor_execute", record)
         self.assertEqual(len(statements), 3)
         for sql in statements:
@@ -227,7 +228,7 @@ class RegisteredMaintenanceOverviewTest(unittest.TestCase):
         empty = MartDatabase(MartDbConfig(dsn="sqlite+pysqlite:///:memory:"))
         try:
             MartBase.metadata.create_all(empty.engine)
-            result = MartQueryRepository(empty).registered_maintenance_overview()
+            result = registered_maintenance_overview(empty)
             self.assertEqual(result["summary"], {"registered_assets":0,"maintenance_events":0,"assets_with_maintenance":0})
             self.assertEqual(result["assets"], [])
         finally:empty.engine.dispose()

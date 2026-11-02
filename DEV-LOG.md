@@ -1281,3 +1281,9 @@ uneven counts, zero-WO assets and no unrelated domain SQL. Exact-head CI/review 
 a new Factual image are required; prior49ff image reuse is no longer compatible.
 Grant issuance, local-policy/controller approval, fresh Engineer session/recovery,
 service transition and real browser UAT remain separately gated. PR119 retained.
+
+Recovery compatibility refinement: placed the registered Asset/WO query in its own
+read-only service module and restored the repository tree to PR119 bytes. The
+existing controller fixture/recovery contract and all prior methods stay intact;
+no new compatibility exception or persistence change. CI/review/image seals follow
+the new immutable head before any activation.
