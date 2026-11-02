@@ -127,6 +127,7 @@ jobs:
         working-directory: reliability-cockpit/web
         run: |
           node scripts/wo-detail-check.mjs
+          npx eslint lib/wo-date.ts
           cd ..
           PYTHONPATH=.:tests python scripts/wo_detail_react_acceptance.py
       - name: Build actual PdM package test components
@@ -171,7 +172,7 @@ jobs:
       - run: npm run check:ux && npm run check:eng-product && npm run check:engineering-fixes && npm run check:pdm-input && npm run check:integration && npm run check:reports && npm run lint
       - run: npm run check:sprint5
       - run: npm run check:reliability-performance
-      - run: node scripts/wo-detail-check.mjs
+      - run: node scripts/wo-detail-check.mjs && npx eslint lib/wo-date.ts
       - run: npm run check:asset-evidence
       - run: npx tsc --noEmit
       - run: npm run build
