@@ -18,6 +18,11 @@ BOOLS={'is_task','has_children'}
 
 
 def field(key, value, present, origin):
+ original=value
+ if key in BOOLS and isinstance(value,str) and value.strip().lower() in ('0','1','false','true'):
+  value=value.strip().lower() in ('1','true')
+ if key in BOOLS or key=='estimated_duration_hours':
+  if value=='': value=None
  state='SOURCE_NOT_YET_VERIFIED' if not present else 'SOURCE_CONFIRMED_EMPTY' if value is None or value=='' else 'SOURCE_VALUE'
  if origin=='LEGACY_COLUMN': state='RETAINED_LEGACY_VALUE' if value is not None else 'SOURCE_NOT_YET_VERIFIED'
  valid = value is None or (isinstance(value,str) and len(value)<=FIELDS[key][1])
@@ -26,7 +31,8 @@ def field(key, value, present, origin):
  if key=='estimated_duration_hours': valid=value is None or isinstance(value,(float,int)) and not isinstance(value,bool) and math.isfinite(value) and value>=0
  if not valid: value=None;state='SOURCE_VALUE_INVALID'
  result={'value':value,'state':state,'origin':origin,'epoch_seconds':None}
- if key in CLOCKS and value is not None:
+ if key in BOOLS: result['original_value']=original if isinstance(original,(str,bool)) and (not isinstance(original,str) or len(original)<=16) else None
+ if key in CLOCKS and value not in (None,''):
   parsed=clock(value)
   if parsed['state']=='VALID': result['epoch_seconds']=version(value).timestamp()
   else: result['state']='SOURCE_TIMESTAMP_INVALID'
@@ -55,6 +61,7 @@ def projected(member):
    # Do not promote redacted invalid input to a confirmed null.
    if previous.get('state') in ('SOURCE_VALUE_INVALID','SOURCE_TIMESTAMP_INVALID'):
     checked['state']=previous['state']
+   if 'original_value' in previous: checked['original_value']=previous['original_value']
    checked['source_changed_at']=previous.get('source_changed_at')
    result['fields'][key]=checked
  result['collected_at']=proof.get('collected_at')
@@ -82,6 +89,9 @@ def merge_details(previous,incoming,existing,new_row):
     result['fields'][key]=field(key,value,True,'LEGACY_COLUMN')
     result['fields'][key]['source_changed_at']=old_version.isoformat() if old_version else None
    if attr and getattr(existing,attr) is not None:new_row[attr]=getattr(existing,attr)
-  elif old.get('value') is not None and new_version==old_version and item.get('value')!=old['value']:
-   raise ValueError('conflicting WO detail at equal source version')
+  elif old.get('value') is not None and item.get('value')!=old['value']:
+   previous_version=version(old.get('source_changed_at'))
+   incoming_version=version(item.get('source_changed_at'))
+   if previous_version is None or incoming_version is None or incoming_version<=previous_version:
+    raise ValueError('conflicting WO detail without newer field evidence')
  return result

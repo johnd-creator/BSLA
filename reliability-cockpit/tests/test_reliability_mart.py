@@ -211,7 +211,9 @@ class RegisteredMaintenanceOverviewTest(unittest.TestCase):
     def test_queries_are_aggregate_only_and_never_touch_unrelated_domains(self):
         from sqlalchemy import event
         statements = []
-        def record(conn, cursor, statement, parameters, context, executemany):statements.append(statement.lower())
+        def record(conn, cursor, statement, parameters, context, executemany):
+            self.assertTrue(context.compiled.statement.is_select, 'only SQLAlchemy SELECT aggregates are permitted')
+            statements.append(statement.lower())
         event.listen(self.database.engine, "before_cursor_execute", record)
         try:
             with patch.object(self.repository, "integrity_summary", side_effect=AssertionError("unrelated query")), patch.object(self.repository, "decision_overview", side_effect=AssertionError("ADMIN query")):
@@ -219,7 +221,7 @@ class RegisteredMaintenanceOverviewTest(unittest.TestCase):
         finally:event.remove(self.database.engine, "before_cursor_execute", record)
         self.assertEqual(len(statements), 5)
         for sql in statements:
-            self.assertTrue(sql.lstrip().startswith("select"))
+            self.assertTrue(sql.lstrip().startswith(("select", "with verified_wo_basis as materialized")))
             for table in ["fmea_assessment","asset_health_assessment","rcfa_analysis","overhaul_event","asset_af_mapping"]:self.assertNotIn(table, sql)
             self.assertIn("reliability_asset_registry", sql)
         self.assertTrue(any("limit" in statement for statement in statements))

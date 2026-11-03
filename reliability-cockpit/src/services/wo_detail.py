@@ -46,6 +46,8 @@ def detail_view(row):
    if key=='estimated_duration_hours': valid=value is None or isinstance(value,(float,int)) and not isinstance(value,bool) and math.isfinite(value) and value>=0
    if valid:
     observed=instant(item.get('source_changed_at'));current=row_version(row.source_changed_at)
+    if observed is None or current is None or observed>current: continue
+    if item['state']=='SOURCE_CONFIRMED_EMPTY' and observed!=current: continue
     fields[key]={'value':value,'state':item['state'],'origin':item['origin'],'source_changed_at':observed.isoformat() if observed and current and observed<=current else None}
  # Presence/state never derives from a WO status.
  clocks=source.get('actual_dates',{})

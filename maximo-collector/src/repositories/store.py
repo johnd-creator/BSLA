@@ -130,7 +130,7 @@ class CollectorStore:
             new_maximo["actual_dates"] = merge_evidence(previous, incoming)
         elif previous:
             new_maximo["actual_dates"] = previous
-        if new_maximo.get("wo_detail"):
+        if new_maximo.get("wo_detail") and new_maximo["wo_detail"] != old_maximo.get("wo_detail"):
             from src.adapters.maximo.wo_detail import merge_details
             new_maximo["wo_detail"] = merge_details(old_maximo.get("wo_detail"), new_maximo["wo_detail"], existing, row)
         row["sources"] = {**new_sources, "maximo": new_maximo}

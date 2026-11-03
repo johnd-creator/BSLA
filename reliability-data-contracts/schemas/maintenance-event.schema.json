@@ -50,6 +50,14 @@
             "null"
           ],
           "maxLength": 128
+        },
+        "original_value": {
+          "type": [
+            "string",
+            "boolean",
+            "null"
+          ],
+          "maxLength": 16
         }
       },
       "additionalProperties": false

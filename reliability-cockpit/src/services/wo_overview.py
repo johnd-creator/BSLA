@@ -12,16 +12,20 @@ def wo_overview(database, *, window_days=30, as_of=None):
  scope=select(M).join(R,R.asset_ref==M.equipment_id).where(M.site_code=='BSR',M.organization_code=='IP',R.site_code=='BSR',R.organization_code=='IP').subquery()
  key=func.coalesce(scope.c.work_order_id,scope.c.canonical_id)
  count=lambda condition:func.count(func.distinct(key)).filter(condition)
- source=scope.c.sources['maximo']; detail=source['wo_detail']
- epoch=detail['fields']['reported_at']['epoch_seconds']
- numeric=(func.jsonb_typeof(epoch)=='number') if database.engine.dialect.name=='postgresql' else func.json_type(scope.c.sources,'$.maximo.wo_detail.fields.reported_at.epoch_seconds').in_(['integer','real'])
- reported=case((numeric,epoch.as_float()),else_=None)
- proof=source['actual_dates']
- identity=and_(proof['schema_version'].as_integer()==1,proof['identity']['wonum'].as_string()==source['wonum'].as_string(),proof['identity']['assetnum'].as_string()==source['assetnum'].as_string(),proof['identity']['siteid'].as_string()=='BSR',proof['identity']['orgid'].as_string()=='IP')
- valid_start=and_(scope.c.actual_start.is_not(None),identity,proof['fields']['actstart']['state'].as_string()=='VALID')
- valid_finish=and_(scope.c.actual_finish.is_not(None),identity,proof['fields']['actfinish']['state'].as_string()=='VALID')
- valid_report=and_(reported.is_not(None),detail['schema_version'].as_integer()==1,detail['identity']['wonum'].as_string()==source['wonum'].as_string(),detail['identity']['assetnum'].as_string()==source['assetnum'].as_string(),detail['identity']['siteid'].as_string()=='BSR',detail['identity']['orgid'].as_string()=='IP',detail['fields']['reported_at']['state'].as_string().in_(['SOURCE_VALUE','RETAINED_LEGACY_VALUE']))
- bases={'reported':(reported,valid_report,True),'actual_started':(scope.c.actual_start,valid_start,False),'actual_finished':(scope.c.actual_finish,valid_finish,False),'record_modified':(scope.c.source_changed_at,scope.c.source_changed_at.is_not(None),False)}
+ from src.services.wo_evidence_sql import WoProofSql
+ proof=WoProofSql(database,scope)
+ reported,valid_report=proof.reported()
+ valid_start=proof.valid_actual('actstart',scope.c.actual_start)
+ valid_finish=proof.valid_actual('actfinish',scope.c.actual_finish)
+ # Evaluate each evidence proof once per registered row, rather than repeating
+ # timestamp parsing in every weekly/window FILTER. This remains SELECT-only.
+ evaluated=select(key.label('wo_key'),scope.c.status.label('status'),
+  case((valid_report,reported),else_=None).label('reported'),
+  case((valid_start,scope.c.actual_start),else_=None).label('actual_started'),
+  case((valid_finish,scope.c.actual_finish),else_=None).label('actual_finished'),
+  scope.c.source_changed_at.label('record_modified')).select_from(scope).cte('verified_wo_basis').prefix_with('MATERIALIZED')
+ scope=evaluated;key=scope.c.wo_key
+ bases={name:(scope.c[name],scope.c[name].is_not(None),name=='reported') for name in ('reported','actual_started','actual_finished','record_modified')}
  def between(basis,a,b):
   col,valid,epoch=bases[basis]
   return and_(valid,col>=a.timestamp() if epoch else col>=a,col<b.timestamp() if epoch else col<b)

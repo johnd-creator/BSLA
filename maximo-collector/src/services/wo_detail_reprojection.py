@@ -78,14 +78,14 @@ def project_details(db,plan,*,approved_plan_sha256,expected_database,checkpoint_
       incoming=source[key]['fields'].get(name,{})
       if previous.get('value') is not None and incoming.get('value')!=previous['value']: raise ValueError('conflicting retained field at equal source version')
     if key!='wo_detail' and current.get('value') is not None:
-     if source.get(key) is not None and current['value']!=source[key]: raise ValueError('existing retained detail clock conflict')
+     if source.get(key) is not None and current['value']!=source[key] and (version(current['value']) is None or version(current['value'])!=version(source[key])): raise ValueError('existing retained detail clock conflict')
      continue
     put(after,('sources','maximo',key),{'present':True,'value':source[key]})
    if m.failure_code is None: after['failure_code']=record.get('failure_code')
    changes=[{'path':list(path),'before':slot(before,path),'after':slot(after,path)} for path in PATHS if not same(slot(before,path),slot(after,path))]
    if changes:
     m.sources=after['sources'];m.failure_code=after['failure_code'];m.mart_updated_at=_next_update_time(m.mart_updated_at)
-   receipt['records'].append({'wonum':item['wonum'],'fields':changes,'containers':[{'path':list(path),'before':slot(before,path)} for path in (('sources',),('sources','maximo'))]})
+   receipt['records'].append({'wonum':item['wonum'],'fields':changes,'containers':[{'path':list(path),'before':slot(before,path)} for path in (('sources',),('sources','maximo')) if not slot(before,path)['present'] or slot(before,path).get('value') is None]})
   s.flush();checkpoint(db,checkpoint_callback,receipt);s.commit()
  receipt['state']='APPLIED';return signed(receipt)
 

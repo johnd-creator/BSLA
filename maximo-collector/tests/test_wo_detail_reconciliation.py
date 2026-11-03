@@ -74,3 +74,51 @@ class DetailTest(unittest.TestCase):
   def fail(r):raise OSError('synthetic disk failure')
   with self.assertRaises(OSError):project_details(self.db,p,approved_plan_sha256=seal(p),expected_database=self.target,checkpoint_callback=fail)
   with self.db.session() as s:self.assertNotIn('wo_detail',s.query(mart_models.MaintenanceEventMartOrm).one().sources['maximo'])
+
+ def test_equivalent_retained_clock_preserves_original_text(self):
+  raw='2026-09-01T00:00:00+07:00'
+  with self.db.session() as s:
+   s.query(models.WorkOrderOrm).one().reported_at=datetime.fromisoformat(raw).astimezone(timezone.utc)
+   m=s.query(mart_models.MaintenanceEventMartOrm).one();source=copy.deepcopy(m.sources);source['maximo']['reportdate']=raw;m.sources=source;s.commit()
+  if self.db.engine.dialect.name=='sqlite':
+   # SQLite strips ORM timestamp offsets. Supply the independently known UTC
+   # fixture serialization; the identical PG case exercises the actual mapper.
+   from unittest.mock import patch
+   with self.db.session() as s:payload=_work_order_payload(s.query(models.WorkOrderOrm).one())
+   payload['reportdate']='2026-08-31T17:00:00Z'
+   with patch('src.services.wo_detail_reprojection._work_order_payload',return_value=payload):self.project()
+  else:self.project()
+  with self.db.session() as s:self.assertEqual(s.query(mart_models.MaintenanceEventMartOrm).one().sources['maximo']['reportdate'],raw)
+ def test_detail_versions_are_field_scoped(self):
+  from src.repositories.store import CollectorStore
+  store=CollectorStore(self.db)
+  store.upsert_work_order(work_order_from_payload(dict(RAW,description='A')))
+  later=dict(RAW,changedate='2026-09-04T00:00:00Z')
+  store.upsert_work_order(work_order_from_payload(later))
+  store.upsert_work_order(work_order_from_payload(dict(later,description='B')))
+  with self.db.session() as s:self.assertEqual(s.query(models.WorkOrderOrm).one().description,'B')
+  with self.assertRaises(ValueError):store.upsert_work_order(work_order_from_payload(dict(later,description='C')))
+ def test_rollback_does_not_resurrect_worker_deleted_metadata(self):
+  receipt=self.project()
+  with self.db.session() as s:
+   m=s.query(mart_models.MaintenanceEventMartOrm).one();source=copy.deepcopy(m.sources)
+   for key in list(source['maximo']):
+    if key not in ('wo_detail','reportdate','schedstart','schedfinish'):source['maximo'].pop(key)
+   m.sources=source;s.commit()
+  rollback_details(self.db,receipt,expected_database=self.target,checkpoint_callback=self.checkpoint)
+  with self.db.session() as s:self.assertNotIn('wonum',s.query(mart_models.MaintenanceEventMartOrm).one().sources.get('maximo',{}))
+ def test_date_only_recovery_preserves_identical_detail_proof_and_string_boolean(self):
+  from src.repositories.store import CollectorStore
+  from src.services.wo_actual_date_recovery import rollback_cohort
+  store=CollectorStore(self.db);store.upsert_work_order(work_order_from_payload(dict(RAW,istask='0')))
+  with self.db.session() as s:
+   before=copy.deepcopy(s.query(models.WorkOrderOrm).one().sources['maximo']['wo_detail'])
+   self.assertFalse(before['fields']['is_task']['value']);self.assertEqual(before['fields']['is_task']['original_value'],'0')
+  plan={**plan_details(self.db,[RAW['wonum']]),'format':'wo-actual-dates/1'}
+  receipt=apply_cohort(self.db,plan,{RAW['wonum']:RAW},expected_database=self.target,approved_plan_sha256=seal(plan),checkpoint=self.checkpoint)
+  rollback_cohort(self.db,receipt,expected_database=self.target,checkpoint=self.checkpoint)
+  with self.db.session() as s:self.assertEqual(s.query(models.WorkOrderOrm).one().sources['maximo']['wo_detail'],before)
+ def test_blank_source_clock_is_empty_not_invalid(self):
+  proof=work_order_from_payload(dict(RAW,reportdate='',schedstart='')).sources['maximo']['wo_detail']
+  for key in ('reported_at','scheduled_start'):
+   self.assertEqual(proof['fields'][key]['state'],'SOURCE_CONFIRMED_EMPTY');self.assertEqual(proof['fields'][key]['value'],'')
