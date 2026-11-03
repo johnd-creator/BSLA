@@ -1265,3 +1265,18 @@ reader verified the stored facts. This is data availability, not live hierarchy 
 or Engineer UAT acceptance. All existing containers remain preserved; PR119 runtime,
 controller compatibility STOP, UNKNOWN roles, PARTIAL global coverage and Logbook
 PdM HOLD remain. Counts, raw identities and recovery evidence remain private.
+
+## WO actual-date recovery candidate — 3 November 2026
+
+Dedicated candidate from main `6bff0a5c5b67b2e5137b50c1d4d0063416f65686`. No merge, runtime replacement, schema migration or live Mart repair. Qualification and independent review are bound to the eventual immutable PR head. Private source/coverage/restore evidence remains outside Git. [Lineage, status addendum and recovery gates](../maximo-collector/docs/wo-actual-date-recovery.md).
+
+## WO rollback gate correction candidate — 3 November 2026
+
+Draft PR #128 receives the worker-safe field-scoped rollback correction under
+NADI-WO-ACTUAL-DATE-ROLLBACK-FIX-01. Fresh full PostgreSQL restore tests reproduce
+the prior CAS failure and verify metadata-preserving rollback/reapply and newer
+clock conflicts. Exact-head CI and independent review remain release gates;
+there is no merge or live recovery authorization. Canonical CI adds mandatory
+synthetic PostgreSQL lanes without changing main-only selection or the original
+offline/six-file guards. Private source identities, counts, service pins and
+operational decisions remain outside Git. [Recovery runbook](../maximo-collector/docs/wo-actual-date-recovery.md).

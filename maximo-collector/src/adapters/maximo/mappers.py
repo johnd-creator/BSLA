@@ -7,6 +7,8 @@ Ported from the reliability-cockpit adapter (which this collector replaces).
 
 from __future__ import annotations
 
+from src.adapters.maximo.actual_dates import evidence as actual_date_evidence
+
 from typing import Any, Mapping
 
 from src.adapters.maximo.oslc_client import (
@@ -168,6 +170,7 @@ def work_order_from_payload(member: Mapping[str, Any]) -> WorkOrder:
             "wonum": member.get("wonum"),
             "workorderid": member.get("workorderid"),
             "extra": _work_order_extra(member),
+            "actual_dates": actual_date_evidence(member),
         }},
     )
 

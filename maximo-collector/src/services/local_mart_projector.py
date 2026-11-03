@@ -7,6 +7,8 @@ never constructs a Maximo client and never changes a Maximo SyncCursor.
 
 from __future__ import annotations
 
+from src.adapters.maximo.actual_dates import retained_values
+
 import os
 import logging
 from dataclasses import dataclass
@@ -141,6 +143,8 @@ def _work_order_payload(row: models.WorkOrderOrm) -> dict[str, Any] | None:
     equipment_id = normalize_identifier(row.equipment_id)
     if not equipment_id:
         return None
+    actual = retained_values((row.sources or {}).get("maximo", {}).get("actual_dates"),
+                             row.id, equipment_id, row.source_changed_at)
     # Only approved scalar fields are reconstructed.  Person fields and raw
     # source JSON are intentionally excluded from the canonical payload.
     return {
@@ -159,9 +163,10 @@ def _work_order_payload(row: models.WorkOrderOrm) -> dict[str, Any] | None:
         "downtime": row.downtime_hours,
         "actlabhrs": row.actual_labor_hours,
         "failurecode": row.failure_code,
-        # The local operational schema does not retain actstart/actfinish.
-        "actstart": None,
-        "actfinish": None,
+        # Only exact, scoped, versioned retained clock evidence can replay.
+        "collector_actual_dates": (row.sources or {}).get("maximo", {}).get("actual_dates"),
+        "actstart": actual.get("actstart"),
+        "actfinish": actual.get("actfinish"),
     }
 
 
