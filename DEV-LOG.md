@@ -1386,3 +1386,22 @@ this correction requires fresh exact-head CI and independent closure.
 ## 2026-11-03 — NADI-WO-DATA-AND-EXECUTIVE-RECONCILIATION-01 candidate
 
 One integrated candidate builds on qualified Draft PR128 without changing that dependency head. Adds bounded non-personal detail retention/reprojection, optional scoped WO detail, four separate Executive date bases, unique-WO SQL counts and explicit missing coverage/backlog/group semantics. Source timestamps never come from status or changedate fallback. No live source request, service replacement, grant/schema/cursor change or operational backfill is authorized by code qualification. Exact-head CI, independent review and historical preservation guards remain mandatory; operational actions are consolidated privately. [Contract, lineage and gates](reliability-cockpit/docs/NADI-WO-DATA-AND-EXECUTIVE-RECONCILIATION-01.md).
+
+
+## 2026-11-03 — PR129 review closure and browser qualification correction
+
+The failed review draft was repaired and sealed without changing its immutable
+range. Independent review closed the WO field-version, known-null replay, safe
+SQL evidence-binding and field-scoped rollback defects. Exact finite source
+exceptions preserve historical classification/detail pins and all current-byte,
+ancestry, untracked-source and canonical CI checks. Disposable negative tests
+reject changed source, manifest, historical assertions/maps and unrelated files.
+
+At `0c16080eb284539a80b374e6a5fd927e02e3a58c`, Maximo CI and NADI backend passed;
+the mandatory browser suite found that expanded WO detail had lost its legacy
+disclosure label. Restore that label, the visible chronology heading and original
+Legacy date text in provenance. Browser assertions remain unchanged. The corrected
+head requires fresh full canonical CI and independent review; previous green lanes
+do not substitute for it. Live activation, source sampling, Mart repair and real
+Engineer UAT remain unperformed and separately gated. All 35 existing container
+identities/images/start/restart metadata were verified unchanged.

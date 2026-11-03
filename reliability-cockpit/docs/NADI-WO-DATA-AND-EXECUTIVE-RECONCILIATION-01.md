@@ -120,3 +120,24 @@ services run this candidate and real Engineer Beranda→Aset→Maintenance→WO 
 passes. Development completion may qualify NADI_WO_EVIDENCE_AND_EXECUTIVE_RECONCILED
 only after all exact-head code/review gates pass. Operational recovery counts stay0
 until separately approved writes genuinely occur.
+
+
+### Review and browser compatibility correction
+
+WO detail observations retain per-field versions, including verified empty values
+through omitted or invalid replay. Historical repair preserves known null proof
+instead of downgrading it to unverified absence. Executive date aggregates bind
+typed source evidence to original/normalized timestamps, retained columns and
+known nonfuture versions; malformed JSON never enters unchecked numeric/time
+casts. PostgreSQL 16 validates source calendars before timestamp conversion.
+
+The finite preservation manifest validates exact immutable blobs and current
+bytes; a stable historical wrapper base retains both historical assertion loops.
+It does not regenerate pins, adopt moving HEAD or authorize runtime actions.
+All old maps and broader source, route, untracked and ancestry checks remain.
+
+The mandatory browser journey also requires the original provenance disclosure
+label, visible chronology heading and raw Legacy report/schedule ISO text. Those
+remain compatible with the seven-section presentation and plain bounded text.
+Browser assertions and CI qualification selectors are preserved. A code review
+PASS and individual green jobs are not full final-head qualification.
