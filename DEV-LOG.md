@@ -1359,3 +1359,14 @@ reader verified the stored facts. This is data availability, not live hierarchy 
 or Engineer UAT acceptance. All existing containers remain preserved; PR119 runtime,
 controller compatibility STOP, UNKNOWN roles, PARTIAL global coverage and Logbook
 PdM HOLD remain. Counts, raw identities and recovery evidence remain private.
+
+### 3 November 2026 — NADI-ASSET-HIERARCHY-LOCAL-RELEASE-01 candidate
+
+[Integrated local-release candidate](reliability-cockpit/docs/NADI-ASSET-HIERARCHY-LOCAL-RELEASE-01.md) adds exact-root hierarchy READ,
+proven ancestor branch navigation, explicit UNKNOWN/UNVERIFIED/PARTIAL presentation
+and closed controller source/recovery admission. Engineering AUTHOR/write scope,
+legacy READ grants, source acquisition, stores and historical protections remain.
+One Draft PR; exact-head CI/independent review, precise grant/service-owner approval,
+fresh recovery/session gates, actual activation and live Engineer UAT remain distinct.
+No automatic merge, source request, retained-data write or phase advancement.
+Runtime remains PR119 until all gates pass. Global semantics UNKNOWN; Logbook HOLD.

@@ -11,7 +11,7 @@ from types import SimpleNamespace
 import unittest
 
 from src.services.factual_read_entitlements import (
-    ISSUER, ZERO, CAPABILITIES, canonical, decode, private_read, append_event, instant, PolicyCommitUncertain)
+    ISSUER, ZERO, CAPABILITIES, BASE_CAPABILITIES, canonical, decode, private_read, append_event, instant, PolicyCommitUncertain)
 from src.qa.factual_reads import administer, load_approval, bind_directory, main
 
 ASSET = "asset:MAXIMO:MXASSET:BSR:IP:SYNTHETIC-A"
@@ -68,7 +68,7 @@ class FactualReadEntitlementsTest(unittest.TestCase):
 
     def test_registered_scope_is_explicit_read_only_reversible_and_bounded(self):
         before = list(self.provider.db.iterdump())
-        approval = {**self.approval, "assets":[], "scope_kind":"REGISTERED_BSR_IP"}
+        approval = {**self.approval, "assets":[], "scope_kind":"REGISTERED_BSR_IP", "capabilities":sorted(BASE_CAPABILITIES)}
         calls = []
         def lookup(value):
             calls.append(value)
@@ -91,8 +91,19 @@ class FactualReadEntitlementsTest(unittest.TestCase):
         for metadata in [{"source":"OTHER", "registered_asset_count":137},
                          {"source":"MAXIMO_LIST_OF_ASSETS", "registered_asset_count":True},
                          {"source":"MAXIMO_LIST_OF_ASSETS", "registered_asset_count":0}]:
-            with self.assertRaises(ValueError):self.run_admin({**self.approval,"assets":[],"scope_kind":"REGISTERED_BSR_IP"},lookup=lambda _:metadata,apply=True)
+            with self.assertRaises(ValueError):self.run_admin({**self.approval,"assets":[],"scope_kind":"REGISTERED_BSR_IP","capabilities":sorted(BASE_CAPABILITIES)},lookup=lambda _:metadata,apply=True)
         self.assertFalse(self.path.exists())
+
+    def test_hierarchy_capability_requires_exact_roots_and_asset_read(self):
+        for fields in [
+            {"scope_kind":"REGISTERED_BSR_IP","assets":[]},
+            {"capabilities":["FACTUAL_HIERARCHY_READ"]},
+        ]:
+            with self.assertRaisesRegex(ValueError,"FACTUAL_HIERARCHY_EXACT_ROOT_REQUIRED"):
+                self.run_admin({**self.approval,**fields},apply=True)
+        self.assertFalse(self.path.exists())
+        self.assertEqual(self.run_admin(apply=True)["status"],"APPLIED")
+        self.assertIn("FACTUAL_HIERARCHY_READ",decode(private_read(self.path))[0]["capabilities"])
 
     def test_issue_revoke_audit_and_engineering_write_scope_unchanged(self):
         before = list(self.provider.db.iterdump())

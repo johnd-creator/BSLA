@@ -1,3 +1,4 @@
+import {scopedHierarchyPage} from './factual-hierarchy-reader';
 import {hasPortfolioRead,portfolioRoutes} from './factual-policy';
 import {readBounded} from './bounded-http';
 import {localGuardEnabled,verifyLocalSession,PRIVATE_HEADERS,type LocalSession} from './local-session';
@@ -33,7 +34,7 @@ export function factualAccess(path:string[],params:URLSearchParams,session:Local
   }
  }
  if(path.length===5&&path[2]==='assets'&&path[4]==='hierarchy'){
-  if(!hasPortfolioRead(session))return 'PORTFOLIO_SCOPE_DENIED';
+  if(!hasPortfolioRead(session)&&!factualAssets(read,['FACTUAL_ASSET_READ','FACTUAL_HIERARCHY_READ']).includes(path[3]))return 'PORTFOLIO_SCOPE_DENIED';
   const canonical=/^asset:MAXIMO:MXASSET:BSR:IP:[A-Za-z0-9_.-]{1,120}$/;
   if(!canonical.test(path[3]))return 'ASSET_SCOPE_DENIED';
   for(const key of params.keys())if(!['node_ref','offset','limit'].includes(key))return 'QUERY_DENIED';
@@ -93,6 +94,11 @@ export async function factualGateway(request:Request,path:string[],requestFetch:
   const type=upstream.headers.get('content-type')??'';
   if(!type.toLowerCase().startsWith('application/json'))return denied('UPSTREAM_TYPE_DENIED',502);
   bytes=await readBounded(upstream.body,2*1024*1024,controller.signal);status=upstream.status;
+  if(scoped&&usesReadPolicy&&path.length===5&&path[2]==='assets'&&path[4]==='hierarchy'){
+   if(status===404)return denied('ASSET_SCOPE_DENIED',403);
+   if(status!==200)return denied('FACTUAL_UPSTREAM_UNAVAILABLE',503);
+   bytes=new TextEncoder().encode(JSON.stringify(scopedHierarchyPage(JSON.parse(new TextDecoder().decode(bytes)),path[3],url.searchParams.get('node_ref')??path[3],Number(url.searchParams.get('offset')??0),Number(url.searchParams.get('limit')??25))));
+  }
   if(scoped&&usesReadPolicy&&route==='v1/reliability/maintenance-events'&&status===200){
    const page=scopedMaintenancePage(JSON.parse(new TextDecoder().decode(bytes)),url.searchParams.get('asset_ref')!,Number(url.searchParams.get('offset')??0),Number(url.searchParams.get('limit')??50));
    bytes=new TextEncoder().encode(JSON.stringify(page));
