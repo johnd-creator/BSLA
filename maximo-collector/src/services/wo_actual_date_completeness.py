@@ -26,7 +26,7 @@ def _verified_fields(proof, identity, changed):
         valid_state = state == checked["state"] or (state == "INVALID" and item.get("original") is None)
         if (valid_state and item.get("normalized") == checked["normalized"]
                 and observed is not None and (observed == changed or state == "VALID" and observed < changed)):
-            result[key] = checked
+            result[key] = {**checked, "state": state}
     return result
 
 

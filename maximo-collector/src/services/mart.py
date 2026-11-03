@@ -15,7 +15,7 @@ from typing import Any, Mapping
 
 from sqlalchemy import func, select
 
-from src.adapters.maximo.actual_dates import version
+from src.adapters.maximo.actual_dates import retained_values, version
 from src.contracts.validator import ContractValidationError, validate_record
 from src.repositories import mart_models as orm
 from src.repositories.database import Database
@@ -278,6 +278,18 @@ def _validate_for_write(entity: str, record: Mapping[str, Any]) -> dict[str, Any
     return validated
 
 
+def _actual_field_version(row, field, source_key):
+    """Use a verified field observation version, otherwise the row version."""
+    source = (row.get("sources") or {}).get("maximo", {})
+    proof = source.get("actual_dates")
+    wonum, assetnum = source.get("wonum"), source.get("assetnum")
+    current = row.get("source_changed_at")
+    retained = retained_values(proof, wonum, assetnum, current)
+    if (source_key in retained and version(retained[source_key]) == version(row.get(field))):
+        return version(proof["fields"][source_key]["source_changed_at"])
+    return version(current)
+
+
 def _merge_maintenance(existing, row):
     """Reject older/unknown observations and retain non-null actual clocks.
 
@@ -290,9 +302,12 @@ def _merge_maintenance(existing, row):
     for field, source_key in (("actual_start", "actstart"), ("actual_finish", "actfinish")):
         previous = getattr(existing, field)
         incoming = row[field]
-        if previous is not None and incoming is not None and old == new:
-            if version(previous) != version(incoming):
-                raise CanonicalRecordRejected("conflicting actual date at the same source version")
+        if previous is not None and incoming is not None and version(previous) != version(incoming):
+            previous_field = _actual_field_version({"sources": existing.sources,
+                              "source_changed_at": existing.source_changed_at, field: previous}, field, source_key)
+            incoming_field = _actual_field_version(row, field, source_key)
+            if previous_field is not None and (incoming_field is None or incoming_field <= previous_field):
+                raise CanonicalRecordRejected("conflicting actual date without a newer field observation")
         if previous is not None and incoming is None:
             row[field] = previous
             sources = copy.deepcopy(row.get("sources") or {})

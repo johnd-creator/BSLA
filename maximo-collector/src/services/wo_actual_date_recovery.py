@@ -13,7 +13,7 @@ import dataclasses
 import hashlib
 import json
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import text
 
@@ -37,7 +37,7 @@ def seal(value):
 
 def _json(value):
     if isinstance(value, datetime):
-        return value.isoformat()
+        return version(value).astimezone(timezone.utc).isoformat()
     raise TypeError("unsupported recovery evidence")
 
 
@@ -172,8 +172,12 @@ def apply_cohort(db, plan, observations, *, expected_database, approved_plan_sha
             sources = copy.deepcopy(local.sources or {})
             vendor = sources.setdefault("maximo", {})
             vendor["actual_dates"] = merge_evidence(vendor.get("actual_dates"), evidence(raw))
-            domain = WorkOrder(**{f.name: (sources if f.name == "sources" else getattr(local, f.name))
-                                 for f in dataclasses.fields(WorkOrder)})
+            domain_values = {f.name: (sources if f.name == "sources" else getattr(local, f.name))
+                             for f in dataclasses.fields(WorkOrder)}
+            # This is a proven DB version, not a naive source observation.
+            # SQLite loses timezone metadata on legacy DateTime columns.
+            domain_values["source_changed_at"] = version(local.source_changed_at)
+            domain = WorkOrder(**domain_values)
             store.upsert_work_order_in_session(session, domain)
             payload = _work_order_payload(local)
             if payload is None:

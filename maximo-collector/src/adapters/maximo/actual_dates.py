@@ -84,8 +84,10 @@ def merge_evidence(previous, incoming):
 
 
 def projected_evidence(member):
-    """Carry the original field observation version through local projection."""
-    result = evidence(member)
+    """Local synthetic NULLs cannot establish an observed source null."""
+    if "collector_actual_dates" not in member:
+        return evidence(member)
+    result = evidence({key: value for key, value in member.items() if key not in FIELDS})
     proof = member.get("collector_actual_dates")
     if not isinstance(proof, dict) or proof.get("schema_version") != 1 or proof.get("identity") != result["identity"]:
         return result
@@ -94,8 +96,11 @@ def projected_evidence(member):
         item = proof.get("fields", {}).get(key, {})
         state = item.get("state")
         checked = clock(item.get("original"), present=state != "UNAVAILABLE")
+        # A capped/non-scalar invalid original is deliberately not retained.
+        redacted_invalid = state == "INVALID" and item.get("original") is None
         observed = version(item.get("source_changed_at"))
-        if (checked["state"] == state and checked["normalized"] == item.get("normalized")
+        if ((checked["state"] == state or redacted_invalid)
+                and checked["normalized"] == item.get("normalized")
                 and current is not None and observed is not None and observed <= current):
-            result["fields"][key] = {**checked, "source_changed_at": item["source_changed_at"]}
+            result["fields"][key] = {**checked, "state": state, "source_changed_at": item["source_changed_at"]}
     return result

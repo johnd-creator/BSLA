@@ -35,7 +35,11 @@ receive an invented timezone. Date-only values are invalid actual timestamps.
 A missing/invalid newer observation cannot retract an existing valid date. That
 retained field keeps its original observation version. Newer explicit valid dates
 may correct a date; conflicting dates at the same source version fail. Older
-observations are no-ops. No source-null correction rule is authorized here.
+observations are no-ops. No source-null correction rule is authorized here. Local rows without source clock
+proof stay UNAVAILABLE; reconstructed NULLs never become observed source nulls.
+Invalid originals excluded by the retention size/type cap remain INVALID evidence.
+Field-level observation versions govern valid corrections even when a newer row
+previously carried a missing clock.
 
 ## Evidence-derived completeness and status matrix
 
@@ -74,7 +78,10 @@ The service module `src.services.wo_actual_date_recovery` exposes separate stage
    20 business requests (including detail/auth retry requests), existing 1s floor
    and 1MiB cap. It requests only identity/date/status/version context. No broad
    traversal, automatic retry loop, cursor update or write occurs. A checkpoint
-   callback privately persists each validated result. Resume revalidates completed
+   callback privately persists each validated result. WO detail resource links carry
+   the exact selected fields. A WO collection auth retry consumes the same request
+   budget but does not count an expired response as a successfully visited page;
+   the once-only retry and successful-page/loop caps remain enforced. Resume revalidates completed
    identities and skips their source requests. HTTP/auth failures stop the run.
 3. Rehearse using a private, independent restore into disposable SQLite. Existing
    same-owner snapshots may include only the cohort and required parent rows.

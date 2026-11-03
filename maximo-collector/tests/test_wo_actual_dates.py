@@ -107,8 +107,11 @@ class ActualDatesTest(unittest.TestCase):
         self.write(dict(RAW,changedate="2026-09-03T00:00:00Z",actstart=None,actfinish=None,status="CAN"))
         self.assertEqual(self.write(dict(RAW,status="STALE")).records_unchanged,1)
         self.assertEqual(self.write(dict(RAW,changedate=None,status="UNKNOWN")).records_unchanged,1)
+        # The retained clock is still a v1 observation. A v2 explicit valid
+        # correction is newer field evidence even when the row was already v2.
+        self.write(dict(RAW,changedate="2026-09-03T00:00:00Z",actstart="2026-08-01T00:00:00Z",status="CAN"))
         with self.assertRaises(CanonicalRecordRejected):
-            self.write(dict(RAW,changedate="2026-09-03T00:00:00Z",actstart="2026-08-01T00:00:00Z"))
+            self.write(dict(RAW,changedate="2026-09-03T00:00:00Z",actstart="2026-08-02T00:00:00Z"))
         with self.db.session() as s:
             row=s.get(mart_models.MaintenanceEventMartOrm,maintenance_event_from_payload(RAW)["id"])
             self.assertEqual(row.status,"CAN");self.assertIsNotNone(row.actual_start);self.assertIsNotNone(row.actual_finish)
@@ -121,6 +124,8 @@ class ActualDatesTest(unittest.TestCase):
         with self.db.session() as s:
             row=s.get(mart_models.MaintenanceEventMartOrm,plan["cohort"][0]["canonical_id"])
             self.assertEqual(row.status,"CLOSE");self.assertEqual(row.downtime_hours,0);self.assertIsNone(row.event_type)
+            self.assertIsNotNone(row.actual_start);self.assertIsNotNone(row.actual_finish)
+            self.assertEqual(s.query(models.WorkOrderOrm).one().sources["maximo"]["actual_dates"]["fields"]["actstart"]["state"],"VALID")
             self.assertEqual(s.query(models.SyncCursorOrm).count(),0)
             self.assertEqual(s.query(mart_models.MartProjectionStateOrm).count(),0)
         rollback_cohort(self.db,receipt,expected_database="disposable-sqlite")
@@ -232,3 +237,82 @@ class RecoveryCheckpointTest(unittest.TestCase):
                 self.assertIsNone(session.query(mart_models.MaintenanceEventMartOrm).one().actual_start)
                 self.assertEqual(session.query(models.WorkOrderOrm).one().sources["maximo"]["actual_dates"]["fields"]["actstart"]["state"],"UNAVAILABLE")
         finally:db.engine.dispose()
+
+
+class IndependentReviewRegressions(unittest.TestCase):
+    def test_unobserved_legacy_dates_remain_unverified_after_projection(self):
+        from src.services.wo_actual_date_completeness import classify_dates
+        row=models.WorkOrderOrm(id=RAW["wonum"],equipment_id=RAW["assetnum"],source_changed_at=datetime.fromisoformat(T))
+        record=maintenance_event_from_payload(_work_order_payload(row))
+        self.assertEqual(record["sources"]["maximo"]["actual_dates"]["fields"]["actstart"]["state"],"UNAVAILABLE")
+        self.assertEqual(classify_dates(record)["state"],"SOURCE_NOT_YET_VERIFIED")
+
+    def test_redacted_invalid_original_never_becomes_confirmed_null(self):
+        from src.services.wo_actual_date_completeness import classify_dates
+        for value in ("x"*129,{"unexpected":"non-scalar"},["bad"],123,True):
+            raw=dict(RAW,actstart=value,actfinish=None)
+            direct=maintenance_event_from_payload(raw)
+            self.assertEqual(classify_dates(direct)["state"],"SOURCE_TIMESTAMP_INVALID")
+            mapped=work_order_from_payload(raw)
+            row=models.WorkOrderOrm(**{f.name:getattr(mapped,f.name) for f in __import__('dataclasses').fields(mapped)})
+            projected=maintenance_event_from_payload(_work_order_payload(row))
+            self.assertEqual(projected["sources"]["maximo"]["actual_dates"]["fields"]["actstart"]["state"],"INVALID")
+            self.assertEqual(classify_dates(projected)["state"],"SOURCE_TIMESTAMP_INVALID")
+
+    def test_newer_field_correction_agrees_in_collector_and_mart(self):
+        db=Database(DbConfig("sqlite+pysqlite:///:memory:"));db.create_all()
+        try:
+            store,writer=CollectorStore(db),MartWriter(db)
+            observations=[RAW,dict(RAW,changedate="2026-09-03T00:00:00Z",actstart=None),
+                          dict(RAW,changedate="2026-09-03T00:00:00Z",actstart="2026-08-01T00:00:00Z")]
+            for raw in observations:
+                store.upsert_work_order(work_order_from_payload(raw))
+                with db.session() as session:record=maintenance_event_from_payload(_work_order_payload(session.get(models.WorkOrderOrm,RAW["wonum"])))
+                writer.persist_collection(CanonicalCollection("maintenance_event",records=[record]))
+            with db.session() as session:
+                mart=session.query(mart_models.MaintenanceEventMartOrm).one()
+                self.assertEqual(mart.actual_start,datetime.fromisoformat(observations[-1]["actstart"]))
+                self.assertEqual(datetime.fromisoformat(mart.sources["maximo"]["actual_dates"]["fields"]["actstart"]["source_changed_at"]),datetime.fromisoformat(observations[-1]["changedate"].replace("Z","+00:00")))
+        finally:db.engine.dispose()
+
+
+class WorkOrderClientRegression(unittest.TestCase):
+    class Response:
+        content=b"{}"
+        headers={"Content-Type":"application/json"}
+        text=""
+        url="http://maximo.example/maximo/oslc/os/mxwodetail"
+        def __init__(self,payload,status=200):self.payload=payload;self.status_code=status
+        def json(self):return self.payload
+        def raise_for_status(self):
+            if self.status_code>=400:raise RuntimeError("synthetic HTTP error")
+
+    def client(self,responses,budget=20):
+        from types import SimpleNamespace
+        from src.adapters.maximo.oslc_client import OslcClient
+        from src.config import MaximoConfig
+        session=Mock();session.request.side_effect=responses
+        auth=SimpleNamespace(session=session,last_request_at=0.0,ensure_logged_in=Mock(),handle_expiry=Mock())
+        return OslcClient(MaximoConfig(base_url="http://maximo.example/maximo",rate_limit_seconds=0),auth,request_budget=budget),auth
+
+    def test_wo_collection_expiry_retries_once_without_weakening_page_or_request_caps(self):
+        client,auth=self.client([self.Response({},401),self.Response({"_member":[RAW]})])
+        rows=list(client.iterate("mxwodetail",select=list(SELECT),page_size=2,max_pages=1))
+        self.assertEqual(rows,[RAW]);auth.handle_expiry.assert_called_once()
+        self.assertEqual(client.request_telemetry["business_requests"],2);self.assertEqual(client.last_iteration_pages,1)
+        from src.adapters.maximo.oslc_client import OslcRequestBudgetExceeded,OslcAuthExpiredError
+        client,auth=self.client([self.Response({},401),self.Response({},401)])
+        with self.assertRaises(OslcAuthExpiredError):list(client.iterate("mxwodetail",page_size=2,max_pages=1))
+        self.assertEqual(client.request_telemetry["business_requests"],2);auth.handle_expiry.assert_called_once()
+        client,_=self.client([self.Response({},401)],budget=1)
+        with self.assertRaises(OslcRequestBudgetExceeded):list(client.iterate("mxwodetail",page_size=2,max_pages=1))
+        self.assertEqual(client.request_telemetry["business_requests"],1)
+
+    def test_wo_detail_link_carries_exact_field_selection(self):
+        from urllib.parse import parse_qs,urlsplit
+        link="http://maximo.example/maximo/oslc/os/mxwodetail/SYNTHETIC?oslc.select=*"
+        client,_=self.client([self.Response({"_member":[{"rdf:resource":link}]}),self.Response(RAW)])
+        self.assertEqual(list(client.iterate("mxwodetail",select=list(SELECT),page_size=2,max_pages=1)),[RAW])
+        detail_url=client._session.request.call_args_list[1].args[1]
+        self.assertEqual(parse_qs(urlsplit(detail_url).query)["oslc.select"],[",".join(SELECT)])
+        self.assertEqual(client.request_telemetry["business_requests"],2)
