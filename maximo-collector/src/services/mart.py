@@ -15,6 +15,7 @@ from typing import Any, Mapping
 
 from sqlalchemy import func, select
 
+from src.adapters.maximo.actual_dates import version
 from src.contracts.validator import ContractValidationError, validate_record
 from src.repositories import mart_models as orm
 from src.repositories.database import Database
@@ -277,11 +278,71 @@ def _validate_for_write(entity: str, record: Mapping[str, Any]) -> dict[str, Any
     return validated
 
 
+def _merge_maintenance(existing, row):
+    """Reject older/unknown observations and retain non-null actual clocks.
+
+    A newer, explicit non-null value may correct a date. Retractions require
+    a separately verified policy; this writer never clears a retained date.
+    """
+    old, new = version(existing.source_changed_at), version(row["source_changed_at"])
+    if old is not None and (new is None or new < old):
+        return False
+    for field, source_key in (("actual_start", "actstart"), ("actual_finish", "actfinish")):
+        previous = getattr(existing, field)
+        incoming = row[field]
+        if previous is not None and incoming is not None and old == new:
+            if version(previous) != version(incoming):
+                raise CanonicalRecordRejected("conflicting actual date at the same source version")
+        if previous is not None and incoming is None:
+            row[field] = previous
+            sources = copy.deepcopy(row.get("sources") or {})
+            maximo = sources.setdefault("maximo", {})
+            old_source = (existing.sources or {}).get("maximo", {})
+            if source_key in old_source:
+                maximo[source_key] = old_source[source_key]
+            retained = old_source.get("actual_dates", {}).get("fields", {}).get(source_key)
+            if retained:
+                maximo.setdefault("actual_dates", {}).setdefault("fields", {})[source_key] = copy.deepcopy(retained)
+            row["sources"] = sources
+    return True
+
+
 class MartWriter:
     """Persist Contract v1 collections in one transaction per entity batch."""
 
     def __init__(self, db: Database):
         self._db = db
+
+    def recover_actual_dates(self, session, record):
+        """Fill clocks on an existing exact-version WO in the caller transaction.
+
+        This bounded repair does not acquire records or commit. The caller
+        owns the separately approved cohort, backup and atomic legacy write.
+        """
+        validated = _validate_for_write("maintenance_event", record)
+        row = _maintenance_row(validated)
+        existing = session.get(orm.MaintenanceEventMartOrm, row["canonical_id"], with_for_update=True)
+        if (existing is None or existing.equipment_id != row["equipment_id"]
+                or existing.work_order_id != row["work_order_id"]
+                or version(existing.source_changed_at) is None
+                or version(existing.source_changed_at) != version(row["source_changed_at"])):
+            raise CanonicalRecordRejected("recovery requires existing exact identity and source version")
+        _merge_maintenance(existing, row)
+        sources = copy.deepcopy(existing.sources or {})
+        vendor = sources.setdefault("maximo", {})
+        incoming = row["sources"]["maximo"]
+        for key in ("actstart", "actfinish", "actual_dates"):
+            if key in incoming:
+                vendor[key] = incoming[key]
+        changed = sources != existing.sources
+        for key in ("actual_start", "actual_finish"):
+            if getattr(existing, key) != row[key]:
+                setattr(existing, key, row[key])
+                changed = True
+        if changed:
+            existing.sources = sources
+            existing.mart_updated_at = _next_update_time(existing.mart_updated_at)
+        return changed
 
     def persist_collection(self, collection: Any, *, dry_run: bool = False) -> MartWriteStats:
         entity = str(collection.canonical_entity)
@@ -312,7 +373,7 @@ class MartWriter:
             with self._db.session() as session:
                 for record in validated:
                     row = spec.row_builder(record)
-                    existing = session.get(spec.model, record["canonical_id"])
+                    existing = session.get(spec.model, record["canonical_id"], with_for_update=True)
                     if existing is None:
                         now = datetime.now(timezone.utc)
                         row["mart_created_at"] = now
@@ -321,6 +382,10 @@ class MartWriter:
                         stats.records_inserted += 1
                         continue
 
+                    if entity == "maintenance_event":
+                        if not _merge_maintenance(existing, row):
+                            stats.records_unchanged += 1
+                            continue
                     changed = any(getattr(existing, key) != value for key, value in row.items())
                     if not changed:
                         stats.records_unchanged += 1

@@ -1359,3 +1359,7 @@ reader verified the stored facts. This is data availability, not live hierarchy 
 or Engineer UAT acceptance. All existing containers remain preserved; PR119 runtime,
 controller compatibility STOP, UNKNOWN roles, PARTIAL global coverage and Logbook
 PdM HOLD remain. Counts, raw identities and recovery evidence remain private.
+
+## 2026-11-03 — NADI-MAXIMO-WO-ACTUAL-DATE-RECOVERY-01 candidate
+
+Audited both acquisition paths and the local projection; implemented existing-JSON clock retention, source-version/non-null preservation, bounded atomic recovery and CAS rollback. Added PO status-aware completeness without status inference, source writes, migration, cursor/schedule changes or frontend changes. Hermetic qualification and owner-private source/recovery evidence are independent from activation/operational acceptance. [Runbook](maximo-collector/docs/wo-actual-date-recovery.md).

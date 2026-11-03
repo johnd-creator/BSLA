@@ -528,3 +528,7 @@ context under an exact registered BSR/IP root. Technical nodes remain distinct
 from Registry membership. Missing edges and unverified system/equipment/component
 roles remain explicit; no source acquisition or permission expansion is implied.
 See [candidate contract and verification](reliability-cockpit/docs/NADI-ASSET-HIERARCHY-01.md).
+
+## WO date completeness — 3 November 2026
+
+FR-02 requires evidence-derived actual dates and status-aware completeness. WAPPR/WMATL may legitimately have no recorded dates; COMP/CLOSE never prove date availability. Genuine dates remain visible independently of status. Collector/Mart correction and bounded recovery are tracked in [the lineage runbook](maximo-collector/docs/wo-actual-date-recovery.md); frontend/API presentation acceptance is separate.

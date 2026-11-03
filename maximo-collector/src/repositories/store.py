@@ -10,6 +10,7 @@ from typing import Any
 from sqlalchemy import desc, func, or_, select, text
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
+from src.adapters.maximo.actual_dates import merge_evidence, version
 from src.domain import models as domain
 from src.repositories import models as orm
 from src.repositories.database import Database
@@ -97,8 +98,43 @@ class CollectorStore:
             session.commit()
         return outcome
 
-    def upsert_work_order(self, w: domain.WorkOrder) -> None:
-        self._upsert(orm.WorkOrderOrm, _row(w))
+    def upsert_work_order(self, w: domain.WorkOrder) -> str:
+        with self._db.session() as session:
+            outcome = self.upsert_work_order_in_session(session, w)
+            session.commit()
+            return outcome
+
+    def upsert_work_order_in_session(self, session, w: domain.WorkOrder) -> str:
+        """Shared transaction boundary for normal acquisition and exact recovery."""
+        row = {f.name: getattr(w, f.name) for f in dataclasses.fields(w)}
+        row["sources"] = _json_safe(w.sources)
+        for key, value in row.items():
+            if isinstance(value, datetime) and value.tzinfo is not None:
+                row[key] = value.astimezone(timezone.utc)
+        existing = session.get(orm.WorkOrderOrm, w.id, with_for_update=True)
+        if existing is None:
+            session.add(orm.WorkOrderOrm(**row))
+            return "inserted"
+        old_version = version(existing.source_changed_at)
+        new_version = version(w.source_changed_at.isoformat()) if w.source_changed_at else None
+        if old_version is not None and (new_version is None or new_version < old_version):
+            return "unchanged"
+        old_maximo = (existing.sources or {}).get("maximo", {})
+        new_sources = row.get("sources") or {}
+        new_maximo = dict(new_sources.get("maximo") or {})
+        previous = old_maximo.get("actual_dates")
+        incoming = new_maximo.get("actual_dates")
+        if previous and incoming and previous.get("identity") != incoming.get("identity"):
+            raise ValueError("WO clock identity changed")
+        if incoming:
+            new_maximo["actual_dates"] = merge_evidence(previous, incoming)
+        elif previous:
+            new_maximo["actual_dates"] = previous
+        row["sources"] = {**new_sources, "maximo": new_maximo}
+        changed = any(getattr(existing, key) != value for key, value in row.items())
+        for key, value in row.items():
+            setattr(existing, key, value)
+        return "updated" if changed else "unchanged"
 
     def upsert_service_request(self, s: domain.ServiceRequest) -> None:
         self._upsert(orm.ServiceRequestOrm, _row(s))
@@ -159,7 +195,9 @@ class CollectorStore:
         source_value: datetime,
     ) -> bool:
         """Return true when a local row already has this source timestamp."""
-        if not entity_id:
+        if not entity_id or entity_name == "work_order":
+            # Equality of changedate cannot prove newly selected clocks were
+            # previously retained. The locked upsert handles no-op replay.
             return False
         mapping = {
             "equipment": orm.EquipmentOrm,

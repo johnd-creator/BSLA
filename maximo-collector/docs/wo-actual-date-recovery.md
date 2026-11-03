@@ -1,0 +1,151 @@
+# WO actual date lineage and bounded recovery
+
+Requirement: **NADI-MAXIMO-WO-ACTUAL-DATE-RECOVERY-01**, including the PO's
+status-aware completeness addendum. Baseline main: `6bff0a5c5b67b2e5137b50c1d4d0063416f65686`.
+This candidate is not operational activation, historical-population recovery or
+KPI eligibility. Private operational evidence is kept outside Git.
+
+## Field lineage audit
+
+| Boundary | Baseline behavior | Candidate behavior |
+|---|---|---|
+| Verified MXWODETAIL contract | `actstart`/`actfinish` are TIMESTAMP candidates; canonical select already requests them | Same verified scalar fields; exact BSR/IP identity and original offsets |
+| Routine `WORK_ORDER_SELECT` | Neither actual field selected | Both selected; schedules, limits, cursors and F01–F24 guards unchanged |
+| Legacy mapper/store | Actual fields discarded; unrestricted replacement upsert | Allowlisted `sources.maximo.actual_dates` evidence; locked source-version checks |
+| Local `_work_order_payload` | Both actual fields unconditionally NULL | Only exact identity/version-bound retained dates replay |
+| Canonical mapper | Actual date support; naive/invalid input could fail a whole row | Zoned dates retain their instant and original text; unknown zones/invalid values remain evidence and canonical NULL |
+| MartWriter | Blind update could erase dates or apply stale observations | Older/unknown versions cannot replace newer rows; NULL cannot retract dates; equal-version conflicting dates fail atomically |
+| Mart/API | Existing `actual_start`/`actual_finish` columns and MaintenanceView fields | Existing fields reused, no schema or API migration |
+
+`changedate`, scheduled/reported dates, status, downtime and labor never supply
+actual dates or repair duration. Zero evidence stays zero. Status and raw Work
+Type remain source values; this package introduces no classification or KPI rule.
+
+## Retention decision
+
+Use the existing JSON column rather than add legacy normalized columns. The
+versioned allowlist stores only WO/Asset/site/org identity and each actual clock's
+state, original scalar, normalized ISO timestamp and source observation version.
+No raw response, person data or credential is added. Clock states distinguish
+VALID, MISSING (returned null/empty), UNAVAILABLE (not returned), INVALID and NAIVE.
+An omitted field cannot establish why it was omitted or that source storage is null.
+Valid strings retain fractional precision and original offset; naive values never
+receive an invented timezone. Date-only values are invalid actual timestamps.
+
+A missing/invalid newer observation cannot retract an existing valid date. That
+retained field keeps its original observation version. Newer explicit valid dates
+may correct a date; conflicting dates at the same source version fail. Older
+observations are no-ops. No source-null correction rule is authorized here.
+
+## Evidence-derived completeness and status matrix
+
+`wo_actual_date_completeness.classify_dates` and `status_date_matrix` are read-only
+reporting functions. `report_cohort` joins exact staged source, legacy and Mart
+evidence without making source requests. States are:
+
+- `ACTUAL_DATES_AVAILABLE`: both Mart dates available.
+- `START_ONLY` / `FINISH_ONLY`: one Mart date available; independent missing-reason flags remain visible.
+- `SOURCE_CONFIRMED_EMPTY`: both returned source clocks explicitly empty at the exact current source version.
+- `SOURCE_NOT_YET_VERIFIED`: missing evidence has not been verified.
+- `COLLECTOR_PROJECTION_GAP`: a missing Mart clock has verified source/retained evidence.
+- `SOURCE_TIMESTAMP_INVALID`: source evidence has an invalid or ambiguous timezone/value.
+
+Classification priority is invalid → verified gap → date availability → confirmed
+empty → unverified. Matrices independently count both/start-only/finish-only/both
+missing, confirmed-null, unverified, pipeline loss, timestamp issues and identity/
+version mismatches. Missing-reason counts may overlap and must not be summed as
+exclusive populations. A missing field is not a confirmed source null. Old empty
+observations cannot establish current emptiness after a source version change.
+
+Original status is the grouping key. WAPPR/WMATL remain in all coverage totals and
+receive a neutral note that dates may not yet be recorded; this establishes no
+execution state. Genuine dates remain available for these statuses. COMP/CLOSE
+with missing dates receive a completeness-review flag, never fabricated dates or
+a complete-evidence designation. Advanced-status flags prioritize review only.
+
+## Bounded operator mechanism and authorization
+
+The service module `src.services.wo_actual_date_recovery` exposes separate stages:
+
+1. `plan_cohort(db, wonums)`: read-only, 1–10 unique exact WOs, existing registered
+   parent, equal zoned legacy/Mart source versions. Seal with `seal(plan)`.
+2. `fetch_cohort(client, plan, completed=..., checkpoint=...)`: existing owning
+   OslcClient, GET-only exact predicates, verified fields, one page per WO, budget
+   20 business requests (including detail/auth retry requests), existing 1s floor
+   and 1MiB cap. It requests only identity/date/status/version context. No broad
+   traversal, automatic retry loop, cursor update or write occurs. A checkpoint
+   callback privately persists each validated result. Resume revalidates completed
+   identities and skips their source requests. HTTP/auth failures stop the run.
+3. Rehearse using a private, independent restore into disposable SQLite. Existing
+   same-owner snapshots may include only the cohort and required parent rows.
+   No operational database is replaced. Compare unrelated columns, replay and
+   rollback before requesting an operational write.
+4. **Separate explicit approval required:** `apply_cohort` must receive the exact
+   reviewed plan digest and owning database identity. A digest is a pin, not an
+   authorization credential. Before invocation, verify source/service ownership,
+   fresh affected-row + database backups, independent restore, required reviews/
+   exact-head CI and container/data preservation. PostgreSQL requires a durable
+   private rollback-receipt callback before commit; callback failure rolls back.
+5. Apply one small co-located legacy/Mart transaction through CollectorStore and
+   the validating MartWriter. Lock in deterministic WO order, recheck exact
+   identities, current Registry membership and both source versions. A changed
+   source version requires normal acquisition and a new plan, not clock rebasing.
+   Only legacy clock JSON and Mart clock/evidence fields may change. All source,
+   projection and collection cursors remain unchanged. A staged subset supports
+   bounded resumption; replay is idempotent.
+6. Privately checkpoint the datetime-preserving receipt (before rows and after
+   seals) with owner-only permissions, fsync and atomic replacement. A commit
+   interruption is resolved by comparing current rows to before/after seals,
+   never blindly reapplying an old backup. Never load an untrusted pickle.
+7. `rollback_cohort` is also separately governed operational mutation. It locks
+   all affected rows and compares their full current after-seals before restoring
+   only the fields this repair changed. If normal workers have changed a row,
+   rollback fails closed for the whole cohort and preserves newer evidence.
+
+No command defaults to acquisition, schema creation or live recovery. The library
+is deliberately invoked by a reviewed owner-private runner, not an unauthenticated
+web endpoint. Existing broad `mxcollector backfill` is **not** this bounded repair.
+No runtime replacement is approved by this source patch.
+
+## Qualification and operational evidence
+
+The hermetic suite covers future selection/retention, all clock states, fractional
+precision/offsets, null/zero, source/identity/version conflicts, stale and equal-version
+replay, atomic partial failure, checkpoint failure, independent restore, exact CAS
+rollback, every completeness state and neutral status rules. CI's original memory-only
+offline guard remains intact. File-backed private rehearsal is separate from that
+suite. Canonical Maximo CI must test the immutable PR head on Python 3.11 and 3.12;
+independent review and a passing gate are required before any later release.
+
+Runtime audit, authorized bounded source samples, real-cohort restore/replay,
+status matrices, coverage counts and service seals belong in owner-private evidence.
+A bounded source pilot or isolated recovery cannot establish population-wide source
+absence, source completeness, operational recovery or production acceptance.
+
+## Minimum later runtime change and scalable population plan
+
+If separately approved, build one exact-head Collector image and inspect the actual
+console imports as well as `/app/src`. Replace only Maximo API, scheduled Maximo
+worker and Mart projector using their existing Compose ownership/overrides. All
+three import this shared Collector package. Preserve the exact commands, env,
+ports, project, volumes, cursor floors and schedules. No NADI frontend/Engineering/
+Factual API replacement is needed to expose the already existing date columns.
+Pin all three old images/configurations and affected-row recovery receipts. Prove
+all unrelated container roles/states unchanged; do not use broad `compose up` or
+`down`, migrations, collection bootstrap or data backfill as a release shortcut.
+
+After a separately approved pilot write, prioritize COMP/CLOSE missing-date cohorts
+for review while retaining all other statuses in coverage. Each next cohort needs
+an exact manifest and finite budget; use current missing evidence and current source
+versions, record explicit source-null vs unavailable/invalid cases, apply only
+approved batches, stop on auth/scope/version/backup/ownership failure and resume
+from sealed private checkpoints. A successful pilot authorizes no larger population.
+
+## Next NADI presentation task
+
+Existing MaintenanceView already exposes `actual_start`, `actual_finish`, status,
+canonical identity, scoped source dates and optional source detail. UI must consume actual dates explicitly,
+keep planned/reported/changed dates distinct and show timezone/source uncertainty.
+The status notes and completeness report are ready as Collector-side functions;
+exposing them through a new optional Factual read DTO is a separately reviewed API
+follow-up. No broad grant, frontend redesign or KPI eligibility is part of this PR.

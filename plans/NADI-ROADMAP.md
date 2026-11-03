@@ -1281,3 +1281,7 @@ reader verified the stored facts. This is data availability, not live hierarchy 
 or Engineer UAT acceptance. All existing containers remain preserved; PR119 runtime,
 controller compatibility STOP, UNKNOWN roles, PARTIAL global coverage and Logbook
 PdM HOLD remain. Counts, raw identities and recovery evidence remain private.
+
+## WO actual-date pipeline candidate — 3 November 2026
+
+NADI-MAXIMO-WO-ACTUAL-DATE-RECOVERY-01 corrects acquisition/JSON retention/local projection and adds exact-cohort recovery with evidence-derived status completeness. Development and isolated rehearsal are authorized; live service replacement, write cohorts and frontend presentation remain separate gates. No phase or operational KPI eligibility changes. [Runbook](../maximo-collector/docs/wo-actual-date-recovery.md).
