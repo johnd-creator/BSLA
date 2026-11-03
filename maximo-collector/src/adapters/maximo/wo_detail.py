@@ -82,7 +82,9 @@ def merge_details(previous,incoming,existing,new_row):
   old=old_fields.get(key,{})
   attr=columns.get(key)
   if item['state'] in ('SOURCE_NOT_YET_VERIFIED','SOURCE_VALUE_INVALID','SOURCE_TIMESTAMP_INVALID'):
-   if old.get('value') is not None:
+   if old.get('value') is not None or old.get('state')=='SOURCE_CONFIRMED_EMPTY' and old.get('origin')=='MAXIMO_RESPONSE':
+    # A verified null is an observation too. Omission/invalid replay must not
+    # erase its field version and permit an equal-version value correction.
     result['fields'][key]=copy.deepcopy(old)
    elif attr and getattr(existing,attr) is not None:
     value=getattr(existing,attr);value=value.isoformat() if isinstance(value,datetime) else value

@@ -139,3 +139,24 @@ class DetailTest(unittest.TestCase):
    m=s.query(mart_models.MaintenanceEventMartOrm).one();source=copy.deepcopy(m.sources);source['maximo']['wo_detail']=evidence(RAW);m.sources=source;s.commit()
   self.project()
   with self.db.session() as s:self.assertEqual(s.query(mart_models.MaintenanceEventMartOrm).one().sources['maximo']['wo_detail']['fields']['description']['value'],'Original technical work')
+
+ def test_known_null_survives_omitted_and_invalid_same_version_replay(self):
+  from src.repositories.store import CollectorStore
+  store=CollectorStore(self.db)
+  for intermediate in (RAW,dict(RAW,description='x'*4001)):
+   store.upsert_work_order(work_order_from_payload(dict(RAW,description=None)))
+   store.upsert_work_order(work_order_from_payload(intermediate))
+   with self.db.session() as s:
+    field=s.query(models.WorkOrderOrm).one().sources['maximo']['wo_detail']['fields']['description']
+    self.assertEqual(field['state'],'SOURCE_CONFIRMED_EMPTY');self.assertEqual(field['origin'],'MAXIMO_RESPONSE');self.assertIsNone(field['value'])
+   with self.assertRaises(ValueError):store.upsert_work_order(work_order_from_payload(dict(RAW,description='Same-version contradiction')))
+ def test_reprojection_does_not_downgrade_known_null_to_unverified(self):
+  from src.adapters.maximo.wo_detail import evidence
+  with self.db.session() as s:
+   s.query(models.WorkOrderOrm).one().description=None
+   m=s.query(mart_models.MaintenanceEventMartOrm).one();source=copy.deepcopy(m.sources);source['maximo']['wo_detail']=evidence(dict(RAW,description=None));known=copy.deepcopy(source['maximo']['wo_detail']['fields']['description']);m.sources=source;s.commit()
+  self.project()
+  with self.db.session() as s:
+   self.assertEqual(s.query(mart_models.MaintenanceEventMartOrm).one().sources['maximo']['wo_detail']['fields']['description'],known)
+   s.query(models.WorkOrderOrm).one().description='Same-version contradictory Legacy value';s.commit()
+  with self.assertRaises(ValueError):self.project()
