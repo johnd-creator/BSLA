@@ -528,3 +528,10 @@ context under an exact registered BSR/IP root. Technical nodes remain distinct
 from Registry membership. Missing edges and unverified system/equipment/component
 roles remain explicit; no source acquisition or permission expansion is implied.
 See [candidate contract and verification](reliability-cockpit/docs/NADI-ASSET-HIERARCHY-01.md).
+
+### Asset hierarchy local-review boundary — 3 November 2026 candidate
+
+An independently approved Factual hierarchy READ may authorize one exact registered BSR/IP entry root and retained ancestors/descendants. Ancestor exploration exposes only the branch towards that root. It confers no additional Registry membership or Engineering write permission. UI must preserve UNKNOWN unit, UNVERIFIED semantic role and PARTIAL coverage; missing retained children are not verified leaves.
+
+NADI-ASSET-HIERARCHY-LOCAL-RELEASE-01 is a development candidate; source merge,
+local activation and authorized Product Owner/Engineer acceptance are separate.

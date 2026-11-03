@@ -77,10 +77,37 @@ class HierarchyTest(unittest.TestCase):
         self.assertNotIn("count(",self.statements[0].lower())
 
     def test_off_root_sibling_or_foreign_node_is_denied_before_counts(self):
-        for node in ["SIBLING","SYSTEM","FOREIGN","MISSING"]:
+        for node in ["SIBLING","FOREIGN","MISSING"]:
             self.statements.clear()
             self.assertIsNone(read_hierarchy(self.database,PREFIX+"ROOT",node_ref=PREFIX+node))
             self.assertFalse(any("count(" in sql.lower() for sql in self.statements))
+
+    def test_ancestor_navigation_exposes_only_verified_root_branch(self):
+        self.add("TOP")
+        self.add("UNRELATED-UNCLE",parent="TOP")
+        with Session(self.database.engine) as session:
+            session.get(Asset,PREFIX+"SYSTEM").parent_asset_ref=PREFIX+"TOP"
+            session.get(Asset,PREFIX+"PART-A").unit=None
+            session.commit()
+        self.statements.clear()
+        page=read_hierarchy(self.database,PREFIX+"ROOT",node_ref=PREFIX+"SYSTEM")
+        self.assertEqual(page.node_relation,"ANCESTOR")
+        self.assertEqual([n.source_asset_number for n in page.path],["SYSTEM","ROOT"])
+        self.assertEqual([n.source_asset_number for n in page.items],["ROOT"])
+        self.assertEqual(page.total,1)
+        self.assertNotIn("SIBLING",page.model_dump_json())
+        self.assertFalse(any("count(" in sql.lower() for sql in self.statements))
+        page=read_hierarchy(self.database,PREFIX+"ROOT",node_ref=PREFIX+"TOP")
+        self.assertEqual([n.source_asset_number for n in page.path],["TOP","SYSTEM","ROOT"])
+        self.assertEqual([n.source_asset_number for n in page.items],["SYSTEM"])
+        self.assertNotIn("UNRELATED-UNCLE",page.model_dump_json())
+        page=read_hierarchy(self.database,PREFIX+"ROOT",node_ref=PREFIX+"TOP",offset=1,limit=1)
+        self.assertEqual((page.total,page.items,page.has_more),(1,[],False))
+        self.assertIsNone(read_hierarchy(self.database,PREFIX+"ROOT",node_ref=PREFIX+"UNRELATED-UNCLE"))
+        descendant=read_hierarchy(self.database,PREFIX+"ROOT",node_ref=PREFIX+"PART-A")
+        self.assertEqual(descendant.node_relation,"DESCENDANT")
+        self.assertIsNone(descendant.node.unit)
+        self.assertEqual(descendant.node.hierarchy_role,"UNKNOWN")
 
     def test_missing_children_never_claims_source_leaf_or_complete(self):
         self.add("GAPPED",registered=True,children=True,parent="NOT-RETAINED")

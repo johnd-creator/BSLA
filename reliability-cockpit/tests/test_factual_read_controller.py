@@ -7,7 +7,7 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock
 from datetime import datetime,timedelta,timezone
-from src.services.factual_read_entitlements import canonical,instant,append_event,ZERO,CAPABILITIES,ISSUER
+from src.services.factual_read_entitlements import canonical,instant,append_event,ZERO,CAPABILITIES,BASE_CAPABILITIES,ISSUER
 
 FILE=Path(__file__).resolve().parents[2]/'deploy/development/local_development.py'
 spec=importlib.util.spec_from_file_location('factual_controller_test',FILE)
@@ -36,7 +36,7 @@ class FactualReadControllerTest(unittest.TestCase):
         root=self.state/'factual-read-120';root.mkdir(mode=0o700)
         file=root/'grants.ndjson';now=datetime.now(timezone.utc).replace(microsecond=0)
         event=dict(action='ISSUE',grant_id='synthetic-grant',subject='local:synthetic-engineer',assets=['asset:MAXIMO:MXASSET:BSR:IP:SYNTHETIC-A'],capabilities=sorted(CAPABILITIES),not_before=instant(now),expires_at=instant(now+timedelta(hours=1)),actor=ISSUER,approval_ref='synthetic-owner',operator_ref='synthetic-operator',at=instant(now))
-        if registered:event.update(assets=[],scope_kind='REGISTERED_BSR_IP')
+        if registered:event.update(assets=[],scope_kind='REGISTERED_BSR_IP',capabilities=sorted(BASE_CAPABILITIES))
         append_event(file,event,expected_head=ZERO)
         approval={k:v for k,v in event.items() if k!='at'}
         approval.update(schema_version=1,expected_head=ZERO)
@@ -51,6 +51,12 @@ class FactualReadControllerTest(unittest.TestCase):
         approval=json.loads(approval_file.read_text());approval.pop('scope_kind')
         approval_file.write_text(canonical(approval)+'\n')
         with self.assertRaises(RuntimeError):self.manager.factual_read_environment(self.root,required=True)
+
+    def test_legacy_schema_without_new_base_capability_constant_still_works(self):
+        file=self.policy(registered=True)
+        schema=self.root/'reliability-cockpit/src/services/factual_read_entitlements.py'
+        schema.write_text(schema.read_text()+"\ndel BASE_CAPABILITIES\n")
+        self.assertEqual(self.manager.factual_read_environment(self.root,required=True),['NADI_FACTUAL_READ_POLICY_FILE='+str(file)])
 
     def test_exact_stable_private_state_bound_to_frontend_only(self):
         file=self.policy()
