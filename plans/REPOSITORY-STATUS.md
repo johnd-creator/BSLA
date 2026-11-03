@@ -1280,3 +1280,7 @@ there is no merge or live recovery authorization. Canonical CI adds mandatory
 synthetic PostgreSQL lanes without changing main-only selection or the original
 offline/six-file guards. Private source identities, counts, service pins and
 operational decisions remain outside Git. [Recovery runbook](../maximo-collector/docs/wo-actual-date-recovery.md).
+
+## 2026-11-03 — NADI-WO-DATA-AND-EXECUTIVE-RECONCILIATION-01 candidate
+
+One integrated candidate builds on qualified Draft PR128 without changing that dependency head. Adds bounded non-personal detail retention/reprojection, optional scoped WO detail, four separate Executive date bases, unique-WO SQL counts and explicit missing coverage/backlog/group semantics. Source timestamps never come from status or changedate fallback. No live source request, service replacement, grant/schema/cursor change or operational backfill is authorized by code qualification. Exact-head CI, independent review and historical preservation guards remain mandatory; operational actions are consolidated privately. [Contract, lineage and gates](../reliability-cockpit/docs/NADI-WO-DATA-AND-EXECUTIVE-RECONCILIATION-01.md).

@@ -1382,3 +1382,7 @@ commit state; all their identity/date/version guards remain mandatory. Added
 uncommitted/committed retry and genuine partial-cohort refusal regressions to both
 memory and PostgreSQL suites. Prior exact-head qualification remains historical;
 this correction requires fresh exact-head CI and independent closure.
+
+## 2026-11-03 — NADI-WO-DATA-AND-EXECUTIVE-RECONCILIATION-01 candidate
+
+One integrated candidate builds on qualified Draft PR128 without changing that dependency head. Adds bounded non-personal detail retention/reprojection, optional scoped WO detail, four separate Executive date bases, unique-WO SQL counts and explicit missing coverage/backlog/group semantics. Source timestamps never come from status or changedate fallback. No live source request, service replacement, grant/schema/cursor change or operational backfill is authorized by code qualification. Exact-head CI, independent review and historical preservation guards remain mandatory; operational actions are consolidated privately. [Contract, lineage and gates](reliability-cockpit/docs/NADI-WO-DATA-AND-EXECUTIVE-RECONCILIATION-01.md).

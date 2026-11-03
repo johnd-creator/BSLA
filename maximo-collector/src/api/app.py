@@ -32,7 +32,7 @@ WORK_ORDER_SELECT = (
     "worktype", "woclass", "description", "reportdate", "changedate", "statusdate",
     "schedstart", "schedfinish", "actstart", "actfinish", "targcompdate", "estdur", "downtime", "wopriority",
     "wopriority_description", "reportedby", "supervisor", "lead", "failurecode", "istask",
-    "pctaskid", "haschildren", "estlabcost", "estmatcost", "actlabcost", "actmatcost",
+    "pctaskid", "parent", "wogroup", "haschildren", "estlabcost", "estmatcost", "actlabcost", "actmatcost",
     "actlabhrs", "siteid", "orgid", "seksi", "bu", "jumlahhidup", "jumlahmati", "luasareatanam",
 )
 PERSON_SELECT = ("personid", "displayname", "firstname", "status", "statusdate", "locationorg")

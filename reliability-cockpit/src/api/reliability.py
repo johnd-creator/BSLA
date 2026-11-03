@@ -75,6 +75,7 @@ class RegisteredMaintenanceAsset(BaseModel):
 
 
 class RegisteredMaintenanceOverview(BaseModel):
+    wo_evidence: dict[str, object] | None = None
     scope: RegisteredReadScope
     as_of: datetime
     summary: RegisteredMaintenanceSummary
@@ -96,6 +97,13 @@ class WorkClassificationView(BaseModel):
     status_state: Literal["AVAILABLE", "MISSING_RETAINED_STATUS"]
 
 
+class WorkOrderFieldView(BaseModel):
+    source_changed_at: str | None = None
+    value: str | float | bool | None = None
+    state: str
+    origin: str
+
+
 class MaintenanceSourceDetailView(BaseModel):
     """Allowlisted retained scalars; no legacy-store join or source acquisition."""
 
@@ -104,6 +112,10 @@ class MaintenanceSourceDetailView(BaseModel):
     reported_at: str | None = None
     scheduled_start: str | None = None
     scheduled_finish: str | None = None
+    fields: dict[str, WorkOrderFieldView] = Field(default_factory=dict)
+    actual_dates_state: str = "SOURCE_NOT_YET_VERIFIED"
+    source_collected_at: datetime | None = None
+    mart_record_updated_at: datetime | None = None
 
 
 class MaintenanceView(BaseModel):
@@ -397,6 +409,7 @@ class RecordAvailabilityView(BaseModel):
 
 
 class DecisionOverviewView(BaseModel):
+    wo_evidence: dict[str, object] | None = None
     scope: DecisionScopeView
     data_maturity: DataMaturityView
     window_days: Literal[7, 30, 90]
@@ -797,10 +810,13 @@ def _maintenance(row) -> MaintenanceView:
         # Preserve the original offset, fractional precision and naive clocks.
         return value
 
+    from src.services.wo_detail import detail_view
+    fields, actual_state, collected = detail_view(row)
     detail = MaintenanceSourceDetailView(
         work_order_number=scalar("wonum"), asset_number=scalar("assetnum"),
         reported_at=clock("reportdate"), scheduled_start=clock("schedstart"),
-        scheduled_finish=clock("schedfinish"),
+        scheduled_finish=clock("schedfinish"), fields=fields, actual_dates_state=actual_state,
+        source_collected_at=collected, mart_record_updated_at=getattr(row,"mart_updated_at",None),
     )
     return MaintenanceView.model_validate({
         **{k: getattr(row, k) for k in MaintenanceView.model_fields if k not in {"classification", "source_detail"}},
@@ -874,12 +890,13 @@ def _decision_overview(raw: dict[str, object], window_days: int) -> DecisionOver
     assert isinstance(summary, dict)
     assert isinstance(records, dict)
     return DecisionOverviewView(
+        wo_evidence=raw.get("wo_evidence"),
         scope=DecisionScopeView(
             site_code="BSR",
             organization_code="IP",
             registry_scope="reliability_asset_registry",
             maintenance_source="Local Collector → Reliability Mart",
-            date_basis="COALESCE(actual_start, source_changed_at)",
+            date_basis="ACTSTART_ONLY; REPORTED / ACTFINISH / CHANGEDATE SEPARATE",
         ),
         data_maturity=DataMaturityView(
             asset_maintenance="CURRENT LOCAL PROJECTION",

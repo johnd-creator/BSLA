@@ -6,6 +6,8 @@ fields, and collection references never cross this boundary.
 
 from __future__ import annotations
 
+from src.adapters.maximo.wo_detail import projected as projected_detail
+
 from datetime import datetime
 from typing import Any, Mapping
 
@@ -152,6 +154,7 @@ def maintenance_event_from_payload(member: Mapping[str, Any]) -> dict[str, Any]:
             "worktype": work_type, "status": _text(member, "status"),
             "actstart": clock(member.get("actstart"))["original"], "actfinish": clock(member.get("actfinish"))["original"],
             "actual_dates": projected_evidence(member),
+            "wo_detail": projected_detail(member),
             "changedate": changed, "downtime": oslc_pop_number(member, "downtime"),
             "reportdate": _retained_clock(member, "reportdate"),
             "schedstart": _retained_clock(member, "schedstart"),
