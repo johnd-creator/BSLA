@@ -21,7 +21,7 @@ def registered_maintenance_overview(database) -> dict[str, object]:
                ReliabilityAssetRegistryMart.organization_code == ORGANIZATION_CODE)
     ).subquery()
     count = func.count(scope.c.canonical_id)
-    latest = func.max(func.coalesce(scope.c.actual_start, scope.c.source_changed_at))
+    latest = func.max(scope.c.source_changed_at)
     ranking = (
         select(ReliabilityAssetRegistryMart.asset_ref, ReliabilityAssetRegistryMart.source_asset_number,
                AssetMasterMart.description, count.label("event_count"), latest.label("latest_activity"))
@@ -37,7 +37,10 @@ def registered_maintenance_overview(database) -> dict[str, object]:
         registered = session.scalar(select(func.count(ReliabilityAssetRegistryMart.asset_ref)).where(
             ReliabilityAssetRegistryMart.site_code == SITE_CODE, ReliabilityAssetRegistryMart.organization_code == ORGANIZATION_CODE))
         rows = session.execute(ranking).all()
+    from src.services.wo_overview import wo_overview
+    evidence = wo_overview(database)
     return {
+        "wo_evidence": evidence,
         "scope": {"site_code": SITE_CODE, "organization_code": ORGANIZATION_CODE, "kind": "REGISTERED_BSR_IP"},
         "as_of": datetime.now(timezone.utc),
         "summary": {"registered_assets": int(registered or 0), "maintenance_events": int(totals[0] or 0), "assets_with_maintenance": int(totals[1] or 0)},

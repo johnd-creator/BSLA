@@ -288,6 +288,13 @@ class OslcClient:
                     )
                 retried_auth = True
                 self._auth.handle_expiry()
+                if object_structure.lower() == "mxwodetail":
+                    # An expired response is not a successfully visited WO
+                    # page. Re-login remains once-only and consumes the same
+                    # business request budget; successful-page caps stay exact.
+                    seen_page_fingerprints.remove(page_fingerprint)
+                    pages -= 1
+                    self._last_iteration_pages = pages
                 continue  # retry the same url with the fresh session
             if resp.status_code == 403:
                 raise OslcError(f"Maximo returned HTTP 403 for {object_structure}; account lacks READ permission")
@@ -311,7 +318,7 @@ class OslcClient:
                     )
                     if not resource_url:
                         raise OslcError("invalid resource link")
-                    resource_url = _add_detail_select(resource_url)
+                    resource_url = _add_detail_select(resource_url, select if object_structure.lower() == "mxwodetail" else None)
                     self._detail_request_count += 1
                     detail = self.get(resource_url)
                     if MaximoAuth.looks_expired(detail):
@@ -394,9 +401,14 @@ def _normalize_member(member: Mapping[str, Any]) -> dict[str, Any]:
     return normalized
 
 
-def _add_detail_select(resource_url: str) -> str:
+def _add_detail_select(resource_url: str, wo_select=None) -> str:
     """Limit asset detail responses to the verified scalar field allowlist."""
     parsed = urlsplit(resource_url)
+    if "/mxwodetail/" in parsed.path.lower() and wo_select:
+        query = [(key, value) for key, value in parse_qsl(parsed.query, keep_blank_values=True)
+                 if key.lower() != "oslc.select"]
+        query.append(("oslc.select", ",".join(wo_select)))
+        return urlunsplit((parsed.scheme, parsed.netloc, parsed.path, urlencode(query), parsed.fragment))
     if "/mxapiasset/" not in parsed.path.lower() and "/mxasset/" not in parsed.path.lower():
         return resource_url
     query = parse_qsl(parsed.query, keep_blank_values=True)

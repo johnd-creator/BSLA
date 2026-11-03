@@ -69,7 +69,7 @@ Status legend: ✅ verified on this instance · ⛔ forbidden (BMXAA0024E) · �
 | `lead` | `lead` | string | |
 | `failure_code` | `failurecode` | string | Retained direct scalar; MX-015A verified presence. Not a failure event, cause/remedy or verified Failure Code master relationship. |
 | `is_task` | `istask` | boolean | |
-| `parent_wo` | `pctaskid`/`wogroup` | string | task hierarchy |
+| `parent_wo` | `pctaskid` | string | Legacy task-reference field; not proof of source PARENT. Raw verified `parent` and `wogroup` are retained independently in optional WO detail; WO Group semantics remain unverified. |
 | `has_children` | `haschildren` | boolean | |
 | `estimated_labor_cost` | `estlabcost` | number | |
 | `estimated_material_cost` | `estmatcost` | number | |

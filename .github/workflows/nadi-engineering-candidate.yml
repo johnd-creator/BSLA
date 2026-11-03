@@ -74,6 +74,11 @@ jobs:
         env:
           PYTHONPATH: '.:tests'
         run: python -m unittest test_pdm_source_interpretation -v
+      - name: Integrated WO detail and executive reconciliation
+        working-directory: reliability-cockpit
+        env:
+          PYTHONPATH: '.:tests'
+        run: python -m unittest test_wo_executive_reconciliation test_wo_executive_postgres test_wo_detail test_wo_sr_classification test_reliability_mart -v
       - name: Separate Factual READ private administration and scoped local policy
         working-directory: reliability-cockpit
         env:

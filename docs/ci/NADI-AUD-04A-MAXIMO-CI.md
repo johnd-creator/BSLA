@@ -37,7 +37,9 @@ Two fresh GitHub-hosted Ubuntu lanes install the collector from its selected
 checkout using pip, independently of any developer virtual environment:
 Python **3.11** is the `pyproject.toml` minimum; **3.12** matches its Dockerfile.
 Each lane has a 15-minute timeout, with separate five-minute metadata/gate jobs.
-No collector service, Docker stack, database service or migration is launched.
+The original offline lanes launch no service or database. The additive PostgreSQL
+recovery lanes below use a separate ephemeral synthetic service; no operational
+stack or migration is launched.
 Dependencies retain the project's existing bounded version ranges; PyYAML
 6.0.3 is pinned for infrastructure tests. Dependency locking remains separate
 work; Python patch versions and `ubuntu-latest` can advance. Exact Python
@@ -201,3 +203,22 @@ There is no cross-version cache dependency or operational service cost.
 Official localhost:3000, all QA sessions/data/schema, collectors, Mart, Phase-1
 policy, worktrees, backups, original PNGs and workbook are untouched. No
 operational action, database access or source synchronization was performed.
+
+## Additive WO rollback PostgreSQL gate — 3 November 2026
+
+NADI-WO-ACTUAL-DATE-ROLLBACK-FIX-01 adds `postgres` lanes for Python 3.11/3.12.
+They use the same selected exact source HEAD and immutable workflow tooling,
+`postgres:16.4-alpine` pinned by digest, a fresh `maximo_collector` test database
+and non-superuser `nadi_ci` owner. Synthetic passwords are disposable CI fixtures,
+never Maximo/plant credentials. The guarded runner scrubs source environment,
+disables dotenv, denies HTTP/subprocess and other database targets, and fails
+on missing tests, skipped tests, expected failures or unexpected I/O. This is
+accidental-I/O defense, not a hostile-code sandbox; use only disposable runners.
+
+The final gate requires success of `select`, `collector` and `postgres`, followed
+by the existing fresh PR-HEAD recheck. Main-target selection and production policy
+are preserved. Offline memory-only guards and the exact six file rehearsals are
+unchanged. The new PostgreSQL suite covers real row locks, atomic field rollback,
+worker metadata replay, NULL and field-version protection, commit interruptions,
+verified duplicate rollback and partial cohort conflicts. Real-cohort full-backup
+restore is additionally recorded privately; CI contains synthetic evidence only.

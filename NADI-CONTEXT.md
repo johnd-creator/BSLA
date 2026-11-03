@@ -158,3 +158,7 @@ reader verified the stored facts. This is data availability, not live hierarchy 
 or Engineer UAT acceptance. All existing containers remain preserved; PR119 runtime,
 controller compatibility STOP, UNKNOWN roles, PARTIAL global coverage and Logbook
 PdM HOLD remain. Counts, raw identities and recovery evidence remain private.
+
+## WO actual-date recovery candidate — 3 November 2026
+
+NADI-MAXIMO-WO-ACTUAL-DATE-RECOVERY-01 is a Collector/Mart source candidate with isolated rehearsal, not an operational write or runtime transition. Existing columns/API support actual dates; absence must distinguish verified source emptiness from unavailable, invalid and lost evidence. See [lineage and release boundaries](maximo-collector/docs/wo-actual-date-recovery.md).

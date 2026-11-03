@@ -1281,3 +1281,11 @@ reader verified the stored facts. This is data availability, not live hierarchy 
 or Engineer UAT acceptance. All existing containers remain preserved; PR119 runtime,
 controller compatibility STOP, UNKNOWN roles, PARTIAL global coverage and Logbook
 PdM HOLD remain. Counts, raw identities and recovery evidence remain private.
+
+## WO actual-date pipeline candidate — 3 November 2026
+
+NADI-MAXIMO-WO-ACTUAL-DATE-RECOVERY-01 corrects acquisition/JSON retention/local projection and adds exact-cohort recovery with evidence-derived status completeness. Development and isolated rehearsal are authorized; live service replacement, write cohorts and frontend presentation remain separate gates. No phase or operational KPI eligibility changes. [Runbook](../maximo-collector/docs/wo-actual-date-recovery.md).
+
+## 2026-11-03 — NADI-WO-DATA-AND-EXECUTIVE-RECONCILIATION-01 candidate
+
+One integrated candidate builds on qualified Draft PR128 without changing that dependency head. Adds bounded non-personal detail retention/reprojection, optional scoped WO detail, four separate Executive date bases, unique-WO SQL counts and explicit missing coverage/backlog/group semantics. Source timestamps never come from status or changedate fallback. No live source request, service replacement, grant/schema/cursor change or operational backfill is authorized by code qualification. Exact-head CI, independent review and historical preservation guards remain mandatory; operational actions are consolidated privately. [Contract, lineage and gates](../reliability-cockpit/docs/NADI-WO-DATA-AND-EXECUTIVE-RECONCILIATION-01.md).

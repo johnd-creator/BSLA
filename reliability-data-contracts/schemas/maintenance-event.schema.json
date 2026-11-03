@@ -3,6 +3,186 @@
   "$id": "https://reliability-data-contracts/schemas/maintenance-event.schema.json",
   "title": "MaintenanceEvent",
   "description": "Vendor-neutral maintenance execution event, also used as the MX-007R canonical maintenance_event contract. Legacy fields remain compatible; v1 provenance and evidence are optional during migration.",
+  "$defs": {
+    "woDetailField": {
+      "type": "object",
+      "required": [
+        "value",
+        "state",
+        "origin",
+        "epoch_seconds"
+      ],
+      "properties": {
+        "value": {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ],
+          "maxLength": 4000
+        },
+        "state": {
+          "enum": [
+            "SOURCE_VALUE",
+            "RETAINED_LEGACY_VALUE",
+            "SOURCE_CONFIRMED_EMPTY",
+            "SOURCE_NOT_YET_VERIFIED",
+            "SOURCE_VALUE_INVALID",
+            "SOURCE_TIMESTAMP_INVALID"
+          ]
+        },
+        "origin": {
+          "enum": [
+            "MAXIMO_RESPONSE",
+            "LEGACY_COLUMN"
+          ]
+        },
+        "epoch_seconds": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "source_changed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 128
+        },
+        "original_value": {
+          "type": [
+            "string",
+            "boolean",
+            "null"
+          ],
+          "maxLength": 16
+        }
+      },
+      "additionalProperties": false
+    },
+    "woDetail": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "identity": {
+          "type": "object",
+          "properties": {
+            "wonum": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 160
+            },
+            "assetnum": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 160
+            },
+            "siteid": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 160
+            },
+            "orgid": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 160
+            }
+          },
+          "additionalProperties": false
+        },
+        "source_changed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 128
+        },
+        "collected_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 128
+        },
+        "fields": {
+          "type": "object",
+          "properties": {
+            "description": {
+              "$ref": "#/$defs/woDetailField"
+            },
+            "status_description": {
+              "$ref": "#/$defs/woDetailField"
+            },
+            "work_class": {
+              "$ref": "#/$defs/woDetailField"
+            },
+            "priority": {
+              "$ref": "#/$defs/woDetailField"
+            },
+            "priority_description": {
+              "$ref": "#/$defs/woDetailField"
+            },
+            "location_id": {
+              "$ref": "#/$defs/woDetailField"
+            },
+            "source_parent": {
+              "$ref": "#/$defs/woDetailField"
+            },
+            "source_task_reference": {
+              "$ref": "#/$defs/woDetailField"
+            },
+            "wo_group": {
+              "$ref": "#/$defs/woDetailField"
+            },
+            "is_task": {
+              "$ref": "#/$defs/woDetailField"
+            },
+            "has_children": {
+              "$ref": "#/$defs/woDetailField"
+            },
+            "reported_at": {
+              "$ref": "#/$defs/woDetailField"
+            },
+            "status_changed_at": {
+              "$ref": "#/$defs/woDetailField"
+            },
+            "scheduled_start": {
+              "$ref": "#/$defs/woDetailField"
+            },
+            "scheduled_finish": {
+              "$ref": "#/$defs/woDetailField"
+            },
+            "target_completion": {
+              "$ref": "#/$defs/woDetailField"
+            },
+            "estimated_duration_hours": {
+              "$ref": "#/$defs/woDetailField"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schema_version",
+        "identity",
+        "source_changed_at",
+        "fields"
+      ],
+      "additionalProperties": false
+    }
+  },
   "type": "object",
   "required": ["id", "equipment_id"],
   "properties": {
@@ -70,6 +250,7 @@
           "type": ["object", "null"],
           "description": "Derived from mxwodetail actual fields (site BSR)",
           "properties": {
+            "wo_detail": {"$ref":"#/$defs/woDetail"},
             "origin": {
               "type": ["string", "null"],
               "enum": ["MXWODETAIL", null]

@@ -36,7 +36,7 @@ class WorkOrderDetailTest(unittest.TestCase):
         self.assertNotIn("sources", dto.model_dump())
         self.assertNotIn("provenance", dto.model_dump())
         self.assertEqual(dto.failure_code, "RETAINED-CODE")
-        self.assertEqual(set(dto.source_detail.model_dump()), {"work_order_number","asset_number","reported_at","scheduled_start","scheduled_finish"})
+        self.assertEqual(set(dto.source_detail.model_dump()), {"work_order_number","asset_number","reported_at","scheduled_start","scheduled_finish","fields","actual_dates_state","source_collected_at","mart_record_updated_at"})
 
 
 if __name__ == "__main__":

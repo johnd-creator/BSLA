@@ -68,3 +68,10 @@ All list endpoints support `q`, `offset`, `limit`, and optional
 Vendor identifiers are quarantined under `sources.maximo`.
 The dashboard's sync button only triggers the local collector; business data
 requests to Maximo remain GET-only.
+
+## Actual WO dates
+
+[Actual-date lineage and bounded recovery](docs/wo-actual-date-recovery.md) describes
+versioned JSON retention, safe projection and status-aware completeness. Code
+qualification does not authorize source expansion, Collector replacement or a live
+Mart repair; historical recovery uses exact separately approved cohorts.

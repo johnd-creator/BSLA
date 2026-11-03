@@ -30,9 +30,9 @@ from src.api.data_explorer import router as data_explorer_router
 WORK_ORDER_SELECT = (
     "wonum", "workorderid", "assetnum", "location", "status", "status_description",
     "worktype", "woclass", "description", "reportdate", "changedate", "statusdate",
-    "schedstart", "schedfinish", "targcompdate", "estdur", "downtime", "wopriority",
+    "schedstart", "schedfinish", "actstart", "actfinish", "targcompdate", "estdur", "downtime", "wopriority",
     "wopriority_description", "reportedby", "supervisor", "lead", "failurecode", "istask",
-    "pctaskid", "haschildren", "estlabcost", "estmatcost", "actlabcost", "actmatcost",
+    "pctaskid", "parent", "wogroup", "haschildren", "estlabcost", "estmatcost", "actlabcost", "actmatcost",
     "actlabhrs", "siteid", "orgid", "seksi", "bu", "jumlahhidup", "jumlahmati", "luasareatanam",
 )
 PERSON_SELECT = ("personid", "displayname", "firstname", "status", "statusdate", "locationorg")

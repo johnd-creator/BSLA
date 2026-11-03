@@ -7,6 +7,8 @@ never constructs a Maximo client and never changes a Maximo SyncCursor.
 
 from __future__ import annotations
 
+from src.adapters.maximo.actual_dates import retained_values
+
 import os
 import logging
 from dataclasses import dataclass
@@ -137,10 +139,31 @@ def _asset_record(row: models.EquipmentOrm) -> dict[str, Any] | None:
     return record
 
 
+def _detail_proof(row):
+    from src.adapters.maximo.wo_detail import evidence, FIELDS
+    proof = (row.sources or {}).get("maximo", {}).get("wo_detail")
+    if isinstance(proof, dict):
+        return proof
+    # Legacy columns prove retained values, not source-null or collection time.
+    values = {"wonum": row.id, "assetnum": row.equipment_id, "siteid": "BSR", "orgid": "IP",
+              "changedate": _timestamp_value(row.source_changed_at)}
+    mapping = {"description":"description", "status_description":"status_description", "woclass":"work_class",
+               "wopriority":"priority", "wopriority_description":"priority_description", "location":"location_id",
+               "pctaskid":"parent_wo", "istask":"is_task", "haschildren":"has_children", "estdur":"estimated_duration_hours",
+               "reportdate":"reported_at", "statusdate":"status_changed_at", "schedstart":"scheduled_start",
+               "schedfinish":"scheduled_finish", "targcompdate":"target_completion"}
+    for source, attr in mapping.items():
+        value = getattr(row, attr)
+        values[source] = value.isoformat() if isinstance(value, datetime) else value
+    return evidence(values, origin="LEGACY_COLUMN")
+
+
 def _work_order_payload(row: models.WorkOrderOrm) -> dict[str, Any] | None:
     equipment_id = normalize_identifier(row.equipment_id)
     if not equipment_id:
         return None
+    actual = retained_values((row.sources or {}).get("maximo", {}).get("actual_dates"),
+                             row.id, equipment_id, row.source_changed_at)
     # Only approved scalar fields are reconstructed.  Person fields and raw
     # source JSON are intentionally excluded from the canonical payload.
     return {
@@ -150,6 +173,13 @@ def _work_order_payload(row: models.WorkOrderOrm) -> dict[str, Any] | None:
         "orgid": ORGANIZATION_CODE,
         "status": row.status,
         "worktype": row.work_type,
+        "description": row.description, "status_description": row.status_description,
+        "woclass": row.work_class, "wopriority": row.priority, "wopriority_description": row.priority_description,
+        "location": row.location_id, "pctaskid": row.parent_wo, "istask": row.is_task,
+        "haschildren": row.has_children, "estdur": row.estimated_duration_hours,
+        "statusdate": row.status_changed_at.isoformat() if row.status_changed_at else None,
+        "targcompdate": row.target_completion.isoformat() if row.target_completion else None,
+        "collector_wo_detail": _detail_proof(row),
         # New retained source clocks keep uncertainty in disposable/naive stores.
         # Existing source_changed_at normalization is outside this correction.
         "reportdate": row.reported_at.isoformat() if row.reported_at else None,
@@ -159,9 +189,10 @@ def _work_order_payload(row: models.WorkOrderOrm) -> dict[str, Any] | None:
         "downtime": row.downtime_hours,
         "actlabhrs": row.actual_labor_hours,
         "failurecode": row.failure_code,
-        # The local operational schema does not retain actstart/actfinish.
-        "actstart": None,
-        "actfinish": None,
+        # Only exact, scoped, versioned retained clock evidence can replay.
+        "collector_actual_dates": (row.sources or {}).get("maximo", {}).get("actual_dates"),
+        "actstart": actual.get("actstart"),
+        "actfinish": actual.get("actfinish"),
     }
 
 

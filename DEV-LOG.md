@@ -1359,3 +1359,49 @@ reader verified the stored facts. This is data availability, not live hierarchy 
 or Engineer UAT acceptance. All existing containers remain preserved; PR119 runtime,
 controller compatibility STOP, UNKNOWN roles, PARTIAL global coverage and Logbook
 PdM HOLD remain. Counts, raw identities and recovery evidence remain private.
+
+## 2026-11-03 — NADI-MAXIMO-WO-ACTUAL-DATE-RECOVERY-01 candidate
+
+Audited both acquisition paths and the local projection; implemented existing-JSON clock retention, source-version/non-null preservation, bounded atomic recovery and CAS rollback. Added PO status-aware completeness without status inference, source writes, migration, cursor/schedule changes or frontend changes. Hermetic qualification and owner-private source/recovery evidence are independent from activation/operational acceptance. [Runbook](maximo-collector/docs/wo-actual-date-recovery.md).
+
+## 2026-11-03 — NADI-WO-ACTUAL-DATE-ROLLBACK-FIX-01 candidate
+
+Reproduced the full-row rollback refusal after independent normal-worker metadata
+updates on a fresh isolated full PostgreSQL restore. Replaced that sole CAS with
+presence-aware per-path journaling, exact date/provenance guards and atomic scoped
+rollback; independent metadata survives and newer field observations fail closed.
+Added actual PostgreSQL lock/recovery qualification to the unchanged main-target
+Maximo CI policy. Isolated recovery/replay/rollback is tested independently of
+exact-head CI/review and live acceptance. No operational recovery, service
+replacement, source request, cursor/scope/schedule or schema change is authorized
+or performed. Polling PAGE_LIMIT coverage remains a separate operational concern.
+
+Independent review identified a mixed idempotent/changed-cohort prepared-rollback
+retry defect. No-op entries are now neutral only when reconciling transaction
+commit state; all their identity/date/version guards remain mandatory. Added
+uncommitted/committed retry and genuine partial-cohort refusal regressions to both
+memory and PostgreSQL suites. Prior exact-head qualification remains historical;
+this correction requires fresh exact-head CI and independent closure.
+
+## 2026-11-03 — NADI-WO-DATA-AND-EXECUTIVE-RECONCILIATION-01 candidate
+
+One integrated candidate builds on qualified Draft PR128 without changing that dependency head. Adds bounded non-personal detail retention/reprojection, optional scoped WO detail, four separate Executive date bases, unique-WO SQL counts and explicit missing coverage/backlog/group semantics. Source timestamps never come from status or changedate fallback. No live source request, service replacement, grant/schema/cursor change or operational backfill is authorized by code qualification. Exact-head CI, independent review and historical preservation guards remain mandatory; operational actions are consolidated privately. [Contract, lineage and gates](reliability-cockpit/docs/NADI-WO-DATA-AND-EXECUTIVE-RECONCILIATION-01.md).
+
+
+## 2026-11-03 — PR129 review closure and browser qualification correction
+
+The failed review draft was repaired and sealed without changing its immutable
+range. Independent review closed the WO field-version, known-null replay, safe
+SQL evidence-binding and field-scoped rollback defects. Exact finite source
+exceptions preserve historical classification/detail pins and all current-byte,
+ancestry, untracked-source and canonical CI checks. Disposable negative tests
+reject changed source, manifest, historical assertions/maps and unrelated files.
+
+At `0c16080eb284539a80b374e6a5fd927e02e3a58c`, Maximo CI and NADI backend passed;
+the mandatory browser suite found that expanded WO detail had lost its legacy
+disclosure label. Restore that label, the visible chronology heading and original
+Legacy date text in provenance. Browser assertions remain unchanged. The corrected
+head requires fresh full canonical CI and independent review; previous green lanes
+do not substitute for it. Live activation, source sampling, Mart repair and real
+Engineer UAT remain unperformed and separately gated. All 35 existing container
+identities/images/start/restart metadata were verified unchanged.

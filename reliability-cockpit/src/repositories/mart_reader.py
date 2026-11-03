@@ -1104,7 +1104,7 @@ class MartQueryRepository:
         if current.tzinfo is None:
             current = current.replace(tzinfo=timezone.utc)
         window_start = current - timedelta(days=window_days)
-        date_column = func.coalesce(MaintenanceEventMart.actual_start, MaintenanceEventMart.source_changed_at)
+        date_column = MaintenanceEventMart.actual_start
         maintenance_scope = (
             select(MaintenanceEventMart)
             .join(ReliabilityAssetRegistryMart, ReliabilityAssetRegistryMart.asset_ref == MaintenanceEventMart.equipment_id)
@@ -1115,7 +1115,7 @@ class MartQueryRepository:
                 ReliabilityAssetRegistryMart.organization_code == ORGANIZATION_CODE,
             )
         ).subquery()
-        scoped_date = func.coalesce(maintenance_scope.c.actual_start, maintenance_scope.c.source_changed_at)
+        scoped_date = maintenance_scope.c.actual_start
 
         week_start = datetime(current.year, current.month, current.day, tzinfo=current.tzinfo) - timedelta(days=current.weekday())
         trend_starts = [week_start - timedelta(weeks=offset) for offset in range(11, -1, -1)]
@@ -1221,11 +1221,14 @@ class MartQueryRepository:
             records = session.execute(records_statement).one()
             registered_assets = int(session.scalar(registry_statement) or 0)
 
+        from src.services.wo_overview import wo_overview
+        wo_evidence = wo_overview(self.database, window_days=window_days, as_of=current)
         integrity = self.integrity_summary()
         summary_values = summary._mapping
         trend_values = trend._mapping
         record_values = records._mapping
         return {
+            "wo_evidence": wo_evidence,
             "registered_assets": registered_assets,
             "summary": {
                 "maintenance_activity_7d": int(summary_values["maintenance_7d"] or 0),

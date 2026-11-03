@@ -528,3 +528,11 @@ context under an exact registered BSR/IP root. Technical nodes remain distinct
 from Registry membership. Missing edges and unverified system/equipment/component
 roles remain explicit; no source acquisition or permission expansion is implied.
 See [candidate contract and verification](reliability-cockpit/docs/NADI-ASSET-HIERARCHY-01.md).
+
+## WO date completeness — 3 November 2026
+
+FR-02 requires evidence-derived actual dates and status-aware completeness. WAPPR/WMATL may legitimately have no recorded dates; COMP/CLOSE never prove date availability. Genuine dates remain visible independently of status. Collector/Mart correction and bounded recovery are tracked in [the lineage runbook](maximo-collector/docs/wo-actual-date-recovery.md); frontend/API presentation acceptance is separate.
+
+## 2026-11-03 — NADI-WO-DATA-AND-EXECUTIVE-RECONCILIATION-01 candidate
+
+One integrated candidate builds on qualified Draft PR128 without changing that dependency head. Adds bounded non-personal detail retention/reprojection, optional scoped WO detail, four separate Executive date bases, unique-WO SQL counts and explicit missing coverage/backlog/group semantics. Source timestamps never come from status or changedate fallback. No live source request, service replacement, grant/schema/cursor change or operational backfill is authorized by code qualification. Exact-head CI, independent review and historical preservation guards remain mandatory; operational actions are consolidated privately. [Contract, lineage and gates](reliability-cockpit/docs/NADI-WO-DATA-AND-EXECUTIVE-RECONCILIATION-01.md).
