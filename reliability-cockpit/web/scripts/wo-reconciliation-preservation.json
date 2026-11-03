@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewedHead": "ebfa86fd9a9cb035a926f133874104cfaa81c2a3",
+  "reviewedHead": "56c502a82f8e8a179d98d31f25e16f88393aad86",
   "fenceBase": "988af8d4875758b300e7b563c0a205f143ee184c",
   "files": {
     ".github/workflows/nadi-engineering-candidate.yml": "6421fb444407179172bf5f0942f86bffdf13045c2eac705a34a0751432a26519",
@@ -37,7 +37,7 @@
     "reliability-cockpit/web/components/ExecutiveOverview.tsx": "87690708ffa876e4cec22e6e597f47b2a1b3aaa5d6c4f6a719bda4ebe1469255",
     "reliability-cockpit/web/components/ScopedExecutiveOverview.tsx": "e402d1e70552dc2cba8a9143680084592c1d29e65023b20316a2bc1e4c8061c0",
     "reliability-cockpit/web/components/WoEvidenceOverview.tsx": "98fa6cfba385e0e217d13892779e8362729c7373f899296db504d970b3b6e742",
-    "reliability-cockpit/web/components/WorkOrderSourceDetail.tsx": "df1191a652fd5e86bc8b3374cea8e9f0db4b56f2c9cbaa9bd942c0838db52238",
+    "reliability-cockpit/web/components/WorkOrderSourceDetail.tsx": "ee024c5ddc07f1b6148478f631569fad2e1f863d9feea653fe4743aa30124384",
     "reliability-cockpit/web/lib/api.ts": "4240e30f8c6ea92413738a1ebbcf57a1454209fa427578a7911ed0afa1a9057e",
     "reliability-cockpit/web/lib/factual-read-contract.ts": "9901d26ac62c4979d683af6147af0f676497aed987de901da6f4bd968f20ed28",
     "reliability-cockpit/web/lib/factual-scoped-reader.ts": "00655cd8f70982de281d97f48a343b8256dbb997893f58ee3bf44297ed2b5121",
