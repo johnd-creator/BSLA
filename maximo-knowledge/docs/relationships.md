@@ -179,3 +179,28 @@ UNKNOWN/PARTIAL. Excel remains a reference and was not imported.
 Next safe work is a separately reviewed eligibility/scope plan for any future
 ingestion of children with unavailable source units. The read exception does not
 authorize that ingestion, new membership, role assignment or service activation.
+
+## NADI-HIERARCHY-CHILD-CANONICAL-INGEST-20261103 — closed approved ingestion
+
+A later explicit owner approval admitted the sealed child/parent allowlist into the
+existing Maximo-owned canonical Mart after fresh consistent backup, independent
+restore and full-batch rollback/insert/replay rehearsal. The prior read-only unit
+exception alone did not authorize writes. Existing canonical source fields and
+MartWriter were reused, with a same-connection outer transaction and INSERT-only
+AssetMaster fence. Legacy Equipment/status history were not appended; this avoids
+expanding the scheduled WO/projector input population. Routine acquisition scope,
+Registry, grants, credentials, schema and asset cursors remain unchanged.
+
+Exact source IDs and direct parent references are preserved. Missing child eq11
+stays unavailable/UNKNOWN, without parent/plant/CS01 fallback. Protected old facts,
+Registry/mappings/ledger and WO classifications pass preservation checks. The
+reviewed hierarchy reader traversed the isolated restored data with UNKNOWN roles
+and unregistered child flags; unregistered roots were denied. The configured live
+SELECT-only reader also verified all approved stored identities and parents.
+
+These checks establish stored-data/source-reader compatibility; live hierarchy UI
+and Engineer UAT remain pending while the PR119 runtime/controller gate is retained.
+Global hierarchy coverage remains PARTIAL, semantic roles UNKNOWN, and Registry
+members do not imply physical roots. Excel was not imported; Logbook PdM HOLD.
+See the [closed-batch method and recovery limits](../../docs/NADI-NIGHT-INTEGRATION-20261102.md#nadi-hierarchy-child-canonical-ingest-20261103--closed-approved-ingestion).
+Raw identities, cardinalities and recovery evidence remain private.

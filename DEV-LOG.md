@@ -1343,3 +1343,19 @@ blocked. PR121 is Draft/superseded and Logbook PdM HOLD. Domain input describes 
 unnamed tier above system, then system/subsystem/asset/equipment; source role mapping
 is UNKNOWN and Registry membership does not imply physical roots. See [source report](docs/NADI-NIGHT-INTEGRATION-20261102.md)
 for method and limits; raw evidence and counts remain private.
+
+### NADI-HIERARCHY-CHILD-CANONICAL-INGEST-20261103 — authorized append
+
+The owner separately approved ingestion of the closed, previously verified child
+allowlist. After fresh consistent backup, independent isolated restore, denied-write
+tests and full-packet rollback/insert/replay rehearsal, an insert-only outer
+transaction appended missing AssetMaster facts through the existing MartWriter in
+the Maximo-owned Mart. Source IDs and direct parent references are preserved; missing
+child unit remains UNKNOWN without parent/plant fallback. Legacy Equipment, Registry,
+old facts, mappings, ledger, asset cursors and WO classifications are preserved.
+Default acquisition scope and scheduled workers are unchanged. The reviewed NADI
+hierarchy reader passed on the isolated data, and the configured live SELECT-only
+reader verified the stored facts. This is data availability, not live hierarchy UI
+or Engineer UAT acceptance. All existing containers remain preserved; PR119 runtime,
+controller compatibility STOP, UNKNOWN roles, PARTIAL global coverage and Logbook
+PdM HOLD remain. Counts, raw identities and recovery evidence remain private.

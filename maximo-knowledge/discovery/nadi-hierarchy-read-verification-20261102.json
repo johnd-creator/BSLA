@@ -111,5 +111,36 @@
     "registry_members_are_all_physical_roots": false,
     "previous_discrepancy_status": "OWNER_VERIFICATION_REQUIRED_WITHOUT_SCOPE_EXPANSION",
     "raw_evidence_and_cardinalities": "private"
+  },
+  "closed_child_canonical_ingestion": {
+    "task": "NADI-HIERARCHY-CHILD-CANONICAL-INGEST-20261103",
+    "verified_date": "2026-11-03",
+    "date_timezone": "Asia/Jakarta",
+    "status": "APPROVED_CLOSED_BATCH_COMMITTED_AND_VERIFIED",
+    "authorization": "later explicit owner approval; distinct from preceding read-only exception",
+    "scope": "sealed child allowlist with verified direct parents and BSR/IP; no default-policy expansion",
+    "source_projection": "existing canonical mxasset field selection via mxapiasset",
+    "source_business_methods": [
+      "GET"
+    ],
+    "source_business_writes": false,
+    "store": "existing Maximo-owned canonical Mart",
+    "writer": "existing MartWriter; same-connection outer transaction and savepoint; new asset_master rows only",
+    "legacy_equipment_or_status_history_appended": false,
+    "unit_unavailable_handling": "UNKNOWN; no parent/plant/CS01 fallback",
+    "direct_parent_and_source_identity": "PRESERVED",
+    "fresh_consistent_backup_and_independent_restore": "PASS",
+    "full_batch_late_rollback_insert_and_idempotent_replay": "PASS",
+    "reviewed_hierarchy_reader_on_isolated_data": "PASS",
+    "configured_live_SELECT_only_reader_identity_check": "PASS",
+    "old_facts_registry_mapping_ledger_and_WO_classifications": "PRESERVED",
+    "global_asset_cursors_and_transaction_projection_state": "UNCHANGED",
+    "default_collector_scope_or_worker_changed": false,
+    "grant_credentials_schema_or_runtime_changed": false,
+    "existing_containers": "PRESERVED; temporary restore removed",
+    "live_hierarchy_UI_or_Engineer_UAT": "NOT_ACTIVATED",
+    "hierarchy_roles": "UNKNOWN",
+    "global_population_coverage": "PARTIAL",
+    "raw_evidence_and_cardinalities": "private"
   }
 }

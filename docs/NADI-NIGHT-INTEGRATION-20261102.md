@@ -192,3 +192,68 @@ UNKNOWN/PARTIAL. Excel remains a reference and was not imported.
 Next safe work is a separately reviewed eligibility/scope plan for any future
 ingestion of children with unavailable source units. The read exception does not
 authorize that ingestion, new membership, role assignment or service activation.
+
+## NADI-HIERARCHY-CHILD-CANONICAL-INGEST-20261103 — closed approved ingestion
+
+This is a later, separately owner-authorized operation. The preceding unit-exception
+read did not itself authorize writes. The approved finite child/parent manifest was
+sealed before enrichment, with BSR/IP and exact returned identity/parent guards.
+Only already observed child IDs were fetched using the existing canonical asset
+field selection, credential-owning worker and bounded GET client. The one-task
+exception omits the child unit predicate; routine Collector configuration is unchanged.
+Missing eq11 stays unavailable/UNKNOWN and does not inherit CS01 or the plant value.
+
+The owning store is the existing Maximo Collector database. The NADI hierarchy
+reader uses canonical `asset_master`; this batch therefore uses the existing
+MartWriter to append only missing AssetMaster rows. It intentionally adds no legacy
+Equipment rows or status observations, avoiding expansion of the scheduled legacy
+WO/projector input population. The existing mapper is used with explicit source-only
+unit handling. No new Registry membership, role, source credential, permission,
+schema, global cursor, collection-run completion or default collection scope is
+created. Old parent facts and all existing technical rows remain intact.
+
+A fresh exported read-only snapshot bound the private backup to table fingerprints.
+An independent network-isolated restore matched every public table. Isolated checks
+covered redirected targets, wrong IDs/site/org/parent, unavailable-unit fallback,
+UPDATE/other-table INSERT denial, late outer rollback, insert-only commit, replay
+deduplication and existing-identity drift. Full-batch rehearsal proved rollback
+after inner writer completion, successful insert and zero additional rows on replay.
+The exact operator and source-packet hashes were pinned before the real operation.
+The live append used one outer PostgreSQL transaction, with the normal writer bound
+to a savepoint on that same connection. A SQL fence and session flush guard allowed
+only new AssetMaster writes. Existing matching IDs would be skipped, never updated.
+
+Source/parent identity, unavailable unit and exact before/after protected-table
+fingerprints passed before commit and were checked again afterwards. Equipment,
+old AssetMaster/status history, Registry, mappings, selections and schema ledger
+are preserved. Asset acquisition cursors/runs and projection state were unchanged
+by the transaction; native WO/projector schedules continued independently. The
+asset projection watermark remains unchanged. WO classification fingerprints also
+match. The task-owned restore container was removed after verification; all existing
+container roles and unrelated identities/images/start/restart/state/ports passed
+the preservation check. The consistent backup is retained privately.
+
+The reviewed hierarchy reader at `6d9efc2f3e364a14f6faea1520c083dcf65b9197`
+traversed the restored canonical data, preserving exact direct parents, UNKNOWN
+unit/role and unregistered child flags; an unregistered child could not become an
+authorized root. Separately, the configured live Factual SELECT-only reader verified
+all approved stored identities and parent references. These checks prove source
+reader/data compatibility. They do not deploy the hierarchy route or prove live
+Engineer browser visibility. Registry membership does not establish physical roots.
+The domain owner's proposed levels remain unverified source semantics; Excel was
+not imported. Global coverage remains PARTIAL and roles UNKNOWN.
+
+An initial enrichment attempt used unused legacy projection fields and stopped at
+the local scalar allowlist check before any database write. The specific offending
+field/type was not retained; the supported canonical projection then passed for the
+whole manifest. A backup helper also stopped on a missing local import before
+creating its dump; after correction the consistent backup/restore passed. These
+local failures did not change source business data or bypass a failed gate.
+
+Local frontend, Engineering and Factual remain the original PR119 revision/image.
+The existing controller source/recovery compatibility STOP remains; new admission,
+grant issuance and live candidate UAT are still separate activation gates. This
+backup/rehearsal qualifies only this append. PR121 remains Draft/superseded and
+Logbook PdM HOLD. Raw packets, counts, identities and private evidence locations
+are excluded from public documentation. This is a closed batch, not a new recurring
+collector or full source synchronization claim.
