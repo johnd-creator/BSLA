@@ -1,5 +1,5 @@
 // NADI-WO-DATA-AND-EXECUTIVE-RECONCILIATION-01: immutable reviewed bytes.
-// Validation only: never adopts "fb4ca2389f96260a938911f00d5524815807e326", regenerates pins or skips a failed gate.
+// Validation only: immutable anchor; no pin regeneration or skipped gates.
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import {readFileSync} from 'node:fs';
