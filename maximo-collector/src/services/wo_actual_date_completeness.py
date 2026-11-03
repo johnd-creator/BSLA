@@ -61,6 +61,7 @@ def classify_dates(record, *, source=None, legacy_sources=None):
     invalid = [key for key, item in proof.items() if item["state"] in ("INVALID", "NAIVE")]
     gap = [key for key in missing if any(fields.get(key, {}).get("state") == "VALID" for fields in (retained, legacy, observed))]
     confirmed = [key for key in missing if proof.get(key, {}).get("state") == "MISSING"]
+    confirmed_null = [key for key in confirmed if proof[key]["original"] is None]
     unverified = [key for key in missing if key not in gap and key not in confirmed and key not in invalid]
     start, finish = available["actstart"], available["actfinish"]
     if invalid:
@@ -85,7 +86,7 @@ def classify_dates(record, *, source=None, legacy_sources=None):
     elif advanced:
         note = "Data-completeness review: actual dates are missing; status does not establish date evidence."
     return {"status": status, "state": state, "actual_start_available": start, "actual_finish_available": finish,
-            "source_confirmed_null_fields": confirmed, "unverified_missing_fields": unverified,
+            "source_confirmed_null_fields": confirmed_null, "source_confirmed_empty_fields": confirmed, "unverified_missing_fields": unverified,
             "collector_projection_gap_fields": gap, "invalid_timestamp_fields": invalid,
             "source_identity_or_version_mismatch": mismatch, "advanced_status_missing_dates": advanced, "status_note": note}
 
@@ -101,6 +102,7 @@ def status_date_matrix(classifications):
         row["finish_only"] += int(finish and not start)
         row["both_missing"] += int(not start and not finish)
         row["source_confirmed_null"] += bool(result["source_confirmed_null_fields"])
+        row["source_confirmed_empty"] += bool(result["source_confirmed_empty_fields"])
         row["unverified_missing"] += bool(result["unverified_missing_fields"])
         row["collector_projection_loss"] += bool(result["collector_projection_gap_fields"])
         row["invalid_or_ambiguous"] += bool(result["invalid_timestamp_fields"])

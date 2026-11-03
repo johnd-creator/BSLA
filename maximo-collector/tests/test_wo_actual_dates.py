@@ -330,3 +330,16 @@ class UnknownClockVersionRegression(unittest.TestCase):
                 with self.assertRaises(CanonicalRecordRejected):writer.persist_collection(CanonicalCollection("maintenance_event",records=[conflicting]))
             with db.session() as session:self.assertEqual(session.query(mart_models.MaintenanceEventMartOrm).one().actual_start,datetime.fromisoformat(RAW["actstart"]))
         finally:db.engine.dispose()
+
+
+class SourceNullVsEmptyRegression(unittest.TestCase):
+    def test_explicit_blank_is_confirmed_empty_but_not_source_null(self):
+        from src.services.wo_actual_date_completeness import classify_dates,status_date_matrix
+        raw=dict(RAW,actstart="",actfinish="")
+        result=classify_dates(maintenance_event_from_payload(raw),source=raw)
+        self.assertEqual(result["state"],"SOURCE_CONFIRMED_EMPTY")
+        self.assertEqual(result["source_confirmed_null_fields"],[])
+        self.assertEqual(set(result["source_confirmed_empty_fields"]),{"actstart","actfinish"})
+        matrix=status_date_matrix([result])
+        self.assertEqual(matrix[0]["source_confirmed_null"],0)
+        self.assertEqual(matrix[0]["source_confirmed_empty"],1)

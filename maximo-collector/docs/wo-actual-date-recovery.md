@@ -58,7 +58,8 @@ Classification priority is invalid → verified gap → date availability → co
 empty → unverified. Matrices independently count both/start-only/finish-only/both
 missing, confirmed-null, unverified, pipeline loss, timestamp issues and identity/
 version mismatches. Missing-reason counts may overlap and must not be summed as
-exclusive populations. A missing field is not a confirmed source null. Old empty
+exclusive populations. Source-confirmed-null counts require an actual returned null;
+returned empty strings are confirmed empty but do not count as source nulls. A missing field is not a confirmed source null. Old empty
 observations cannot establish current emptiness after a source version change.
 
 Original status is the grouping key. WAPPR/WMATL remain in all coverage totals and
