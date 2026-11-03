@@ -43,6 +43,20 @@ def replace(path,data,mode=0o600):
     temp=path.with_name(path.name+'.'+uuid.uuid4().hex+'.tmp');write(temp,data,mode);os.replace(temp,path)
 
 
+def activate_metadata(wrapper,manifest,oldw,oldm,neww,newm,read,verify):
+    """Only our metadata bytes may be recovered; executable wrapper stays0700."""
+    try:
+        replace(manifest,newm);replace(wrapper,neww,0o700)
+        return verify()
+    except BaseException:
+        actualw=read(wrapper,mode=0o700);actualm=read(manifest)
+        if actualw not in (oldw,neww) or actualm not in (oldm,newm):
+            raise RuntimeError('CONTROLLER_RECOVERY_CONCURRENT_CHANGE') from None
+        if actualw!=oldw:replace(wrapper,oldw,0o700)
+        if actualm!=oldm:replace(manifest,oldm)
+        raise
+
+
 def amend(source):
     """Each exact anchor occurs once; no fuzzy patch or deleted historical gate."""
     replacements=[
@@ -83,7 +97,7 @@ def amend(source):
 def baseline(repository, admission):
     state=Path(repository).resolve()/'.nadi-dev/state';read=admission.private_bytes
     wrapper=state.parent/'nadi-dev';manifest=state/'local-development-release.json';active=state/'local-dev-01/active.json'
-    raww,rawm,rawa=read(wrapper),read(manifest),read(active)
+    raww,rawm,rawa=read(wrapper,mode=0o700),read(manifest),read(active)
     record=json.loads(rawm);value=json.loads(rawa)
     words=shlex.split(raww.decode().splitlines()[1]);old=Path(words[2])
     if (raww.decode().splitlines()[0]!='#!/bin/sh' or len(raww.decode().splitlines())!=2
@@ -192,22 +206,17 @@ def install(repository,prepared_path,owner_path,owner_digest):
     try:
         fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
         with manager.transaction():
-            if read(wrapper)!=oldw or read(manifest)!=oldm or read(active)!=olda:raise RuntimeError('CONCURRENT_CONTROLLER_CHANGE')
+            if read(wrapper,mode=0o700)!=oldw or read(manifest)!=oldm or read(active)!=olda:raise RuntimeError('CONCURRENT_CONTROLLER_CHANGE')
             before={u:old_manager.unit(u) for u in current.UNITS}
             for n,b in [('manifest-before.private.json',oldm),('wrapper-before.private.sh',oldw),('active-before.private.json',olda)]:
                 write(manager.state/(ident+'-'+n),b)
-            try:
-                replace(manifest,newm);replace(wrapper,neww,0o700)
+            def verify():
                 result=manager.status()
                 if (result['transport_process_readiness']!='VERIFIED' or read(active)!=olda
                         or any(manager.unit(u)!=old for u,old in before.items())):
                     raise RuntimeError('CONTROLLER_INSTALL_CHANGED_RUNTIME')
-            except BaseException:
-                if read(wrapper) not in (oldw,neww) or read(manifest) not in (oldm,newm):
-                    raise RuntimeError('CONTROLLER_RECOVERY_CONCURRENT_CHANGE') from None
-                if read(wrapper)!=oldw:replace(wrapper,oldw,0o700)
-                if read(manifest)!=oldm:replace(manifest,oldm)
-                raise
+                return result
+            activate_metadata(wrapper,manifest,oldw,oldm,neww,newm,read,verify)
             outcome={'status':'INSTALLED','candidate_sha':p['candidate_sha'],'services_restarted':False,
                      'active_state_bytes_unchanged':True,'files':p['files'],'admission_sha256':p['admission_sha256']}
             write(manager.state/(ident+'-installed.private.json'),json.dumps(outcome,indent=2).encode())

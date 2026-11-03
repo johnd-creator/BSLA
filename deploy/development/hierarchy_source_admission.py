@@ -46,7 +46,7 @@ def sha(data):
     return hashlib.sha256(data).hexdigest()
 
 
-def private_bytes(path, maximum=4*1024*1024):
+def private_bytes(path, maximum=4*1024*1024, *, mode=0o600):
     path=Path(path)
     parent=path.parent.lstat()
     if (path.parent.resolve()!=path.parent or not stat.S_ISDIR(parent.st_mode)
@@ -56,7 +56,7 @@ def private_bytes(path, maximum=4*1024*1024):
     with os.fdopen(fd,'rb') as stream:
         s=os.fstat(stream.fileno())
         if (not stat.S_ISREG(s.st_mode) or s.st_uid!=os.getuid() or s.st_nlink!=1
-                or stat.S_IMODE(s.st_mode)!=0o600 or s.st_size>maximum):
+                or stat.S_IMODE(s.st_mode)!=mode or s.st_size>maximum):
             raise RuntimeError('PRIVATE_ADMISSION_FILE_REQUIRED')
         data=stream.read(maximum+1)
         if len(data)>maximum:raise RuntimeError('ADMISSION_SIZE_LIMIT')
@@ -123,9 +123,13 @@ def object_id(root,revision,path):
 
 def compatible(control, comparator, front, recovery, candidate_sha, recovery_sha):
     value=approved(control)
-    if (candidate_sha!=value['candidate_sha'] or recovery_sha!=value['recovery_sha']
-            or git(front,'rev-parse','HEAD')!=candidate_sha or git(recovery,'rev-parse','HEAD')!=recovery_sha
-            or git(front,'rev-parse',candidate_sha+'^{tree}')!=value['candidate_tree']):
+    if git(front,'rev-parse','HEAD')!=candidate_sha or git(recovery,'rev-parse','HEAD')!=recovery_sha:
+        raise RuntimeError('SOURCE_ADMISSION_REVISION_MISMATCH')
+    if (candidate_sha,recovery_sha)!=(value['candidate_sha'],value['recovery_sha']):
+        # Keep every historical exact-equality check. This branch grants no source
+        # difference exception; the original conservative comparator owns it.
+        return comparator.compatible(front,recovery,candidate_sha,recovery_sha)
+    if git(front,'rev-parse',candidate_sha+'^{tree}')!=value['candidate_tree']:
         raise RuntimeError('SOURCE_ADMISSION_REVISION_MISMATCH')
     paths=comparator.COMPATIBILITY_PATHS
     if set(value['objects'])!=set(paths):raise RuntimeError('SOURCE_ADMISSION_PATH_SET_CHANGED')

@@ -64,6 +64,61 @@ class AdmissionTest(unittest.TestCase):
     def test_exact_candidate_and_recovery_objects_pass(self):
         self.assertEqual(len(self.check()),64)
 
+    def test_historical_equal_source_keeps_original_strict_comparator(self):
+        strict=load(DEPLOY/'frontend_preview.py')
+        strict.COMPATIBILITY_PATHS=self.comparator.COMPATIBILITY_PATHS
+        expected=strict.compatible(self.recovery,self.recovery,self.old,self.old)
+        self.assertEqual(m.compatible(self.control,strict,self.recovery,self.recovery,self.old,self.old),expected)
+        self.put('reliability-cockpit/src/services/UNREVIEWED.py','changed')
+        self.commit();unknown=self.git('rev-parse','HEAD')
+        with self.assertRaisesRegex(RuntimeError,'FRONTEND_BACKEND_CONTRACT_DIFFERENCE'):
+            m.compatible(self.control,strict,self.front,self.recovery,unknown,self.old)
+
+    def test_executable_wrapper_read_does_not_relax_private_policy_mode(self):
+        wrapper=self.base/'wrapper';self.private(wrapper,b'executable');wrapper.chmod(0o700)
+        self.assertEqual(m.private_bytes(wrapper,mode=0o700),b'executable')
+        with self.assertRaisesRegex(RuntimeError,'PRIVATE_ADMISSION_FILE_REQUIRED'):m.private_bytes(wrapper)
+        wrapper.chmod(0o600)
+        with self.assertRaisesRegex(RuntimeError,'PRIVATE_ADMISSION_FILE_REQUIRED'):m.private_bytes(wrapper,mode=0o700)
+
+    def metadata(self):
+        wrapper=self.base/'wrapper';manifest=self.base/'manifest'
+        self.private(wrapper,b'old-wrapper');wrapper.chmod(0o700);self.private(manifest,b'old-manifest')
+        return wrapper,manifest
+
+    def test_post_replace_failure_restores_wrapper_manifest_and_permissions(self):
+        wrapper,manifest=self.metadata()
+        def fail():
+            self.assertEqual(m.private_bytes(wrapper,mode=0o700),b'new-wrapper')
+            self.assertEqual(m.private_bytes(manifest),b'new-manifest')
+            raise RuntimeError('READINESS_FAILED')
+        with self.assertRaisesRegex(RuntimeError,'READINESS_FAILED'):
+            installer.activate_metadata(wrapper,manifest,b'old-wrapper',b'old-manifest',b'new-wrapper',b'new-manifest',m.private_bytes,fail)
+        self.assertEqual(m.private_bytes(wrapper,mode=0o700),b'old-wrapper')
+        self.assertEqual(m.private_bytes(manifest),b'old-manifest')
+
+    def test_metadata_success_and_partial_replace_failure(self):
+        wrapper,manifest=self.metadata()
+        self.assertEqual(installer.activate_metadata(wrapper,manifest,b'old-wrapper',b'old-manifest',b'new-wrapper',b'new-manifest',m.private_bytes,lambda:'VERIFIED'),'VERIFIED')
+        self.assertEqual(m.private_bytes(wrapper,mode=0o700),b'new-wrapper')
+        real=installer.replace
+        def replace(path,data,mode=0o600):
+            if path==wrapper:raise OSError('WRAPPER_REPLACE_FAILED')
+            real(path,data,mode)
+        with patch.object(installer,'replace',side_effect=replace):
+            with self.assertRaisesRegex(OSError,'WRAPPER_REPLACE_FAILED'):
+                installer.activate_metadata(wrapper,manifest,b'new-wrapper',b'new-manifest',b'third-wrapper',b'third-manifest',m.private_bytes,lambda:None)
+        self.assertEqual(m.private_bytes(wrapper,mode=0o700),b'new-wrapper')
+        self.assertEqual(m.private_bytes(manifest),b'new-manifest')
+
+    def test_unknown_concurrent_metadata_is_never_overwritten(self):
+        wrapper,manifest=self.metadata()
+        def race():
+            wrapper.write_bytes(b'concurrent-wrapper');raise RuntimeError('FAILED')
+        with self.assertRaisesRegex(RuntimeError,'CONTROLLER_RECOVERY_CONCURRENT_CHANGE'):
+            installer.activate_metadata(wrapper,manifest,b'old-wrapper',b'old-manifest',b'new-wrapper',b'new-manifest',m.private_bytes,race)
+        self.assertEqual(m.private_bytes(wrapper,mode=0o700),b'concurrent-wrapper')
+
     def test_unknown_candidate_or_changed_recovery_sha_fails(self):
         for candidate,recovery in [('a'*40,self.old),(self.head,'b'*40)]:
             with self.assertRaisesRegex(RuntimeError,'REVISION_MISMATCH'):

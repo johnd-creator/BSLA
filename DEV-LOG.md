@@ -1370,3 +1370,9 @@ One Draft PR; exact-head CI/independent review, precise grant/service-owner appr
 fresh recovery/session gates, actual activation and live Engineer UAT remain distinct.
 No automatic merge, source request, retained-data write or phase advancement.
 Runtime remains PR119 until all gates pass. Global semantics UNKNOWN; Logbook HOLD.
+
+Local-release review follow-up: before installer execution, independent review found
+wrapper-mode/recovery and historical equality-selection regressions. Corrected
+explicit executable/private modes and retained strict comparator fallback; added
+real-file partial/post-replacement/concurrent recovery regressions. Candidate head,
+CI, image and independent review pins must be refreshed. Runtime stays PR119.

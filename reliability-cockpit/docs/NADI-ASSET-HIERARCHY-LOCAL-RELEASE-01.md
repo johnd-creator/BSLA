@@ -110,3 +110,15 @@ NADI_HIERARCHY_LOCAL_ACTIVE_READY_FOR_PO_REVIEW. Until then retain precise BLOCK
 status and the working PR119 runtime. Global hierarchy coverage is PARTIAL, semantic
 roles UNKNOWN, method/KPI acceptance unchanged, and Logbook PdM HOLD. No source
 request, recollection, schema migration, QA/production deployment or automatic merge.
+
+
+## Independent review correction
+
+The first immutable candidate review identified functional controller issues before
+any installation. Executable wrappers require explicit0700 handling while private
+policy/manifest files retain0600. Failure after either metadata replacement is now
+covered with real disposable files, including restoration of old bytes/modes and
+refusal to overwrite concurrent unknown bytes. Historical equal-source selections
+continue through the original strict comparator; only the exact new differing tuple
+uses the reviewed admission. Relevant exact-head qualification is repeated after
+these corrections. The initial source review is retained as historical evidence.
