@@ -84,10 +84,10 @@ The service module `src.services.wo_actual_date_recovery` exposes separate stage
    budget but does not count an expired response as a successfully visited page;
    the once-only retry and successful-page/loop caps remain enforced. Resume revalidates completed
    identities and skips their source requests. HTTP/auth failures stop the run.
-3. Rehearse using a private, independent restore into disposable SQLite. Existing
-   same-owner snapshots may include only the cohort and required parent rows.
-   No operational database is replaced. Compare unrelated columns, replay and
-   rollback before requesting an operational write.
+3. Rehearse against a fresh full private PostgreSQL backup and independent isolated
+   restore. Compare every restored table fingerprint, exact cohort identity/version,
+   resumed normal-worker replay, rollback and unrelated records. Memory-only SQLite
+   and six guarded file rehearsals remain additional synthetic checks.
 4. **Separate explicit approval required:** `apply_cohort` must receive the exact
    reviewed plan digest and owning database identity. A digest is a pin, not an
    authorization credential. Before invocation, verify source/service ownership,
@@ -95,20 +95,38 @@ The service module `src.services.wo_actual_date_recovery` exposes separate stage
    exact-head CI and container/data preservation. PostgreSQL requires a durable
    private rollback-receipt callback before commit; callback failure rolls back.
 5. Apply one small co-located legacy/Mart transaction through CollectorStore and
-   the validating MartWriter. Lock in deterministic WO order, recheck exact
+   the validating MartWriter. Lock Registry assets first, then WOs, in deterministic sorted order, recheck exact
    identities, current Registry membership and both source versions. A changed
    source version requires normal acquisition and a new plan, not clock rebasing.
    Only legacy clock JSON and Mart clock/evidence fields may change. All source,
    projection and collection cursors remain unchanged. A staged subset supports
    bounded resumption; replay is idempotent.
-6. Privately checkpoint the datetime-preserving receipt (before rows and after
-   seals) with owner-only permissions, fsync and atomic replacement. A commit
-   interruption is resolved by comparing current rows to before/after seals,
-   never blindly reapplying an old backup. Never load an untrusted pickle.
-7. `rollback_cohort` is also separately governed operational mutation. It locks
-   all affected rows and compares their full current after-seals before restoring
-   only the fields this repair changed. If normal workers have changed a row,
-   rollback fails closed for the whole cohort and preserves newer evidence.
+6. Privately checkpoint the versioned `wo-actual-dates-journal/2` receipt with
+   owner-only permissions, fsync and durable host acknowledgment before commit.
+   It contains the pinned plan, diagnostic before/after rows, exact changed leaves,
+   created-container markers and date/provenance read guards. JSON absence differs
+   from explicit null. Its digest detects damaged evidence; it is not authorization.
+   Full-row seals are diagnostic and never the sole rollback CAS criterion.
+7. `rollback_cohort` is separately governed mutation. Under the same deterministic
+   locks, validate every cohort member before changing any row. Compare all actual
+   values, raw date strings and complete date proof against the saved after guard.
+   Restore only changed leaves; remove newly created containers only if empty.
+   Preserve independent status, failure code, source changedate and JSON siblings.
+   Advance `mart_updated_at` monotonically for a real rollback; never restore its
+   old value. Unknown or regressed versions and identity/Registry changes conflict.
+8. An advanced overall source version is safe only if legacy and Mart versions
+   agree and unchanged, valid, identity-bound per-field proofs remain authoritative
+   for both actual clocks. A NULL replay can retain these proofs; a newer valid
+   observation, even with the same date, changes provenance and conflicts. Missing
+   proof never permits guessing. A conflict rolls back the entire cohort.
+9. A returned `ROLLED_BACK` journal includes verified rollback guards and source
+   versions; duplicate invocation verifies them and performs no writes. An old
+   APPLIED receipt cannot claim an already completed rollback. PREPARED journals
+   reconcile lost apply acknowledgments only against the committed after evidence;
+   if apply never committed, retry the approved apply. ROLLBACK_PREPARED journals
+   distinguish wholly committed versus wholly uncommitted rollback; a mixed cohort
+   conflicts. Callback failure aborts the transaction. PostgreSQL requires a durable
+   checkpoint on rollback too. Never deserialize untrusted pickle data.
 
 No command defaults to acquisition, schema creation or live recovery. The library
 is deliberately invoked by a reviewed owner-private runner, not an unauthenticated
@@ -157,3 +175,34 @@ keep planned/reported/changed dates distinct and show timezone/source uncertaint
 The status notes and completeness report are ready as Collector-side functions;
 exposing them through a new optional Factual read DTO is a separately reviewed API
 follow-up. No broad grant, frontend redesign or KPI eligibility is part of this PR.
+
+## Worker-safe rollback correction — NADI-WO-ACTUAL-DATE-ROLLBACK-FIX-01
+
+The prior full-row CAS blocked a legitimate worker replay: independent failure-code
+and source metadata updates changed the seal despite unchanged actual dates. The
+correction audits the complete recovery write set:
+
+| Side | Restorable fields | Independent fields preserved |
+|---|---|---|
+| Collector | `sources.maximo.actual_dates` schema, exact identity and individual field-proof leaves | All row metadata and other JSON paths |
+| Mart | `actual_start`, `actual_finish`, `sources.maximo.actstart`, `actfinish`, individual `actual_dates` proof leaves | Status, failure_code, source_changed_at, report/schedule metadata, provenance and other JSON |
+| Transaction metadata | No stale value restoration | `mart_updated_at` advances for actual rollback |
+
+CI adds a separate PostgreSQL matrix on Python 3.11/3.12, using a pinned PostgreSQL
+image, dedicated disposable database and non-superuser synthetic owner. The final
+Maximo gate now requires this matrix as well as the original offline matrix and
+six guarded file rehearsals. Production/main selection, exact-head recheck,
+read-only workflow permissions and source network restrictions remain intact.
+
+The owner-private full restore reproduced the earlier whole-row refusal and the
+independent replay changes. The corrected rollback, reapply, idempotence and newer
+start/finish conflict checks passed on that isolated restore. This records tested
+candidate behavior, not operational activation. Exact-head CI/review receipts and
+all service/image/cohort details belong in the separate private readiness package.
+
+Read-only polling investigation remains separate: PAGE_LIMIT intentionally ends a
+bounded traversal without advancing its watermark. Repeated newest-first runs can
+replay the same capped window without reaching the old cursor. A recent worker run
+or recovered cohort does not prove full source coverage. Preserve request/page caps,
+cursor, recovery floor, schedule and scope; any reconciliation needs its own reviewed
+operational proposal. No broad recollection is authorized by this correction.

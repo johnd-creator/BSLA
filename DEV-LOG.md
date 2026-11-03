@@ -1363,3 +1363,15 @@ PdM HOLD remain. Counts, raw identities and recovery evidence remain private.
 ## 2026-11-03 — NADI-MAXIMO-WO-ACTUAL-DATE-RECOVERY-01 candidate
 
 Audited both acquisition paths and the local projection; implemented existing-JSON clock retention, source-version/non-null preservation, bounded atomic recovery and CAS rollback. Added PO status-aware completeness without status inference, source writes, migration, cursor/schedule changes or frontend changes. Hermetic qualification and owner-private source/recovery evidence are independent from activation/operational acceptance. [Runbook](maximo-collector/docs/wo-actual-date-recovery.md).
+
+## 2026-11-03 — NADI-WO-ACTUAL-DATE-ROLLBACK-FIX-01 candidate
+
+Reproduced the full-row rollback refusal after independent normal-worker metadata
+updates on a fresh isolated full PostgreSQL restore. Replaced that sole CAS with
+presence-aware per-path journaling, exact date/provenance guards and atomic scoped
+rollback; independent metadata survives and newer field observations fail closed.
+Added actual PostgreSQL lock/recovery qualification to the unchanged main-target
+Maximo CI policy. Isolated recovery/replay/rollback is tested independently of
+exact-head CI/review and live acceptance. No operational recovery, service
+replacement, source request, cursor/scope/schedule or schema change is authorized
+or performed. Polling PAGE_LIMIT coverage remains a separate operational concern.
