@@ -249,7 +249,10 @@ def rollback_cohort(db, receipt, *, expected_database, checkpoint=None):
             current = {"legacy": _snapshot(local), "mart": _snapshot(mart)}
             current_guard = journal.date_guard(current)
             rolled_back = receipt["state"] in ("ROLLED_BACK", "ROLLBACK_PREPARED") and journal.same(current_guard, entry.get("rollback_guard"))
-            reconciled_states.add(rolled_back)
+            # A no-op entry matches both guards and cannot prove commit state.
+            # Still validate all its identity/date/version guards below.
+            if entry["write_set"]["fields"]:
+                reconciled_states.add(rolled_back)
             guard = entry.get("rollback_guard") if rolled_back else entry["date_guard"]
             if receipt["state"] == "ROLLED_BACK" and not rolled_back:
                 raise ValueError("verified rollback state no longer matches")
@@ -265,7 +268,7 @@ def rollback_cohort(db, receipt, *, expected_database, checkpoint=None):
                 raise ValueError("advanced source version without authoritative unchanged date proof")
             if not rolled_back:
                 pending.append((local, mart, journal.restored(current, entry), entry))
-        if len(reconciled_states) != 1:
+        if len(reconciled_states) > 1:
             raise ValueError("partial-cohort rollback state conflict")
         if receipt["state"] == "ROLLED_BACK":
             return result  # no writes, proven rollback journal plus current state

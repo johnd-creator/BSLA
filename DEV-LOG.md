@@ -1375,3 +1375,10 @@ Maximo CI policy. Isolated recovery/replay/rollback is tested independently of
 exact-head CI/review and live acceptance. No operational recovery, service
 replacement, source request, cursor/scope/schedule or schema change is authorized
 or performed. Polling PAGE_LIMIT coverage remains a separate operational concern.
+
+Independent review identified a mixed idempotent/changed-cohort prepared-rollback
+retry defect. No-op entries are now neutral only when reconciling transaction
+commit state; all their identity/date/version guards remain mandatory. Added
+uncommitted/committed retry and genuine partial-cohort refusal regressions to both
+memory and PostgreSQL suites. Prior exact-head qualification remains historical;
+this correction requires fresh exact-head CI and independent closure.

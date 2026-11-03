@@ -211,6 +211,52 @@ class RollbackScenarios:
             self.assertEqual(self.snapshots()[RAW["wonum"]][side]["sources"], {"maximo": {"worker": "retained"}})
 
 
+    def test_mixed_idempotent_and_changed_cohort_precommit_retry(self):
+        self.prepare(second=True)
+        # Restore the initial cohort, then simulate approved staged recovery.
+        self.rollback()
+        first = {RAW["wonum"]: self.raws[RAW["wonum"]]}
+        apply_cohort(self.db, self.plan, first, expected_database=self.target,
+                     approved_plan_sha256=seal(self.plan), checkpoint=self.checkpoint)
+        self.receipt = self.apply()
+        self.assertEqual([bool(e["write_set"]["fields"]) for e in self.receipt["records"]], [False, True])
+        saved = []
+        def fail(receipt):
+            saved.append(receipt)
+            raise OSError("synthetic failure before rollback commit")
+        with self.assertRaises(OSError): self.rollback(checkpoint=fail)
+        result = self.rollback(saved[0])
+        now = self.snapshots()
+        # The already-present first WO belongs to an earlier recovery journal.
+        self.assertIsNotNone(now[RAW["wonum"]]["mart"]["actual_start"])
+        second = list(self.raws)[1]
+        self.assertIsNone(now[second]["mart"]["actual_start"])
+        self.assertEqual(result, self.rollback(result))
+
+    def test_mixed_noop_committed_rollback_ack_retry(self):
+        self.prepare(second=True); self.rollback()
+        apply_cohort(self.db, self.plan, {RAW["wonum"]: RAW}, expected_database=self.target,
+                     approved_plan_sha256=seal(self.plan), checkpoint=self.checkpoint)
+        self.receipt = self.apply(); self.rollback()
+        result = self.rollback(self.saved[-1])
+        self.assertEqual(result["state"], "ROLLED_BACK")
+        self.assertEqual(result, self.rollback(result))
+
+
+    def test_prepared_actual_partial_changed_cohort_is_refused(self):
+        self.prepare(second=True); saved = []
+        def fail(receipt):
+            saved.append(receipt)
+            raise OSError("synthetic rollback interruption")
+        with self.assertRaises(OSError): self.rollback(checkpoint=fail)
+        subset = copy.deepcopy(self.receipt); subset["records"] = subset["records"][:1]
+        self.rollback(journal.signed(subset))
+        current = self.snapshots()
+        with self.assertRaisesRegex(ValueError, "partial-cohort"):
+            self.rollback(saved[0])
+        self.assertTrue(journal.same(current, self.snapshots()))
+
+
     def test_partial_cohort_conflict_writes_nothing(self):
         self.prepare(second=True)
         second = list(self.raws.values())[1]
