@@ -316,3 +316,17 @@ class WorkOrderClientRegression(unittest.TestCase):
         detail_url=client._session.request.call_args_list[1].args[1]
         self.assertEqual(parse_qs(urlsplit(detail_url).query)["oslc.select"],[",".join(SELECT)])
         self.assertEqual(client.request_telemetry["business_requests"],2)
+
+
+class UnknownClockVersionRegression(unittest.TestCase):
+    def test_conflicting_non_null_clock_requires_provably_newer_field_version(self):
+        db=Database(DbConfig("sqlite+pysqlite:///:memory:"));db.create_all()
+        try:
+            writer=MartWriter(db)
+            initial=maintenance_event_from_payload(dict(RAW,changedate=None))
+            writer.persist_collection(CanonicalCollection("maintenance_event",records=[initial]))
+            for change in (None,"2026-09-04T00:00:00Z"):
+                conflicting=maintenance_event_from_payload(dict(RAW,changedate=change,actstart="2026-08-01T00:00:00Z"))
+                with self.assertRaises(CanonicalRecordRejected):writer.persist_collection(CanonicalCollection("maintenance_event",records=[conflicting]))
+            with db.session() as session:self.assertEqual(session.query(mart_models.MaintenanceEventMartOrm).one().actual_start,datetime.fromisoformat(RAW["actstart"]))
+        finally:db.engine.dispose()

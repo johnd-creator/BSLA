@@ -306,7 +306,7 @@ def _merge_maintenance(existing, row):
             previous_field = _actual_field_version({"sources": existing.sources,
                               "source_changed_at": existing.source_changed_at, field: previous}, field, source_key)
             incoming_field = _actual_field_version(row, field, source_key)
-            if previous_field is not None and (incoming_field is None or incoming_field <= previous_field):
+            if previous_field is None or incoming_field is None or incoming_field <= previous_field:
                 raise CanonicalRecordRejected("conflicting actual date without a newer field observation")
         if previous is not None and incoming is None:
             row[field] = previous
