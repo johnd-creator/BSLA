@@ -89,7 +89,7 @@ def merge_details(previous,incoming,existing,new_row):
     result['fields'][key]=field(key,value,True,'LEGACY_COLUMN')
     result['fields'][key]['source_changed_at']=old_version.isoformat() if old_version else None
    if attr and getattr(existing,attr) is not None:new_row[attr]=getattr(existing,attr)
-  elif old.get('value') is not None and item.get('value')!=old['value']:
+  elif (old.get('value') is not None or old.get('state')=='SOURCE_CONFIRMED_EMPTY' and old.get('origin')=='MAXIMO_RESPONSE') and item.get('value')!=old.get('value'):
    previous_version=version(old.get('source_changed_at'))
    incoming_version=version(item.get('source_changed_at'))
    if previous_version is None or incoming_version is None or incoming_version<=previous_version:

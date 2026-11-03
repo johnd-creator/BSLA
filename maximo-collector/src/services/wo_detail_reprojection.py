@@ -76,7 +76,7 @@ def project_details(db,plan,*,approved_plan_sha256,expected_database,checkpoint_
      if not isinstance(prior,dict) or prior.get('identity')!=source[key]['identity'] or version(prior.get('source_changed_at'))!=version(item['changedate']): raise ValueError('existing detail proof conflict')
      for name,previous in prior.get('fields',{}).items():
       incoming=source[key]['fields'].get(name,{})
-      if previous.get('value') is not None and incoming.get('value')!=previous['value']: raise ValueError('conflicting retained field at equal source version')
+      if (previous.get('value') is not None or previous.get('state')=='SOURCE_CONFIRMED_EMPTY' and previous.get('origin')=='MAXIMO_RESPONSE') and incoming.get('value')!=previous.get('value'): raise ValueError('conflicting retained field at equal source version')
     if key!='wo_detail' and current.get('value') is not None:
      if source.get(key) is not None and current['value']!=source[key] and (version(current['value']) is None or version(current['value'])!=version(source[key])): raise ValueError('existing retained detail clock conflict')
      continue

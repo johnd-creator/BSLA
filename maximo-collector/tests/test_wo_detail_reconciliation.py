@@ -122,3 +122,20 @@ class DetailTest(unittest.TestCase):
   proof=work_order_from_payload(dict(RAW,reportdate='',schedstart='')).sources['maximo']['wo_detail']
   for key in ('reported_at','scheduled_start'):
    self.assertEqual(proof['fields'][key]['state'],'SOURCE_CONFIRMED_EMPTY');self.assertEqual(proof['fields'][key]['value'],'')
+
+ def test_known_null_requires_newer_field_evidence(self):
+  from src.repositories.store import CollectorStore
+  store=CollectorStore(self.db)
+  store.upsert_work_order(work_order_from_payload(dict(RAW,description=None)))
+  with self.assertRaises(ValueError):store.upsert_work_order(work_order_from_payload(dict(RAW,description='Conflicting same-version value')))
+  store.upsert_work_order(work_order_from_payload(dict(RAW,changedate='2026-09-04T00:00:00Z',description='Newer observed value')))
+  with self.db.session() as s:self.assertEqual(s.query(models.WorkOrderOrm).one().description,'Newer observed value')
+ def test_reprojection_preserves_known_source_null_and_allows_unverified_absence(self):
+  from src.adapters.maximo.wo_detail import evidence
+  with self.db.session() as s:
+   m=s.query(mart_models.MaintenanceEventMartOrm).one();source=copy.deepcopy(m.sources);source['maximo']['wo_detail']=evidence(dict(RAW,description=None));m.sources=source;s.commit()
+  with self.assertRaises(ValueError):self.project()
+  with self.db.session() as s:
+   m=s.query(mart_models.MaintenanceEventMartOrm).one();source=copy.deepcopy(m.sources);source['maximo']['wo_detail']=evidence(RAW);m.sources=source;s.commit()
+  self.project()
+  with self.db.session() as s:self.assertEqual(s.query(mart_models.MaintenanceEventMartOrm).one().sources['maximo']['wo_detail']['fields']['description']['value'],'Original technical work')
