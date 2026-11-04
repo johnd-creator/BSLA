@@ -15,6 +15,12 @@ const files={
   "reliability-cockpit/docs/NADI-WO-ACTIVATION-CORRECTION-01.md": "8fbf5e3a13b58593e08442267bb263043a353686ae9a62f79bc1f349d56d9d9d",
   "reliability-cockpit/tests/test_wo_service_activation.py": "8fa5dc005f5ae071308af5fb95af04a220b358a18f080287d9929a22849530ff"
 };
+const repairedHead="a70a0f3043b5a57ba6f23e36a27de0c8e2b90201";
+const repairedFiles={
+  "deploy/development/wo_service_activation.py": "d35eeb958187c0bd80819da094668cf646b36513b417660f51eda47553fc460c",
+  "reliability-cockpit/docs/NADI-WO-ACTIVATION-CORRECTION-01.md": "465bb4406e136ef7b508446cbab59492a4f48008876bb87ed3e6f1c1b1fcd1f6",
+  "reliability-cockpit/tests/test_wo_service_activation.py": "117c9e62eca964a1d0cc66de5bcfe0f56872531beadcee71062ed7e22be1430a"
+};
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 export function reviewedWoDeploymentHashes(root){
  const git=(...args)=>execFileSync('git',['-C',root,...args]);
@@ -22,8 +28,14 @@ export function reviewedWoDeploymentHashes(root){
  for(const [path,expected] of Object.entries(files)){
   assert(!path.startsWith('/')&&!path.split('/').includes('..')&&!/[\\*?]/.test(path));
   assert.equal(hash(git('show',reviewedHead+':'+path)),expected,'immutable deployment correction pin changed: '+path);
-  assert.equal(hash(readFileSync(root+'/'+path)),expected,'unreviewed deployment correction change: '+path);
  }
+ assert.equal(git('merge-base',repairedHead,'HEAD').toString('utf8').trim(),repairedHead);
+ for(const [path,expected] of Object.entries(repairedFiles)){
+  assert(Object.hasOwn(files,path),'repair outside reviewed deployment path set');
+  assert.equal(hash(git('show',repairedHead+':'+path)),expected,'immutable predecessor repair pin changed: '+path);
+ }
+ const current={...files,...repairedFiles};
+ for(const [path,expected] of Object.entries(current))assert.equal(hash(readFileSync(root+'/'+path)),expected,'unreviewed deployment correction change: '+path);
  // The old loader and all of its historical assertions survive an exact
  // import/return amendment; neither the old manifest nor wrapper is rewritten.
  const loader='reliability-cockpit/web/scripts/wo-reconciliation-preservation.mjs';
@@ -34,5 +46,5 @@ export function reviewedWoDeploymentHashes(root){
  for(const value of [anchor,before])assert.equal(original.split(value).length,2);
  const expected=original.replace(anchor,"import {reviewedWoDeploymentHashes} from './wo-deployment-preservation.mjs';\n"+anchor).replace(before,after);
  assert.equal(readFileSync(root+'/'+loader,'utf8'),expected,'unreviewed historical loader amendment');
- return files;
+ return current;
 }
