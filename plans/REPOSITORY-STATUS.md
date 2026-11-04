@@ -1326,3 +1326,9 @@ PR head and separately reviewed deployment-pin layer. Source implementation,
 qualification, final owner approval and actual activation remain distinct. No
 new live data authority or previous once-only binding is carried forward.
 [Procedure](../reliability-cockpit/docs/NADI-WO-ACTIVATION-CORRECTION-01.md).
+
+
+The label qualification review also identified a conditional untagged-image
+cleanup blocker. Candidate tooling now preserves the original image reference,
+rejects untagged/ONBUILD bases and withholds PASS until cleanup succeeds. This
+is a separately reviewable correction, not an operational exception.

@@ -19,11 +19,37 @@ _spec = importlib.util.spec_from_file_location('activation', Path(__file__).with
 a = importlib.util.module_from_spec(_spec); _spec.loader.exec_module(a)
 
 
+def retained_base_tags(image):
+    tags = image.get('RepoTags') or []
+    if not isinstance(tags, list) or not tags or not all(isinstance(tag, str) and tag for tag in tags):
+        raise RuntimeError('PREEXISTING_TAGGED_FIXTURE_BASE_REQUIRED')
+    if image.get('Config', {}).get('OnBuild') not in (None, []):
+        raise RuntimeError('FIXTURE_BASE_ONBUILD_FORBIDDEN')
+    return set(tags)
+
+
+def cleanup_fixture_images(tags, image_id, original_tags):
+    for tag in reversed(tags[1:]):
+        if subprocess.run(['docker','image','inspect',tag],capture_output=True).returncode == 0:
+            a.run(['docker','image','rm',tag])
+    current = json.loads(a.run(['docker','image','inspect',image_id]))[0]
+    if not original_tags.intersection(current.get('RepoTags') or []):
+        # Never remove the last reference to a preexisting image. Preserve our
+        # alias and fail qualification if another actor removed its old tags.
+        raise RuntimeError('ORIGINAL_BASE_TAG_CHANGED_PRESERVE_FIXTURE_ALIAS')
+    if subprocess.run(['docker','image','inspect',tags[0]],capture_output=True).returncode == 0:
+        a.run(['docker','image','rm',tags[0]])
+    if json.loads(a.run(['docker','image','inspect',image_id]))[0]['Id'] != image_id:
+        raise RuntimeError('ORIGINAL_FIXTURE_BASE_NOT_PRESERVED')
+
+
 def rehearse(image, graph, directory):
     root = Path(directory).resolve()
     root.mkdir(mode=0o700, parents=True, exist_ok=False)
     os.chmod(root, 0o700)
-    image_id = json.loads(a.run(['docker','image','inspect',image]))[0]['Id']
+    base_image = json.loads(a.run(['docker','image','inspect',image]))[0]
+    image_id = base_image['Id']
+    original_tags = retained_base_tags(base_image)
     project = 'nadi-wo-compose-rehearsal-' + secrets.token_hex(6)
     if not a.SERVICES <= set(graph) or not all(re.fullmatch('[a-z][a-z0-9-]{0,60}', k) for k in graph):
         raise RuntimeError('CLOSED_SYNTHETIC_GRAPH_REQUIRED')
@@ -37,6 +63,7 @@ def rehearse(image, graph, directory):
     tags = [base_tag, project + '-image:before', project + '-image:after']
     commands = []
     image_metadata = {}
+    owned_untagged = None
     try:
         # Metadata-only builds from an already present image. No RUN, source
         # code, credentials, package installation or database startup.
@@ -47,6 +74,18 @@ def rehearse(image, graph, directory):
             tag = project + '-image:' + phase
             a.run(['docker','build','--network','none','--pull=false','--tag',tag,str(context)])
             image_metadata[phase] = json.loads(a.run(['docker','image','inspect',tag]))[0]
+        negative_context = root/'image-untagged'; negative_context.mkdir(mode=0o700)
+        (negative_context/'Dockerfile').write_text('FROM '+base_tag+'\nLABEL nadi.synthetic.untagged="'+project+'"\n')
+        owned_untagged = a.run(['docker','build','--quiet','--network','none','--pull=false',str(negative_context)]).decode().strip()
+        if not re.fullmatch('sha256:[a-f0-9]{64}',owned_untagged):
+            raise RuntimeError('EXACT_OWNED_UNTAGGED_FIXTURE_IMAGE_REQUIRED')
+        untagged = json.loads(a.run(['docker','image','inspect',owned_untagged]))[0]
+        try:retained_base_tags(untagged)
+        except RuntimeError as error:
+            if str(error)!='PREEXISTING_TAGGED_FIXTURE_BASE_REQUIRED':raise
+        else:raise RuntimeError('UNTAGGED_FIXTURE_BASE_NOT_REJECTED')
+        if json.loads(a.run(['docker','image','inspect',owned_untagged]))[0]['Id'] != owned_untagged:
+            raise RuntimeError('REJECTED_UNTAGGED_FIXTURE_IMAGE_CHANGED')
         services = {}
         for name,deps in graph.items():
             oneshot = name.endswith('-init') or name in {'mart-ready','mart-migrate','pi-migrate','mart-reader'}
@@ -136,6 +175,7 @@ def rehearse(image, graph, directory):
           'forbidden_marker_absent':not (root/'forbidden').exists(),'lifecycle_events':positive_events,
           'inherited_label_preflight_rejection':'PASS','historical_runtime_label_failure_reproduced':'PASS','historical_bad_fixture_rollback':'PASS','explicit_original_task_label_activation_and_rollback':'PASS',
           'corrected_sequence_seconds':round(time.time()-start,3),
+          'untagged_base_rejected_without_deletion':'PASS',
           'fixture_image_labels':{k:v['Config']['Labels'] for k,v in image_metadata.items()},
           'network':'none','application_or_source_credentials':False,'host_ports':False,'database_server_started':False}
         # Separately reproduce the original dependency-start hazard in this
@@ -146,15 +186,23 @@ def rehearse(image, graph, directory):
         positive['old_compose_start_dependency_reproduced']=hazard
         positive['old_command_forbidden_marker']=(root/'forbidden').exists()
         if not hazard or not positive['old_command_forbidden_marker']:raise RuntimeError('ORIGINAL_CAUSE_NOT_REPRODUCED')
-        (root/'result.json').write_text(json.dumps(positive,indent=2));(root/'result.json').chmod(0o600)
-        return positive
     finally:
-        ids=a.run(['docker','ps','-aq','--filter','label=com.docker.compose.project='+project]).decode().split()
-        if ids:a.run(['docker','rm','-f','-v',*ids])
-        for tag in reversed(tags):
-            if subprocess.run(['docker','image','inspect',tag],capture_output=True).returncode==0:
-                a.run(['docker','image','rm',tag])
-        a.verify_preservation(live_before,a.inventory(),set())
+        try:
+            ids=a.run(['docker','ps','-aq','--filter','label=com.docker.compose.project='+project]).decode().split()
+            if ids:a.run(['docker','rm','-f','-v',*ids])
+            if owned_untagged is not None:
+                owned=json.loads(a.run(['docker','image','inspect',owned_untagged]))[0]
+                if (owned_untagged==image_id or owned['Config']['Labels'].get('nadi.synthetic.untagged')!=project):
+                    raise RuntimeError('OWNED_UNTAGGED_FIXTURE_IDENTITY_CHANGED')
+                a.run(['docker','image','rm',owned_untagged])
+            cleanup_fixture_images(tags,image_id,original_tags)
+        finally:
+            a.verify_preservation(live_before,a.inventory(),set())
+    # A PASS artifact is published only after cleanup and original resources
+    # have also passed; failed finally blocks must not leave a false PASS.
+    positive['original_base_preserved_after_cleanup'] = True
+    (root/'result.json').write_text(json.dumps(positive,indent=2));(root/'result.json').chmod(0o600)
+    return positive
 
 
 if __name__=='__main__':

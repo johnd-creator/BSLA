@@ -1497,3 +1497,17 @@ Runtime stays Collector2e/Factual/frontend/Engineering469 with normal writers.
 No activation, writer pause, controller install, grant or live recovery DML is
 authorized. A new private exact final package and owner decision are mandatory.
 See [label qualification](reliability-cockpit/docs/NADI-WO-ACTIVATION-CORRECTION-01.md).
+
+
+### 2026-11-04 — independent rehearsal resource-preservation correction
+
+Independent review of the label correction found a technical blocker when an
+untagged preexisting image is used as fixture input: removing its temporary
+alias can remove the original image. The rehearsal now rejects untagged or
+ONBUILD-bearing bases before tag/container operations, requires an original
+reference to survive cleanup, and verifies the original image still exists.
+An actual disposable untagged-image regression and four unit regressions cover
+this boundary; the safety/admission suite now has23tests. PASS evidence is
+published only after cleanup and operational preservation also succeed.
+The preceding19-test milestone remains historical. New exact-head CI/review
+and the final owner package are still required; runtime/data remain unchanged.

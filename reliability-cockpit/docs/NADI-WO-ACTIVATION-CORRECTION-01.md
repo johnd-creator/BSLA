@@ -122,3 +122,20 @@ grant change, live data binding or WO recovery writes. A new exact source/image/
 configuration/cohort/window package, fresh recovery/session gates, and final
 owner approval are required. Existing 10-WO/20-timestamp and fixed detail identity
 boundaries remain; the previous once-only binding cannot be reused after polling.
+
+
+### Fixture base-image custody
+
+Rehearsal input must be an already present, trusted, tagged shell-capable image
+without ONBUILD triggers. Qualification uses the existing PostgreSQL fixture
+image, never a source/application image or operational credentials. Inherited
+image environment/files are not sanitized; this tool is not an untrusted-image
+sandbox. An untagged input is rejected before tag/container operations.
+
+The rehearsal creates a separate disposable untagged metadata image to prove
+that rejection leaves it intact. Cleanup removes that owned fixture and only
+the generated image tags. At least one original base tag must still reference
+the original image before the temporary alias is removed; otherwise the alias
+is retained and qualification fails. The original image is inspected again
+after cleanup. PASS is written only after cleanup and operational-container
+preservation both succeed. Unit negatives cover disappearing original tags.

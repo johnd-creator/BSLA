@@ -13,6 +13,8 @@ import fcntl
 path = Path(__file__).resolve().parents[2] / 'deploy/development/wo_service_activation.py'
 spec = importlib.util.spec_from_file_location('wo_service_activation', path)
 m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+rehearsal_spec = importlib.util.spec_from_file_location('wo_service_rehearsal', path.with_name('wo_service_rehearsal.py'))
+r = importlib.util.module_from_spec(rehearsal_spec); rehearsal_spec.loader.exec_module(r)
 
 
 def container():
@@ -149,6 +151,41 @@ class Safety(unittest.TestCase):
         new=copy.deepcopy(old);new['target']['Id']='new';m.verify_preservation(old,new,{'target'})
 
 
+
+
+class RehearsalImagePreservation(unittest.TestCase):
+    def test_untagged_base_rejected_before_tag_or_container_operations(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.object(r.a,'run',return_value=json.dumps([{'Id':'sha256:old','RepoTags':[],'Config':{}}]).encode()) as run,patch.object(r.a,'inventory') as inventory:
+                with self.assertRaisesRegex(RuntimeError,'PREEXISTING_TAGGED'):
+                    r.rehearse('sha256:old',{x:{} for x in m.SERVICES},str(Path(directory)/'new'))
+                self.assertEqual(run.call_count,1);inventory.assert_not_called()
+
+    def test_onbuild_is_not_executed_by_metadata_fixture_builds(self):
+        with self.assertRaisesRegex(RuntimeError,'ONBUILD_FORBIDDEN'):
+            r.retained_base_tags({'RepoTags':['existing:base'],'Config':{'OnBuild':['RUN unexpected']}})
+
+    def test_cleanup_keeps_original_tagged_image_and_only_removes_fixture_aliases(self):
+        removed=[]
+        def run(args):
+            if args[2]=='rm':removed.append(args[-1]);return b''
+            return json.dumps([{'Id':'sha256:old','RepoTags':['existing:base','fixture:base']}]).encode()
+        with patch.object(r.a,'run',side_effect=run),patch.object(r.subprocess,'run') as probe:
+            probe.return_value.returncode=0
+            r.cleanup_fixture_images(['fixture:base','fixture:before','fixture:after'],'sha256:old',{'existing:base'})
+        self.assertEqual(removed,['fixture:after','fixture:before','fixture:base'])
+        self.assertNotIn('sha256:old',removed)
+
+    def test_cleanup_preserves_last_alias_if_original_reference_disappears(self):
+        removed=[]
+        def run(args):
+            if args[2]=='rm':removed.append(args[-1]);return b''
+            return json.dumps([{'Id':'sha256:old','RepoTags':['fixture:base']}]).encode()
+        with patch.object(r.a,'run',side_effect=run),patch.object(r.subprocess,'run') as probe:
+            probe.return_value.returncode=0
+            with self.assertRaisesRegex(RuntimeError,'PRESERVE_FIXTURE_ALIAS'):
+                r.cleanup_fixture_images(['fixture:base','fixture:before','fixture:after'],'sha256:old',{'existing:base'})
+        self.assertEqual(removed,['fixture:after','fixture:before'])
 
 
 class OperationalAdmission(unittest.TestCase):
