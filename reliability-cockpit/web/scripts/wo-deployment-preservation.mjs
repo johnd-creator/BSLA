@@ -21,6 +21,16 @@ const repairedFiles={
   "reliability-cockpit/docs/NADI-WO-ACTIVATION-CORRECTION-01.md": "465bb4406e136ef7b508446cbab59492a4f48008876bb87ed3e6f1c1b1fcd1f6",
   "reliability-cockpit/tests/test_wo_service_activation.py": "117c9e62eca964a1d0cc66de5bcfe0f56872531beadcee71062ed7e22be1430a"
 };
+const labelBaseHead="244686244bb39ab8e7a929a52f2a39940b4bb1b9";
+const labelReviewedHead="3d68eef4f88356b3bf515bbaa2ee1e90c182d027";
+const labelFiles={
+  "DEV-LOG.md": "0b37fc6b80f44cd9d2a34b03fbf4409fb45da56bc17a3eff82e7656d2a4b4b0d",
+  "deploy/development/wo_service_activation.py": "2beb02efe4616d1736bfc2750991e7e97e4253133f1e8da32da5258de8376711",
+  "deploy/development/wo_service_rehearsal.py": "6b72686de268a221e027e06f52e31c79610cb3deb5889798bfd323992164eac3",
+  "plans/REPOSITORY-STATUS.md": "fd04a466c1e405f107fab156f51886379d7e05e01e81ef0b221ea3f7663f80f9",
+  "reliability-cockpit/docs/NADI-WO-ACTIVATION-CORRECTION-01.md": "7e8c412dcfbf7d84f3f5406c3cfc05963eeb89c2edba647ed189abad26c21b50",
+  "reliability-cockpit/tests/test_wo_service_activation.py": "9be92ddbe9544632861c0bd0528c763d5d2004734773b3b385f121e779867de6"
+};
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 export function reviewedWoDeploymentHashes(root){
  const git=(...args)=>execFileSync('git',['-C',root,...args]);
@@ -34,7 +44,14 @@ export function reviewedWoDeploymentHashes(root){
   assert(Object.hasOwn(files,path),'repair outside reviewed deployment path set');
   assert.equal(hash(git('show',repairedHead+':'+path)),expected,'immutable predecessor repair pin changed: '+path);
  }
- const current={...files,...repairedFiles};
+ assert.equal(git('merge-base',labelBaseHead,'HEAD').toString('utf8').trim(),labelBaseHead);
+ assert.equal(hash(git('show',labelBaseHead+':reliability-cockpit/web/scripts/wo-deployment-preservation.mjs')),"0ec2de05b0677e774c361467cd12cc1d73f4f8927e332af39936ae7a6f5edcbf",'immutable predecessor deployment loader changed');
+ assert.equal(git('merge-base',labelReviewedHead,'HEAD').toString('utf8').trim(),labelReviewedHead);
+ for(const [path,expected] of Object.entries(labelFiles)){
+  assert(Object.hasOwn(files,path),'label correction outside original deployment path set');
+  assert.equal(hash(git('show',labelReviewedHead+':'+path)),expected,'immutable image-label correction pin changed: '+path);
+ }
+ const current={...files,...repairedFiles,...labelFiles};
  for(const [path,expected] of Object.entries(current))assert.equal(hash(readFileSync(root+'/'+path)),expected,'unreviewed deployment correction change: '+path);
  // The old loader and all of its historical assertions survive an exact
  // import/return amendment; neither the old manifest nor wrapper is rewritten.
