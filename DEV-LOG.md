@@ -1422,3 +1422,15 @@ wrapper-mode/recovery and historical equality-selection regressions. Corrected
 explicit executable/private modes and retained strict comparator fallback; added
 real-file partial/post-replacement/concurrent recovery regressions. Candidate head,
 CI, image and independent review pins must be refreshed. Runtime stays PR119.
+
+## 2026-11-04 — NADI-WO-INTEGRATED-LOCAL-RELEASE-01 preparation
+
+Release audit verified PR129 contains PR128 but lacks active469 hierarchy/access
+changes. Consolidated those already qualified changes once to preserve current
+capability decoding and ancestor navigation. Added a closed source/recovery
+admission, explicit owner-gated controller preparation/install and non-issuing
+read-packet resolver. Historical guards, original AUTHOR/write scope, canonical
+CI selectors and all existing browser assertions remain. Fresh qualification,
+private backups/restore, exact service/cohort approval and actual Engineer UAT
+are mandatory; no operational replacement, grant or Mart write is implied.
+See [integrated release runbook](reliability-cockpit/docs/NADI-WO-INTEGRATED-LOCAL-RELEASE-01.md).

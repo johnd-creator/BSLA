@@ -83,7 +83,7 @@ jobs:
         working-directory: reliability-cockpit
         env:
           PYTHONPATH: '.:tests'
-        run: python -m unittest test_factual_read_entitlements test_factual_read_controller test_hierarchy_source_admission test_local_activation_qualification -v
+        run: python -m unittest test_factual_read_entitlements test_factual_read_controller test_hierarchy_source_admission test_wo_integrated_source_admission test_local_activation_qualification -v
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '22'
