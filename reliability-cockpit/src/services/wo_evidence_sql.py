@@ -4,27 +4,45 @@ PostgreSQL16 verifies calendar inputs before casts. SQLite is the disposable
 fixture dialect; julianday comparisons use its millisecond clock resolution.
 No source text receives an invented timezone and no malformed JSON is cast.
 """
-from sqlalchemy import and_,case,cast,DateTime,Numeric,func,literal
+from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy import and_,case,cast,DateTime,Numeric,String,func,literal
 
 ISO=r'^[0-9]{4}-(0[1-9]|1[0-2])-([0-2][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9]{1,9})?(Z|[+-]([01][0-9]|2[0-3]):[0-5][0-9])$'
 MIN_EPOCH=-62135596800
 MAX_EPOCH=253402300800
 
+# Only the small proof roots needed by the overview are materialized. Retain
+# their JSON types so malformed numbers, strings, booleans and nulls still pass
+# through the same type/calendar/identity/version guards.
+EVIDENCE_ROOTS=(('maximo','wonum'),('maximo','assetnum'),
+ ('maximo','wo_detail','schema_version'),('maximo','wo_detail','identity'),
+ ('maximo','wo_detail','source_changed_at'),('maximo','wo_detail','fields','reported_at'),
+ ('maximo','actual_dates','schema_version'),('maximo','actual_dates','identity'),
+ ('maximo','actual_dates','fields','actstart'),('maximo','actual_dates','fields','actfinish'))
+
 class WoProofSql:
- def __init__(self,database,scope):
-  self.postgres=database.engine.dialect.name=='postgresql';self.scope=scope
+ def __init__(self,database,scope,roots=None):
+  self.postgres=database.engine.dialect.name=='postgresql';self.scope=scope;self.roots=roots or {}
   self.tolerance=.000002 if self.postgres else .001
  def json(self,*path):
-  expr=self.scope.c.sources
-  for part in path:expr=expr[part]
+  if self.roots:
+   prefix=next(root for root in self.roots if path[:len(root)]==root)
+   expr=self.roots[prefix];tail=path[len(prefix):]
+  else:expr=self.scope.c.sources;tail=path
+  for part in tail:expr=expr[part]
   return expr
+ def scalar_text(self,path):
+  value=self.json(*path)
+  # A materialized scalar column is a JSON value, rather than an index
+  # expression. Extract its root text without retaining JSON quote marks.
+  return value.op('#>>',return_type=String())(literal([],type_=ARRAY(String()))) if path in self.roots else value.as_string()
  def kind(self,path):
   return func.jsonb_typeof(self.json(*path)) if self.postgres else func.json_type(self.scope.c.sources,'$.'+'.'.join(path))
  def number(self,path):
   kinds=('number',) if self.postgres else ('integer','real')
-  return case((self.kind(path).in_(kinds),cast(self.json(*path).as_string(),Numeric())),else_=None)
+  return case((self.kind(path).in_(kinds),cast(self.scalar_text(path),Numeric())),else_=None)
  def schema(self,path):return self.number(path)==1
- def text(self,path):return case((self.kind(path)=='string' if self.postgres else self.kind(path)=='text',self.json(*path).as_string()),else_=None)
+ def text(self,path):return case((self.kind(path)=='string' if self.postgres else self.kind(path)=='text',self.scalar_text(path)),else_=None)
  def epoch(self,path):
   value=self.text(path)
   shape=and_(func.length(value)<=128,value.regexp_match(ISO),~value.like('%-00:00'))

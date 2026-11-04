@@ -71,3 +71,20 @@ WO Group and backlog semantics remain unapproved; operational MTBF/MTTR stays of
 Final ACTIVE status requires all approved services and actual UAT to pass. Until
 then report NADI_WO_INTEGRATED_RELEASE_BLOCKED with the exact remaining approval,
 authentication, source or recovery gates, without substituting CI for live evidence.
+
+
+## Exact identity approval and one initial version freeze
+
+Normal workers can advance retained source versions during owner review. The
+consolidated proposal therefore pins the complete identity envelope and permits
+one initial read-only version binding after the owner-approved writer pause.
+Every identity, canonical Asset relation, Registry membership and equal Legacy/Mart
+source version must pass. New identities and unresolved version gaps are deferred.
+The resulting exact ten-or-fewer plans and their seals are immutable; any later
+version conflict stops without replanning. Fresh backups and an independent
+restore/rehearsal of those frozen plans must pass before service replacement or
+Mart writes. This preparation rule needs explicit inclusion in the owner decision.
+
+Full restored-data qualification also rebuilds statistics in the disposable clone
+and tests the actual five-second read timeout after detail recovery. It does not
+change live database statistics, timeouts or service configuration.

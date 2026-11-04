@@ -1445,3 +1445,15 @@ through the actual issuer event schema without issuing a grant. Regression tests
 cover these mismatches. Current-baseline notes supersede historical PR119 recovery
 references with active469 source; old log entries remain. Exact-head qualification
 and private operational approval are still required; runtime/data stay unchanged.
+
+
+### 2026-11-04 — post-recovery overview qualification
+
+Full private restored-data qualification separated missing restore planner statistics
+from the cost of repeatedly extracting proof fields from populated source JSON.
+The existing five-second Mart timeout remains enforced. PostgreSQL now materializes
+only ten required proof roots before repeated identity, type, calendar, epoch and
+version checks. Counting keys, date bases, Registry/BSR/IP scope and DTOs stay the
+same. SQLite and PostgreSQL regressions include wide unrelated source evidence.
+Large restored-data performance and new exact-head CI/review remain mandatory;
+no operational change or live UAT is claimed.

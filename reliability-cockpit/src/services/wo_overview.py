@@ -12,8 +12,17 @@ def wo_overview(database, *, window_days=30, as_of=None):
  scope=select(M).join(R,R.asset_ref==M.equipment_id).where(M.site_code=='BSR',M.organization_code=='IP',R.site_code=='BSR',R.organization_code=='IP').subquery()
  key=func.coalesce(scope.c.work_order_id,scope.c.canonical_id)
  count=lambda condition:func.count(func.distinct(key)).filter(condition)
- from src.services.wo_evidence_sql import WoProofSql
+ from src.services.wo_evidence_sql import WoProofSql,EVIDENCE_ROOTS
  proof=WoProofSql(database,scope)
+ if proof.postgres:
+  # Wide source JSON is commonly TOASTed after detail recovery. Extract the
+  # ten bounded proof roots once per scoped row before repeated predicates;
+  # the complete source document never enters the aggregate CTE.
+  columns=('work_order_id','canonical_id','status','source_changed_at','actual_start','actual_finish')
+  projected=select(*(scope.c[name] for name in columns),
+   *(proof.json(*path).label('proof_'+str(i)) for i,path in enumerate(EVIDENCE_ROOTS))).select_from(scope).cte('scoped_wo_proofs').prefix_with('MATERIALIZED')
+  scope=projected;key=func.coalesce(scope.c.work_order_id,scope.c.canonical_id)
+  proof=WoProofSql(database,scope,{path:scope.c['proof_'+str(i)] for i,path in enumerate(EVIDENCE_ROOTS)})
  reported,valid_report=proof.reported()
  valid_start=proof.valid_actual('actstart',scope.c.actual_start)
  valid_finish=proof.valid_actual('actfinish',scope.c.actual_finish)
