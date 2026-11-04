@@ -105,6 +105,36 @@ def verify_runtime(actual, expected, predecessor=None):
         raise RuntimeError('RUNTIME_CONTRACT_CHANGED')
 
 
+
+def admit_runtime(actual, expected, receipt_root, plan_sha256, name):
+    try:
+        verify_runtime(actual, expected)
+        return
+    except RuntimeError as error:
+        if str(error) != 'UNEXPECTED_COMPOSE_REPLACEMENT_LABEL':
+            raise
+    # Re-entry after an ID-style recreation must recover exactly the predecessor
+    # already admitted by this plan's durable completed operation. Never infer
+    # trust from an arbitrary ID-shaped label or an uncommitted observation.
+    service = actual['Config']['Labels']['com.docker.compose.service']
+    for path in sorted(Path(receipt_root).glob('*-' + service + '-*.completed.json'), reverse=True):
+        completed = json.loads(private_bytes(path))
+        prepared_path = path.with_name(path.name.removesuffix('.completed.json') + '.json')
+        prepared = json.loads(private_bytes(prepared_path))
+        if (completed.get('state') != 'VERIFIED' or prepared.get('state') != 'PREPARED'
+                or prepared.get('plan_sha256') != plan_sha256
+                or completed.get('command') != prepared.get('command')):
+            continue
+        retained = completed['after'].get(name)
+        if (retained is None or retained['Id'] != actual['Id']
+                or retained['Config']['Labels'].get('com.docker.compose.replace') != actual['Config']['Labels'].get('com.docker.compose.replace')
+                or digest(runtime_contract(retained)) != digest(runtime_contract(actual))):
+            continue
+        verify_runtime(actual, expected, predecessor=prepared['before'][name])
+        return
+    raise RuntimeError('UNEXPECTED_COMPOSE_REPLACEMENT_LABEL')
+
+
 def operation_args(action, service):
     if service not in SERVICES or service in FORBIDDEN:
         raise RuntimeError('EXACT_SERVICE_ALLOWLIST_REQUIRED')
@@ -265,10 +295,10 @@ def execute(plan_path, action, service, owner_path, receipt_dir):
         for role, spec in plan['services'].items():
             current = before['/'+PROJECT+'-'+role+'-1']
             if current['Image'] == spec['image_before']:
-                verify_runtime(current, spec['baseline_runtime'])
+                admit_runtime(current, spec['baseline_runtime'], root, hashlib.sha256(raw).hexdigest(), '/'+PROJECT+'-'+role+'-1')
             elif current['Image'] == spec['image_after']:
-                verify_runtime(current, expected_runtime(spec['baseline_runtime'], spec['image_after'], plan['candidate_sha'],
-                    '/reliability-data-contracts' if role=='mart-projector' else None))
+                admit_runtime(current, expected_runtime(spec['baseline_runtime'], spec['image_after'], plan['candidate_sha'],
+                    '/reliability-data-contracts' if role=='mart-projector' else None), root, hashlib.sha256(raw).hexdigest(), '/'+PROJECT+'-'+role+'-1')
             else:
                 raise RuntimeError('UNEXPECTED_CURRENT_SERVICE_IMAGE')
         if action == 'preflight':
@@ -288,9 +318,9 @@ def execute(plan_path, action, service, owner_path, receipt_dir):
         candidate = expected_runtime(seed, spec['image_after'], plan['candidate_sha'],
                                      '/reliability-data-contracts' if service == 'mart-projector' else None)
         if actual['Image'] == spec['image_before']:
-            verify_runtime(actual, seed)
+            admit_runtime(actual, seed, root, hashlib.sha256(raw).hexdigest(), name)
         elif actual['Image'] == spec['image_after']:
-            verify_runtime(actual, candidate)
+            admit_runtime(actual, candidate, root, hashlib.sha256(raw).hexdigest(), name)
         else:
             raise RuntimeError('UNEXPECTED_CURRENT_IMAGE')
         if action in ('replace', 'rollback') and service in WRITERS and actual['State']['Running']:

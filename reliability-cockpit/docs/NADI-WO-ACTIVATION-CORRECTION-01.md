@@ -44,7 +44,10 @@ silently retries a failed step or changes official paired-controller admission.
 Compare exact Env key/value maps (duplicate keys rejected), ignoring their
 ordering and Docker-generated hostname/config-hash/image/config-file labels.
 A generated replacement label is accepted only for the same exact service replica name or a known predecessor ID.
-Arbitrary ID-shaped values are rejected.
+Arbitrary ID-shaped values are rejected. A subsequent invocation may recover
+the exact predecessor only from this same plan's private VERIFIED receipt paired
+with its durable PREPARED record; current ID/metadata/runtime must match. Missing,
+uncertain, different-plan or stale receipt state fails closed.
 Source revision labels remain exact. Normalize only present null DNS lists to
 empty lists and present null OomKillDisable to false. Missing keys, actual DNS
 values, OOM-disable=true, port/resource/security flags, command, user, entrypoint,

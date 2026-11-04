@@ -178,6 +178,38 @@ class OperationalAdmission(unittest.TestCase):
                 with self.assertRaisesRegex(RuntimeError,'ENGINE_IDENTITY'):m.validate_plan(self.plan)
                 self.assertEqual(run.call_count,3)
 
+    def test_multi_invocation_ID_metadata_rollback_then_resume(self):
+        with tempfile.TemporaryDirectory() as directory:
+            self.setup_operation(directory)
+            name='/'+m.PROJECT+'-maximo-worker-1';state=copy.deepcopy(self.before)
+            state[name]['State'].update(Status='running',Running=True)
+            sequence=[];events=[]
+            def run(args):
+                if args[1]=='events':return b'\n'.join(json.dumps(event).encode() for event in events)
+                service=args[-1];self.assertEqual(service,'maximo-worker');prior=copy.deepcopy(state[name]);events.clear()
+                if 'stop' in args:state[name]['State'].update(Status='exited',Running=False)
+                elif '--force-recreate' in args:
+                    target=m.expected_runtime(self.plan['services'][service]['baseline_runtime'],'sha256:new','candidate') if 'candidate' in args else copy.deepcopy(self.plan['services'][service]['baseline_runtime'])
+                    target['Id']='new-'+str(len(sequence));target['Config']['Hostname']=target['Id'];target['Config']['Labels']['com.docker.compose.replace']=prior['Id'];target['State'].update(Status='created',Running=False);state[name]=target
+                else:state[name]['State'].update(Status='running',Running=True)
+                events.append({'Action':'start' if state[name]['State']['Running'] else 'stop','Actor':{'ID':state[name]['Id'],'Attributes':{'name':name.lstrip('/'),'com.docker.compose.project':m.PROJECT,'com.docker.compose.service':service}}})
+                sequence.append(args);return b''
+            prefix=lambda plan,service,candidate:['docker','compose','candidate' if candidate else 'baseline']
+            with patch.object(m,'validate_plan',side_effect=lambda p:p),patch.object(m,'inventory',side_effect=lambda:copy.deepcopy(state)),patch.object(m,'compose_prefix',side_effect=prefix),patch.object(m,'run',side_effect=run):
+                for action in ('quiesce','replace','rollback','resume','quiesce','replace','resume'):
+                    result=m.execute(self.planpath,action,'maximo-worker',self.ownerpath,self.receipts)
+                    self.assertEqual(result['status'],'VERIFIED')
+                self.assertEqual(len(sequence),7)
+                self.assertTrue(state[name]['State']['Running'])
+                # Unknown receipt provenance cannot admit an otherwise known-ID
+                # metadata value after rollback/re-entry.
+                for path in self.receipts.glob('*.json'):
+                    if '.completed.' in path.name or '.observed.' in path.name:continue
+                    value=json.loads(path.read_text());value['plan_sha256']='other-plan';path.write_text(json.dumps(value))
+                with self.assertRaisesRegex(RuntimeError,'REPLACEMENT_LABEL'):
+                    m.execute(self.planpath,'quiesce','maximo-worker',self.ownerpath,self.receipts)
+                self.assertEqual(len(sequence),7)
+
     def test_file_and_environment_seals_fail_before_render(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);env=root/'.env.platform';env.write_text('SYNTHETIC=only');env.chmod(0o600)
