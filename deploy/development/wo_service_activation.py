@@ -23,6 +23,8 @@ PROJECT = 'reliability-cockpit-platform'
 GENERATED_LABELS = frozenset({'com.docker.compose.config-hash',
     'com.docker.compose.image', 'com.docker.compose.project.config_files'})
 ACTIONS = ('preflight', 'quiesce', 'replace', 'resume', 'rollback')
+TASK_LABEL = 'nadi.local.task'
+COMPOSE_LABEL_PREFIX = 'com.docker.compose.'
 
 
 def encoded(value):
@@ -52,6 +54,37 @@ def environment(values):
             raise RuntimeError('UNAMBIGUOUS_ENVIRONMENT_REQUIRED')
         result[key] = item
     return result
+
+
+def effective_labels(image, rendered):
+    """Merge image-inherited and explicitly rendered labels before mutation.
+
+    Docker adds its own Compose metadata at creation. Neither input may spoof
+    that namespace; the later full-runtime comparison still protects it.
+    """
+    result = {}
+    for values in (image.get('Config', {}).get('Labels'), rendered.get('labels')):
+        if values is None:
+            continue
+        if not isinstance(values, dict):
+            raise RuntimeError('UNAMBIGUOUS_LABEL_MAP_REQUIRED')
+        for key, value in values.items():
+            if (not isinstance(key, str) or not key or not isinstance(value, str)
+                    or key.startswith(COMPOSE_LABEL_PREFIX)):
+                raise RuntimeError('INVALID_OR_RESERVED_IMAGE_LABEL')
+            result[key] = value
+    return result
+
+
+def verify_effective_labels(baseline, old_image, new_image, old, new, revision):
+    before = effective_labels(old_image, old)
+    actual = {key: value for key, value in baseline['Config']['Labels'].items()
+              if not key.startswith(COMPOSE_LABEL_PREFIX)}
+    if before != actual:
+        raise RuntimeError('BASELINE_EFFECTIVE_IMAGE_LABELS_CHANGED')
+    expected = {**before, 'org.opencontainers.image.revision': revision}
+    if effective_labels(new_image, new) != expected:
+        raise RuntimeError('UNAPPROVED_EFFECTIVE_IMAGE_LABEL_CHANGE')
 
 
 def runtime_contract(container):
@@ -255,18 +288,27 @@ def validate_plan(plan):
     if run(['docker', 'info', '--format', '{{.ID}}']).decode().strip() != plan['engine_id']:
         raise RuntimeError('DOCKER_ENGINE_IDENTITY_CHANGED')
     for service, spec in plan['services'].items():
+        images = {}
         for key in ('image_before', 'image_after'):
             image = json.loads(run(['docker', 'image', 'inspect', spec[key]]))[0]
             if key == 'image_after' and image['Config'].get('Labels', {}).get('org.opencontainers.image.revision') != plan['candidate_sha']:
                 raise RuntimeError('CANDIDATE_IMAGE_SOURCE_REVISION_MISMATCH')
             if image['Id'] != spec[key]:
                 raise RuntimeError('PINNED_IMAGE_UNAVAILABLE')
+            images[key] = image
         old_prefix = compose_prefix(plan, service, False)
         new_prefix = compose_prefix(plan, service, True)
         old = json.loads(run(old_prefix + ['config', '--format', 'json']))['services'][service]
         new = json.loads(run(new_prefix + ['config', '--format', 'json']))['services'][service]
+        verify_effective_labels(spec['baseline_runtime'], images['image_before'],
+                                images['image_after'], old, new, plan['candidate_sha'])
         expected = copy.deepcopy(old); expected['image'] = spec['image_after']
         expected.setdefault('labels', {})['org.opencontainers.image.revision'] = plan['candidate_sha']
+        if service == 'cockpit-api':
+            task = spec['baseline_runtime']['Config']['Labels'].get(TASK_LABEL)
+            if not isinstance(task, str) or not task:
+                raise RuntimeError('ORIGINAL_FACTUAL_TASK_LABEL_REQUIRED')
+            expected['labels'][TASK_LABEL] = task
         if service == 'mart-projector':
             if expected['environment'].get('RELIABILITY_CONTRACTS_ROOT') != '/contracts':
                 raise RuntimeError('ORIGINAL_CONTRACT_ROOT_CHANGED')

@@ -1314,3 +1314,15 @@ new bounded Compose tooling and actual dependency-isolation rehearsal are under
 exact-head qualification. Original source/grant/controller and field-level data
 recovery guards remain. A changed command/image/cohort/window needs one exact
 consolidated operational decision. [Correction](../reliability-cockpit/docs/NADI-WO-ACTIVATION-CORRECTION-01.md).
+
+
+### 4 November 2026 — integrated WO inherited-label preparation
+
+Emergency recovery restored Collector2e and Factual/frontend/Engineering469.
+The integrated draft adds pre-mutation effective image-label admission and a
+real isolated two-image regression, preserving strict runtime checks and all
+historical source/CI protections. Qualification is bound to the final immutable
+PR head and separately reviewed deployment-pin layer. Source implementation,
+qualification, final owner approval and actual activation remain distinct. No
+new live data authority or previous once-only binding is carried forward.
+[Procedure](../reliability-cockpit/docs/NADI-WO-ACTIVATION-CORRECTION-01.md).

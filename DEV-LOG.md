@@ -1480,3 +1480,20 @@ the actual dependency graph, no source credentials/network/database server, and
 separately reproduces the old start dependency hazard. Private runtime/source
 consequences remain auditable; this entry does not claim activation or Engineer
 UAT. [Procedure and qualification boundaries](reliability-cockpit/docs/NADI-WO-ACTIVATION-CORRECTION-01.md).
+
+
+## 2026-11-04 — integrated WO image-label requalification preparation
+
+After the recorded emergency baseline recovery, preflight now compares effective
+image-plus-Compose labels against the actual sealed baseline before any service
+operation. Factual configuration explicitly preserves its original task label;
+all other label/runtime/source guards remain. Nineteen safety/admission tests
+and an isolated two-image inherited-label regression exercise rejection, fixture
+recovery, corrected replacement/rollback and forbidden-init preservation. Final
+exact-head CI and independent reviews are recorded with the integrated draft PR;
+local diagnostic tests are not activation evidence. Historical preservation pins
+remain immutable beneath a separately reviewed finite correction layer.
+Runtime stays Collector2e/Factual/frontend/Engineering469 with normal writers.
+No activation, writer pause, controller install, grant or live recovery DML is
+authorized. A new private exact final package and owner decision are mandatory.
+See [label qualification](reliability-cockpit/docs/NADI-WO-ACTIVATION-CORRECTION-01.md).

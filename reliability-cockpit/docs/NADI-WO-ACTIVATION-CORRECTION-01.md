@@ -86,3 +86,39 @@ preparation/review. Refresh expired Engineer authentication only when the offici
 controller rejects it. Use that Engineer for actual Beranda → Asset → Maintenance
 → WO Detail, authorized hierarchy and PdM regressions, private screenshots and
 SQL reconciliation. Never substitute ADMIN or claim dummy-fixture UAT.
+
+## 4 November 2026 — inherited image-label requalification
+
+The stopped candidate inherited a different `nadi.local.task` value from its
+Factual image. Both Compose renders omitted that key; comparing only those
+renders did not establish the effective container label contract. The strict
+runtime gate correctly rejected the changed label. Emergency recovery returned
+Collector to `2eacce47` and Factual/frontend/Engineering to `469f21fe`; its private
+approval and operational evidence remain separate from this source correction.
+
+Preflight now merges image labels with explicitly rendered labels and compares
+all non-Compose metadata against the sealed actual baseline. Candidate labels
+may differ only in the exact source revision. Image/rendered inputs cannot spoof
+the reserved Docker Compose namespace. The full later runtime comparison still
+protects Docker metadata and every other configuration field; no task-label
+exception or ignore rule was added.
+
+The new Factual override must explicitly preserve the original container task
+label from the exact baseline seal. This legacy operational label is separate
+from the accurately pinned candidate image/source revision. An absent override,
+extra inherited label, false baseline label or ambiguous/reserved label map
+fails before any runtime inventory, service command or receipt preparation.
+
+The isolated Docker rehearsal builds two metadata-only shell-fixture images with
+different inherited task labels. It proves preflight rejects the historical
+case without mutation, deliberately reproduces that runtime rejection only in
+the disposable fixture, restores it, and verifies corrected replacement and
+rollback using the original task label. Init/unrelated preservation and the old
+dependency-start negative remain mandatory. Results record source SHA/dirty
+state and module/graph hashes; final qualification must use the clean exact head.
+
+This preparation authorizes no activation, writer pause, controller install,
+grant change, live data binding or WO recovery writes. A new exact source/image/
+configuration/cohort/window package, fresh recovery/session gates, and final
+owner approval are required. Existing 10-WO/20-timestamp and fixed detail identity
+boundaries remain; the previous once-only binding cannot be reused after polling.

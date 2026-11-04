@@ -26,6 +26,48 @@ def container():
 
 
 class Safety(unittest.TestCase):
+    def label_fixture(self):
+        before = container()
+        before['Config']['Labels'][m.TASK_LABEL] = 'original-task'
+        old_image = {'Config': {'Labels': dict(before['Config']['Labels'])}}
+        new_image = {'Config': {'Labels': {
+            'org.opencontainers.image.revision': 'new', m.TASK_LABEL: 'new-task'}}}
+        return before, old_image, new_image
+
+    def test_inherited_task_label_conflict_is_not_hidden_by_equal_renders(self):
+        before, old_image, new_image = self.label_fixture()
+        old = {'labels': {'org.opencontainers.image.revision': 'old'}}
+        new = {'labels': {'org.opencontainers.image.revision': 'new'}}
+        with self.assertRaisesRegex(RuntimeError, 'EFFECTIVE_IMAGE_LABEL_CHANGE'):
+            m.verify_effective_labels(before, old_image, new_image, old, new, 'new')
+        new['labels'][m.TASK_LABEL] = 'original-task'
+        m.verify_effective_labels(before, old_image, new_image, old, new, 'new')
+        # Runtime checks still reject the historical bad container outright.
+        bad = m.expected_runtime(before, 'sha256:new', 'new')
+        bad['Config']['Labels'][m.TASK_LABEL] = 'new-task'
+        with self.assertRaisesRegex(RuntimeError, 'RUNTIME_CONTRACT_CHANGED'):
+            m.verify_runtime(bad, m.expected_runtime(before, 'sha256:new', 'new'))
+
+    def test_effective_label_admission_rejects_baseline_drift_and_extra_labels(self):
+        before, old_image, new_image = self.label_fixture()
+        new = {'labels': {m.TASK_LABEL: 'original-task'}}
+        old_image['Config']['Labels'][m.TASK_LABEL] = 'different-baseline'
+        with self.assertRaisesRegex(RuntimeError, 'BASELINE_EFFECTIVE'):
+            m.verify_effective_labels(before, old_image, new_image, {}, new, 'new')
+        old_image['Config']['Labels'][m.TASK_LABEL] = 'original-task'
+        new_image['Config']['Labels']['unexpected'] = 'inherited'
+        with self.assertRaisesRegex(RuntimeError, 'EFFECTIVE_IMAGE_LABEL_CHANGE'):
+            m.verify_effective_labels(before, old_image, new_image, {}, new, 'new')
+
+    def test_label_maps_reject_reserved_metadata_and_ambiguous_values(self):
+        for labels in ([m.TASK_LABEL + '=value'], {'flag': True}, {'': 'value'},
+                       {m.COMPOSE_LABEL_PREFIX + 'service': 'maximo-init'}):
+            for image, rendered in (({'Config': {'Labels': labels}}, {}),
+                                    ({'Config': {}}, {'labels': labels})):
+                with self.assertRaises(RuntimeError):m.effective_labels(image, rendered)
+        self.assertEqual(m.effective_labels({'Config': {'Labels': {'a': 'old'}}},
+                                           {'labels': {'a': 'explicit'}}), {'a': 'explicit'})
+
     def test_only_exact_services_and_no_dependencies(self):
         for service in m.SERVICES:
             for action in ('replace','rollback'):
@@ -177,6 +219,35 @@ class OperationalAdmission(unittest.TestCase):
             with patch.object(m,'run',side_effect=[b'expected',b'expected',b'wrong-engine']) as run:
                 with self.assertRaisesRegex(RuntimeError,'ENGINE_IDENTITY'):m.validate_plan(self.plan)
                 self.assertEqual(run.call_count,3)
+
+    def test_inherited_label_preflight_stops_before_inventory_or_mutation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            self.setup_operation(directory)
+            factual=self.plan['services']['cockpit-api']['baseline_runtime']
+            factual['Config']['Labels'][m.TASK_LABEL]='original-task'
+            self.plan.update(version=1,project=m.PROJECT,repository=directory,
+                env_file=str(Path(directory)/'.env.platform'),container_count=35,
+                forbidden=list(m.FORBIDDEN),docker_context='expected',
+                compose_version='expected',engine_id='expected')
+            self.save()
+            old={'image':'sha256:old','labels':{'org.opencontainers.image.revision':'old'}}
+            new={'image':'sha256:new','labels':{'org.opencontainers.image.revision':'candidate'}}
+            def read_only(args):
+                if args[1]=='image':
+                    candidate=args[-1]=='sha256:new'
+                    return json.dumps([{'Id':args[-1],'Config':{'Labels':{
+                        'org.opencontainers.image.revision':'candidate' if candidate else 'old',
+                        m.TASK_LABEL:'new-task' if candidate else 'original-task'}}}]).encode()
+                if 'config' in args:
+                    return json.dumps({'services':{'cockpit-api':new if 'candidate' in args else old}}).encode()
+                return b'expected'
+            prefix=lambda plan,service,candidate:['docker','compose','candidate' if candidate else 'baseline']
+            with patch.object(m,'compose_prefix',side_effect=prefix),patch.object(m,'run',side_effect=read_only) as run,patch.object(m,'inventory') as inventory:
+                with self.assertRaisesRegex(RuntimeError,'UNAPPROVED_EFFECTIVE_IMAGE_LABEL_CHANGE'):
+                    self.invoke()
+                inventory.assert_not_called()
+                self.assertTrue(all('up' not in call.args[0] and 'stop' not in call.args[0] for call in run.call_args_list))
+                self.assertEqual(list(self.receipts.glob('*.json')),[])
 
     def test_multi_invocation_ID_metadata_rollback_then_resume(self):
         with tempfile.TemporaryDirectory() as directory:
