@@ -1,5 +1,6 @@
 // NADI-WO-DATA-AND-EXECUTIVE-RECONCILIATION-01: immutable reviewed bytes.
 // Validation only: immutable anchor; no pin regeneration or skipped gates.
+import {reviewedWoDeploymentHashes} from './wo-deployment-preservation.mjs';
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import {readFileSync} from 'node:fs';
@@ -83,5 +84,5 @@ export function reviewedWoReconciliationHashes(root){
  for(const anchor of [importAnchor,mapAnchor])assert.equal(original.split(anchor).length,2,'single exact guard amendment required');
  const expected=original.replace(importAnchor,importAnchor+'\n'+importAddition).replace(mapAnchor,mapAmendment);
  assert.equal(readFileSync(root+'/'+wrapper,'utf8'),expected,'unreviewed preservation wrapper mutation');
- return {...data.files,[wrapper]:sha(expected)};
+ return {...data.files,...reviewedWoDeploymentHashes(root),[wrapper]:sha(expected)};
 }
