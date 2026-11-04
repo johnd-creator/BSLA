@@ -4,11 +4,14 @@ import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
-const reviewedHead="56c502a82f8e8a179d98d31f25e16f88393aad86";
+const reviewedHead="0274e85cba2517e0e48b936013025a75c4187fca";
 const wrapperBase="fb4ca2389f96260a938911f00d5524815807e326";
 const fenceBase='988af8d4875758b300e7b563c0a205f143ee184c';
 const expectedPaths=[
   ".github/workflows/nadi-engineering-candidate.yml",
+  "deploy/development/wo_integrated_controller.py",
+  "deploy/development/wo_integrated_grants.py",
+  "deploy/development/wo_integrated_source_admission.py",
   "maximo-collector/README.md",
   "maximo-collector/docs/wo-actual-date-recovery.md",
   "maximo-collector/postgres_tests/test_wo_actual_date_postgres.py",
@@ -39,6 +42,7 @@ const expectedPaths=[
   "reliability-cockpit/tests/test_wo_detail.py",
   "reliability-cockpit/tests/test_wo_executive_postgres.py",
   "reliability-cockpit/tests/test_wo_executive_reconciliation.py",
+  "reliability-cockpit/tests/test_wo_integrated_source_admission.py",
   "reliability-cockpit/web/components/ExecutiveOverview.tsx",
   "reliability-cockpit/web/components/ScopedExecutiveOverview.tsx",
   "reliability-cockpit/web/components/WoEvidenceOverview.tsx",
@@ -60,7 +64,7 @@ const mapAnchor='const current={...exceptions,...reviewedWoDetailHashes,...revie
 const mapAmendment='const current={...exceptions,...reviewedWoDetailHashes,...reviewedFactualReadHashes,...reviewedWoReconciliationHashes(root)};';
 export function reviewedWoReconciliationHashes(root){
  const bytes=readFileSync(new URL('./wo-reconciliation-preservation.json',import.meta.url));
- assert.equal(sha(bytes),'2de02fa27e3907fbff56fb93e346cedf032b8c0af3540c5bb0a9483f743ddfae','reviewed WO reconciliation manifest changed');
+ assert.equal(sha(bytes),'4d38045eec4bef12d359e6c0864637134f224ce825ba08c60997bb65afc891a4','reviewed WO reconciliation manifest changed');
  const data=JSON.parse(bytes.toString('utf8'));
  assert.equal(bytes.toString('utf8'),JSON.stringify(data,null,2)+'\n','canonical manifest only; duplicate keys prohibited');
  assert.deepEqual(Object.keys(data),['schemaVersion','reviewedHead','fenceBase','files']);
