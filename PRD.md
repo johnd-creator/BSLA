@@ -536,3 +536,10 @@ FR-02 requires evidence-derived actual dates and status-aware completeness. WAPP
 ## 2026-11-03 — NADI-WO-DATA-AND-EXECUTIVE-RECONCILIATION-01 candidate
 
 One integrated candidate builds on qualified Draft PR128 without changing that dependency head. Adds bounded non-personal detail retention/reprojection, optional scoped WO detail, four separate Executive date bases, unique-WO SQL counts and explicit missing coverage/backlog/group semantics. Source timestamps never come from status or changedate fallback. No live source request, service replacement, grant/schema/cursor change or operational backfill is authorized by code qualification. Exact-head CI, independent review and historical preservation guards remain mandatory; operational actions are consolidated privately. [Contract, lineage and gates](reliability-cockpit/docs/NADI-WO-DATA-AND-EXECUTIVE-RECONCILIATION-01.md).
+
+### Asset hierarchy local-review boundary — 3 November 2026 candidate
+
+An independently approved Factual hierarchy READ may authorize one exact registered BSR/IP entry root and retained ancestors/descendants. Ancestor exploration exposes only the branch towards that root. It confers no additional Registry membership or Engineering write permission. UI must preserve UNKNOWN unit, UNVERIFIED semantic role and PARTIAL coverage; missing retained children are not verified leaves.
+
+NADI-ASSET-HIERARCHY-LOCAL-RELEASE-01 is a development candidate; source merge,
+local activation and authorized Product Owner/Engineer acceptance are separate.

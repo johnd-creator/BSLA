@@ -1405,3 +1405,20 @@ head requires fresh full canonical CI and independent review; previous green lan
 do not substitute for it. Live activation, source sampling, Mart repair and real
 Engineer UAT remain unperformed and separately gated. All 35 existing container
 identities/images/start/restart metadata were verified unchanged.
+
+### 3 November 2026 — NADI-ASSET-HIERARCHY-LOCAL-RELEASE-01 candidate
+
+[Integrated local-release candidate](reliability-cockpit/docs/NADI-ASSET-HIERARCHY-LOCAL-RELEASE-01.md) adds exact-root hierarchy READ,
+proven ancestor branch navigation, explicit UNKNOWN/UNVERIFIED/PARTIAL presentation
+and closed controller source/recovery admission. Engineering AUTHOR/write scope,
+legacy READ grants, source acquisition, stores and historical protections remain.
+One Draft PR; exact-head CI/independent review, precise grant/service-owner approval,
+fresh recovery/session gates, actual activation and live Engineer UAT remain distinct.
+No automatic merge, source request, retained-data write or phase advancement.
+Runtime remains PR119 until all gates pass. Global semantics UNKNOWN; Logbook HOLD.
+
+Local-release review follow-up: before installer execution, independent review found
+wrapper-mode/recovery and historical equality-selection regressions. Corrected
+explicit executable/private modes and retained strict comparator fallback; added
+real-file partial/post-replacement/concurrent recovery regressions. Candidate head,
+CI, image and independent review pins must be refreshed. Runtime stays PR119.

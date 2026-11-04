@@ -162,3 +162,14 @@ PdM HOLD remain. Counts, raw identities and recovery evidence remain private.
 ## WO actual-date recovery candidate — 3 November 2026
 
 NADI-MAXIMO-WO-ACTUAL-DATE-RECOVERY-01 is a Collector/Mart source candidate with isolated rehearsal, not an operational write or runtime transition. Existing columns/API support actual dates; absence must distinguish verified source emptiness from unavailable, invalid and lost evidence. See [lineage and release boundaries](maximo-collector/docs/wo-actual-date-recovery.md).
+
+### 3 November 2026 — NADI-ASSET-HIERARCHY-LOCAL-RELEASE-01 candidate
+
+[Integrated local-release candidate](reliability-cockpit/docs/NADI-ASSET-HIERARCHY-LOCAL-RELEASE-01.md) adds exact-root hierarchy READ,
+proven ancestor branch navigation, explicit UNKNOWN/UNVERIFIED/PARTIAL presentation
+and closed controller source/recovery admission. Engineering AUTHOR/write scope,
+legacy READ grants, source acquisition, stores and historical protections remain.
+One Draft PR; exact-head CI/independent review, precise grant/service-owner approval,
+fresh recovery/session gates, actual activation and live Engineer UAT remain distinct.
+No automatic merge, source request, retained-data write or phase advancement.
+Runtime remains PR119 until all gates pass. Global semantics UNKNOWN; Logbook HOLD.
