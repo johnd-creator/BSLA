@@ -14,6 +14,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Mapping
 
 from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 
 from src.contracts.validator import ContractValidationError, validate_record
 from src.repositories import mart_models as orm
@@ -284,6 +285,36 @@ class MartWriter:
         self._db = db
 
     def persist_collection(self, collection: Any, *, dry_run: bool = False) -> MartWriteStats:
+        """Existing owning transaction API; validate before opening any session."""
+        entity, stats, validated = self._prepare_collection(collection)
+        if dry_run or not validated:
+            return stats
+        try:
+            with self._db.session() as session:
+                self._persist_validated(entity, stats, validated, session)
+                session.commit()
+        except MartPersistenceError:
+            raise
+        except Exception as error:
+            stats.database_errors += 1
+            raise MartPersistenceError(f"Mart transaction failed for {entity}") from error
+        return stats
+
+    def persist_in_session(
+        self, collection: Any, session: Session, *, dry_run: bool = False
+    ) -> MartWriteStats:
+        """Caller owns commit/rollback. Never acknowledge work before it commits.
+
+        Validate the entire batch before adding any rows. On error the caller
+        MUST roll back its transaction, including any related receipts.
+        """
+        entity, stats, validated = self._prepare_collection(collection)
+        if dry_run or not validated:
+            return stats
+        return self._persist_validated(entity, stats, validated, session)
+
+    @staticmethod
+    def _prepare_collection(collection: Any):
         entity = str(collection.canonical_entity)
         stats = MartWriteStats(entity, records_received=len(collection.records))
         if entity not in ENTITY_SPECS:
@@ -304,32 +335,32 @@ class MartWriter:
                 stats.contract_errors += 1
                 raise
 
-        if dry_run or not validated:
-            return stats
+        return entity, stats, validated
 
+    @staticmethod
+    def _persist_validated(entity, stats, validated, session):
         spec = ENTITY_SPECS[entity]
         try:
-            with self._db.session() as session:
-                for record in validated:
-                    row = spec.row_builder(record)
-                    existing = session.get(spec.model, record["canonical_id"])
-                    if existing is None:
-                        now = datetime.now(timezone.utc)
-                        row["mart_created_at"] = now
-                        row["mart_updated_at"] = now
-                        session.add(spec.model(**row))
-                        stats.records_inserted += 1
-                        continue
+            for record in validated:
+                row = spec.row_builder(record)
+                existing = session.get(spec.model, record["canonical_id"])
+                if existing is None:
+                    now = datetime.now(timezone.utc)
+                    row["mart_created_at"] = now
+                    row["mart_updated_at"] = now
+                    session.add(spec.model(**row))
+                    stats.records_inserted += 1
+                    continue
 
-                    changed = any(getattr(existing, key) != value for key, value in row.items())
-                    if not changed:
-                        stats.records_unchanged += 1
-                        continue
-                    for key, value in row.items():
-                        setattr(existing, key, value)
-                    existing.mart_updated_at = _next_update_time(existing.mart_updated_at)
-                    stats.records_updated += 1
-                session.commit()
+                changed = any(getattr(existing, key) != value for key, value in row.items())
+                if not changed:
+                    stats.records_unchanged += 1
+                    continue
+                for key, value in row.items():
+                    setattr(existing, key, value)
+                existing.mart_updated_at = _next_update_time(existing.mart_updated_at)
+                stats.records_updated += 1
+            session.flush()
         except MartPersistenceError:
             raise
         except Exception as error:  # pragma: no cover - database-specific failure
