@@ -1306,3 +1306,11 @@ source through the official controller. Collector remains `2eacce47`; source
 qualification, operational approval, activation and real Engineer UAT are separate
 gates. See [integrated release](../reliability-cockpit/docs/NADI-WO-INTEGRATED-LOCAL-RELEASE-01.md).
 No new service, grant or Mart write is authorized by this correction.
+
+### 4 November 2026 — integrated WO operational correction candidate
+
+The integrated WO release remains locally BLOCKED after mandatory stop/rollback;
+new bounded Compose tooling and actual dependency-isolation rehearsal are under
+exact-head qualification. Original source/grant/controller and field-level data
+recovery guards remain. A changed command/image/cohort/window needs one exact
+consolidated operational decision. [Correction](../reliability-cockpit/docs/NADI-WO-ACTIVATION-CORRECTION-01.md).

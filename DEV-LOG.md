@@ -1469,3 +1469,14 @@ The prototype retained counts, malformed-evidence rejection and scope tests whil
 meeting the unchanged read timeout. Final-image restored-data qualification and
 exact-head canonical CI/review remain separate pending gates. Runtime remains
 active469/Collector2eacce; no operational writes or activation were performed.
+
+## 2026-11-04 — NADI-WO-INTEGRATED-ACTIVATION-CORRECTION-01 candidate
+
+Prepared bounded owning-Compose service operations after the previous failed
+cutover/rollback: preserve dependencies, explicitly use no-deps for replacement
+and writer resumption, compare Docker empty defaults narrowly, and audit every
+unrelated container plus lifecycle events. New synthetic Docker rehearsal uses
+the actual dependency graph, no source credentials/network/database server, and
+separately reproduces the old start dependency hazard. Private runtime/source
+consequences remain auditable; this entry does not claim activation or Engineer
+UAT. [Procedure and qualification boundaries](reliability-cockpit/docs/NADI-WO-ACTIVATION-CORRECTION-01.md).

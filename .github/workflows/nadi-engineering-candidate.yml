@@ -79,6 +79,10 @@ jobs:
         env:
           PYTHONPATH: '.:tests'
         run: python -m unittest test_wo_executive_reconciliation test_wo_executive_postgres test_wo_detail test_wo_sr_classification test_reliability_mart -v
+      - name: Exact-service Compose safety and forbidden-dependency rehearsal
+        run: |
+          python -m unittest discover -s reliability-cockpit/tests -p test_wo_service_activation.py -v
+          python deploy/development/wo_service_rehearsal.py --image postgres:16 --graph deploy/development/wo-service-rehearsal-graph.json --directory "$RUNNER_TEMP/wo-service-rehearsal"
       - name: Separate Factual READ private administration and scoped local policy
         working-directory: reliability-cockpit
         env:
