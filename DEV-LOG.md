@@ -1434,3 +1434,14 @@ CI selectors and all existing browser assertions remain. Fresh qualification,
 private backups/restore, exact service/cohort approval and actual Engineer UAT
 are mandatory; no operational replacement, grant or Mart write is implied.
 See [integrated release runbook](reliability-cockpit/docs/NADI-WO-INTEGRATED-LOCAL-RELEASE-01.md).
+
+
+### 2026-11-04 — integrated release review corrections
+
+Independent review found prospective READ packets accepted noncanonical clocks
+and falsy non-list asset scopes that the official issuer rejects. Preparation now
+requires canonical UTC seconds, exact empty registered asset lists and validation
+through the actual issuer event schema without issuing a grant. Regression tests
+cover these mismatches. Current-baseline notes supersede historical PR119 recovery
+references with active469 source; old log entries remain. Exact-head qualification
+and private operational approval are still required; runtime/data stay unchanged.

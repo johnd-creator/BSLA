@@ -67,6 +67,17 @@ class AdmissionTest(unittest.TestCase):
  def test_app_persistence_change_refused_even_if_owner_objects_updated(self):
   path='reliability-cockpit/src/repositories/application_models.py';self.put(path,'changed');self.commit();self.head=self.git('rev-parse','HEAD');self.value.update(candidate_sha=self.head,candidate_tree=self.git('rev-parse','HEAD^{tree}'));self.value['objects']={p:[m.object_id(self.recovery,self.old,p),m.object_id(self.front,self.head,p)] for p in self.comparator.COMPATIBILITY_PATHS};self.save()
   with self.assertRaisesRegex(RuntimeError,'PERSISTENCE_CHANGE_DENIED'):self.check()
+ def test_admission_rejects_nonissuer_time_and_falsy_nonlist_assets(self):
+  for invalid in ('2026-11-04T10:00:00+07:00','2026-11-04T03:00:00.000Z','2026-11-04T03:00:00','2026-02-30T03:00:00Z'):
+   value=copy.deepcopy(self.value);value['required_grants'][0]['not_before']=invalid
+   with self.subTest(time=invalid),self.assertRaises(RuntimeError):m.decode((m.canonical(value)+'\n').encode())
+  for invalid in (None,{},'',False):
+   value=copy.deepcopy(self.value);value['required_grants'][0]['assets']=invalid
+   with self.subTest(assets=invalid),self.assertRaises(RuntimeError):m.decode((m.canonical(value)+'\n').encode())
+ def test_prepared_grants_match_real_issuer_schema_without_issuing(self):
+  before=copy.deepcopy(self.value);m.validate_issuer_contract(self.value,schema);self.assertEqual(before,self.value)
+  value=copy.deepcopy(self.value);value['required_grants'][0]['assets']=None
+  with self.assertRaisesRegex(ValueError,'ASSETS_INVALID'):m.validate_issuer_contract(value,schema)
  def test_active_closed_grants_pass_without_engineering_write_scope_change(self):
   self.policy();before=list(self.value['engineering_asset_ids']);env=m.factual_environment(self.control,{'sha':self.head,'root':str(self.front)});self.assertEqual(len(env),1);self.assertEqual(self.value['engineering_asset_ids'],before)
  def test_missing_or_different_subject_grant_denied(self):

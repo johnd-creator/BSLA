@@ -64,7 +64,7 @@ def decode(raw):
   start,end=(_time(grant[k]) for k in ('not_before','expires_at'))
   if not 0<(end-start).total_seconds()<=86400:raise RuntimeError('BOUNDED_READ_WINDOW_REQUIRED')
   if index==0:
-   if grant['scope_kind']!='REGISTERED_BSR_IP' or grant['assets'] or set(grant['capabilities'])!=READ_CAPS:
+   if grant['scope_kind']!='REGISTERED_BSR_IP' or grant['assets']!=[] or set(grant['capabilities'])!=READ_CAPS:
     raise RuntimeError('REGISTERED_READ_ONLY_REQUIRED')
   elif (grant['scope_kind']!='EXACT_ASSETS' or not isinstance(grant['assets'],list) or len(grant['assets'])!=1 or not isinstance(grant['assets'][0],str) or not re.fullmatch(r'asset:MAXIMO:MXASSET:BSR:IP:[A-Za-z0-9_.-]{1,120}',grant['assets'][0])
         or set(grant['capabilities'])!=READ_CAPS|{'FACTUAL_HIERARCHY_READ'}):
@@ -74,10 +74,20 @@ def decode(raw):
 
 def _time(value):
  try:
-  parsed=datetime.fromisoformat(value.replace('Z','+00:00'))
+  if not isinstance(value,str) or not re.fullmatch(r'\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ',value):raise ValueError()
+  parsed=datetime.strptime(value,'%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=timezone.utc)
   if parsed.tzinfo is None or value.endswith('-00:00'):raise ValueError()
   return parsed.astimezone(timezone.utc)
  except (ValueError,TypeError,AttributeError):raise RuntimeError('AWARE_READ_WINDOW_REQUIRED') from None
+
+def validate_issuer_contract(value,schema):
+ # Exercise the actual issuer event schema before preparation. These in-memory
+ # prospective records are validation only; no policy receipt is persisted.
+ previous='0'*64
+ for index,grant in enumerate(value['required_grants']):
+  event={**grant,'version':index+1,'previous_sha256':previous,'action':'ISSUE','at':grant['not_before']}
+  event['sha256']=sha(schema.canonical(event).encode())
+  schema.validate_event(event);previous=event['sha256']
 
 def approved(control):
  # Every historical controller/module/admission check remains mandatory.

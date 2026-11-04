@@ -19,6 +19,7 @@ policy_schema=load(HERE.parents[1]/'reliability-cockpit/src/services/factual_rea
 
 def next_approval(admission,policy,index):
  if type(index) is not int or index not in (0,1):raise RuntimeError('EXACT_GRANT_PACKET_INDEX_REQUIRED')
+ admission_schema.validate_issuer_contract(admission,policy_schema)
  events=policy_schema.decode(policy);prior=admission['policy_prior_head']
  start=0 if prior=='0'*64 else next((i+1 for i,e in enumerate(events) if e['sha256']==prior),None)
  if start is None or len(events)!=start+index:raise RuntimeError('READ_BATCH_HEAD_CHANGED')

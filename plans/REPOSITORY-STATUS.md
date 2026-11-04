@@ -1295,3 +1295,14 @@ One Draft PR; exact-head CI/independent review, precise grant/service-owner appr
 fresh recovery/session gates, actual activation and live Engineer UAT remain distinct.
 No automatic merge, source request, retained-data write or phase advancement.
 Runtime remains PR119 until all gates pass. Global semantics UNKNOWN; Logbook HOLD.
+
+
+## 4 November 2026 — integrated release baseline correction
+
+The accepted active frontend, Engineering and Factual source is `469f21fe`,
+not the historical PR119 rollback target described above. The new integrated
+release preserves that hierarchy/access behavior and seals its private recovery
+source through the official controller. Collector remains `2eacce47`; source
+qualification, operational approval, activation and real Engineer UAT are separate
+gates. See [integrated release](../reliability-cockpit/docs/NADI-WO-INTEGRATED-LOCAL-RELEASE-01.md).
+No new service, grant or Mart write is authorized by this correction.

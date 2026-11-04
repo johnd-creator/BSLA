@@ -122,3 +122,12 @@ refusal to overwrite concurrent unknown bytes. Historical equal-source selection
 continue through the original strict comparator; only the exact new differing tuple
 uses the reviewed admission. Relevant exact-head qualification is repeated after
 these corrections. The initial source review is retained as historical evidence.
+
+
+## 4 November 2026 — historical plan superseded
+
+The PR119 rollback references in this historical preparation record are superseded
+for the integrated release. Current frontend/Engineering/Factual source is
+`469f21fe`; its sealed private recovery is the required baseline. See
+[integrated release](NADI-WO-INTEGRATED-LOCAL-RELEASE-01.md). Existing history and
+source guards remain intact. No activation or grant is implied by this correction.

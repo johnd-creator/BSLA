@@ -76,7 +76,8 @@ def prepare(repository,admission_path,destination):
  if record['files']!=BASELINE_FILES:raise RuntimeError('ACCEPTED_CONTROLLER_BASELINE_CHANGED')
  source={name:reader(old_root/name) for name in BASELINE_FILES}
  if any(digest(raw)!=BASELINE_FILES[name] for name,raw in source.items()):raise RuntimeError('CONTROLLER_BASELINE_BYTES_CHANGED')
- raw=reader(Path(admission_path));admission=module(HERE/'wo_integrated_source_admission.py').decode(raw)
+ raw=reader(Path(admission_path));admission_module=module(HERE/'wo_integrated_source_admission.py');admission=admission_module.decode(raw)
+ admission_module.validate_issuer_contract(admission,module(HERE.parents[1]/'reliability-cockpit/src/services/factual_read_entitlements.py'))
  dest=Path(destination)
  if not dest.is_absolute() or dest.resolve()!=dest or dest.exists():raise RuntimeError('NEW_PRIVATE_PREPARED_DIRECTORY_REQUIRED')
  dest.mkdir(mode=0o700)
