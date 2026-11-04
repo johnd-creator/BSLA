@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
-const reviewedHead="1ab8e3fab32204f5ff61e87da0ab5f0026c73417";
+const reviewedHead="a3f477daa2e47e533a72b23b8fed17b32f1d7226";
 const wrapperBase="fb4ca2389f96260a938911f00d5524815807e326";
 const fenceBase='988af8d4875758b300e7b563c0a205f143ee184c';
 const expectedPaths=[
@@ -64,7 +64,7 @@ const mapAnchor='const current={...exceptions,...reviewedWoDetailHashes,...revie
 const mapAmendment='const current={...exceptions,...reviewedWoDetailHashes,...reviewedFactualReadHashes,...reviewedWoReconciliationHashes(root)};';
 export function reviewedWoReconciliationHashes(root){
  const bytes=readFileSync(new URL('./wo-reconciliation-preservation.json',import.meta.url));
- assert.equal(sha(bytes),'77fc00d13154da20983dc147ae8c5c266d2d11d900bdb7e1f3b5814e9932549a','reviewed WO reconciliation manifest changed');
+ assert.equal(sha(bytes),'b17b9c3ed0e043cb9ce8a8297b9ad88b38746ec95f4140e5614519ea82e77cfc','reviewed WO reconciliation manifest changed');
  const data=JSON.parse(bytes.toString('utf8'));
  assert.equal(bytes.toString('utf8'),JSON.stringify(data,null,2)+'\n','canonical manifest only; duplicate keys prohibited');
  assert.deepEqual(Object.keys(data),['schemaVersion','reviewedHead','fenceBase','files']);
