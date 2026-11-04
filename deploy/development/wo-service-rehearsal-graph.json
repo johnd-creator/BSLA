@@ -1,0 +1,41 @@
+{
+  "maximo-api": {
+    "maximo-init": {
+      "condition": "service_completed_successfully",
+      "required": true
+    }
+  },
+  "maximo-init": {
+    "maximo-db": {
+      "condition": "service_healthy",
+      "required": true
+    }
+  },
+  "maximo-db": {},
+  "maximo-worker": {
+    "maximo-init": {
+      "condition": "service_completed_successfully",
+      "required": true
+    }
+  },
+  "mart-projector": {
+    "maximo-init": {
+      "condition": "service_completed_successfully",
+      "required": true
+    }
+  },
+  "cockpit-api": {
+    "cockpit-init": {
+      "condition": "service_completed_successfully",
+      "required": true
+    }
+  },
+  "cockpit-init": {
+    "cockpit-db": {
+      "condition": "service_healthy",
+      "required": true
+    }
+  },
+  "cockpit-db": {},
+  "unrelated": {}
+}

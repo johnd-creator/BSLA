@@ -1,0 +1,1 @@
+export interface WoEvidence {window_days:7|30|90;counts:Record<string,number>;date_coverage:Record<string,number>;weekly:({period_start:string;period_end:string}&Record<string,string|number>)[];population:{wo_group:string;counting_key:string};backlog:{state:string;count:number|null};freshness:{state:string};status_snapshot:{value:string;count:number}[]}

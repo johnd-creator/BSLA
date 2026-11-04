@@ -74,11 +74,20 @@ jobs:
         env:
           PYTHONPATH: '.:tests'
         run: python -m unittest test_pdm_source_interpretation -v
+      - name: Integrated WO detail and executive reconciliation
+        working-directory: reliability-cockpit
+        env:
+          PYTHONPATH: '.:tests'
+        run: python -m unittest test_wo_executive_reconciliation test_wo_executive_postgres test_wo_detail test_wo_sr_classification test_reliability_mart -v
+      - name: Exact-service Compose safety and forbidden-dependency rehearsal
+        run: |
+          python -m unittest discover -s reliability-cockpit/tests -p test_wo_service_activation.py -v
+          python deploy/development/wo_service_rehearsal.py --image postgres:16 --graph deploy/development/wo-service-rehearsal-graph.json --directory "$RUNNER_TEMP/wo-service-rehearsal"
       - name: Separate Factual READ private administration and scoped local policy
         working-directory: reliability-cockpit
         env:
           PYTHONPATH: '.:tests'
-        run: python -m unittest test_factual_read_entitlements test_factual_read_controller test_local_activation_qualification -v
+        run: python -m unittest test_factual_read_entitlements test_factual_read_controller test_hierarchy_source_admission test_wo_integrated_source_admission test_local_activation_qualification -v
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '22'

@@ -135,14 +135,14 @@ class ReliabilityMartReadTest(unittest.TestCase):
     def test_decision_overview_is_registry_scoped_and_backend_aggregated(self):
         result = self.repository.decision_overview(window_days=30, as_of=NOW)
         self.assertEqual(result["registered_assets"], 2)
-        self.assertEqual(result["summary"]["maintenance_activity_7d"], 2)
-        self.assertEqual(result["summary"]["maintenance_activity_30d"], 2)
-        self.assertEqual(result["summary"]["assets_active_7d"], 2)
-        self.assertEqual(result["summary"]["assets_active_30d"], 2)
+        self.assertEqual(result["summary"]["maintenance_activity_7d"], 1)
+        self.assertEqual(result["summary"]["maintenance_activity_30d"], 1)
+        self.assertEqual(result["summary"]["assets_active_7d"], 1)
+        self.assertEqual(result["summary"]["assets_active_30d"], 1)
         self.assertEqual(len(result["trend"]), 12)
-        self.assertEqual({row["value"] for row in result["status_distribution"]}, {"CAN", "COMPLETE"})
-        self.assertEqual({row["value"] for row in result["work_type_distribution"]}, {"CORRECTIVE", "PM"})
-        self.assertEqual([row["source_asset_number"] for row in result["activity_concentration"]], ["ASSET-A", "ASSET-B"])
+        self.assertEqual({row["value"] for row in result["status_distribution"]}, {"COMPLETE"})
+        self.assertEqual({row["value"] for row in result["work_type_distribution"]}, {"CORRECTIVE"})
+        self.assertEqual([row["source_asset_number"] for row in result["activity_concentration"]], ["ASSET-A"])
         self.assertEqual(result["records"]["fmea_records"], 1)
         self.assertEqual(result["records"]["fmea_assets_represented"], 1)
         self.assertNotIn("rcfa_assets_represented", result["records"])
@@ -211,18 +211,20 @@ class RegisteredMaintenanceOverviewTest(unittest.TestCase):
     def test_queries_are_aggregate_only_and_never_touch_unrelated_domains(self):
         from sqlalchemy import event
         statements = []
-        def record(conn, cursor, statement, parameters, context, executemany):statements.append(statement.lower())
+        def record(conn, cursor, statement, parameters, context, executemany):
+            self.assertTrue(context.compiled.statement.is_select, 'only SQLAlchemy SELECT aggregates are permitted')
+            statements.append(statement.lower())
         event.listen(self.database.engine, "before_cursor_execute", record)
         try:
             with patch.object(self.repository, "integrity_summary", side_effect=AssertionError("unrelated query")), patch.object(self.repository, "decision_overview", side_effect=AssertionError("ADMIN query")):
                 registered_maintenance_overview(self.database)
         finally:event.remove(self.database.engine, "before_cursor_execute", record)
-        self.assertEqual(len(statements), 3)
+        self.assertEqual(len(statements), 5)
         for sql in statements:
-            self.assertTrue(sql.lstrip().startswith("select"))
+            self.assertTrue(sql.lstrip().startswith(("select", "with verified_wo_basis as materialized")))
             for table in ["fmea_assessment","asset_health_assessment","rcfa_analysis","overhaul_event","asset_af_mapping"]:self.assertNotIn(table, sql)
             self.assertIn("reliability_asset_registry", sql)
-        self.assertIn("limit", statements[-1])
+        self.assertTrue(any("limit" in statement for statement in statements))
 
     def test_empty_registry_returns_zero_without_placeholder_rows(self):
         empty = MartDatabase(MartDbConfig(dsn="sqlite+pysqlite:///:memory:"))
@@ -337,7 +339,7 @@ class ReliabilityMartApiTest(unittest.TestCase):
             response = reliability_api.decision_overview(window_days=30, service=self.service)
         self.assertEqual(response.window_days, 30)
         self.assertEqual(response.summary.registered_assets.evidence_class, "VERIFIED")
-        self.assertEqual(response.summary.assets_active_7d.value, 2)
+        self.assertEqual(response.summary.assets_active_7d.value, 1)
         parameter = self.app.openapi()["paths"]["/v1/reliability/decision-overview"]["get"]["parameters"][0]
         self.assertEqual(parameter["schema"]["enum"], [7, 30, 90])
         for invalid in (0, 14, 180, 365):

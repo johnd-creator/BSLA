@@ -706,7 +706,7 @@ class LocalDevelopment:
         now=datetime.now(timezone.utc)
         if any(module.timestamp(e['at'])>now+timedelta(seconds=5) for e in events):
             raise RuntimeError('FACTUAL_POLICY_CLOCK_REGRESSION')
-        if (not event or event['action']!='ISSUE' or set(event['capabilities'])!=module.CAPABILITIES or
+        if (not event or event['action']!='ISSUE' or not {'FACTUAL_DASHBOARD_READ','FACTUAL_ASSET_READ','FACTUAL_MAINTENANCE_READ'}.issubset(event['capabilities']) or
                 event.get('scope_kind','EXACT_ASSETS')!=approval.get('scope_kind','EXACT_ASSETS') or
                 any(event[key]!=approval[key] for key in fields-{'schema_version','expected_head'}) or
                 event['previous_sha256']!=approval['expected_head'] or

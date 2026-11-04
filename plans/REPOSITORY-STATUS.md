@@ -1265,3 +1265,70 @@ reader verified the stored facts. This is data availability, not live hierarchy 
 or Engineer UAT acceptance. All existing containers remain preserved; PR119 runtime,
 controller compatibility STOP, UNKNOWN roles, PARTIAL global coverage and Logbook
 PdM HOLD remain. Counts, raw identities and recovery evidence remain private.
+
+## WO actual-date recovery candidate — 3 November 2026
+
+Dedicated candidate from main `6bff0a5c5b67b2e5137b50c1d4d0063416f65686`. No merge, runtime replacement, schema migration or live Mart repair. Qualification and independent review are bound to the eventual immutable PR head. Private source/coverage/restore evidence remains outside Git. [Lineage, status addendum and recovery gates](../maximo-collector/docs/wo-actual-date-recovery.md).
+
+## WO rollback gate correction candidate — 3 November 2026
+
+Draft PR #128 receives the worker-safe field-scoped rollback correction under
+NADI-WO-ACTUAL-DATE-ROLLBACK-FIX-01. Fresh full PostgreSQL restore tests reproduce
+the prior CAS failure and verify metadata-preserving rollback/reapply and newer
+clock conflicts. Exact-head CI and independent review remain release gates;
+there is no merge or live recovery authorization. Canonical CI adds mandatory
+synthetic PostgreSQL lanes without changing main-only selection or the original
+offline/six-file guards. Private source identities, counts, service pins and
+operational decisions remain outside Git. [Recovery runbook](../maximo-collector/docs/wo-actual-date-recovery.md).
+
+## 2026-11-03 — NADI-WO-DATA-AND-EXECUTIVE-RECONCILIATION-01 candidate
+
+One integrated candidate builds on qualified Draft PR128 without changing that dependency head. Adds bounded non-personal detail retention/reprojection, optional scoped WO detail, four separate Executive date bases, unique-WO SQL counts and explicit missing coverage/backlog/group semantics. Source timestamps never come from status or changedate fallback. No live source request, service replacement, grant/schema/cursor change or operational backfill is authorized by code qualification. Exact-head CI, independent review and historical preservation guards remain mandatory; operational actions are consolidated privately. [Contract, lineage and gates](../reliability-cockpit/docs/NADI-WO-DATA-AND-EXECUTIVE-RECONCILIATION-01.md).
+
+### 3 November 2026 — NADI-ASSET-HIERARCHY-LOCAL-RELEASE-01 candidate
+
+[Integrated local-release candidate](../reliability-cockpit/docs/NADI-ASSET-HIERARCHY-LOCAL-RELEASE-01.md) adds exact-root hierarchy READ,
+proven ancestor branch navigation, explicit UNKNOWN/UNVERIFIED/PARTIAL presentation
+and closed controller source/recovery admission. Engineering AUTHOR/write scope,
+legacy READ grants, source acquisition, stores and historical protections remain.
+One Draft PR; exact-head CI/independent review, precise grant/service-owner approval,
+fresh recovery/session gates, actual activation and live Engineer UAT remain distinct.
+No automatic merge, source request, retained-data write or phase advancement.
+Runtime remains PR119 until all gates pass. Global semantics UNKNOWN; Logbook HOLD.
+
+
+## 4 November 2026 — integrated release baseline correction
+
+The accepted active frontend, Engineering and Factual source is `469f21fe`,
+not the historical PR119 rollback target described above. The new integrated
+release preserves that hierarchy/access behavior and seals its private recovery
+source through the official controller. Collector remains `2eacce47`; source
+qualification, operational approval, activation and real Engineer UAT are separate
+gates. See [integrated release](../reliability-cockpit/docs/NADI-WO-INTEGRATED-LOCAL-RELEASE-01.md).
+No new service, grant or Mart write is authorized by this correction.
+
+### 4 November 2026 — integrated WO operational correction candidate
+
+The integrated WO release remains locally BLOCKED after mandatory stop/rollback;
+new bounded Compose tooling and actual dependency-isolation rehearsal are under
+exact-head qualification. Original source/grant/controller and field-level data
+recovery guards remain. A changed command/image/cohort/window needs one exact
+consolidated operational decision. [Correction](../reliability-cockpit/docs/NADI-WO-ACTIVATION-CORRECTION-01.md).
+
+
+### 4 November 2026 — integrated WO inherited-label preparation
+
+Emergency recovery restored Collector2e and Factual/frontend/Engineering469.
+The integrated draft adds pre-mutation effective image-label admission and a
+real isolated two-image regression, preserving strict runtime checks and all
+historical source/CI protections. Qualification is bound to the final immutable
+PR head and separately reviewed deployment-pin layer. Source implementation,
+qualification, final owner approval and actual activation remain distinct. No
+new live data authority or previous once-only binding is carried forward.
+[Procedure](../reliability-cockpit/docs/NADI-WO-ACTIVATION-CORRECTION-01.md).
+
+
+The label qualification review also identified a conditional untagged-image
+cleanup blocker. Candidate tooling now preserves the original image reference,
+rejects untagged/ONBUILD bases and withholds PASS until cleanup succeeds. This
+is a separately reviewable correction, not an operational exception.

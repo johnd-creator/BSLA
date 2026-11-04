@@ -40,6 +40,7 @@ export function parseFactualRead(data:string,subject:string,now=Date.now()):Fact
   const scope=e.scope_kind??'EXACT_ASSETS';
   if(!['EXACT_ASSETS','REGISTERED_BSR_IP'].includes(scope)||!strings(e.assets)||(scope==='REGISTERED_BSR_IP'?e.assets.length!==0:e.assets.length<1||e.assets.length>20)||e.assets.some(a=>!/^asset:MAXIMO:MXASSET:BSR:IP:[A-Za-z0-9_.-]{1,120}$/.test(a)))return fail();
   if(!strings(e.capabilities)||!e.capabilities.length||e.capabilities.some(c=>!(FACTUAL_READ_CAPABILITIES as readonly string[]).includes(c)))return fail();
+  if(e.capabilities.includes('FACTUAL_HIERARCHY_READ')&&(scope!=='EXACT_ASSETS'||!e.capabilities.includes('FACTUAL_ASSET_READ')))return fail();
   const start=time(e.not_before),end=time(e.expires_at),at=time(e.at);
   if(end<=start||end-start>86400000||at<lastTime||at>now+5000||e.action==='ISSUE'&&(at<start||at-start>3600000))return fail();
   const unsigned=Object.fromEntries(Object.entries(e).filter(([k])=>k!=='sha256'));

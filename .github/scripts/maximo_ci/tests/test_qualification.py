@@ -147,7 +147,7 @@ class WorkflowTests(unittest.TestCase):
 
     def test_gate_and_token_isolation(self):
         jobs = self.workflow['jobs']
-        self.assertEqual(jobs['gate']['needs'], ['select', 'collector'])
+        self.assertEqual(jobs['gate']['needs'], ['select', 'collector', 'postgres'])
         self.assertEqual(jobs['gate']['if'], '${{ always() }}')
         self.assertEqual(jobs['collector']['needs'], 'select')
         self.assertFalse(any('GH_TOKEN' in step.get('env', {}) for step in jobs['collector']['steps']))
@@ -155,9 +155,26 @@ class WorkflowTests(unittest.TestCase):
         for selection, collector, expected in [('success', 'success', 0), ('success', 'failure', 1),
                                                 ('failure', 'skipped', 1), ('success', 'cancelled', 1)]:
             result = subprocess.run(['bash', '-e', '-c', failure_gate['run']],
-                                    env={'SELECTION_RESULT': selection, 'COLLECTOR_RESULT': collector},
+                                    env={'SELECTION_RESULT': selection, 'COLLECTOR_RESULT': collector, 'POSTGRES_RESULT': 'success'},
                                     capture_output=True, timeout=5)
             self.assertEqual(result.returncode, expected)
+
+    def test_postgres_gate_is_additive_nonprivileged_and_exact_head(self):
+        jobs = self.workflow['jobs']; pg = jobs['postgres']
+        self.assertEqual(pg['needs'], 'select')
+        self.assertEqual(pg['strategy']['matrix']['python'], ['3.11', '3.12'])
+        self.assertRegex(pg['services']['maximo-pg']['image'], r'postgres:16\.4-alpine@sha256:[a-f0-9]{64}$')
+        self.assertFalse(any('GH_TOKEN' in s.get('env', {}) for s in pg['steps']))
+        checkout = [s for s in pg['steps'] if s.get('with', {}).get('path') == 'source'][0]
+        self.assertEqual(checkout['with']['ref'], '${{ needs.select.outputs.sha }}')
+        runner = [s for s in pg['steps'] if 'run_postgres.py' in s.get('run', '')][0]
+        self.assertIn('ci-tools/.github/scripts/maximo_ci/run_postgres.py', runner['run'])
+        self.assertEqual(runner['env']['TESTED_SHA'], '${{ needs.select.outputs.sha }}')
+        gate = next(s for s in jobs['gate']['steps'] if 'SELECTION_RESULT' in s.get('env', {}))
+        for status in ('failure', 'cancelled', 'skipped', ''):
+            result = subprocess.run(['bash', '-e', '-c', gate['run']], env={
+                'SELECTION_RESULT': 'success', 'COLLECTOR_RESULT': 'success', 'POSTGRES_RESULT': status}, capture_output=True)
+            self.assertNotEqual(result.returncode, 0)
 
 
 class OfflineRunnerTests(unittest.TestCase):

@@ -14,7 +14,8 @@ import re
 import stat
 import tempfile
 
-CAPABILITIES = {"FACTUAL_DASHBOARD_READ", "FACTUAL_ASSET_READ", "FACTUAL_MAINTENANCE_READ"}
+BASE_CAPABILITIES = {"FACTUAL_DASHBOARD_READ", "FACTUAL_ASSET_READ", "FACTUAL_MAINTENANCE_READ"}
+CAPABILITIES = BASE_CAPABILITIES | {"FACTUAL_HIERARCHY_READ"}
 ISSUER = "local:c759c2d1-19a4-4291-9b66-9218dbd12dea"
 ZERO = "0" * 64
 MAX_BYTES = 4 * 1024 * 1024
@@ -72,6 +73,8 @@ def validate_event(e):
     if (not isinstance(caps, list) or not caps or any(not isinstance(c, str) or c not in CAPABILITIES for c in caps)
             or caps != sorted(set(caps))):
         raise ValueError("FACTUAL_POLICY_CAPABILITIES_INVALID")
+    if "FACTUAL_HIERARCHY_READ" in caps and (scope != "EXACT_ASSETS" or "FACTUAL_ASSET_READ" not in caps):
+        raise ValueError("FACTUAL_HIERARCHY_EXACT_ROOT_REQUIRED")
     start, end, at = (timestamp(e[k]) for k in ("not_before", "expires_at", "at"))
     if not 0 < (end-start).total_seconds() <= 86400:
         raise ValueError("FACTUAL_POLICY_EXPIRY_INVALID")

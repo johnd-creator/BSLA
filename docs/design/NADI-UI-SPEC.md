@@ -662,3 +662,10 @@ visible. Empty retained children, access denied and unavailable backend are
 distinct; keyboard drill/back and bounded child paging preserve the same root.
 No health color, inferred hierarchy role or automatic Registry membership is added.
 [Scope and validation](../../reliability-cockpit/docs/NADI-ASSET-HIERARCHY-01.md).
+
+### Hierarchy engineer review — 3 November 2026 candidate
+
+Use a lazy, bounded node/page panel with keyboard expansion/collapse, source identity/description/raw type/status, explicit UNKNOWN unit and UNVERIFIED role. Preserve selected context through browser back/forward. Ancestor views explain their root-bound branch restriction; no eager full tree, sibling enumeration or depth-derived semantics. Real screenshots and operational identities stay private.
+
+NADI-ASSET-HIERARCHY-LOCAL-RELEASE-01 is a development candidate; source merge,
+local activation and authorized Product Owner/Engineer acceptance are separate.

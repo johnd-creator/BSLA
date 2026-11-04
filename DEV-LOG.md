@@ -1359,3 +1359,155 @@ reader verified the stored facts. This is data availability, not live hierarchy 
 or Engineer UAT acceptance. All existing containers remain preserved; PR119 runtime,
 controller compatibility STOP, UNKNOWN roles, PARTIAL global coverage and Logbook
 PdM HOLD remain. Counts, raw identities and recovery evidence remain private.
+
+## 2026-11-03 — NADI-MAXIMO-WO-ACTUAL-DATE-RECOVERY-01 candidate
+
+Audited both acquisition paths and the local projection; implemented existing-JSON clock retention, source-version/non-null preservation, bounded atomic recovery and CAS rollback. Added PO status-aware completeness without status inference, source writes, migration, cursor/schedule changes or frontend changes. Hermetic qualification and owner-private source/recovery evidence are independent from activation/operational acceptance. [Runbook](maximo-collector/docs/wo-actual-date-recovery.md).
+
+## 2026-11-03 — NADI-WO-ACTUAL-DATE-ROLLBACK-FIX-01 candidate
+
+Reproduced the full-row rollback refusal after independent normal-worker metadata
+updates on a fresh isolated full PostgreSQL restore. Replaced that sole CAS with
+presence-aware per-path journaling, exact date/provenance guards and atomic scoped
+rollback; independent metadata survives and newer field observations fail closed.
+Added actual PostgreSQL lock/recovery qualification to the unchanged main-target
+Maximo CI policy. Isolated recovery/replay/rollback is tested independently of
+exact-head CI/review and live acceptance. No operational recovery, service
+replacement, source request, cursor/scope/schedule or schema change is authorized
+or performed. Polling PAGE_LIMIT coverage remains a separate operational concern.
+
+Independent review identified a mixed idempotent/changed-cohort prepared-rollback
+retry defect. No-op entries are now neutral only when reconciling transaction
+commit state; all their identity/date/version guards remain mandatory. Added
+uncommitted/committed retry and genuine partial-cohort refusal regressions to both
+memory and PostgreSQL suites. Prior exact-head qualification remains historical;
+this correction requires fresh exact-head CI and independent closure.
+
+## 2026-11-03 — NADI-WO-DATA-AND-EXECUTIVE-RECONCILIATION-01 candidate
+
+One integrated candidate builds on qualified Draft PR128 without changing that dependency head. Adds bounded non-personal detail retention/reprojection, optional scoped WO detail, four separate Executive date bases, unique-WO SQL counts and explicit missing coverage/backlog/group semantics. Source timestamps never come from status or changedate fallback. No live source request, service replacement, grant/schema/cursor change or operational backfill is authorized by code qualification. Exact-head CI, independent review and historical preservation guards remain mandatory; operational actions are consolidated privately. [Contract, lineage and gates](reliability-cockpit/docs/NADI-WO-DATA-AND-EXECUTIVE-RECONCILIATION-01.md).
+
+
+## 2026-11-03 — PR129 review closure and browser qualification correction
+
+The failed review draft was repaired and sealed without changing its immutable
+range. Independent review closed the WO field-version, known-null replay, safe
+SQL evidence-binding and field-scoped rollback defects. Exact finite source
+exceptions preserve historical classification/detail pins and all current-byte,
+ancestry, untracked-source and canonical CI checks. Disposable negative tests
+reject changed source, manifest, historical assertions/maps and unrelated files.
+
+At `0c16080eb284539a80b374e6a5fd927e02e3a58c`, Maximo CI and NADI backend passed;
+the mandatory browser suite found that expanded WO detail had lost its legacy
+disclosure label. Restore that label, the visible chronology heading and original
+Legacy date text in provenance. Browser assertions remain unchanged. The corrected
+head requires fresh full canonical CI and independent review; previous green lanes
+do not substitute for it. Live activation, source sampling, Mart repair and real
+Engineer UAT remain unperformed and separately gated. All 35 existing container
+identities/images/start/restart metadata were verified unchanged.
+
+### 3 November 2026 — NADI-ASSET-HIERARCHY-LOCAL-RELEASE-01 candidate
+
+[Integrated local-release candidate](reliability-cockpit/docs/NADI-ASSET-HIERARCHY-LOCAL-RELEASE-01.md) adds exact-root hierarchy READ,
+proven ancestor branch navigation, explicit UNKNOWN/UNVERIFIED/PARTIAL presentation
+and closed controller source/recovery admission. Engineering AUTHOR/write scope,
+legacy READ grants, source acquisition, stores and historical protections remain.
+One Draft PR; exact-head CI/independent review, precise grant/service-owner approval,
+fresh recovery/session gates, actual activation and live Engineer UAT remain distinct.
+No automatic merge, source request, retained-data write or phase advancement.
+Runtime remains PR119 until all gates pass. Global semantics UNKNOWN; Logbook HOLD.
+
+Local-release review follow-up: before installer execution, independent review found
+wrapper-mode/recovery and historical equality-selection regressions. Corrected
+explicit executable/private modes and retained strict comparator fallback; added
+real-file partial/post-replacement/concurrent recovery regressions. Candidate head,
+CI, image and independent review pins must be refreshed. Runtime stays PR119.
+
+## 2026-11-04 — NADI-WO-INTEGRATED-LOCAL-RELEASE-01 preparation
+
+Release audit verified PR129 contains PR128 but lacks active469 hierarchy/access
+changes. Consolidated those already qualified changes once to preserve current
+capability decoding and ancestor navigation. Added a closed source/recovery
+admission, explicit owner-gated controller preparation/install and non-issuing
+read-packet resolver. Historical guards, original AUTHOR/write scope, canonical
+CI selectors and all existing browser assertions remain. Fresh qualification,
+private backups/restore, exact service/cohort approval and actual Engineer UAT
+are mandatory; no operational replacement, grant or Mart write is implied.
+See [integrated release runbook](reliability-cockpit/docs/NADI-WO-INTEGRATED-LOCAL-RELEASE-01.md).
+
+
+### 2026-11-04 — integrated release review corrections
+
+Independent review found prospective READ packets accepted noncanonical clocks
+and falsy non-list asset scopes that the official issuer rejects. Preparation now
+requires canonical UTC seconds, exact empty registered asset lists and validation
+through the actual issuer event schema without issuing a grant. Regression tests
+cover these mismatches. Current-baseline notes supersede historical PR119 recovery
+references with active469 source; old log entries remain. Exact-head qualification
+and private operational approval are still required; runtime/data stay unchanged.
+
+
+### 2026-11-04 — post-recovery overview qualification
+
+Full private restored-data qualification separated missing restore planner statistics
+from the cost of repeatedly extracting proof fields from populated source JSON.
+The existing five-second Mart timeout remains enforced. PostgreSQL now materializes
+only ten required proof roots before repeated identity, type, calendar, epoch and
+version checks. Counting keys, date bases, Registry/BSR/IP scope and DTOs stay the
+same. SQLite and PostgreSQL regressions include wide unrelated source evidence.
+Large restored-data performance and new exact-head CI/review remain mandatory;
+no operational change or live UAT is claimed.
+
+
+### 2026-11-04 — populated-proof query follow-up
+
+Private fully projected-data profiling showed repeated clock parsing and a second
+proof evaluation for the independent status snapshot. The source subtree and
+guarded clock/number expressions are now materialized once; status aggregation
+reuses the same registered BSR/IP relation without date-proof computation.
+The prototype retained counts, malformed-evidence rejection and scope tests while
+meeting the unchanged read timeout. Final-image restored-data qualification and
+exact-head canonical CI/review remain separate pending gates. Runtime remains
+active469/Collector2eacce; no operational writes or activation were performed.
+
+## 2026-11-04 — NADI-WO-INTEGRATED-ACTIVATION-CORRECTION-01 candidate
+
+Prepared bounded owning-Compose service operations after the previous failed
+cutover/rollback: preserve dependencies, explicitly use no-deps for replacement
+and writer resumption, compare Docker empty defaults narrowly, and audit every
+unrelated container plus lifecycle events. New synthetic Docker rehearsal uses
+the actual dependency graph, no source credentials/network/database server, and
+separately reproduces the old start dependency hazard. Private runtime/source
+consequences remain auditable; this entry does not claim activation or Engineer
+UAT. [Procedure and qualification boundaries](reliability-cockpit/docs/NADI-WO-ACTIVATION-CORRECTION-01.md).
+
+
+## 2026-11-04 — integrated WO image-label requalification preparation
+
+After the recorded emergency baseline recovery, preflight now compares effective
+image-plus-Compose labels against the actual sealed baseline before any service
+operation. Factual configuration explicitly preserves its original task label;
+all other label/runtime/source guards remain. Nineteen safety/admission tests
+and an isolated two-image inherited-label regression exercise rejection, fixture
+recovery, corrected replacement/rollback and forbidden-init preservation. Final
+exact-head CI and independent reviews are recorded with the integrated draft PR;
+local diagnostic tests are not activation evidence. Historical preservation pins
+remain immutable beneath a separately reviewed finite correction layer.
+Runtime stays Collector2e/Factual/frontend/Engineering469 with normal writers.
+No activation, writer pause, controller install, grant or live recovery DML is
+authorized. A new private exact final package and owner decision are mandatory.
+See [label qualification](reliability-cockpit/docs/NADI-WO-ACTIVATION-CORRECTION-01.md).
+
+
+### 2026-11-04 — independent rehearsal resource-preservation correction
+
+Independent review of the label correction found a technical blocker when an
+untagged preexisting image is used as fixture input: removing its temporary
+alias can remove the original image. The rehearsal now rejects untagged or
+ONBUILD-bearing bases before tag/container operations, requires an original
+reference to survive cleanup, and verifies the original image still exists.
+An actual disposable untagged-image regression and four unit regressions cover
+this boundary; the safety/admission suite now has23tests. PASS evidence is
+published only after cleanup and operational preservation also succeed.
+The preceding19-test milestone remains historical. New exact-head CI/review
+and the final owner package are still required; runtime/data remain unchanged.

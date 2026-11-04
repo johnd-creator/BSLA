@@ -36,6 +36,7 @@ class HierarchyNode(BaseModel):
 class HierarchyView(BaseModel):
     root_ref: str
     node: HierarchyNode
+    node_relation: Literal["ROOT", "DESCENDANT", "ANCESTOR"] = "ROOT"
     path: list[HierarchyNode]
     ancestors: list[HierarchyNode]
     ancestor_state: Literal["NO_RETAINED_PARENT", "UNRESOLVED_PARENT", "OUT_OF_SCOPE_PARENT", "CYCLE", "DEPTH_LIMIT"]
@@ -87,11 +88,11 @@ def _node(row) -> HierarchyNode:
 
 
 def read_hierarchy(database, root_ref: str, *, node_ref: str | None = None, offset: int = 0, limit: int = 25) -> HierarchyView | None:
-    """Caller must first enforce portfolio authority; return no off-root evidence.
+    """Caller admits an exact registered root before requesting technical context.
 
-    Root Registry admission and an upward path proof precede child counts/pages.
-    All lookups are exact-key and BSR/IP scoped; traversal stops after 32 edges.
-    Missing retained edges cannot establish a leaf or complete source inventory.
+    A node must be a proven descendant or retained ancestor of that root. Ancestor
+    pages expose only the proven branch towards the root, never siblings or other
+    descendant branches. Membership proof precedes all child counts and pages.
     """
     node_ref = root_ref if node_ref is None else node_ref
     if not REF.fullmatch(root_ref) or not REF.fullmatch(node_ref):
@@ -102,25 +103,8 @@ def read_hierarchy(database, root_ref: str, *, node_ref: str | None = None, offs
         root = session.execute(_query().where(Asset.canonical_id == root_ref, _registered())).first()
         if root is None:
             return None
-        # Prove requested node descends from the admitted root, without scanning a tree.
-        path = []
-        seen = set()
-        cursor = node_ref
-        for _ in range(MAX_DEPTH + 1):
-            if cursor in seen or not REF.fullmatch(cursor):
-                return None
-            seen.add(cursor)
-            row = root if cursor == root_ref else session.execute(_query().where(Asset.canonical_id == cursor)).first()
-            if row is None:
-                return None
-            path.append(_node(row))
-            if cursor == root_ref:
-                break
-            cursor = row.parent_asset_ref or ""
-        else:
-            return None
-        path.reverse()
-        # Ancestors of the registered root are context, never new Registry entries.
+        # Ancestors are admitted only by exact retained links from the registered root.
+        # Keep closest-first internally, then render oldest-first in the DTO.
         ancestors = []
         seen = {root_ref}
         cursor = root.parent_asset_ref
@@ -145,13 +129,46 @@ def read_hierarchy(database, root_ref: str, *, node_ref: str | None = None, offs
         else:
             if cursor:
                 state = "DEPTH_LIMIT"
-        children = (*_scope(), Asset.parent_asset_ref == node_ref)
-        total = session.scalar(select(func.count()).select_from(Asset).where(*children, Asset.canonical_id.like("asset:MAXIMO:MXASSET:BSR:IP:%"))) or 0
-        rows = session.execute(_query().where(Asset.parent_asset_ref == node_ref, Asset.canonical_id.like("asset:MAXIMO:MXASSET:BSR:IP:%")).order_by(Asset.canonical_id).offset(offset).limit(limit)).all()
-        # Invalid canonical identifiers are not public technical nodes. Fail closed,
-        # rather than post-filtering and returning an inaccurate pagination proof.
-        if any(not REF.fullmatch(row.canonical_id) for row in rows):
-            raise ValueError("HIERARCHY_SOURCE_IDENTIFIER_INVALID")
-        return HierarchyView(root_ref=root_ref, node=path[-1], path=path, ancestors=list(reversed(ancestors)),
-            ancestor_state=state, unresolved_parent_ref=unresolved, items=[_node(row) for row in rows],
-            total=total, offset=offset, limit=limit, has_more=offset + len(rows) < total)
+
+        ancestor_index = next((i for i, node in enumerate(ancestors) if node.canonical_id == node_ref), None)
+        if ancestor_index is not None:
+            # Selecting a parent is context navigation, not permission to enumerate
+            # every child of that parent. The only item is the already-proven edge.
+            branch = _node(root) if ancestor_index == 0 else ancestors[ancestor_index - 1]
+            node = ancestors[ancestor_index]
+            path = list(reversed(ancestors[:ancestor_index + 1])) + [_node(root)]
+            items = [branch] if offset == 0 else []
+            total, relation = 1, "ANCESTOR"
+        else:
+            path = []
+            seen = set()
+            cursor = node_ref
+            for _ in range(MAX_DEPTH):
+                if cursor in seen or not REF.fullmatch(cursor):
+                    return None
+                seen.add(cursor)
+                row = root if cursor == root_ref else session.execute(_query().where(Asset.canonical_id == cursor)).first()
+                if row is None:
+                    return None
+                path.append(_node(row))
+                if cursor == root_ref:
+                    break
+                cursor = row.parent_asset_ref or ""
+            else:
+                if cursor != root_ref:
+                    return None
+                path.append(_node(root))
+            path.reverse()
+            node = path[-1]
+            relation = "ROOT" if node_ref == root_ref else "DESCENDANT"
+            children = (*_scope(), Asset.parent_asset_ref == node_ref,
+                        Asset.canonical_id.like("asset:MAXIMO:MXASSET:BSR:IP:%"))
+            total = session.scalar(select(func.count()).select_from(Asset).where(*children)) or 0
+            rows = session.execute(_query().where(*children).order_by(Asset.canonical_id).offset(offset).limit(limit)).all()
+            if any(not REF.fullmatch(row.canonical_id) for row in rows):
+                raise ValueError("HIERARCHY_SOURCE_IDENTIFIER_INVALID")
+            items = [_node(row) for row in rows]
+        return HierarchyView(root_ref=root_ref, node=node, node_relation=relation,
+            path=path, ancestors=list(reversed(ancestors)), ancestor_state=state,
+            unresolved_parent_ref=unresolved, items=items, total=total, offset=offset,
+            limit=limit, has_more=offset + len(items) < total)

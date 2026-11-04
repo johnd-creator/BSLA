@@ -158,3 +158,29 @@ reader verified the stored facts. This is data availability, not live hierarchy 
 or Engineer UAT acceptance. All existing containers remain preserved; PR119 runtime,
 controller compatibility STOP, UNKNOWN roles, PARTIAL global coverage and Logbook
 PdM HOLD remain. Counts, raw identities and recovery evidence remain private.
+
+## WO actual-date recovery candidate — 3 November 2026
+
+NADI-MAXIMO-WO-ACTUAL-DATE-RECOVERY-01 is a Collector/Mart source candidate with isolated rehearsal, not an operational write or runtime transition. Existing columns/API support actual dates; absence must distinguish verified source emptiness from unavailable, invalid and lost evidence. See [lineage and release boundaries](maximo-collector/docs/wo-actual-date-recovery.md).
+
+### 3 November 2026 — NADI-ASSET-HIERARCHY-LOCAL-RELEASE-01 candidate
+
+[Integrated local-release candidate](reliability-cockpit/docs/NADI-ASSET-HIERARCHY-LOCAL-RELEASE-01.md) adds exact-root hierarchy READ,
+proven ancestor branch navigation, explicit UNKNOWN/UNVERIFIED/PARTIAL presentation
+and closed controller source/recovery admission. Engineering AUTHOR/write scope,
+legacy READ grants, source acquisition, stores and historical protections remain.
+One Draft PR; exact-head CI/independent review, precise grant/service-owner approval,
+fresh recovery/session gates, actual activation and live Engineer UAT remain distinct.
+No automatic merge, source request, retained-data write or phase advancement.
+Runtime remains PR119 until all gates pass. Global semantics UNKNOWN; Logbook HOLD.
+
+
+## 4 November 2026 — integrated release baseline correction
+
+The accepted active frontend, Engineering and Factual source is `469f21fe`,
+not the historical PR119 rollback target described above. The new integrated
+release preserves that hierarchy/access behavior and seals its private recovery
+source through the official controller. Collector remains `2eacce47`; source
+qualification, operational approval, activation and real Engineer UAT are separate
+gates. See [integrated release](reliability-cockpit/docs/NADI-WO-INTEGRATED-LOCAL-RELEASE-01.md).
+No new service, grant or Mart write is authorized by this correction.

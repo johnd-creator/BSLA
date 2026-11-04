@@ -1,3 +1,4 @@
+import {safeWoOverview} from './wo-overview';
 /** Server-side read models built only from exact authorized Registry/WO requests. */
 import {readBounded} from './bounded-http';
 import {canonicalBsrAsset,factualAssets,registeredRead,type FactualReadSnapshot} from './factual-read-policy';
@@ -50,7 +51,16 @@ export function scopedMaintenancePage(value:unknown,id:string,offset:number,limi
   const row=object(value);if(row.equipment_id!==id||row.site_code!=='BSR'||row.organization_code!=='IP')throw new Error('SCOPED_WO_IDENTITY_INVALID');
   const safe=pick(row,MAINTENANCE_FIELDS);
   if(row.classification!=null)safe.classification=pick(object(row.classification),CLASSIFICATION_FIELDS);
-  if(row.source_detail!=null){const detail=object(row.source_detail);if(detail.asset_number!=null&&detail.asset_number!==id.split(':').at(-1))throw new Error('SCOPED_WO_IDENTITY_INVALID');safe.source_detail=pick(detail,SOURCE_FIELDS);}
+  if(row.source_detail!=null){const detail=object(row.source_detail);if(detail.asset_number!=null&&detail.asset_number!==id.split(':').at(-1))throw new Error('SCOPED_WO_IDENTITY_INVALID');safe.source_detail=pick(detail,SOURCE_FIELDS);
+   for(const key of ['source_collected_at','mart_record_updated_at'])if(typeof detail[key]==='string'&&preciseInstant(detail[key] as string))(safe.source_detail as Record<string,unknown>)[key]=detail[key];
+   if(detail.fields!=null){const selected:Record<string,unknown>={};for(const [key,cap] of Object.entries({description:4000,status_description:300,work_class:80,priority:80,priority_description:300,location_id:160,source_parent:160,source_task_reference:160,wo_group:160,is_task:0,has_children:0,reported_at:128,status_changed_at:128,scheduled_start:128,scheduled_finish:128,target_completion:128,estimated_duration_hours:0})){
+    const value=object(detail.fields)[key];if(value==null)continue;const f=object(value);
+    if(!['MAXIMO_RESPONSE','LEGACY_COLUMN'].includes(String(f.origin)))throw new Error('SCOPED_DETAIL_INVALID');
+    if(!['SOURCE_VALUE','RETAINED_LEGACY_VALUE','SOURCE_CONFIRMED_EMPTY','SOURCE_NOT_YET_VERIFIED','SOURCE_VALUE_INVALID','SOURCE_TIMESTAMP_INVALID'].includes(String(f.state)))throw new Error('SCOPED_DETAIL_INVALID');
+    if(f.value!==null&&!(typeof f.value==='string'&&f.value.length<=cap||['is_task','has_children'].includes(key)&&typeof f.value==='boolean'||['priority','estimated_duration_hours'].includes(key)&&typeof f.value==='number'&&Number.isFinite(f.value)&&(key==='priority'||f.value>=0)))throw new Error('SCOPED_DETAIL_INVALID');
+    selected[key]=pick(f,['value','state','origin']);if(typeof f.source_changed_at==='string'&&preciseInstant(f.source_changed_at))(selected[key] as Record<string,unknown>).source_changed_at=f.source_changed_at;
+   }(safe.source_detail as Record<string,unknown>).fields=selected;}
+   if(typeof detail.actual_dates_state==='string'&&['ACTUAL_DATES_AVAILABLE','START_ONLY','FINISH_ONLY','SOURCE_CONFIRMED_EMPTY','SOURCE_NOT_YET_VERIFIED','COLLECTOR_PROJECTION_GAP','SOURCE_TIMESTAMP_INVALID'].includes(detail.actual_dates_state))(safe.source_detail as Record<string,unknown>).actual_dates_state=detail.actual_dates_state;}
   return safe as unknown as MaintenanceEventView;
  });
  return {items,meta:{total:meta.total as number,offset:meta.offset as number,limit:meta.limit as number,has_more:meta.has_more}};
@@ -100,7 +110,7 @@ export async function scopedOverview(snapshot:FactualReadSnapshot,requestFetch:t
    seen.add(id);previous=count as number;return pick(row,['canonical_id','source_asset_number','description','maintenance_events','latest_retained_activity']) as unknown as ScopedFactualOverview['assets'][number];
   });
   if(assets.reduce((n,a)=>n+a.maintenance_events,0)>(summary.maintenance_events as number))throw new Error('SCOPED_OVERVIEW_INVALID');
-  return {scope:{site_code:'BSR',organization_code:'IP',kind:'REGISTERED_BSR_IP'},as_of:value.as_of,summary:pick(summary,['registered_assets','maintenance_events','assets_with_maintenance']) as unknown as ScopedFactualOverview['summary'],assets,restricted_sections:['FMEA_HEALTH_PI','RCFA_OVERHAUL','CROSS_INSPECTION_TRENDS'],operational_kpis:'NOT_ELIGIBLE'};
+  return {scope:{site_code:'BSR',organization_code:'IP',kind:'REGISTERED_BSR_IP'},as_of:value.as_of,summary:pick(summary,['registered_assets','maintenance_events','assets_with_maintenance']) as unknown as ScopedFactualOverview['summary'],assets,wo_evidence:safeWoOverview(value.wo_evidence),restricted_sections:['FMEA_HEALTH_PI','RCFA_OVERHAUL','CROSS_INSPECTION_TRENDS'],operational_kpis:'NOT_ELIGIBLE'};
  }
  const allowed=factualAssets(snapshot,['FACTUAL_DASHBOARD_READ','FACTUAL_ASSET_READ','FACTUAL_MAINTENANCE_READ']);
  if(!allowed.length)throw new Error('FACTUAL_SCOPE_GRANT_REQUIRED');
@@ -108,9 +118,8 @@ export async function scopedOverview(snapshot:FactualReadSnapshot,requestFetch:t
   const asset=await scopedAsset(id,allowed,requestFetch,signal);
   const target=new URL('/v1/reliability/maintenance-events',BASE);target.search=new URLSearchParams({asset_ref:id,offset:'0',limit:'1',sort:'date_desc'}).toString();
   const page=scopedMaintenancePage(await json(target,requestFetch,signal),id,0,1);
-  const latest=page.items[0];
-  return {canonical_id:id,source_asset_number:asset.source_asset_number,description:asset.description,
-   maintenance_events:page.meta.total,latest_retained_activity:latest?.actual_start??latest?.source_changed_at??null};
+   return {canonical_id:id,source_asset_number:asset.source_asset_number,description:asset.description,
+   maintenance_events:page.meta.total,latest_retained_activity:null};
  }));
  return {scope:{site_code:'BSR',organization_code:'IP',kind:'FACTUAL_ASSET_ALLOWLIST'},as_of:new Date().toISOString(),
   summary:{registered_assets:assets.length,maintenance_events:assets.reduce((n,a)=>n+a.maintenance_events,0),assets_with_maintenance:assets.filter(a=>a.maintenance_events>0).length},

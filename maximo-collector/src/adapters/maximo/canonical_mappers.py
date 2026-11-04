@@ -6,10 +6,13 @@ fields, and collection references never cross this boundary.
 
 from __future__ import annotations
 
+from src.adapters.maximo.wo_detail import projected as projected_detail
+
 from datetime import datetime
 from typing import Any, Mapping
 
 from src.adapters.maximo.oslc_client import oslc_pop_integer, oslc_pop_number, oslc_pop_text, oslc_timestamp
+from src.adapters.maximo.actual_dates import clock, projected_evidence
 from src.canonical_identity import canonical_id, scoped_reference
 
 
@@ -133,8 +136,8 @@ def maintenance_event_from_payload(member: Mapping[str, Any]) -> dict[str, Any]:
         # enum field when it is contract-valid.
         "event_type": work_type if work_type in _EVENT_TYPES else None,
         "work_type": work_type,
-        "actual_start": _timestamp(member, "actstart"),
-        "actual_finish": _timestamp(member, "actfinish"),
+        "actual_start": clock(member.get("actstart"), present="actstart" in member)["normalized"],
+        "actual_finish": clock(member.get("actfinish"), present="actfinish" in member)["normalized"],
         "reported_at": _timestamp(member, "reportdate"),
         "scheduled_start": _timestamp(member, "schedstart"),
         "scheduled_finish": _timestamp(member, "schedfinish"),
@@ -149,7 +152,9 @@ def maintenance_event_from_payload(member: Mapping[str, Any]) -> dict[str, Any]:
         "sources": {"maximo": {
             "origin": "MXWODETAIL", "wonum": wonum, "assetnum": assetnum,
             "worktype": work_type, "status": _text(member, "status"),
-            "actstart": _timestamp(member, "actstart"), "actfinish": _timestamp(member, "actfinish"),
+            "actstart": clock(member.get("actstart"))["original"], "actfinish": clock(member.get("actfinish"))["original"],
+            "actual_dates": projected_evidence(member),
+            "wo_detail": projected_detail(member),
             "changedate": changed, "downtime": oslc_pop_number(member, "downtime"),
             "reportdate": _retained_clock(member, "reportdate"),
             "schedstart": _retained_clock(member, "schedstart"),
