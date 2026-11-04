@@ -67,6 +67,7 @@ class ExecutiveEvidenceTest(unittest.TestCase):
    source=self.source();source['maximo']['wo_detail']['schema_version']=value;source['maximo']['actual_dates']['schema_version']=value;self.add(source,suffix='schema'+str(i),actual=True)
    source=self.source();source['maximo']['wo_detail']['fields']['reported_at']['epoch_seconds']=value;source['maximo'].pop('actual_dates');self.add(source,suffix='epoch'+str(i))
   data=self.overview();self.assertEqual(data['counts']['reported'],0);self.assertEqual(data['counts']['actual_started'],0)
+  self.assertEqual(data['status_snapshot'],[{'value':'WAPPR','count':1}])
  def test_wide_unrelated_source_evidence_does_not_change_verified_date_bases(self):
   source=self.source();source['maximo']['unrelated_vendor_fields']={str(i):'X'*4000 for i in range(20)}
   self.add(source,actual=True)
@@ -75,7 +76,7 @@ class ExecutiveEvidenceTest(unittest.TestCase):
  def test_only_registered_bsr_ip_counts(self):
   self.add(self.source(),site='OTHER')
   self.add(self.source(),suffix='TECH',asset='asset:TECHNICAL-ONLY')
-  self.assertEqual(self.overview()['date_coverage']['total_unique_wo'],0)
+  data=self.overview();self.assertEqual(data['date_coverage']['total_unique_wo'],0);self.assertEqual(data['status_snapshot'],[])
 
 class DetailReadTest(unittest.TestCase):
  def detail(self):

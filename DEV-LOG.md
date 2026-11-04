@@ -1457,3 +1457,15 @@ version checks. Counting keys, date bases, Registry/BSR/IP scope and DTOs stay t
 same. SQLite and PostgreSQL regressions include wide unrelated source evidence.
 Large restored-data performance and new exact-head CI/review remain mandatory;
 no operational change or live UAT is claimed.
+
+
+### 2026-11-04 — populated-proof query follow-up
+
+Private fully projected-data profiling showed repeated clock parsing and a second
+proof evaluation for the independent status snapshot. The source subtree and
+guarded clock/number expressions are now materialized once; status aggregation
+reuses the same registered BSR/IP relation without date-proof computation.
+The prototype retained counts, malformed-evidence rejection and scope tests while
+meeting the unchanged read timeout. Final-image restored-data qualification and
+exact-head canonical CI/review remain separate pending gates. Runtime remains
+active469/Collector2eacce; no operational writes or activation were performed.

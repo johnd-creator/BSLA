@@ -20,9 +20,15 @@ EVIDENCE_ROOTS=(('maximo','wonum'),('maximo','assetnum'),
  ('maximo','actual_dates','schema_version'),('maximo','actual_dates','identity'),
  ('maximo','actual_dates','fields','actstart'),('maximo','actual_dates','fields','actfinish'))
 
+EPOCH_PATHS=(('maximo','wo_detail','source_changed_at'),
+ ('maximo','wo_detail','fields','reported_at','value'),
+ ('maximo','wo_detail','fields','reported_at','source_changed_at'),
+ *(('maximo','actual_dates','fields',key,field) for key in ('actstart','actfinish') for field in ('original','normalized','source_changed_at')))
+NUMBER_PATHS=(('maximo','wo_detail','schema_version'),('maximo','actual_dates','schema_version'),('maximo','wo_detail','fields','reported_at','epoch_seconds'))
+
 class WoProofSql:
- def __init__(self,database,scope,roots=None):
-  self.postgres=database.engine.dialect.name=='postgresql';self.scope=scope;self.roots=roots or {}
+ def __init__(self,database,scope,roots=None,epochs=None,numbers=None):
+  self.postgres=database.engine.dialect.name=='postgresql';self.scope=scope;self.roots=roots or {};self.epochs=epochs or {};self.numbers=numbers or {}
   self.tolerance=.000002 if self.postgres else .001
  def json(self,*path):
   if self.roots:
@@ -39,11 +45,13 @@ class WoProofSql:
  def kind(self,path):
   return func.jsonb_typeof(self.json(*path)) if self.postgres else func.json_type(self.scope.c.sources,'$.'+'.'.join(path))
  def number(self,path):
+  if path in self.numbers:return self.numbers[path]
   kinds=('number',) if self.postgres else ('integer','real')
   return case((self.kind(path).in_(kinds),cast(self.scalar_text(path),Numeric())),else_=None)
  def schema(self,path):return self.number(path)==1
  def text(self,path):return case((self.kind(path)=='string' if self.postgres else self.kind(path)=='text',self.scalar_text(path)),else_=None)
  def epoch(self,path):
+  if path in self.epochs:return self.epochs[path]
   value=self.text(path)
   shape=and_(func.length(value)<=128,value.regexp_match(ISO),~value.like('%-00:00'))
   if self.postgres:
