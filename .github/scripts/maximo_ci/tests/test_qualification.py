@@ -147,7 +147,7 @@ class WorkflowTests(unittest.TestCase):
 
     def test_gate_and_token_isolation(self):
         jobs = self.workflow['jobs']
-        self.assertEqual(jobs['gate']['needs'], ['select', 'collector'])
+        self.assertEqual(jobs['gate']['needs'], ['select', 'collector', 'postgres'])
         self.assertEqual(jobs['gate']['if'], '${{ always() }}')
         self.assertEqual(jobs['collector']['needs'], 'select')
         self.assertFalse(any('GH_TOKEN' in step.get('env', {}) for step in jobs['collector']['steps']))
@@ -155,9 +155,20 @@ class WorkflowTests(unittest.TestCase):
         for selection, collector, expected in [('success', 'success', 0), ('success', 'failure', 1),
                                                 ('failure', 'skipped', 1), ('success', 'cancelled', 1)]:
             result = subprocess.run(['bash', '-e', '-c', failure_gate['run']],
-                                    env={'SELECTION_RESULT': selection, 'COLLECTOR_RESULT': collector},
+                                    env={'SELECTION_RESULT': selection, 'COLLECTOR_RESULT': collector, 'POSTGRES_RESULT':'success'},
                                     capture_output=True, timeout=5)
             self.assertEqual(result.returncode, expected)
+
+    def test_pg_lane_failures_block_gate(self):
+        jobs = self.workflow['jobs']
+        self.assertEqual(jobs['postgres']['strategy']['matrix']['python'], ['3.11','3.12'])
+        self.assertFalse(any('GH_TOKEN' in step.get('env', {}) for step in jobs['postgres']['steps']))
+        gate = next(s for s in jobs['gate']['steps'] if 'SELECTION_RESULT' in s.get('env', {}))
+        for value in ('failure','cancelled','skipped',''):
+            result = subprocess.run(['bash','-e','-c',gate['run']],
+                env={'SELECTION_RESULT':'success','COLLECTOR_RESULT':'success','POSTGRES_RESULT':value},
+                capture_output=True, timeout=5)
+            self.assertNotEqual(result.returncode,0)
 
 
 class OfflineRunnerTests(unittest.TestCase):
@@ -240,3 +251,21 @@ class OfflineRunnerTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class DisposableFixtureGuardTests(unittest.TestCase):
+    def setUp(self):
+        module = importlib.util.spec_from_file_location('projection_pg_runner', TOOLS / 'run_projection_pg.py')
+        self.runner = importlib.util.module_from_spec(module)
+        module.loader.exec_module(self.runner)
+        self.params = dict(host='/tmp/private-fixture/socket',port='16479',
+            dbname='nadi_aud02b_disposable',user='nadi_b1_fixture')
+
+    def test_only_exact_private_socket_and_owner_allowed(self):
+        self.assertTrue(self.runner.fixture_connection_allowed(self.params,'/tmp/private-fixture/socket',16479))
+        for key,value in (('host','127.0.0.1'),('host','/tmp/other/socket'),('port',15443),
+                          ('dbname','maximo_collector'),('dbname','nadi_local_dev_01_test'),
+                          ('user','postgres'),('password','synthetic'),('service','other'),('hostaddr','127.0.0.1')):
+            with self.subTest(key=key,value=value):
+                self.assertFalse(self.runner.fixture_connection_allowed(self.params|{key:value},
+                    '/tmp/private-fixture/socket',16479))
