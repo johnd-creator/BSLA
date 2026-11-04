@@ -73,13 +73,15 @@ def rehearse(image, graph, directory):
                 if action=='resume':
                     row=next(r for r in before.values() if r['Config']['Labels']['com.docker.compose.service']==service)
                     cp=prefix+(['-f',str(override)] if row['Config']['Labels']['org.opencontainers.image.revision']=='synthetic-after' else [])
-                command=cp+a.operation_args(action,service);a.run(command);commands.append(command)
+                command=cp+a.operation_args(action,service);operation_start=time.time();a.run(command);commands.append(command)
                 after=snapshots();name='/'+project+'-'+service+'-1'
                 a.verify_preservation(before,after,{name})
+                operation_events=[json.loads(v) for v in a.run(['docker','events','--since',str(operation_start),'--until',str(time.time()),'--filter','type=container','--format','{{json .}}']).splitlines()]
+                a.verify_events(operation_events,before,after,name,service,project)
                 expected=copy.deepcopy(initial[name])
                 revision=before[name]['Config']['Labels']['org.opencontainers.image.revision'] if action in ('quiesce','resume') else ('synthetic-after' if action=='replace' else 'synthetic-before')
                 expected['Config']['Labels']['org.opencontainers.image.revision']=revision
-                try:a.verify_runtime(after[name],expected)
+                try:a.verify_runtime(after[name],expected,predecessor=before[name])
                 except RuntimeError:
                     (root/'failed-runtime-contract.json').write_text(json.dumps({'action':action,'service':service,'expected':a.runtime_contract(expected),'actual':a.runtime_contract(after[name])},indent=2))
                     raise

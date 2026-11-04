@@ -63,9 +63,7 @@ def runtime_contract(container):
     config = copy.deepcopy(container['Config'])
     config.pop('Hostname')  # Docker-generated container identity, checked by Id.
     config['Env'] = environment(config['Env'])
-    replacement = config['Labels'].pop('com.docker.compose.replace', None)
-    if replacement is not None and replacement != config['Labels'].get('com.docker.compose.service', '') + '-1':
-        raise RuntimeError('UNEXPECTED_COMPOSE_REPLACEMENT_LABEL')
+    config['Labels'].pop('com.docker.compose.replace', None)
     for key in GENERATED_LABELS:
         config['Labels'].pop(key, None)
     host = copy.deepcopy(container['HostConfig'])
@@ -93,7 +91,16 @@ def expected_runtime(before, image, revision, contract_root=None):
     return value
 
 
-def verify_runtime(actual, expected):
+def verify_runtime(actual, expected, predecessor=None):
+    # Compose versions emit either the exact service replica name or the actual
+    # predecessor container ID. Never admit an arbitrary ID-shaped string.
+    labels = actual['Config']['Labels']
+    allowed = {None, expected['Config']['Labels'].get('com.docker.compose.replace'),
+               expected['Id'], labels.get('com.docker.compose.service', '') + '-1'}
+    if predecessor is not None:
+        allowed.update({predecessor['Id'], predecessor['Config']['Labels'].get('com.docker.compose.replace')})
+    if labels.get('com.docker.compose.replace') not in allowed:
+        raise RuntimeError('UNEXPECTED_COMPOSE_REPLACEMENT_LABEL')
     if digest(runtime_contract(actual)) != digest(runtime_contract(expected)):
         raise RuntimeError('RUNTIME_CONTRACT_CHANGED')
 
@@ -131,6 +138,21 @@ def verify_preservation(before, after, allowed_names):
     for name in before:
         if name not in allowed_names and digest(preserved(before[name])) != digest(preserved(after[name])):
             raise RuntimeError('UNEXPECTED_SERVICE_ACTIVATION_OR_CHANGE')
+
+
+
+def verify_events(events, before, after, name, service, project=PROJECT):
+    allowed_ids = {before[name]['Id'], after[name]['Id']}
+    allowed_names = {name.lstrip('/'), before[name]['Id'][:12] + '_' + name.lstrip('/')}
+    lifecycle = {'create','start','restart','die','destroy','stop','kill','pause','unpause','update','rename'}
+    for event in events:
+        if event.get('Action') not in lifecycle:
+            continue
+        actor = event.get('Actor', {}); attributes = actor.get('Attributes', {})
+        if (actor.get('ID') not in allowed_ids or attributes.get('name') not in allowed_names
+                or attributes.get('com.docker.compose.project') != project
+                or attributes.get('com.docker.compose.service') != service):
+            raise RuntimeError('UNEXPECTED_SERVICE_LIFECYCLE_EVENT')
 
 
 def run(args):
@@ -292,13 +314,10 @@ def execute(plan_path, action, service, owner_path, receipt_dir):
                       '--until', until, '--filter', 'type=container', '--format', '{{json .}}']).splitlines()]
             write_exclusive(receipt.with_suffix('.observed.json'), {'after': after, 'events': events})
         verify_preservation(before, after, {name})
-        for event in events:
-            if event.get('Action') in {'create','start','restart','die','destroy','stop','kill','pause','unpause','update','rename'}:
-                if event.get('Actor', {}).get('Attributes', {}).get('name') != name.lstrip('/'):
-                    raise RuntimeError('UNEXPECTED_SERVICE_LIFECYCLE_EVENT')
+        verify_events(events, before, after, name, service)
         if after[name]['RestartCount'] != 0 and after[name]['Id'] != actual['Id']:
             raise RuntimeError('NEW_SERVICE_RESTARTED_UNEXPECTEDLY')
-        verify_runtime(after[name], candidate if target_candidate else seed)
+        verify_runtime(after[name], candidate if target_candidate else seed, predecessor=actual)
         expected_running = action == 'resume' or action in ('replace', 'rollback') and service not in WRITERS
         if after[name]['State']['Running'] != expected_running:
             raise RuntimeError('SERVICE_STATE_MISMATCH')

@@ -15,10 +15,10 @@ start/finish times, lifecycle events, logs, schema/ledger and data evidence.
 
 ## Exact service operations
 
-`deploy/development/wo_service_activation.py` defaults to read-only preflight.
+`deploy/development/wo_service_activation.py` defaults to service/database-read-only preflight (it creates a private lock file).
 It accepts only Maximo API, WO worker, Mart projector and Factual API. All other
 services are outside the allowlist; init/database/migration roles are explicitly
-forbidden. Each service uses its own existing project, env file and ordered
+forbidden. Each service uses the existing shared project/env file and its own ordered
 Compose overrides, all sealed by the private exact plan. Rendered images,
 commands, environment, dependencies, hooks, networks and volumes are checked.
 Only image/revision and the already proposed projector contract-root delta may
@@ -43,7 +43,8 @@ silently retries a failed step or changes official paired-controller admission.
 
 Compare exact Env key/value maps (duplicate keys rejected), ignoring their
 ordering and Docker-generated hostname/config-hash/image/config-file labels.
-A generated replacement label is accepted only for the same exact service name.
+A generated replacement label is accepted only for the same exact service replica name or a known predecessor ID.
+Arbitrary ID-shaped values are rejected.
 Source revision labels remain exact. Normalize only present null DNS lists to
 empty lists and present null OomKillDisable to false. Missing keys, actual DNS
 values, OOM-disable=true, port/resource/security flags, command, user, entrypoint,

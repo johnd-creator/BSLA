@@ -3,6 +3,12 @@ import copy
 import importlib.util
 from pathlib import Path
 import unittest
+import tempfile
+import json
+import os
+from datetime import datetime,timezone,timedelta
+from unittest.mock import patch
+import fcntl
 
 path = Path(__file__).resolve().parents[2] / 'deploy/development/wo_service_activation.py'
 spec = importlib.util.spec_from_file_location('wo_service_activation', path)
@@ -51,6 +57,10 @@ class Safety(unittest.TestCase):
         old=container();old['Config']['Labels']['com.docker.compose.service']='maximo-api'
         new=copy.deepcopy(old);new['Config']['Labels']['com.docker.compose.replace']='maximo-api-1'
         m.verify_runtime(new,old)
+        new['Config']['Labels']['com.docker.compose.replace']=old['Id']
+        m.verify_runtime(new,old)
+        new['Config']['Labels']['com.docker.compose.replace']='a'*64
+        with self.assertRaises(RuntimeError):m.verify_runtime(new,old)
         new['Config']['Labels']['com.docker.compose.replace']='different-service-1'
         with self.assertRaises(RuntimeError):m.verify_runtime(new,old)
 
@@ -76,6 +86,16 @@ class Safety(unittest.TestCase):
             with self.assertRaises(RuntimeError):m.verify_runtime(new,old)
         with self.assertRaises(RuntimeError):m.environment(['A=1','A=1'])
 
+    def test_lifecycle_events_require_known_ID_project_service_and_name(self):
+        name='/'+m.PROJECT+'-maximo-api-1';old=container();old['Id']='a'*64;new=copy.deepcopy(old);new['Id']='b'*64
+        event={'Action':'create','Actor':{'ID':new['Id'],'Attributes':{'name':old['Id'][:12]+'_'+name.lstrip('/'),'com.docker.compose.project':m.PROJECT,'com.docker.compose.service':'maximo-api'}}}
+        m.verify_events([event],{name:old},{name:new},name,'maximo-api')
+        for key,value in [('name','forbidden'),('com.docker.compose.service','maximo-init'),('com.docker.compose.project','other')]:
+            bad=copy.deepcopy(event);bad['Actor']['Attributes'][key]=value
+            with self.assertRaises(RuntimeError):m.verify_events([bad],{name:old},{name:new},name,'maximo-api')
+        bad=copy.deepcopy(event);bad['Actor']['ID']='c'*64
+        with self.assertRaises(RuntimeError):m.verify_events([bad],{name:old},{name:new},name,'maximo-api')
+
     def test_preservation_detects_even_successful_one_shot_or_recreation(self):
         old={'target':container(),'init':container(),'unrelated':container()}
         for key in ('init','unrelated'):
@@ -86,5 +106,88 @@ class Safety(unittest.TestCase):
         with self.assertRaises(RuntimeError):m.verify_preservation(old,{**old,'unexpected':container()},{'target'})
         new=copy.deepcopy(old);new['target']['Id']='new';m.verify_preservation(old,new,{'target'})
 
+
+
+
+class OperationalAdmission(unittest.TestCase):
+    def setup_operation(self, directory):
+        root=Path(directory);root.chmod(0o700);self.receipts=root/'receipts';self.receipts.mkdir(mode=0o700)
+        self.before={};services={}
+        for role in sorted(m.SERVICES):
+            row=container();name='/'+m.PROJECT+'-'+role+'-1';row['Name']=name;row['Id']=role+'-old'
+            row['Config']['Labels']['com.docker.compose.service']=role
+            if role=='mart-projector':row['Config']['Env'].append('RELIABILITY_CONTRACTS_ROOT=/contracts')
+            self.before[name]=row;services[role]={'image_before':'sha256:old','image_after':'sha256:new','baseline_runtime':copy.deepcopy(row)}
+        for i in range(31):
+            row=container();row['Id']='unrelated-'+str(i);self.before['/unrelated-'+str(i)]=row
+        now=datetime.now(timezone.utc)
+        self.plan={'purpose':'NADI_WO_ACTIVATION_CORRECTION_01','operator':'owner-approved-operator','candidate_sha':'candidate',
+                   'services':services,'role_identities':{k:[v['Id'],v['Image']] for k,v in self.before.items()},
+                   'window':{'start':(now-timedelta(hours=1)).isoformat(),'end':(now+timedelta(hours=1)).isoformat()}}
+        self.planpath=root/'plan.json';self.ownerpath=root/'owner.json';self.save()
+
+    def save(self):
+        self.planpath.write_text(json.dumps(self.plan));self.planpath.chmod(0o600)
+        import hashlib
+        self.owner={'purpose':self.plan['purpose'],'verdict':'GO','plan_sha256':hashlib.sha256(self.planpath.read_bytes()).hexdigest(),'operator':self.plan['operator']}
+        self.ownerpath.write_text(json.dumps(self.owner));self.ownerpath.chmod(0o600)
+
+    def invoke(self):return m.execute(self.planpath,'resume','maximo-worker',self.ownerpath,self.receipts)
+
+    def test_bad_GO_expired_window_and_private_mode_fail_before_mutation(self):
+        for kind in ('GO','window','mode'):
+            with self.subTest(kind=kind),tempfile.TemporaryDirectory() as directory:
+                self.setup_operation(directory)
+                if kind=='GO':self.owner['plan_sha256']='wrong';self.ownerpath.write_text(json.dumps(self.owner))
+                elif kind=='window':self.plan['window']['end']=(datetime.now(timezone.utc)-timedelta(minutes=1)).isoformat();self.save()
+                else:self.ownerpath.chmod(0o644)
+                with patch.object(m,'validate_plan',side_effect=lambda p:p),patch.object(m,'inventory',return_value=self.before),patch.object(m,'run') as run:
+                    with self.assertRaises(RuntimeError):self.invoke()
+                    run.assert_not_called();self.assertEqual(list(self.receipts.glob('*.json')),[])
+
+    def test_checkpoint_failure_prevents_command(self):
+        with tempfile.TemporaryDirectory() as directory:
+            self.setup_operation(directory)
+            with patch.object(m,'validate_plan',side_effect=lambda p:p),patch.object(m,'inventory',return_value=self.before),patch.object(m,'compose_prefix',return_value=['docker','compose']),patch.object(m,'write_exclusive',side_effect=OSError('disk-full')),patch.object(m,'run') as run:
+                with self.assertRaises(OSError):self.invoke()
+                run.assert_not_called()
+
+    def test_failed_observation_retains_prepared_and_no_completed_claim(self):
+        with tempfile.TemporaryDirectory() as directory:
+            self.setup_operation(directory)
+            with patch.object(m,'validate_plan',side_effect=lambda p:p),patch.object(m,'inventory',side_effect=[self.before,RuntimeError('observation-unavailable')]),patch.object(m,'compose_prefix',return_value=['docker','compose']),patch.object(m,'run',return_value=b'') as run:
+                with self.assertRaises(RuntimeError):self.invoke()
+                self.assertEqual(run.call_count,1)
+                self.assertEqual(len(list(self.receipts.glob('resume-maximo-worker-*.json'))),1)
+                self.assertEqual(list(self.receipts.glob('*.completed.json')),[])
+
+    def test_concurrent_sequence_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            self.setup_operation(directory);fd=os.open(self.receipts/'activation.lock',os.O_CREAT|os.O_RDWR,0o600)
+            try:
+                fcntl.flock(fd,fcntl.LOCK_EX|fcntl.LOCK_NB)
+                with patch.object(m,'validate_plan',side_effect=lambda p:p),patch.object(m,'run') as run:
+                    with self.assertRaises(BlockingIOError):self.invoke()
+                    run.assert_not_called()
+            finally:os.close(fd)
+
+    def test_unknown_engine_fails_before_image_or_compose_mutation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            self.setup_operation(directory);self.plan.update(version=1,project=m.PROJECT,repository=directory,env_file=str(Path(directory)/'.env.platform'),container_count=35,forbidden=list(m.FORBIDDEN),docker_context='expected',compose_version='expected',engine_id='expected')
+            with patch.object(m,'run',side_effect=[b'expected',b'expected',b'wrong-engine']) as run:
+                with self.assertRaisesRegex(RuntimeError,'ENGINE_IDENTITY'):m.validate_plan(self.plan)
+                self.assertEqual(run.call_count,3)
+
+    def test_file_and_environment_seals_fail_before_render(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);env=root/'.env.platform';env.write_text('SYNTHETIC=only');env.chmod(0o600)
+            file=root/'compose.json';file.write_text('{}')
+            plan={'env_file':str(env),'env_sha256':'wrong','services':{'maximo-api':{'files':[{'path':str(file),'sha256':'wrong'}]}}}
+            with patch.object(m,'run') as run:
+                with self.assertRaisesRegex(RuntimeError,'COMPOSE_FILE_SEAL'):m.compose_prefix(plan,'maximo-api',False)
+                import hashlib
+                plan['services']['maximo-api']['files'][0]['sha256']=hashlib.sha256(file.read_bytes()).hexdigest()
+                with self.assertRaisesRegex(RuntimeError,'ENV_FILE_SEAL'):m.compose_prefix(plan,'maximo-api',False)
+                run.assert_not_called()
 
 if __name__=='__main__':unittest.main()
