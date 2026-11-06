@@ -1,8 +1,8 @@
-# AGENTS.md — Reliability Knowledge Starter (workspace root)
+# AGENTS.md — BSLA (workspace root)
 
 Read this file before changing any subproject, then read that subproject's
-`AGENTS.md` and relevant `CONTEXT.md`. This is one Git repository with **eight
-components**. Each component has its own dependencies and tests; the root
+`AGENTS.md` and relevant `CONTEXT.md`. This is one Git repository with **eight existing
+components plus the NADI Laravel development workspace**. Each component has its own dependencies and tests; the root
 Compose files provide a shared deployment, not a shared build or test suite.
 
 ## 1. Existing data and deployment are the default
@@ -42,10 +42,21 @@ rebuilding the persistence architecture or deleting history.
 | `cems-collector/` | Python / FastAPI; Modbus reads, normalization, aggregation | Existing CEMS Collector Postgres |
 | `reliability-cockpit/` | NADI: FastAPI backend + Next.js 15 / React 19 / TypeScript | Existing Cockpit Postgres for legacy sync/KPIs; reads Mart in Maximo DB |
 | `NK/` | Streamlit / pandas / scikit-learn / joblib; coal calorific value prediction | No DB; local model/scaler/mapping files and session history |
+| `NADI/` | Laravel 13 / Blade / Vite development workspace | Existing ignored local SQLite for development accounts and inspection drafts only; source Asset/WO reads use existing APIs |
 
 Collector dashboards also live under each collector's `web/`. The knowledge
 repositories are not daemon applications. `manifest.json` is a generated file
 inventory, not a build manifest. Only the workspace root is a Git repository.
+
+### NADI Laravel development
+
+Physical root is `/home/john-d/Music/BSLA`; the old root path is a compatibility
+symlink for existing Docker mounts, units, venvs and worktrees. Keep Compose project,
+volumes and operational store identities unchanged. Laravel is an additional
+local development UI, not an automatic cutover of the existing NADI deployment.
+Read `NADI/AGENTS.md` and `NADI/README.md` before changing it. Work as one developer
+in the active checkout: small changes, focused tests and an immediately usable
+preview. Do not add routine worktrees, handoff gates or subagents.
 
 ## 3. Data flow and ownership
 

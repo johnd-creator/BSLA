@@ -1,4 +1,4 @@
-# Reliability Knowledge Starter
+# BSLA
 
 Starter workspace for building a reusable organizational data knowledge layer around:
 
@@ -10,14 +10,31 @@ Starter workspace for building a reusable organizational data knowledge layer ar
 ## Repository Layout
 
 ```text
-reliability-knowledge-starter/
+BSLA/
 ├── maximo-knowledge/
 ├── pi-knowledge/
 ├── reliability-data-contracts/
 ├── reliability-cockpit/
 ├── pi-collector/
-└── maximo-collector/
+├── maximo-collector/
+├── cems-collector/
+├── NK/
+└── NADI/                 # Laravel development workspace
 ```
+
+## NADI Laravel development
+
+The new [NADI workspace](NADI/README.md) runs locally at
+<http://127.0.0.1:8010/login>. Work directly in `NADI/` as a single developer:
+small changes, focused tests, refresh the local preview. It contains four local
+roles/accounts, Master Asset, Action Board drafts, read-only WO detail, BSR/CS01
+mapping proposals, and a simple inspection→recommendation draft form.
+
+The existing NADI FastAPI/Next.js preview and managed collectors remain separate.
+The Compose project/volumes are still `reliability-cockpit-platform`. The old
+`/home/john-d/Music/reliability-knowledge-starter` path remains a compatibility
+symlink to `/home/john-d/Music/BSLA`; do not remove it while services reference it.
+No operational database or source identity is replaced.
 
 ## Design Principles
 
