@@ -185,6 +185,16 @@ class SyncCursorOrm(Base):
     updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
+class AssetReferenceCheckOrm(Base):
+    """Local exact-identity lookup evidence, not an alias or asset registry."""
+    __tablename__ = "asset_reference_check"
+    asset_id: Mapped[str] = mapped_column(String(60), primary_key=True)
+    outcome: Mapped[str] = mapped_column(String(40))
+    checked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    retry_after: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    attempts: Mapped[int] = mapped_column(Integer, default=1)
+
+
 class CollectRunOrm(Base):
     """One row per sync run — observability (mirror of pi-collector)."""
 

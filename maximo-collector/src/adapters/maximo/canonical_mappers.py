@@ -6,6 +6,8 @@ fields, and collection references never cross this boundary.
 
 from __future__ import annotations
 
+from src.adapters.maximo.actual_dates import clock, projected_evidence, execution_interval
+
 from datetime import datetime
 from typing import Any, Mapping
 
@@ -115,12 +117,25 @@ def asset_master_from_payload(member: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def maintenance_event_from_payload(member: Mapping[str, Any]) -> dict[str, Any]:
+    if str(member.get("status") or "").strip().upper() != "CLOSE":
+        member = {k: v for k, v in member.items() if k not in {"actstart", "actfinish"}}
     wonum = _required(member, "wonum")
     assetnum = _required(member, "assetnum")
     site, organization = _scope(member)
     changed = _timestamp(member, "changedate")
     work_type = _text(member, "worktype")
     asset_ref = scoped_reference("asset", "MXASSET", assetnum, site, organization)
+    actual_dates = projected_evidence(member)
+    timing = execution_interval(_text(member, "status"), member.get("actstart"), member.get("actfinish"))
+    if _text(member, "status") == "CLOSE":
+        # The local projector supplies NULL for clocks it cannot safely replay.
+        # Preserve the validated observation reason rather than relabeling a
+        # missing zone or malformed source clock as an observed source NULL.
+        for field, name in (("actstart", "START"), ("actfinish", "FINISH")):
+            state = actual_dates["fields"][field]["state"]
+            if state != "VALID":
+                timing = {"state": state + "_ACTUAL_" + name, "duration_hours": None}
+                break
     return {
         "id": canonical_id("maintenance_event", "MXWODETAIL", wonum, site, organization),
         "canonical_id": canonical_id("maintenance_event", "MXWODETAIL", wonum, site, organization),
@@ -133,8 +148,10 @@ def maintenance_event_from_payload(member: Mapping[str, Any]) -> dict[str, Any]:
         # enum field when it is contract-valid.
         "event_type": work_type if work_type in _EVENT_TYPES else None,
         "work_type": work_type,
-        "actual_start": _timestamp(member, "actstart"),
-        "actual_finish": _timestamp(member, "actfinish"),
+        "actual_start": clock(member.get("actstart"), present="actstart" in member)["normalized"],
+        "actual_finish": clock(member.get("actfinish"), present="actfinish" in member)["normalized"],
+        "duration_hours": timing["duration_hours"],
+        "description": _text(member, "description"),
         "reported_at": _timestamp(member, "reportdate"),
         "scheduled_start": _timestamp(member, "schedstart"),
         "scheduled_finish": _timestamp(member, "schedfinish"),
@@ -148,8 +165,14 @@ def maintenance_event_from_payload(member: Mapping[str, Any]) -> dict[str, Any]:
         "relationship_evidence": {"equipment_id": _evidence("DIRECT_VERIFIED")},
         "sources": {"maximo": {
             "origin": "MXWODETAIL", "wonum": wonum, "assetnum": assetnum,
+            "siteid": site, "orgid": organization,
+            "istask": member.get("istask") if isinstance(member.get("istask"), bool) else None,
+            "scope_evidence": member.get("collector_scope_evidence", "DIRECT_SOURCE"),
             "worktype": work_type, "status": _text(member, "status"),
-            "actstart": _timestamp(member, "actstart"), "actfinish": _timestamp(member, "actfinish"),
+            "actstart": clock(member.get("actstart"))["normalized"], "actfinish": clock(member.get("actfinish"))["normalized"],
+            "actual_dates": actual_dates,
+            "actual_timing_state": timing["state"],
+            "description": _text(member, "description"),
             "changedate": changed, "downtime": oslc_pop_number(member, "downtime"),
             "reportdate": _retained_clock(member, "reportdate"),
             "schedstart": _retained_clock(member, "schedstart"),

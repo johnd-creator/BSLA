@@ -27,6 +27,11 @@ def pr():
 
 
 class SelectionTests(unittest.TestCase):
+    def test_verified_repository_rename_keeps_an_exact_gate(self):
+        self.assertEqual(q.REPOSITORY, "johnd-creator/BSLA")
+        with self.assertRaisesRegex(ValueError, "UNEXPECTED_REPOSITORY"):
+            q.validate_request("johnd-creator/reliability-knowledge-starter", "91", HEAD)
+
     def test_valid_exact_head(self):
         self.assertEqual(q.validate_pr(pr(), q.REPOSITORY, '91', HEAD), HEAD)
 

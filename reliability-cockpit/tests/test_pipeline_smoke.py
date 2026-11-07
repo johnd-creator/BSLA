@@ -14,6 +14,8 @@ from __future__ import annotations
 import unittest
 from datetime import date, datetime, timezone
 from typing import Any, Mapping
+from unittest.mock import patch
+from src.config import DbtConfig
 
 from src.adapters.collector_client import (
     CollectorClient,
@@ -65,6 +67,11 @@ class FakeStore:
 
 class PipelineSmokeTest(unittest.TestCase):
     def setUp(self):
+        self.test_database = Database(DbtConfig("sqlite+pysqlite:///:memory:"))
+        patcher = patch("src.repositories.database.db", self.test_database)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        self.addCleanup(self.test_database._engine.dispose)
         self.client = FakeCollectorClient([
             {
                 "assetnum": "A1",

@@ -96,14 +96,19 @@ def work_order_from_payload(member: Mapping[str, Any]) -> WorkOrder:
         lead=oslc_pop_text(member, "lead"),
         failure_code=oslc_pop_text(member, "failurecode"),
         is_task=oslc_pop_bool(member, "istask"),
-        parent_wo=oslc_pop_text(member, "pctaskid"),
+        parent_wo=None,  # PCTASKID is not a verified parent WO number.
         has_children=oslc_pop_bool(member, "haschildren"),
         estimated_labor_cost=oslc_pop_number(member, "estlabcost"),
         estimated_material_cost=oslc_pop_number(member, "estmatcost"),
         actual_labor_cost=oslc_pop_number(member, "actlabcost"),
         actual_material_cost=oslc_pop_number(member, "actmatcost"),
         actual_labor_hours=oslc_pop_number(member, "actlabhrs"),
-        sources={"maximo": {"wonum": member.get("wonum"), "workorderid": member.get("workorderid")}},
+        sources={"maximo": {
+            "wonum": member.get("wonum"), "workorderid": member.get("workorderid"),
+            "hierarchy": {"schema_version": 1, "parent_wo_state": "UNKNOWN",
+                          "source_fields": {name: oslc_pop_text(member, name)
+                                            for name in ("pctaskid", "parent", "wogroup") if name in member}},
+        }},
     )
 
 

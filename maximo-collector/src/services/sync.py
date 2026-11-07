@@ -16,6 +16,7 @@ import requests
 
 from src.adapters.maximo.oslc_client import OslcClient, OslcError, OslcPaginationError, oslc_timestamp
 from src.domain import models as domain
+from src.services.workorder_age import eligibility, window
 from src.repositories.store import CollectorStore
 
 LOG = logging.getLogger(__name__)
@@ -46,6 +47,8 @@ class ObjectSyncConfig:
     cursor_requires_zero_errors: bool = True
     recent_work_orders: bool = False
     request_limit: int = 40
+    work_order_lifecycle: bool = False
+    catchup_page_ceiling: int = 200
 
 
 @dataclass
@@ -79,10 +82,18 @@ class SyncService:
         self._site_id = site_id
 
     def sync(self, config: ObjectSyncConfig) -> SyncStats:
+        if config.work_order_lifecycle and not config.recent_work_orders:
+            raise ValueError("Unrestricted WO backfill is disabled; use lifecycle-aware bounded collection")
         if config.recent_work_orders:
-            from src.services.workorder_recency import sync_recent_work_orders
+            from src.services.workorder_recency import sync_recent_work_orders, _operational_stop
+            if config.work_order_lifecycle:
+                with self._store.work_order_recovery_lock() as acquired:
+                    if not acquired:
+                        return _operational_stop(self._store, SyncStats(config.object_structure), "SOURCE_BUSY")
+                    return sync_recent_work_orders(self._client, self._store, config)
             return sync_recent_work_orders(self._client, self._store, config)
         stats = SyncStats(object_structure=config.object_structure)
+        age_bounds = window(stats.started_at) if config.entity_name == "work_order" else None
         watermark = None
         if config.watermark_field:
             watermark = self._store.get_cursor(config.object_structure)
@@ -152,7 +163,7 @@ class SyncService:
                 config.object_structure,
                 where=where,
                 required_scope=config.scope_clause,
-                select=list(config.select) or None,
+                select=(list(dict.fromkeys((*config.select, "reportdate"))) if config.select and age_bounds else list(config.select) or None),
                 order_by=config.order_by,
                 page_size=config.page_size,
                 max_pages=config.max_pages,
@@ -189,6 +200,16 @@ class SyncService:
                     change = oslc_timestamp(raw.get(config.watermark_field))
                     if change is not None and (last_change is None or change > last_change):
                         last_change = change
+                if age_bounds:
+                    age = eligibility(raw, age_bounds)
+                    if age != "AGE_ELIGIBLE":
+                        stats.skipped += 1
+                        key = "age_excluded" if age == "AGE_EXCLUDED" else "age_unknown"
+                        stats.recency[key] = stats.recency.get(key, 0) + 1
+                        if age == "AGE_UNKNOWN":
+                            stats.complete = False
+                            stats.mode = "partial"
+                        continue
                 try:
                     entity = config.mapper(raw)
                     entity_id = str(

@@ -7,6 +7,8 @@ Ported from the reliability-cockpit adapter (which this collector replaces).
 
 from __future__ import annotations
 
+from src.adapters.maximo.actual_dates import evidence as actual_date_evidence
+
 from typing import Any, Mapping
 
 from src.adapters.maximo.oslc_client import (
@@ -157,7 +159,8 @@ def work_order_from_payload(member: Mapping[str, Any]) -> WorkOrder:
         lead=oslc_pop_text(member, "lead"),
         failure_code=oslc_pop_text(member, "failurecode"),
         is_task=oslc_pop_bool(member, "istask"),
-        parent_wo=oslc_pop_text(member, "pctaskid"),
+        # PCTASKID has no verified equivalence to a parent WO number.
+        parent_wo=None,
         has_children=oslc_pop_bool(member, "haschildren"),
         estimated_labor_cost=oslc_pop_number(member, "estlabcost"),
         estimated_material_cost=oslc_pop_number(member, "estmatcost"),
@@ -167,7 +170,21 @@ def work_order_from_payload(member: Mapping[str, Any]) -> WorkOrder:
         sources={"maximo": {
             "wonum": member.get("wonum"),
             "workorderid": member.get("workorderid"),
+            "siteid": oslc_pop_text(member, "siteid"),
+            "orgid": oslc_pop_text(member, "orgid"),
+            "observed_fields": sorted(str(k) for k in member if k in {
+                "assetnum", "location", "status", "status_description", "worktype", "woclass", "description",
+                "reportdate", "changedate", "statusdate", "schedstart", "schedfinish", "targcompdate", "estdur",
+                "downtime", "wopriority", "wopriority_description", "reportedby", "supervisor", "lead", "failurecode",
+                "istask", "haschildren", "estlabcost", "estmatcost", "actlabcost", "actmatcost", "actlabhrs"}),
             "extra": _work_order_extra(member),
+            "actual_dates": actual_date_evidence(member),
+            "hierarchy": {
+                "schema_version": 1,
+                "parent_wo_state": "UNKNOWN",
+                "source_fields": {name: oslc_pop_text(member, name)
+                                  for name in ("pctaskid", "parent", "wogroup") if name in member},
+            },
         }},
     )
 

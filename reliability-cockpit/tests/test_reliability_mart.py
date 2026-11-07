@@ -135,24 +135,21 @@ class ReliabilityMartReadTest(unittest.TestCase):
     def test_decision_overview_is_registry_scoped_and_backend_aggregated(self):
         result = self.repository.decision_overview(window_days=30, as_of=NOW)
         self.assertEqual(result["registered_assets"], 2)
-        self.assertEqual(result["summary"]["maintenance_activity_7d"], 2)
-        self.assertEqual(result["summary"]["maintenance_activity_30d"], 2)
-        self.assertEqual(result["summary"]["assets_active_7d"], 2)
-        self.assertEqual(result["summary"]["assets_active_30d"], 2)
+        # COMPLETE and CAN are not CLOSE. Legacy unobserved task/clock flags
+        # cannot turn record-change timestamps into execution activity.
+        self.assertEqual(result["summary"]["maintenance_activity_7d"], 0)
+        self.assertEqual(result["summary"]["maintenance_activity_30d"], 0)
+        self.assertEqual(result["summary"]["assets_active_7d"], 0)
+        self.assertEqual(result["summary"]["assets_active_30d"], 0)
         self.assertEqual(len(result["trend"]), 12)
-        self.assertEqual({row["value"] for row in result["status_distribution"]}, {"CAN", "COMPLETE"})
-        self.assertEqual({row["value"] for row in result["work_type_distribution"]}, {"CORRECTIVE", "PM"})
-        self.assertEqual([row["source_asset_number"] for row in result["activity_concentration"]], ["ASSET-A", "ASSET-B"])
+        self.assertEqual(result["status_distribution"], [])
+        self.assertEqual(result["work_type_distribution"], [])
+        self.assertEqual(result["activity_concentration"], [])
+        self.assertEqual(result["activity_evidence"]["availability"], "UNAVAILABLE")
+        self.assertEqual(result["activity_evidence"]["unknown_task_work_orders"], 2)
         self.assertEqual(result["records"]["fmea_records"], 1)
         self.assertEqual(result["records"]["fmea_assets_represented"], 1)
         self.assertNotIn("rcfa_assets_represented", result["records"])
-        with Session(self.database.engine) as session:
-            session.add(MaintenanceEventMart(**_common("maintenance:EVENT-UNKNOWN", "MXWODETAIL"), id="EVENT-UNKNOWN", equipment_id=ASSET_A, actual_start=NOW, source_changed_at=NOW))
-            session.flush()
-            unknown_result = self.repository.decision_overview(window_days=30, as_of=NOW)
-            session.rollback()
-        self.assertIn({"value": "UNKNOWN", "count": 1}, unknown_result["status_distribution"])
-        self.assertIn({"value": "UNKNOWN", "count": 1}, unknown_result["work_type_distribution"])
 
     def test_work_order_reference_uses_scoped_work_order_field(self):
         rows = self.repository.list_maintenance(work_order_id="WO-REF-A").items
@@ -337,7 +334,8 @@ class ReliabilityMartApiTest(unittest.TestCase):
             response = reliability_api.decision_overview(window_days=30, service=self.service)
         self.assertEqual(response.window_days, 30)
         self.assertEqual(response.summary.registered_assets.evidence_class, "VERIFIED")
-        self.assertEqual(response.summary.assets_active_7d.value, 2)
+        self.assertEqual(response.summary.assets_active_7d.value, 0)
+        self.assertEqual(response.activity_evidence.availability, "UNAVAILABLE")
         parameter = self.app.openapi()["paths"]["/v1/reliability/decision-overview"]["get"]["parameters"][0]
         self.assertEqual(parameter["schema"]["enum"], [7, 30, 90])
         for invalid in (0, 14, 180, 365):
@@ -735,7 +733,8 @@ class MaintenanceInvestigationFixtureTest(unittest.TestCase):
             actual_start: datetime | None = None,
             source_changed_at: datetime | None = None,
         ) -> MaintenanceEventMart:
-            sources = {"maximo": {"source_object": "MXWODETAIL"}}
+            sources = {"maximo": {"source_object": "MXWODETAIL", "istask": False, "scope_evidence": "DIRECT_SOURCE", "siteid": "BSR", "orgid": "IP",
+                "actual_dates": {"fields": {"actstart": {"state": "VALID"}}}}}
             if raw_work_type is not None:
                 sources["maximo"]["worktype"] = raw_work_type
             activity = NOW - timedelta(days=days_ago) if days_ago is not None else None
@@ -773,17 +772,16 @@ class MaintenanceInvestigationFixtureTest(unittest.TestCase):
         result = self.repository.maintenance_investigation(window_days=90, min_events=2, as_of=NOW)
         self.assertEqual(result["summary"], {
             "registered_assets": 3,
-            "maintenance_events": 8,
+            "maintenance_events": 7,
             "assets_with_activity": 3,
-            "assets_with_2plus_events": 2,
+            "assets_with_2plus_events": 1,
             "assets_with_3plus_events": 1,
-            "repeat_activity_events": 5,
+            "repeat_activity_events": 4,
         })
-        self.assertEqual([row["source_asset_number"] for row in result["assets"]], ["INV-A", "INV-B"])
+        self.assertEqual([row["source_asset_number"] for row in result["assets"]], ["INV-A"])
         self.assertEqual(result["assets"][0]["event_count"], 5)
         self.assertEqual(result["assets"][0]["repeat_activity_events"], 4)
-        self.assertEqual(result["assets"][1]["event_count"], 2)
-        self.assertEqual(result["assets"][1]["repeat_activity_events"], 1)
+        self.assertEqual(result["activity_evidence"]["not_closed_work_orders"], 1)
 
     def test_activity_date_preference_gaps_and_work_types(self):
         result = self.repository.maintenance_investigation(window_days=180, min_events=2, as_of=NOW)
@@ -794,13 +792,13 @@ class MaintenanceInvestigationFixtureTest(unittest.TestCase):
         self.assertAlmostEqual(first["minimum_gap_days"], 5.0)
 
         thirty_day = self.repository.maintenance_investigation(window_days=30, min_events=2, as_of=NOW)
-        self.assertEqual(thirty_day["summary"]["maintenance_events"], 7)
+        self.assertEqual(thirty_day["summary"]["maintenance_events"], 5)
         self.assertEqual(thirty_day["summary"]["assets_with_activity"], 3)
 
         overview = self.repository.decision_overview(window_days=90, as_of=NOW)
         self.assertEqual({row["value"] for row in overview["work_type_distribution"]}, {"PM", "PDM", "CD", "CM", "UNKNOWN"})
-        self.assertEqual(sum(row["count"] for row in overview["work_type_distribution"]), 8)
-        self.assertIn({"value": "CAN", "count": 1}, overview["status_distribution"])
+        self.assertEqual(sum(row["count"] for row in overview["work_type_distribution"]), 7)
+        self.assertNotIn({"value": "CAN", "count": 1}, overview["status_distribution"])
 
     def test_allowlisted_thresholds_pagination_and_sort(self):
         result = self.repository.maintenance_investigation(window_days=30, min_events=3, offset=0, limit=1, sort="latest_gap_asc", as_of=NOW)
@@ -829,7 +827,7 @@ class MaintenanceInvestigationApiTest(unittest.TestCase):
         with patch("src.repositories.mart_reader.datetime", FixedDateTime):
             response = reliability_api.maintenance_investigation(window_days=90, min_events=2, offset=0, limit=25, sort="event_count_desc", service=self.service)
         self.assertEqual(response.window.days, 90)
-        self.assertEqual(response.summary.repeat_activity_events, 5)
+        self.assertEqual(response.summary.repeat_activity_events, 4)
         self.assertEqual(response.scope.interpretation, "ACTIVITY_NOT_FAILURE")
         for days in (30, 90, 180):
             with patch("src.repositories.mart_reader.datetime", FixedDateTime):

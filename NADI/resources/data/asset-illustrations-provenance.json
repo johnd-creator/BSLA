@@ -1,0 +1,681 @@
+{
+  "kind": "GENERIC_AI_ILLUSTRATION",
+  "review_status": "NOT_ENGINEER_VERIFIED",
+  "assets": [
+    {
+      "family": "control-cabinet",
+      "file": "public/images/asset-families/control-cabinet-illustration-v1.png",
+      "bytes": 1334214,
+      "width": 1672,
+      "height": 941,
+      "sha256": "69b69cfd681b42b9b2c75f0c200ada0d4cbb434b874b9d4f0f1e02b87df0888d",
+      "prompt_summary": "Generic AI illustration of control cabinet, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "water-pump",
+      "file": "public/images/asset-families/water-pump-illustration-v1.png",
+      "bytes": 1455321,
+      "width": 1672,
+      "height": 941,
+      "sha256": "6af9c3b3a3a4952701523263749b204ebe066a706e6d6b83390d93b3add5595c",
+      "prompt_summary": "Generic AI illustration of water pump, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "belt-conveyor",
+      "file": "public/images/asset-families/belt-conveyor-illustration-v1.png",
+      "bytes": 1388784,
+      "width": 1672,
+      "height": 941,
+      "sha256": "80c567a4489b32fda3d8bfa52248653827ef5f0ab9fd43ff64326cdab5952420",
+      "prompt_summary": "Generic AI illustration of belt conveyor, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "storage-tank",
+      "file": "public/images/asset-families/storage-tank-illustration-v1.png",
+      "bytes": 1225149,
+      "width": 1672,
+      "height": 941,
+      "sha256": "7dd6365318146cea3849abd023b31e4e937b974e34487b58482b9e9c52d71ad0",
+      "prompt_summary": "Generic AI illustration of storage tank, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "power-transformer",
+      "file": "public/images/asset-families/power-transformer-illustration-v1.png",
+      "bytes": 1225475,
+      "width": 1672,
+      "height": 941,
+      "sha256": "6a45b75391484d48c1d88010e440775504133696682dea372bf242a757203b36",
+      "prompt_summary": "Generic AI illustration of power transformer, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "industrial-fan",
+      "file": "public/images/asset-families/industrial-fan-illustration-v1.png",
+      "bytes": 1364032,
+      "width": 1672,
+      "height": 941,
+      "sha256": "16fd44aec71778134849edb90d6a706e29474549d4ff83f57ca2adb1b7ea9ea7",
+      "prompt_summary": "Generic AI illustration of industrial fan, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "screw-air-compressor",
+      "file": "public/images/asset-families/screw-air-compressor-illustration-v1.png",
+      "bytes": 1450389,
+      "width": 1672,
+      "height": 941,
+      "sha256": "bae182ddb1248bf62319b67d0bdfff0d447eb1d4b8b8b10944d679ef3c32d889",
+      "prompt_summary": "Generic AI illustration of screw air compressor, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "coal-pulverizer",
+      "file": "public/images/asset-families/coal-pulverizer-illustration-v1.png",
+      "bytes": 1300345,
+      "width": 1672,
+      "height": 941,
+      "sha256": "ec2f15768b0f2443949be4440b2c7b8bfaffc54937a3dfc187d48bd4ca817001",
+      "prompt_summary": "Generic AI illustration of coal pulverizer, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "electric-hoist",
+      "file": "public/images/asset-families/electric-hoist-illustration-v1.png",
+      "bytes": 1299689,
+      "width": 1672,
+      "height": 941,
+      "sha256": "699846d30830bdf6fd06d19baaa91b4aa00e3091897023f21848b6382fb71a5c",
+      "prompt_summary": "Generic AI illustration of electric hoist, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "desiccant-air-dryer",
+      "file": "public/images/asset-families/desiccant-air-dryer-illustration-v1.png",
+      "bytes": 1215494,
+      "width": 1672,
+      "height": 941,
+      "sha256": "4144bce50649733bc63d72d79fd0c473ea29846190d500a675e8d3bbf81daf85",
+      "prompt_summary": "Generic AI illustration of desiccant air dryer, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "air-receiver",
+      "file": "public/images/asset-families/air-receiver-illustration-v1.png",
+      "bytes": 1163186,
+      "width": 1672,
+      "height": 941,
+      "sha256": "03912e35de57bd99027d8d063c4fc6dbfd4b7ce70eb222a8b6b857407b5ed3f2",
+      "prompt_summary": "Generic AI illustration of air receiver, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "travelling-screen",
+      "file": "public/images/asset-families/travelling-screen-illustration-v1.png",
+      "bytes": 1443495,
+      "width": 1672,
+      "height": 941,
+      "sha256": "eb2ae1c848a2ddf34fad4ec94f784c9360ffcec8fa74cc65cbcca59310b332d5",
+      "prompt_summary": "Generic AI illustration of travelling screen, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "coal-feeder",
+      "file": "public/images/asset-families/coal-feeder-illustration-v1.png",
+      "bytes": 1383899,
+      "width": 1672,
+      "height": 941,
+      "sha256": "0e6a8bca0cac0122bfb2bf01ec0d5c5644a8f52f51b864db290f5f03ec7affe7",
+      "prompt_summary": "Generic AI illustration of coal feeder, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "belt-feeder",
+      "file": "public/images/asset-families/belt-feeder-illustration-v1.png",
+      "bytes": 1446357,
+      "width": 1672,
+      "height": 941,
+      "sha256": "90ac5848aab8663ac6da0f7f318f97a158e0606580b5408dc68d74ceb0b10c81",
+      "prompt_summary": "Generic AI illustration of belt feeder, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "vibrating-feeder",
+      "file": "public/images/asset-families/vibrating-feeder-illustration-v1.png",
+      "bytes": 1473202,
+      "width": 1672,
+      "height": 941,
+      "sha256": "046d700a584c5e22c16741f04dcdaa6a2178c12434911d36a9eca3f33bef543e",
+      "prompt_summary": "Generic AI illustration of vibrating feeder, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "coal-crusher",
+      "file": "public/images/asset-families/coal-crusher-illustration-v1.png",
+      "bytes": 1411333,
+      "width": 1672,
+      "height": 941,
+      "sha256": "0194197c942948be5bf0115a4e085fe9ffa91d54b1d841f694c15b9eb25ef489",
+      "prompt_summary": "Generic AI illustration of coal crusher, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "heat-exchanger",
+      "file": "public/images/asset-families/heat-exchanger-illustration-v1.png",
+      "bytes": 1422066,
+      "width": 1672,
+      "height": 941,
+      "sha256": "38d4b26b147e27cbb33fe6f8f2800a7fa46c8f2b96f6df5c854b23892672bd75",
+      "prompt_summary": "Generic AI illustration of heat exchanger, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "air-preheater",
+      "file": "public/images/asset-families/air-preheater-illustration-v1.png",
+      "bytes": 1469127,
+      "width": 1672,
+      "height": 941,
+      "sha256": "b62d63ca58129d91234f61810f14f05ed5941aea859786e73da1f083f801ef42",
+      "prompt_summary": "Generic AI illustration of air preheater, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "circulating-water-pump",
+      "file": "public/images/asset-families/circulating-water-pump-illustration-v1.png",
+      "bytes": 1311247,
+      "width": 1672,
+      "height": 941,
+      "sha256": "b0794769234bceb864d8565b7ec25b1b5def9de0c295c58b2acb444791a6ed3d",
+      "prompt_summary": "Generic AI illustration of circulating water pump, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "condensate-extraction-pump",
+      "file": "public/images/asset-families/condensate-extraction-pump-illustration-v1.png",
+      "bytes": 1153609,
+      "width": 1672,
+      "height": 941,
+      "sha256": "81ee40e6a3eac76782ee5e8c4d2c985b04ecc47842ed8d85755b5ee07578167b",
+      "prompt_summary": "Generic AI illustration of condensate extraction pump, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "feedwater-booster-pump",
+      "file": "public/images/asset-families/feedwater-booster-pump-illustration-v1.png",
+      "bytes": 1572060,
+      "width": 1672,
+      "height": 941,
+      "sha256": "d68fc39fc1e349efb0ee41794656569a5b6d05a2f5002904f8b21dfbb56f1825",
+      "prompt_summary": "Generic AI illustration of feedwater booster pump, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "vacuum-pump",
+      "file": "public/images/asset-families/vacuum-pump-illustration-v1.png",
+      "bytes": 1318806,
+      "width": 1672,
+      "height": 941,
+      "sha256": "e892aca83e85efed3a41b5e31ef792ef726f678e4717dd982d66018f35b9c469",
+      "prompt_summary": "Generic AI illustration of vacuum pump, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "oil-pump",
+      "file": "public/images/asset-families/oil-pump-illustration-v1.png",
+      "bytes": 1409088,
+      "width": 1672,
+      "height": 941,
+      "sha256": "7cea7dfcfb83ff2bdf11da9ccaa00934d6c01f7f0ff8804a8937ef82071da2a3",
+      "prompt_summary": "Generic AI illustration of oil pump, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "boiler-circulating-pump",
+      "file": "public/images/asset-families/boiler-circulating-pump-illustration-v1.png",
+      "bytes": 1378318,
+      "width": 1672,
+      "height": 941,
+      "sha256": "8189296fdce2d3d61d7848f0da5962306d9b1e9f6a429a9860bd4baa2ede76b5",
+      "prompt_summary": "Generic AI illustration of boiler circulating pump, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "industrial-blower",
+      "file": "public/images/asset-families/industrial-blower-illustration-v1.png",
+      "bytes": 1504538,
+      "width": 1672,
+      "height": 941,
+      "sha256": "6b785fb9e06d41382f9a5b6d822e4bb568803cdfea1d79c041f09403a0b13283",
+      "prompt_summary": "Generic AI illustration of industrial blower, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "feedwater-heater",
+      "file": "public/images/asset-families/feedwater-heater-illustration-v1.png",
+      "bytes": 1358401,
+      "width": 1672,
+      "height": 941,
+      "sha256": "21080fc6ed0a2c4dfd954d6b912147b5287a25c8c4d62a60bc858b41ea0af257",
+      "prompt_summary": "Generic AI illustration of feedwater heater, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "diverter-gate",
+      "file": "public/images/asset-families/diverter-gate-illustration-v1.png",
+      "bytes": 1398456,
+      "width": 1672,
+      "height": 941,
+      "sha256": "398e9fdc9c5d65e6a08fac4f0f09cf8b7be0cd2a720e2d8994270f54354f8b25",
+      "prompt_summary": "Generic AI illustration of diverter gate, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "flash-vessel",
+      "file": "public/images/asset-families/flash-vessel-illustration-v1.png",
+      "bytes": 1209089,
+      "width": 1672,
+      "height": 941,
+      "sha256": "4911aa07f1c4852100ca1d0b2e04b08bf122de6d45b2ebcc5ffb5c004bf5e369",
+      "prompt_summary": "Generic AI illustration of flash vessel, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "sludge-pump",
+      "file": "public/images/asset-families/sludge-pump-illustration-v1.png",
+      "bytes": 1671449,
+      "width": 1672,
+      "height": 941,
+      "sha256": "974d4fb95ad8ac1ec16ded91678bc626ef9b6bbd24e2a0ca6ff9b384a96a0f7d",
+      "prompt_summary": "Generic AI illustration of sludge pump, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "wastewater-pump",
+      "file": "public/images/asset-families/wastewater-pump-illustration-v1.png",
+      "bytes": 1200304,
+      "width": 1672,
+      "height": 941,
+      "sha256": "091a2673ad6406837a062e1f312627912dd282b366adbf6f3388a45a6cbf6b0f",
+      "prompt_summary": "Generic AI illustration of wastewater pump, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "dosing-pump",
+      "file": "public/images/asset-families/dosing-pump-illustration-v1.png",
+      "bytes": 1257393,
+      "width": 1672,
+      "height": 941,
+      "sha256": "989fbcf34e9096105a9a59509926ffce6a65d1388a92cb93357969a5cc4440cf",
+      "prompt_summary": "Generic AI illustration of dosing pump, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "diesel-fire-pump",
+      "file": "public/images/asset-families/diesel-fire-pump-illustration-v1.png",
+      "bytes": 1513093,
+      "width": 1672,
+      "height": 941,
+      "sha256": "208af2f5bf339a9d65a4534faf7cb7f05f41f008bfb60739381e7bc9ac56e9d7",
+      "prompt_summary": "Generic AI illustration of diesel fire pump, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "electric-fire-pump",
+      "file": "public/images/asset-families/electric-fire-pump-illustration-v1.png",
+      "bytes": 1582610,
+      "width": 1672,
+      "height": 941,
+      "sha256": "3d169133f1ef4410cd69beff58900ddc80f8d54bff2a299ca15eb5f879fe38b2",
+      "prompt_summary": "Generic AI illustration of electric fire pump, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "jockey-pump",
+      "file": "public/images/asset-families/jockey-pump-illustration-v1.png",
+      "bytes": 1121572,
+      "width": 1672,
+      "height": 941,
+      "sha256": "9832c5cd543d9740da93e1a655b8e71b240d7e4ccb25383bf700e00f5701108c",
+      "prompt_summary": "Generic AI illustration of jockey pump, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "part-valve-damper",
+      "file": "public/images/asset-families/part-valve-damper-illustration-v1.png",
+      "bytes": 1282431,
+      "width": 1672,
+      "height": 941,
+      "sha256": "76bdbc5cbf231f9fcd9c3c9d60c6c8ed8ea617ab155bfe33fb52812de0e1d84c",
+      "prompt_summary": "Generic AI illustration of part valve damper, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "part-piping",
+      "file": "public/images/asset-families/part-piping-illustration-v1.png",
+      "bytes": 1288246,
+      "width": 1672,
+      "height": 941,
+      "sha256": "8dfdaf23de253f6c4572de204cafea17d829ba4c1c998f4978eb391da7847514",
+      "prompt_summary": "Generic AI illustration of part piping, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "instrumentation-kit",
+      "file": "public/images/asset-families/instrumentation-kit-illustration-v1.png",
+      "bytes": 1368073,
+      "width": 1672,
+      "height": 941,
+      "sha256": "95f9f6bcaca7aae22d647801a698802f730e57b34df0b44d8e359b208d03d396",
+      "prompt_summary": "Generic AI illustration of instrumentation kit, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "part-temperature-sensor",
+      "file": "public/images/asset-families/part-temperature-sensor-illustration-v1.png",
+      "bytes": 1167778,
+      "width": 1672,
+      "height": 941,
+      "sha256": "06a906c98b61edffddf7d465d9dec4cf24000a9e9efac1f3fc4133fa0cf5fd84",
+      "prompt_summary": "Generic AI illustration of part temperature sensor, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "part-dial-gauge",
+      "file": "public/images/asset-families/part-dial-gauge-illustration-v1.png",
+      "bytes": 1241593,
+      "width": 1672,
+      "height": 941,
+      "sha256": "870da61c2add4bfc87f517afaa548b820721d6abe9d7b14bbb47d91e728c12cc",
+      "prompt_summary": "Generic AI illustration of part dial gauge, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "part-industrial-switch",
+      "file": "public/images/asset-families/part-industrial-switch-illustration-v1.png",
+      "bytes": 1402037,
+      "width": 1672,
+      "height": 941,
+      "sha256": "0cd69d084be4e95b83d83cac98e62188ea117e6f905ddc0b93fa74d8ab58be2f",
+      "prompt_summary": "Generic AI illustration of part industrial switch, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "part-transmitter",
+      "file": "public/images/asset-families/part-transmitter-illustration-v1.png",
+      "bytes": 1315996,
+      "width": 1672,
+      "height": 941,
+      "sha256": "972e51435568a2c08f88ac1747c372fb208b2a00b89e2548e0f8fa4860ab1970",
+      "prompt_summary": "Generic AI illustration of part transmitter, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "sootblower",
+      "file": "public/images/asset-families/sootblower-illustration-v1.png",
+      "bytes": 1028668,
+      "width": 1672,
+      "height": 941,
+      "sha256": "d27f1ea753e3ef307d53964ab4c71414de2ec30398e16453e5bc0514a90affeb",
+      "prompt_summary": "Generic AI illustration of sootblower, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "steam-turbine",
+      "file": "public/images/asset-families/steam-turbine-illustration-v1.png",
+      "bytes": 1592580,
+      "width": 1672,
+      "height": 941,
+      "sha256": "a13004fc5d3cf2bc057711f5d92f368ba451a2d95d86ec8c6d6351f620e6dc62",
+      "prompt_summary": "Generic AI illustration of steam turbine, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "process-filter",
+      "file": "public/images/asset-families/process-filter-illustration-v1.png",
+      "bytes": 1357556,
+      "width": 1672,
+      "height": 941,
+      "sha256": "96e58e725797ae3b5b4b004010914634bfcd1c77053b41bc575d55c284da4dec",
+      "prompt_summary": "Generic AI illustration of process filter, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "truck",
+      "file": "public/images/asset-families/truck-illustration-v1.png",
+      "bytes": 1445550,
+      "width": 1672,
+      "height": 941,
+      "sha256": "62632d71f1ee2d4ccaf2f4dd513a68d6a0c6cb59e6c357293667ccbc6a814670",
+      "prompt_summary": "Generic AI illustration of truck, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "excavator",
+      "file": "public/images/asset-families/excavator-illustration-v1.png",
+      "bytes": 1573930,
+      "width": 1672,
+      "height": 941,
+      "sha256": "49fdcbf54585899c6d6aef6e9bbfd7daac920d2d383656cca34b9b466a9d23e2",
+      "prompt_summary": "Generic AI illustration of excavator, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "forklift",
+      "file": "public/images/asset-families/forklift-illustration-v1.png",
+      "bytes": 1466011,
+      "width": 1672,
+      "height": 941,
+      "sha256": "b04c660a50906521c5cc3ac4ab1228899413187e69d4abba174945e0bdcd2f8d",
+      "prompt_summary": "Generic AI illustration of forklift, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "loader",
+      "file": "public/images/asset-families/loader-illustration-v1.png",
+      "bytes": 1536925,
+      "width": 1672,
+      "height": 941,
+      "sha256": "228b2f591af9424ec5e3035410f6096e8e6bebd2ec8023c995c414e1b602cfbe",
+      "prompt_summary": "Generic AI illustration of loader, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "dozer",
+      "file": "public/images/asset-families/dozer-illustration-v1.png",
+      "bytes": 1586827,
+      "width": 1672,
+      "height": 941,
+      "sha256": "85cdde74beff4b3ed6579ec301fe1a354c5b9184254528986274134461f02cab",
+      "prompt_summary": "Generic AI illustration of dozer, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "chemical-dosing-kit",
+      "file": "public/images/asset-families/chemical-dosing-kit-illustration-v1.png",
+      "bytes": 1356865,
+      "width": 1672,
+      "height": 941,
+      "sha256": "44089f0464b870eba3ddd7c38e44a4863b45c10b8dd87e8d53f9d9507f867cee",
+      "prompt_summary": "Generic AI illustration of chemical dosing kit, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "fire-protection-kit",
+      "file": "public/images/asset-families/fire-protection-kit-illustration-v1.png",
+      "bytes": 1588755,
+      "width": 1672,
+      "height": 941,
+      "sha256": "3d6d3e5d4201232e4e41010a79bf2c732d3885aa684f04473131c0c88fbd41fa",
+      "prompt_summary": "Generic AI illustration of fire protection kit, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "dust-spray-kit",
+      "file": "public/images/asset-families/dust-spray-kit-illustration-v1.png",
+      "bytes": 1506438,
+      "width": 1672,
+      "height": 941,
+      "sha256": "2502c6a2ce18274f5cf9e5dbe8921f824c7e430edee2263356380a1b651ecbe2",
+      "prompt_summary": "Generic AI illustration of dust spray kit, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "electric-machine",
+      "file": "public/images/asset-families/electric-machine-illustration-v1.png",
+      "bytes": 1628379,
+      "width": 1672,
+      "height": 941,
+      "sha256": "9f340bee12f169f6584455f1527088e8be9cae9f4d04c036e30f3fc467c5f8ad",
+      "prompt_summary": "Generic AI illustration of electric machine, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "battery-bank",
+      "file": "public/images/asset-families/battery-bank-illustration-v1.png",
+      "bytes": 1371903,
+      "width": 1672,
+      "height": 941,
+      "sha256": "1d95fd2a209aa2f8bc56aec97fff94e784b0b25ce42c708534d9f882d49ed5c3",
+      "prompt_summary": "Generic AI illustration of battery bank, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "gear-assembly",
+      "file": "public/images/asset-families/gear-assembly-illustration-v1.png",
+      "bytes": 1549931,
+      "width": 1672,
+      "height": 941,
+      "sha256": "323ef6f2eb7001323f39769adc00928597b54af4b9a07f5b2d6be4c7707124aa",
+      "prompt_summary": "Generic AI illustration of gear assembly, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "busduct",
+      "file": "public/images/asset-families/busduct-illustration-v1.png",
+      "bytes": 1412580,
+      "width": 1672,
+      "height": 941,
+      "sha256": "dd76a3e09ce3a4fdb276c6ff003f7cb60831e215a056230f1212ebf3897b9194",
+      "prompt_summary": "Generic AI illustration of busduct, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "lightning-arrester",
+      "file": "public/images/asset-families/lightning-arrester-illustration-v1.png",
+      "bytes": 1196631,
+      "width": 1672,
+      "height": 941,
+      "sha256": "03582e68baa9eae038e86610a42f5ba9ea660d69855e887c94e6c0be7521a60d",
+      "prompt_summary": "Generic AI illustration of lightning arrester, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "industrial-building",
+      "file": "public/images/asset-families/industrial-building-illustration-v1.png",
+      "bytes": 1519562,
+      "width": 1672,
+      "height": 941,
+      "sha256": "bf23fc320dcb345e40e0472e81cfd448b79be9d13dd4d8abe2553e2f310ba396",
+      "prompt_summary": "Generic AI illustration of industrial building, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "structural-support",
+      "file": "public/images/asset-families/structural-support-illustration-v1.png",
+      "bytes": 1581032,
+      "width": 1672,
+      "height": 941,
+      "sha256": "fe0d976d38e53a75c0f019df1aedb1e8b50c77f9929e13dba95e430e9d1a2872",
+      "prompt_summary": "Generic AI illustration of structural support, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "industrial-site",
+      "file": "public/images/asset-families/industrial-site-illustration-v1.png",
+      "bytes": 1938884,
+      "width": 1672,
+      "height": 941,
+      "sha256": "fde4af5e11a8a344b3c1b3e6f2154b63243ac1cb36fa323da20c6352eb51f5d5",
+      "prompt_summary": "Generic AI illustration of industrial site, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "water-basin",
+      "file": "public/images/asset-families/water-basin-illustration-v1.png",
+      "bytes": 1922606,
+      "width": 1672,
+      "height": 941,
+      "sha256": "90658ef3c140a95a6198f1fd1143746e7eb313072ae319851c26822d13c6dbe5",
+      "prompt_summary": "Generic AI illustration of water basin, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "industrial-chimney",
+      "file": "public/images/asset-families/industrial-chimney-illustration-v1.png",
+      "bytes": 1078377,
+      "width": 1672,
+      "height": 941,
+      "sha256": "21c73b24fd1eed2bb5ef3ceddd95650db604c46c39612a4299b4c9f59fe25f4c",
+      "prompt_summary": "Generic AI illustration of industrial chimney, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "outdoor-lighting",
+      "file": "public/images/asset-families/outdoor-lighting-illustration-v1.png",
+      "bytes": 1080480,
+      "width": 1672,
+      "height": 941,
+      "sha256": "7d27f8cc44990263a08120374f44feec35c0cc5459f8010ddc1870cb7df71b58",
+      "prompt_summary": "Generic AI illustration of outdoor lighting, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "industrial-burner",
+      "file": "public/images/asset-families/industrial-burner-illustration-v1.png",
+      "bytes": 1635729,
+      "width": 1672,
+      "height": 941,
+      "sha256": "2bbdee2556b152317f423f80d43be3b6acf64f19788f29940bf04a417b37b9bf",
+      "prompt_summary": "Generic AI illustration of industrial burner, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "coal-sampler",
+      "file": "public/images/asset-families/coal-sampler-illustration-v1.png",
+      "bytes": 1364833,
+      "width": 1672,
+      "height": 941,
+      "sha256": "1e5824d7a0fbd991b396e965292f65dbf7a7b93c4db8358a30bc1753904e214c",
+      "prompt_summary": "Generic AI illustration of coal sampler, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "dry-ash-unloader",
+      "file": "public/images/asset-families/dry-ash-unloader-illustration-v1.png",
+      "bytes": 1360740,
+      "width": 1672,
+      "height": 941,
+      "sha256": "fde86229f5c6f5c0c1c88ce7474466be8f657a077c5704db616bbbb315c4b3f9",
+      "prompt_summary": "Generic AI illustration of dry ash unloader, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "rapper-mechanism",
+      "file": "public/images/asset-families/rapper-mechanism-illustration-v1.png",
+      "bytes": 1489849,
+      "width": 1672,
+      "height": 941,
+      "sha256": "e2b6dcdabebd3770e75527c6502f8dbc5d24ffbc25d32e28322ec87b79a4ca4f",
+      "prompt_summary": "Generic AI illustration of rapper mechanism, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "magnetic-separator",
+      "file": "public/images/asset-families/magnetic-separator-illustration-v1.png",
+      "bytes": 1551736,
+      "width": 1672,
+      "height": 941,
+      "sha256": "edf5752dbe5c0edf51c0f33c5e714057b967bdf9e317ad1f92ecd7abb4fdbf96",
+      "prompt_summary": "Generic AI illustration of magnetic separator, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "cable-chain",
+      "file": "public/images/asset-families/cable-chain-illustration-v1.png",
+      "bytes": 1574894,
+      "width": 1672,
+      "height": 941,
+      "sha256": "460d3f3f1cabc091f49e0b8b0e877d602c72960ba99a32e232167e46d6259968",
+      "prompt_summary": "Generic AI illustration of cable chain, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "hvac-unit",
+      "file": "public/images/asset-families/hvac-unit-illustration-v1.png",
+      "bytes": 1678170,
+      "width": 1672,
+      "height": 941,
+      "sha256": "fdf8f0a04a8d5ebfa0351ccb2be37880cc6e6acf86ba4d495a2b767e0b59fae5",
+      "prompt_summary": "Generic AI illustration of hvac unit, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "industrial-elevator",
+      "file": "public/images/asset-families/industrial-elevator-illustration-v1.png",
+      "bytes": 1306248,
+      "width": 1672,
+      "height": 941,
+      "sha256": "1b0ffb52adbcca46fbdf18e77f1f5836b812b3f4ae8c3f4927666811195f40cd",
+      "prompt_summary": "Generic AI illustration of industrial elevator, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "utility-barrow",
+      "file": "public/images/asset-families/utility-barrow-illustration-v1.png",
+      "bytes": 1591959,
+      "width": 1672,
+      "height": 941,
+      "sha256": "7acf8e4550cdfaab420bc951fc3239ee4697ea1dd270a1171f607d5b42f9b0aa",
+      "prompt_summary": "Generic AI illustration of utility barrow, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "solar-panel",
+      "file": "public/images/asset-families/solar-panel-illustration-v1.png",
+      "bytes": 1680359,
+      "width": 1672,
+      "height": 941,
+      "sha256": "31e0f0e50f01a62eb17777d8b82d92618f44035d7678ef265ee096f244b230db",
+      "prompt_summary": "Generic AI illustration of solar panel, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "desk-telephone",
+      "file": "public/images/asset-families/desk-telephone-illustration-v1.png",
+      "bytes": 1753270,
+      "width": 1672,
+      "height": 941,
+      "sha256": "0d200144a2f743b6472aa718735e9ca4a1af51dae7a57ef806f49d157642b991",
+      "prompt_summary": "Generic AI illustration of desk telephone, with no plant identifiers, labels or actual measurements."
+    },
+    {
+      "family": "wind-turbine",
+      "file": "public/images/asset-families/wind-turbine-illustration-v1.png",
+      "bytes": 1009719,
+      "width": 1672,
+      "height": 941,
+      "sha256": "b64f4279d2f2f555d728f4fe5817ebbea4d0f1c4aa61915d73c56df5f75b463d",
+      "prompt_summary": "Generic AI illustration of wind turbine, with no plant identifiers, labels or actual measurements."
+    }
+  ]
+}

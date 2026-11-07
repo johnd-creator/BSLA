@@ -1359,3 +1359,15 @@ reader verified the stored facts. This is data availability, not live hierarchy 
 or Engineer UAT acceptance. All existing containers remain preserved; PR119 runtime,
 controller compatibility STOP, UNKNOWN roles, PARTIAL global coverage and Logbook
 PdM HOLD remain. Counts, raw identities and recovery evidence remain private.
+
+## 2026-11-07 — NADI Laravel public-source integration
+
+Prepared a selective public-source integration based on main, without importing
+the older branch's PI/NK commits or changing operational runtime. The Laravel
+workspace adds read-only asset/WO context and local inspection/PdM drafts. Private
+workbooks, source-derived catalogs, inventory mappings and operational evidence
+remain outside the release; automated tests use fictional fixtures. Existing
+source/authorization/DTO safeguards are retained with explicit additive read
+contracts and stricter final actual-duration semantics. Publication is separate
+from deployment, source acquisition, engineering acceptance and phase completion.
+See [scope and checks](NADI/docs/publication.md).

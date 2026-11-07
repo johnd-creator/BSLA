@@ -21,7 +21,8 @@ class WorkOrderDetailTest(unittest.TestCase):
             dto = _maintenance(row)
             self.assertIsNone(dto.source_detail.reported_at)
             self.assertIsNone(dto.actual_start)
-            self.assertEqual(dto.duration_hours, 0)
+            self.assertIsNone(dto.duration_hours)
+            self.assertEqual(dto.actual_timing_state, "NOT_CLOSED")
         legacy = _maintenance(record()).model_dump(exclude={"source_detail"})
         self.assertIsNone(MaintenanceView.model_validate(legacy).source_detail)
 
@@ -30,8 +31,12 @@ class WorkOrderDetailTest(unittest.TestCase):
         row.actual_start = datetime.fromisoformat("2026-10-23T14:51:51+07:00")
         row.failure_code = "RETAINED-CODE"
         dto = _maintenance(row)
-        for key in MaintenanceView.model_fields.keys() - {"source_detail", "classification"}:
+        for key in MaintenanceView.model_fields.keys() - {"source_detail", "classification", "description", "actual_timing_state", "actual_start", "actual_finish", "duration_hours"}:
             self.assertEqual(getattr(dto,key), getattr(row,key))
+        self.assertIsNone(dto.actual_start)
+        self.assertIsNone(dto.actual_finish)
+        self.assertIsNone(dto.duration_hours)
+        self.assertEqual(dto.actual_timing_state, "NOT_CLOSED")
         self.assertNotIn("DO_NOT_EXPOSE", dto.model_dump_json())
         self.assertNotIn("sources", dto.model_dump())
         self.assertNotIn("provenance", dto.model_dump())

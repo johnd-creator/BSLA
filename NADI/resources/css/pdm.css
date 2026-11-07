@@ -1,0 +1,30 @@
+/* PdM forms keep source uncertainty and point units adjacent to the value. */
+.pdm-form { max-width: 1100px; overflow-wrap: anywhere; }
+.pdm-catalog { display: grid; gap: 12px; }
+.pdm-catalog .detail-panel { margin-bottom: 0; }
+.pdm-source { margin-top: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: #f7fafc; }
+.pdm-source summary { cursor: pointer; font-weight: 600; }
+.pdm-source ul { padding-left: 18px; margin: 10px 0; }
+.pdm-source li + li { margin-top: 5px; }
+.pdm-source .data-note, .pdm-workbook-hash { overflow-wrap: anywhere; }
+.pdm-template-choice { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.pdm-template-choice:last-of-type { margin-bottom: 12px; }
+.pdm-template-choice small { display: block; color: var(--muted); margin-top: 5px; }
+.pdm-field-group { padding: 16px; border: 1px solid var(--border); border-radius: 8px; margin: 0; min-width: 0; }
+.pdm-field-group legend { font-weight: 650; padding: 0 6px; }
+.pdm-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 22px; }
+.pdm-reading { min-width: 0; }
+.pdm-value { display: flex; gap: 8px; align-items: center; }
+.pdm-value > input { flex: 1 1 60%; min-width: 0; }
+.pdm-value > div { flex: 0 1 40%; min-width: 0; }
+.pdm-unit { color: var(--muted); min-width: 65px; font-size: 13px; }
+.pdm-ack { display: flex; gap: 10px; align-items: flex-start; font-weight: 400; }
+.pdm-ack input { margin-top: 3px; flex-shrink: 0; }
+@media (max-width: 700px) {
+    .pdm-fields { grid-template-columns: 1fr; }
+    .pdm-template-choice { flex-wrap: wrap; }
+    .pdm-field-group { padding: 12px; }
+}
+
+/* Author styles must not override the inactive precision group. */
+[data-time-fields][hidden] { display: none; }

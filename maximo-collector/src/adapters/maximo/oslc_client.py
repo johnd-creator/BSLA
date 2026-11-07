@@ -19,7 +19,7 @@ import hashlib
 import time
 from datetime import datetime
 from typing import Any, Iterator, Mapping
-from urllib.parse import parse_qsl, quote, urlencode, urljoin, urlparse, urlsplit, urlunsplit, urlunparse
+from urllib.parse import parse_qsl, quote, urlencode, urljoin, urlparse, urlsplit, urlunsplit, urlunparse, unquote
 
 import requests
 
@@ -137,6 +137,7 @@ class OslcClient:
         self._status_counts: dict[str, int] = {}
         self._detail_request_count = 0
         self._last_iteration_pages = 0
+        self._auth_retry_used = False
 
     @property
     def last_iteration_pages(self) -> int:
@@ -182,7 +183,14 @@ class OslcClient:
         delay = self._config.rate_limit_seconds - (time.monotonic() - last_request)
         if delay > 0:
             time.sleep(delay)
-        url = path if path.startswith(("http://", "https://")) else self._config.base_url + path
+        base_path = urlsplit(self._config.base_url).path.rstrip("/")
+        if path.startswith(("http://", "https://")):
+            url = path
+        elif base_path and path.startswith(base_path + "/"):
+            base = urlsplit(self._config.base_url)
+            url = urlunsplit((base.scheme, base.netloc, path, "", ""))
+        else:
+            url = self._config.base_url + path
         # Maximo can return the web login shell (HTTP 200) when content
         # negotiation is omitted. OSLC calls must explicitly request JSON.
         self._business_request_count += 1
@@ -191,6 +199,7 @@ class OslcClient:
             url,
             headers={"Accept": "application/json"},
             timeout=self._config.timeout_seconds,
+            allow_redirects=False,
         )
         status = str(getattr(resp, "status_code", "unknown"))
         self._status_counts[status] = self._status_counts.get(status, 0) + 1
@@ -222,6 +231,7 @@ class OslcClient:
         max_pages: int = 1000,
         identity_field: str | None = None,
         strict_members: bool = False,
+        allow_resource_links: bool = True,
     ) -> Iterator[list[Mapping[str, Any]]]:
         """Paginate through an OSLC object structure (GET only).
 
@@ -282,13 +292,16 @@ class OslcClient:
             self._auth.ensure_logged_in()
             resp = self.get(url)
             if MaximoAuth.looks_expired(resp):
-                if retried_auth:
+                if retried_auth or self._auth_retry_used:
                     raise OslcAuthExpiredError(
                         f"Maximo session still unauthenticated after re-login: HTTP {resp.status_code}"
                     )
                 retried_auth = True
+                self._auth_retry_used = True
                 self._auth.handle_expiry()
-                continue  # retry the same url with the fresh session
+                seen_page_fingerprints.remove(page_fingerprint)
+                pages -= 1
+                continue  # retry exactly this page once; request budget still applies
             if resp.status_code == 403:
                 raise OslcError(f"Maximo returned HTTP 403 for {object_structure}; account lacks READ permission")
             resp.raise_for_status()
@@ -306,20 +319,30 @@ class OslcClient:
             page_ids: set[str] = set()
             for member in members:
                 if _is_resource_link(member):
+                    if not allow_resource_links:
+                        raise OslcError("resource-only payload refused for exact asset lookup")
                     resource_url = _normalize_next_page_url(
                         str(member["rdf:resource"]), self._config.base_url
                     )
                     if not resource_url:
                         raise OslcError("invalid resource link")
+                    if object_structure.lower() == "mxwodetail":
+                        _validate_wo_url(resource_url, self._config.base_url, base, detail=True)
                     resource_url = _add_detail_select(resource_url)
+                    if object_structure.lower() == "mxwodetail" and select:
+                        parsed = urlsplit(resource_url)
+                        query = [(k,v) for k,v in parse_qsl(parsed.query, keep_blank_values=True) if k.lower() != "oslc.select"]
+                        query.append(("oslc.select", ",".join(select)))
+                        resource_url = urlunsplit((parsed.scheme, parsed.netloc, parsed.path, urlencode(query), parsed.fragment))
                     self._detail_request_count += 1
                     detail = self.get(resource_url)
                     if MaximoAuth.looks_expired(detail):
-                        if retried_auth:
+                        if retried_auth or self._auth_retry_used:
                             raise OslcAuthExpiredError(
                                 "Maximo session expired while reading a resource link"
                             )
                         retried_auth = True
+                        self._auth_retry_used = True
                         self._auth.handle_expiry()
                         self._detail_request_count += 1
                         detail = self.get(resource_url)
@@ -345,8 +368,28 @@ class OslcClient:
             )
             previous_page_ids = page_ids
             next_url = _next_page_url(payload)
+            if next_url and next_url.startswith("?"):
+                next_url = urljoin(url, next_url)
             url = _normalize_next_page_url(next_url, self._config.base_url) or ""
+            if url and object_structure.lower() == "mxwodetail":
+                _validate_wo_url(url, self._config.base_url, base, detail=False)
             yield normalized_page
+
+
+def _validate_wo_url(url, base_url, collection, *, detail):
+    path = urlsplit(url).path
+    for _ in range(3):
+        decoded = unquote(path)
+        if decoded == path:
+            break
+        path = decoded
+    if "%" in path or "\\" in path or any(part in {".", ".."} for part in path.split("/")):
+        raise OslcError("ambiguous WO resource path")
+    path = path.rstrip("/").lower()
+    full = urlsplit(base_url.rstrip("/") + collection).path.rstrip("/").lower()
+    allowed = {collection.rstrip("/").lower(), full}
+    if not any(path.startswith(p + "/") if detail else path == p for p in allowed):
+        raise OslcError("WO link left its object scope")
 
 
 def _extract_members(payload: Any) -> list[Mapping[str, Any]]:
