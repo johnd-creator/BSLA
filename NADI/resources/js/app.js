@@ -1,3 +1,4 @@
+import { setupWorkspace } from './workspace-ui';
 import { setupPdmTime } from './pdm-time';
 
 document.querySelectorAll('[data-pdm-time]').forEach(setupPdmTime);
@@ -14,3 +15,5 @@ if (navigation) {
     syncNavigation();
     mobile.addEventListener('change', syncNavigation);
 }
+
+if (document.documentElement) setupWorkspace(document, window);

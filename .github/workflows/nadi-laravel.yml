@@ -1,10 +1,10 @@
 name: NADI Laravel
 on:
   pull_request:
-    paths: ['NADI/**', '.github/workflows/nadi-laravel.yml']
+    paths: ['NADI/**', 'deploy/compose/**', '.github/workflows/nadi-laravel.yml']
   push:
     branches: [main]
-    paths: ['NADI/**', '.github/workflows/nadi-laravel.yml']
+    paths: ['NADI/**', 'deploy/compose/**', '.github/workflows/nadi-laravel.yml']
 permissions:
   contents: read
 jobs:
@@ -42,4 +42,18 @@ jobs:
         run: |
           test ! -f resources/data/pdm-form-catalog.json
           test ! -f database/development.sqlite
+          git diff --exit-code
+  private-runtime-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Synthetic controller and fresh-clone checks only
+        run: python3 -m unittest discover -s deploy/compose/tests -v
+      - name: No private release files are published
+        run: |
+          test ! -f deploy/compose/runtime-images.lock.json
+          test ! -d .nadi-dev
           git diff --exit-code

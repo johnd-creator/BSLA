@@ -61,13 +61,14 @@ Status legend: ✅ verified on this instance · ⛔ forbidden (BMXAA0024E) · �
 | `scheduled_finish` | `schedfinish` | datetime | |
 | `target_completion` | `targcompdate` | datetime | |
 | `estimated_duration_hours` | `estdur` | number | |
-| `downtime_hours` | `downtime` | number | |
+| `downtime_hours` | — | number/null | NOT DERIVED from MXWODETAIL.downtime: the source field is a boolean indicator, not hours. Current Maximo adapter emits null. |
 | `priority` | `wopriority` | string | |
 | `priority_description` | `wopriority_description` | string | |
 | `reported_by` | `reportedby` | string | personid |
 | `supervisor` | `supervisor` | string | |
 | `lead` | `lead` | string | |
-| `failure_code` | `failurecode` | string | Retained direct scalar; MX-015A verified presence. Not a failure event, cause/remedy or verified Failure Code master relationship. |
+| `failure_code` | `failurecode` | string/null | Verified direct classification field; preserved through local Maintenance Mart. Not a governed failure occurrence or denominator. |
+| `sources.maximo.reliability_evidence` | `failurecode`, `problemcode`, `faildate`, `parent`, `origrecordclass`, `origrecordid`, `woclass`, `istask`, `haschildren`, `hasfollowupwork`, `downtime` | object | Typed, scoped, per-field source-version evidence only. Missing/invalid/naive clocks remain explicit. Parent/origin are not resolved or deduplicated; downtime is an indicator, not hours. |
 | `is_task` | `istask` | boolean | |
 | `parent_wo` | — | string/null | Unknown in current adapters; pctaskid/wogroup are not verified parent WO numbers. Null is not proof of no parent. |
 | `sources.maximo.hierarchy.source_fields` | `pctaskid`, `parent`, `wogroup` when actually returned | object | Allowlisted observations only, state UNKNOWN; no inferred hierarchy/sequence. Old stored values use `legacy_parent_wo` with unknown provenance. |

@@ -1,0 +1,17 @@
+.attention-table { table-layout: fixed; width: 100%; }
+.attention-table td { overflow-wrap: anywhere; vertical-align: top; }
+.attention-table th:first-child { width: 23%; }
+.attention-table td small { margin-top: 3px; }
+.attention-prose { white-space: pre-wrap; overflow-wrap: anywhere; }
+.attention-subheading { margin: 16px 0 8px; }
+.priority-urgency { font-weight: 600; color: var(--muted); }
+.urgency-immediate, .attention-overdue { color: #9a3412; }
+.attention-evidence, .attention-revision, .attention-coverage { padding: 10px 0; border-top: 1px solid var(--border); }
+.attention-evidence > .stack, .attention-revision > dl { margin-top: 12px; }
+.attention-secondary > summary { font-weight: 600; padding: 12px 16px; }
+.attention-secondary > section { margin: 8px 12px; }
+@media (max-width: 700px) {
+    .attention-table { min-width: 640px; }
+    .attention-secondary > section { margin: 8px 0; }
+    .attention-table .button { min-height: 44px; }
+}

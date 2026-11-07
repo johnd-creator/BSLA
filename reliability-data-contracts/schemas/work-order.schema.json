@@ -115,6 +115,116 @@
           "type": ["object", "null"],
           "description": "Verified mapping to mxwodetail (site BSR)",
           "properties": {
+            "reliability_evidence": {
+              "type": "object",
+              "description": "Allowlisted, scoped and versioned source observations only. No failure occurrence, failure timestamp, resolved origin/parent, restoration time, operating exposure or KPI is inferred.",
+              "required": [
+                "schema_version",
+                "semantics",
+                "identity",
+                "fields"
+              ],
+              "properties": {
+                "schema_version": {
+                  "const": 1
+                },
+                "semantics": {
+                  "const": "SOURCE_FIELDS_ONLY"
+                },
+                "identity": {
+                  "type": "object",
+                  "properties": {
+                    "wonum": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "assetnum": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "siteid": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "orgid": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "fields": {
+                  "type": "object",
+                  "propertyNames": {
+                    "enum": [
+                      "failurecode",
+                      "problemcode",
+                      "parent",
+                      "origrecordclass",
+                      "origrecordid",
+                      "woclass",
+                      "istask",
+                      "haschildren",
+                      "hasfollowupwork",
+                      "downtime",
+                      "faildate"
+                    ]
+                  },
+                  "additionalProperties": {
+                    "type": "object",
+                    "required": [
+                      "state",
+                      "value",
+                      "source_changed_at"
+                    ],
+                    "properties": {
+                      "state": {
+                        "enum": [
+                          "UNAVAILABLE",
+                          "MISSING",
+                          "INVALID",
+                          "NAIVE",
+                          "VALID",
+                          "OBSERVED"
+                        ]
+                      },
+                      "value": {
+                        "type": [
+                          "string",
+                          "boolean",
+                          "null"
+                        ],
+                        "maxLength": 200
+                      },
+                      "original": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 128
+                      },
+                      "source_changed_at": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "format": "date-time"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "additionalProperties": false
+            },
             "object_structure": {
               "type": ["string", "null"],
               "enum": ["MXWODETAIL", null]

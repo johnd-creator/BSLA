@@ -20,6 +20,7 @@ from src.adapters.maximo.mappers import (
     work_order_from_payload,
 )
 from src.adapters.maximo.oslc_client import ASSET_DETAIL_FIELDS
+from src.adapters.maximo.reliability_fields import DETAIL_FIELDS
 from src.config import MaximoConfig
 from src.repositories import models as orm
 from src.repositories.database import Database, get_database
@@ -34,6 +35,7 @@ WORK_ORDER_SELECT = (
     "wopriority_description", "reportedby", "supervisor", "lead", "failurecode", "istask",
     "pctaskid", "haschildren", "estlabcost", "estmatcost", "actlabcost", "actmatcost",
     "actlabhrs", "siteid", "orgid", "seksi", "bu", "jumlahhidup", "jumlahmati", "luasareatanam",
+    *DETAIL_FIELDS,
 )
 PERSON_SELECT = ("personid", "displayname", "firstname", "status", "statusdate", "locationorg")
 ASSET_SELECT = ASSET_DETAIL_FIELDS

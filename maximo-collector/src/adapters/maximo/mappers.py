@@ -8,6 +8,7 @@ Ported from the reliability-cockpit adapter (which this collector replaces).
 from __future__ import annotations
 
 from src.adapters.maximo.actual_dates import evidence as actual_date_evidence
+from src.adapters.maximo.reliability_fields import evidence as reliability_evidence
 
 from typing import Any, Mapping
 
@@ -151,7 +152,8 @@ def work_order_from_payload(member: Mapping[str, Any]) -> WorkOrder:
         scheduled_finish=oslc_timestamp(member.get("schedfinish")),
         target_completion=oslc_timestamp(member.get("targcompdate")),
         estimated_duration_hours=oslc_pop_number(member, "estdur"),
-        downtime_hours=oslc_pop_number(member, "downtime"),
+        # MXWODETAIL.downtime is a boolean indicator, not a duration.
+        downtime_hours=None,
         priority=oslc_pop_text(member, "wopriority"),
         priority_description=oslc_pop_text(member, "wopriority_description"),
         reported_by=oslc_pop_text(member, "reportedby"),
@@ -179,6 +181,7 @@ def work_order_from_payload(member: Mapping[str, Any]) -> WorkOrder:
                 "istask", "haschildren", "estlabcost", "estmatcost", "actlabcost", "actmatcost", "actlabhrs"}),
             "extra": _work_order_extra(member),
             "actual_dates": actual_date_evidence(member),
+            "reliability_evidence": reliability_evidence(member),
             "hierarchy": {
                 "schema_version": 1,
                 "parent_wo_state": "UNKNOWN",

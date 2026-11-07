@@ -44,6 +44,7 @@ class DataOverviewTest extends TestCase
     private function fake(?array $summary = null, int $backlog = 0): void
     {
         Http::fake([
+            'mart.test/v1/reliability/maintenance-investigation*' => Http::response([], 503),
             'mart.test/v1/reliability/assets/inventory-summary*' => fn () => Http::response($summary ?? $this->summary()),
             'mart.test/v1/reliability/maintenance-events*' => fn () => Http::response(['items' => [], 'meta' => ['offset' => 0, 'limit' => 10, 'total' => $backlog, 'has_more' => false]]),
         ]);
@@ -67,7 +68,7 @@ class DataOverviewTest extends TestCase
             $this->get('/reports')->assertOk()->assertSee('Unduh CSV')->assertSee('bukan laporan tren');
             $this->get('/reports/summary.csv')->assertOk()->assertDownload();
         }
-        Http::assertSentCount(32);
+        Http::assertSentCount(36);
         Http::assertNotSent(fn ($request) => $request->method() !== 'GET');
     }
 
@@ -77,7 +78,7 @@ class DataOverviewTest extends TestCase
         $this->signIn();
         $this->get('/')->assertOk()->assertSee('BSR / IP · hierarki CS01')->assertSee('BSR / IP · aset Registry · status WAPPR')
             ->assertSee('bukan total inspeksi unik')->assertSee('7 menunggu proyeksi');
-        Http::assertSentCount(2);
+        Http::assertSentCount(3);
         Http::assertSent(fn ($request) => str_contains($request->url(), 'inventory-summary') && $request->data() === ['site_code' => 'BSR', 'organization_code' => 'IP']);
         Http::assertSent(fn ($request) => str_contains($request->url(), 'maintenance-events') && $request->data() === ['status' => 'WAPPR', 'offset' => 0, 'limit' => 10, 'sort' => 'date_desc']);
     }

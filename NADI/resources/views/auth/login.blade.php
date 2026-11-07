@@ -10,11 +10,11 @@
                     @csrf
                     <div>
                         <label for="login">Username atau email</label>
-                        <input id="login" type="text" name="login" value="{{ old('login') }}" autocomplete="username" placeholder="Masukkan username atau email" required maxlength="254" autofocus @if($errors->has('login')) aria-invalid="true" @endif>
+                        <input id="login" type="text" name="login" value="{{ old('login') }}" autocomplete="username" placeholder="Masukkan username atau email" required maxlength="254" autofocus @error('login') aria-invalid="true" aria-describedby="error-login" @enderror><x-field-error name="login" />
                     </div>
                     <div>
                         <label for="password">Kata sandi</label>
-                        <input id="password" type="password" name="password" autocomplete="current-password" placeholder="Masukkan kata sandi" required maxlength="256">
+                        <input id="password" type="password" name="password" autocomplete="current-password" placeholder="Masukkan kata sandi" required maxlength="256" @error('password') aria-invalid="true" aria-describedby="error-password" @enderror><x-field-error name="password" />
                     </div>
                     <button class="button primary full" type="submit">Masuk</button>
                 </form>

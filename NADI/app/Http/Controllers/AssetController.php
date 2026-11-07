@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AssetDisruption;
 use App\Services\AssetIllustration;
 use App\Services\AssetTimeline;
 use App\Services\BsrAssetMapping;
+use App\Services\DisruptionLogbook;
 use App\Services\ReliabilityMart;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -70,7 +72,7 @@ class AssetController extends Controller
         return view('assets.timeline', compact('record', 'preview', 'asset'));
     }
 
-    public function show(string $asset, ReliabilityMart $mart, BsrAssetMapping $mapping, AssetIllustration $illustrations)
+    public function show(string $asset, ReliabilityMart $mart, BsrAssetMapping $mapping, AssetIllustration $illustrations, DisruptionLogbook $disruptions)
     {
         abort_if(strlen($asset) > 240 || str_contains($asset, '/') || str_contains($asset, '\\'), 404);
         try {
@@ -93,6 +95,9 @@ class AssetController extends Controller
         $draftMapping = $record ? $mapping->forAsset($record) : null;
         $illustration = $record ? $illustrations->forAsset($record) : null;
 
-        return view('assets.show', compact('record', 'draftMapping', 'illustration'));
+        $disruptionSummary = $disruptions->summary($asset);
+        $disruptionEvents = AssetDisruption::forAsset($asset)->where('status', 'recorded')->with(['members', 'author:id,name'])->orderByDesc('occurred_on')->orderByDesc('id')->limit(5)->get();
+
+        return view('assets.show', compact('record', 'draftMapping', 'illustration', 'disruptionSummary', 'disruptionEvents', 'asset'));
     }
 }

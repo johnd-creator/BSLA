@@ -168,9 +168,10 @@ def _work_order_payload(row: models.WorkOrderOrm) -> dict[str, Any] | None:
         "schedstart": row.scheduled_start.isoformat() if row.scheduled_start else None,
         "schedfinish": row.scheduled_finish.isoformat() if row.scheduled_finish else None,
         "changedate": _timestamp_value(row.source_changed_at),
-        "downtime": row.downtime_hours,
-        "actlabhrs": row.actual_labor_hours,
+        # Legacy numeric downtime may be a coerced source boolean. Never replay as hours.
         "failurecode": row.failure_code,
+        "collector_reliability_evidence": source.get("reliability_evidence"),
+        "actlabhrs": row.actual_labor_hours,
         "description": row.description,
         # Replay only scoped/versioned retained actual-clock evidence.
         "collector_actual_dates": proof,

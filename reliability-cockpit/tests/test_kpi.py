@@ -92,9 +92,12 @@ class KpiServiceTest(unittest.TestCase):
         by_metric = {k.metric: k for k in kpis}
 
         self.assertEqual(set(by_metric), {"MTBF", "MTTR", "AVAILABILITY", "PM_COMPLIANCE"})
-        self.assertEqual(by_metric["MTBF"].value, (744.0 - 20.0) / 2)
-        self.assertEqual(by_metric["MTTR"].value, 20.0 / 2)
-        self.assertAlmostEqual(by_metric["AVAILABILITY"].value, (744.0 - 20.0) / 744.0 * 100, places=6)
+        for metric in ("MTBF", "MTTR", "AVAILABILITY"):
+            self.assertIsNone(by_metric[metric].value)
+            self.assertEqual(by_metric[metric].inputs["readiness"], "NOT_READY")
+            self.assertNotIn("failures", by_metric[metric].inputs)
+            self.assertNotIn("total_operating_hours", by_metric[metric].inputs)
+            self.assertTrue(by_metric[metric].inputs["blockers"])
         self.assertEqual(by_metric["PM_COMPLIANCE"].value, 50.0)
 
     def test_compute_all_persists_and_filters_by_equipment(self):
@@ -123,7 +126,7 @@ class KpiServiceTest(unittest.TestCase):
         kpis = {k.metric: k for k in service.compute_for_equipment("A1", period)}
         self.assertIsNone(kpis["MTBF"].value)
         self.assertIsNone(kpis["MTTR"].value)
-        self.assertAlmostEqual(kpis["AVAILABILITY"].value, 100.0, places=6)
+        self.assertIsNone(kpis["AVAILABILITY"].value)
 
 
 if __name__ == "__main__":

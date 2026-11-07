@@ -16,6 +16,7 @@ from src.adapters.maximo.canonical_mappers import (
     rcfa_analysis_from_payload,
 )
 from src.adapters.maximo.oslc_client import OslcClient
+from src.adapters.maximo.reliability_fields import DETAIL_FIELDS
 from src.config import MaximoConfig
 from src.contracts.validator import ContractValidationError, validate_record
 from src.contracts.mapping_drift import assert_mapping_contract
@@ -65,7 +66,7 @@ CANONICAL_CONFIGS: dict[str, CanonicalSourceConfig] = {
     ),
     "mxwodetail": CanonicalSourceConfig(
         "mxwodetail", "maintenance_event", maintenance_event_from_payload,
-        select=("wonum", "assetnum", "siteid", "orgid", "status", "description", "worktype", "reportdate", "schedstart", "schedfinish", "actstart", "actfinish", "changedate", "downtime", "actlabhrs"),
+        select=("wonum", "assetnum", "siteid", "orgid", "status", "description", "worktype", "reportdate", "schedstart", "schedfinish", "actstart", "actfinish", "changedate", "downtime", "actlabhrs", "failurecode", "woclass", "istask", "haschildren", *DETAIL_FIELDS),
         prefix_field="wonum", order_by=None, page_size=25,
     ),
     "ipfmea": CanonicalSourceConfig(

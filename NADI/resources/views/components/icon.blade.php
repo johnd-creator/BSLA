@@ -1,6 +1,12 @@
 @props(['name'])
 <svg {{ $attributes->class(['icon']) }} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
     @switch($name)
+        @case('menu')
+            <path d="M4 6h16M4 12h16M4 18h16" />
+            @break
+        @case('search')
+            <circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 5 5" />
+            @break
         @case('home')
             <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z" />
             @break

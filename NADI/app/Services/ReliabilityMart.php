@@ -220,6 +220,69 @@ class ReliabilityMart
         return $context;
     }
 
+    /** Read-only repeat WO candidates. Fail closed on older or mismatched semantics. */
+    public function attentionCandidates(int $days = 90, int $offset = 0): array
+    {
+        if (! in_array($days, [30, 90, 180], true) || $offset < 0 || $offset > 1000000) {
+            throw new RuntimeException('Invalid candidate window.');
+        }
+        $data = $this->get('maintenance-investigation', ['window_days' => $days, 'min_events' => 2, 'offset' => $offset, 'limit' => 10, 'sort' => 'event_count_desc']);
+        $scope = $data['scope'] ?? [];
+        $meta = $data['meta'] ?? [];
+        $window = $data['window'] ?? [];
+        $activity = $data['activity_evidence'] ?? [];
+        if (($scope['site_code'] ?? null) !== 'BSR' || ($scope['organization_code'] ?? null) !== 'IP'
+            || ($scope['registry_scope'] ?? null) !== 'reliability_asset_registry'
+            || ($scope['interpretation'] ?? null) !== 'ACTIVITY_NOT_FAILURE'
+            || ($scope['date_basis'] ?? null) !== 'actual_start of CLOSE WO with verified actual clock and non-task evidence; no timestamp fallback'
+            || ($scope['timezone'] ?? null) !== 'Asia/Jakarta'
+            || ($scope['count_basis'] ?? null) !== 'One latest retained WO identity in BSR/IP and the governed Asset Registry; not incidents or labor actions'
+            || ($data['evidence']['repeat_failure'] ?? null) !== 'BUSINESS_SEMANTICS_REQUIRED'
+            || ($window['days'] ?? null) !== $days || ! is_string($window['start'] ?? null) || ! is_string($window['as_of'] ?? null)
+            || ! in_array($activity['availability'] ?? null, ['AVAILABLE', 'PARTIAL', 'UNAVAILABLE'], true)
+            || ! is_array($data['assets'] ?? null) || ! array_is_list($data['assets']) || count($data['assets']) > 10
+            || ! is_int($meta['total'] ?? null) || $meta['total'] < 0 || ($meta['offset'] ?? null) !== $offset
+            || ($meta['limit'] ?? null) !== 10 || ! is_bool($meta['has_more'] ?? null)
+            || $meta['has_more'] !== ($offset + count($data['assets']) < $meta['total'])
+            || count($data['assets']) !== min(10, max(0, $meta['total'] - $offset))) {
+            throw new RuntimeException('Unverified maintenance candidate scope.');
+        }
+        if ($activity['availability'] === 'UNAVAILABLE') {
+            throw new RuntimeException('Maintenance evidence is unavailable, not zero.');
+        }
+        foreach (['unknown_start_work_orders', 'unknown_task_work_orders', 'unknown_status_work_orders', 'duplicate_records_excluded'] as $field) {
+            if (! is_int($activity[$field] ?? null) || $activity[$field] < 0) {
+                throw new RuntimeException('Invalid candidate coverage.');
+            }
+        }
+        foreach (['start', 'as_of'] as $field) {
+            if (! preg_match('/^\d{4}-\d{2}-\d{2}T.*(?:Z|[+-]\d{2}:\d{2})$/', $window[$field]) || strtotime($window[$field]) === false) {
+                throw new RuntimeException('Invalid candidate clock.');
+            }
+        }
+        if (strtotime($window['start']) > strtotime($window['as_of'])) {
+            throw new RuntimeException('Invalid candidate window order.');
+        }
+        $seen = [];
+        $rows = [];
+        foreach ($data['assets'] as $row) {
+            if (! is_array($row) || ! is_string($row['asset_ref'] ?? null)
+                || ! str_starts_with($row['asset_ref'], 'asset:MAXIMO:MXASSET:BSR:IP:') || strlen($row['asset_ref']) > 240
+                || str_contains($row['asset_ref'], '/') || str_contains($row['asset_ref'], '\\') || isset($seen[$row['asset_ref']])
+                || ! is_string($row['source_asset_number'] ?? null) || ! is_int($row['event_count'] ?? null) || $row['event_count'] < 2
+                || (! is_null($row['description'] ?? null) && ! is_string($row['description']))
+                || ! is_string($row['latest_activity'] ?? null) || ! preg_match('/^\d{4}-\d{2}-\d{2}T.*(?:Z|[+-]\d{2}:\d{2})$/', $row['latest_activity'])
+                || strtotime($row['latest_activity']) === false || strtotime($row['latest_activity']) < strtotime($window['start']) || strtotime($row['latest_activity']) > strtotime($window['as_of'])) {
+                throw new RuntimeException('Invalid candidate identity or count.');
+            }
+            $seen[$row['asset_ref']] = true;
+            $rows[] = Arr::only($row, ['asset_ref', 'source_asset_number', 'description', 'event_count', 'latest_activity']);
+        }
+
+        return ['assets' => $rows, 'meta' => Arr::only($meta, ['total', 'offset', 'limit', 'has_more']), 'window' => Arr::only($window, ['days', 'start', 'as_of']),
+            'coverage' => Arr::only($activity, ['availability', 'unknown_start_work_orders', 'unknown_task_work_orders', 'unknown_status_work_orders', 'duplicate_records_excluded'])];
+    }
+
     public function waitingApproval(int $offset): array
     {
         $data = $this->get('maintenance-events', ['status' => 'WAPPR', 'offset' => $offset, 'limit' => 10, 'sort' => 'date_desc']);

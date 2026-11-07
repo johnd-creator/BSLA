@@ -19,6 +19,14 @@ LOG = logging.getLogger(__name__)
 PM_WORK_TYPE = "PM"
 COMPLETED_STATUSES = frozenset({"CLOSE", "CLOSED", "COMP", "COMPLETE", "COMPLETED"})
 
+# Work-order classification and calendar hours do not establish these inputs.
+# Pure formula helpers above/below remain usable with separately governed data.
+WORK_ORDER_KPI_BLOCKERS = {
+    "MTBF": ("FAILURE_OCCURRENCES_UNVERIFIED", "OPERATING_EXPOSURE_UNAVAILABLE"),
+    "MTTR": ("FAILURE_OCCURRENCES_UNVERIFIED", "RESTORATION_INTERVALS_UNAVAILABLE"),
+    "AVAILABILITY": ("OPERATING_EXPOSURE_UNAVAILABLE", "DOWNTIME_INTERVALS_UNAVAILABLE"),
+}
+
 
 def _kpi_id(equipment_id: str, metric: str, period_start: date, period_end: date) -> str:
     return f"{equipment_id}:{metric}:{period_start.isoformat()}:{period_end.isoformat()}"
@@ -146,17 +154,10 @@ def _in_period(reported_at: datetime | None, period: KpiPeriod) -> bool:
 def _aggregate(work_orders: list[WorkOrder], period: KpiPeriod) -> dict[str, float | int]:
     """Roll up the work-order facts that feed the KPI formulas."""
     in_period = [wo for wo in work_orders if _in_period(wo.reported_at, period)]
-    total_downtime_hours = sum(wo.downtime_hours or 0.0 for wo in in_period)
-    failures = sum(1 for wo in in_period if wo.failure_code)
     pm_orders = [wo for wo in in_period if (wo.work_type or "").upper() == PM_WORK_TYPE]
     pm_scheduled = len(pm_orders)
     pm_completed = sum(1 for wo in pm_orders if (wo.status or "").upper() in COMPLETED_STATUSES)
-    period_hours = period.total_hours
-    total_operating_hours = max(period_hours - total_downtime_hours, 0.0)
     return {
-        "failures": failures,
-        "total_downtime_hours": total_downtime_hours,
-        "total_operating_hours": total_operating_hours,
         "pm_scheduled": pm_scheduled,
         "pm_completed": pm_completed,
         "work_orders_in_period": len(in_period),
@@ -177,27 +178,16 @@ class KpiService:
         work_orders = self._store.list_work_orders(equipment_id=equipment_id, limit=10000)
         facts = _aggregate(work_orders, period)
         return [
-            compute_mtbf(
-                equipment_id,
-                failures=facts["failures"],
-                total_operating_hours=facts["total_operating_hours"],
-                period_start=period.start,
-                period_end=period.end,
-            ),
-            compute_mttr(
-                equipment_id,
-                total_downtime_hours=facts["total_downtime_hours"],
-                failures=facts["failures"],
-                period_start=period.start,
-                period_end=period.end,
-            ),
-            compute_availability(
-                equipment_id,
-                total_downtime_hours=facts["total_downtime_hours"],
-                total_operating_hours=facts["total_operating_hours"],
-                period_start=period.start,
-                period_end=period.end,
-            ),
+            *(ReliabilityKpi(
+                id=_kpi_id(equipment_id, metric, period.start, period.end),
+                equipment_id=equipment_id, metric=metric, value=None,
+                unit="percent" if metric == "AVAILABILITY" else "hours",
+                period_start=period.start, period_end=period.end,
+                computed_at=datetime.now(timezone.utc),
+                inputs={"readiness": "NOT_READY", "basis": "WORK_ORDER_ONLY",
+                        "blockers": list(blockers),
+                        "work_orders_in_period": facts["work_orders_in_period"]},
+            ) for metric, blockers in WORK_ORDER_KPI_BLOCKERS.items()),
             compute_pm_compliance(
                 equipment_id,
                 pm_scheduled=facts["pm_scheduled"],

@@ -14,6 +14,7 @@
     @if($summary === null)
         <p class="asset-summary-note">Ringkasan belum tersedia atau responsnya belum dapat diverifikasi. Angka tidak dihitung dari halaman daftar.</p>
     @else
+        <div class="source-context-line"><span class="badge neutral">{{ $summary['complete'] ? 'Pemindaian lengkap terakhir tersedia' : 'Cakupan belum lengkap' }}</span><span>Seluruh inventaris · tidak mengikuti filter daftar</span><details class="inline-disclosure"><summary>Cakupan & dasar kategori</summary><div>
         <p class="asset-summary-note">Total mencakup Equipment, Component, Part, <strong>{{ number_format($summary['system'], 0, ',', '.') }} System</strong>, dan <strong>{{ number_format($summary['unknown'], 0, ',', '.') }} belum dikategorikan</strong>. Kategori mengacu pada Excel engineer melalui ID sumber yang cocok tepat, bukan tipe aset Maximo atau kedalaman hierarki.</p>
         <p class="asset-summary-note">Seluruh inventaris dalam cakupan ini, tidak mengikuti filter atau halaman daftar.
             @if($summary['complete'])
@@ -24,6 +25,6 @@
                     {{ number_format($summary['pending_projection'], 0, ',', '.') }} aset masih menunggu proyeksi ke Mart.
                 @endif
             @endif
-        </p>
+        </p></div></details></div>
     @endif
 </section>

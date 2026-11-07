@@ -1,0 +1,28 @@
+.pdm-trend-intro { overflow-wrap: anywhere; }
+.pdm-trend-asset { padding: 8px 0; overflow-wrap: anywhere; }
+.pdm-trend-filters { margin-bottom: 10px; }
+.pdm-trend-filters > div { flex: 1; min-width: 0; }
+.pdm-trend-filters select { width: 100%; max-width: 100%; }
+.pdm-trend-panel .panel-heading { padding: 0 0 10px; flex-wrap: wrap; }
+.pdm-trend-panel .data-note + .data-note { margin-top: 6px; }
+.pdm-trend-chart { max-width: 900px; margin: 8px auto; }
+.pdm-trend-chart svg { display: block; width: 100%; height: auto; min-height: 160px; }
+.pdm-trend-axis { stroke: var(--border-strong); stroke-width: 1; }
+.pdm-trend-dot { fill: var(--accent); stroke: var(--accent); stroke-width: 2; vector-effect: non-scaling-stroke; }
+/* HTML labels retain readable pixels when the SVG scales on narrow screens. */
+.pdm-trend-range { display: flex; justify-content: space-between; gap: 12px; margin: 0; font-size: 12px; }
+.pdm-trend-range > div { min-width: 0; overflow-wrap: anywhere; }
+.pdm-trend-range > div:last-child { text-align: right; }
+.pdm-trend-range dt { color: var(--muted); }
+.pdm-trend-range dd { margin: 0; font-weight: 600; }
+.pdm-trend-dates { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; color: var(--muted); }
+.pdm-trend-help { margin-top: 8px; }
+.pdm-trend-evidence-link { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
+.pdm-trend-context summary { font-weight: 600; cursor: pointer; }
+.pdm-trend-context .detail-grid { margin-top: 12px; }
+.pdm-trend-context dd { overflow-wrap: anywhere; }
+@media (max-width: 700px) {
+    .pdm-trend-panel { padding: 12px; }
+    .pdm-trend-filters { display: flex; flex-wrap: wrap; }
+    .pdm-trend-filters > div { flex-basis: 100%; }
+}

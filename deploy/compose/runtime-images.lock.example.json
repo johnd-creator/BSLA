@@ -1,0 +1,11 @@
+{
+  "release": "your-reviewed-local-release",
+  "project": "your-existing-compose-project",
+  "images": {
+    "maximo-api": "REPLACE_WITH_VERIFIED_LOCAL_IMAGE_ID",
+    "maximo-worker": "REPLACE_WITH_VERIFIED_LOCAL_IMAGE_ID",
+    "mart-projector": "REPLACE_WITH_VERIFIED_LOCAL_IMAGE_ID",
+    "cockpit-api": "REPLACE_WITH_VERIFIED_LOCAL_IMAGE_ID",
+    "cockpit-worker": "REPLACE_WITH_VERIFIED_LOCAL_IMAGE_ID"
+  }
+}
