@@ -203,3 +203,25 @@ collector control endpoint and does not perform a production load.
 MX-011R can use these APIs after a controlled initial Mart load. That task may
 configure deployment credentials and operational readiness; it must not require
 an API redesign or knowledge of Maximo object-structure names.
+
+## Laravel read-only integration
+
+The additive inventory APIs distinguish collected hierarchy membership from
+governed Registry membership. Exact asset inventory reads and their WO histories
+do not register assets, acquire source records or write to source stores. Annual
+WO comparison uses explicit asset/population scope, unique WO identity and actual
+start-year buckets; unknown dates remain separate. Counts are records, not
+validated incidents, reliability scores or operating availability.
+
+Maintenance DTOs retain reviewed classification and allowlisted source detail.
+The added description is a scalar only. Final duration is recomputed exclusively
+for CLOSE with two valid explicit-zone actual timestamps; unknown, naive, reversed
+or incomplete clocks produce no duration. A legitimate equal timestamp pair is
+zero. Non-CLOSE has no final actual pair or final elapsed duration. Stored labor,
+downtime, report/schedule/status dates and old duration values are not substitutes.
+
+Overview responses add daily evidence, time-zone and counting-basis fields.
+Legacy DTO payloads may omit these additive fields; omission remains unknown.
+Record-change counts are not physical maintenance work. Existing integration,
+classification, scoped-read and source-detail routes remain available. No runtime
+activation or source-data publication is implied.

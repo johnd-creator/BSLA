@@ -30,7 +30,7 @@ from src.api.data_explorer import router as data_explorer_router
 WORK_ORDER_SELECT = (
     "wonum", "workorderid", "assetnum", "location", "status", "status_description",
     "worktype", "woclass", "description", "reportdate", "changedate", "statusdate",
-    "schedstart", "schedfinish", "targcompdate", "estdur", "downtime", "wopriority",
+    "schedstart", "schedfinish", "actstart", "actfinish", "targcompdate", "estdur", "downtime", "wopriority",
     "wopriority_description", "reportedby", "supervisor", "lead", "failurecode", "istask",
     "pctaskid", "haschildren", "estlabcost", "estmatcost", "actlabcost", "actmatcost",
     "actlabhrs", "siteid", "orgid", "seksi", "bu", "jumlahhidup", "jumlahmati", "luasareatanam",
@@ -61,7 +61,7 @@ OBJECTS: dict[str, dict[str, Any]] = {
         orm=orm.WorkOrderOrm, scope='siteid="BSR"', compare_column="source_changed_at",
         prefix_field="wonum", select=WORK_ORDER_SELECT, batch_size=100, page_size=25,
         prefix_query=True,
-        watermark_query=False, max_pages=20, recent_work_orders=True,
+        watermark_query=False, max_pages=20, recent_work_orders=True, work_order_lifecycle=True,
         cursor_requires_zero_errors=True,
     ),
     "mxapisr": dict(
@@ -126,6 +126,7 @@ def sync_config_for(object_structure: str) -> ObjectSyncConfig:
         prefix_query=spec.get("prefix_query", True),
         watermark_query=spec.get("watermark_query", True),
         recent_work_orders=spec.get("recent_work_orders", False),
+        work_order_lifecycle=spec.get("work_order_lifecycle", False),
         cursor_requires_zero_errors=spec.get("cursor_requires_zero_errors", True),
     )
 
@@ -155,6 +156,18 @@ def _serialize(row: Any) -> dict:
         # Python keyword; the public contract calls this field ``class``.
         key = "class" if column.name == "class_label" else column.name
         out[key] = _iso(value) if isinstance(value, datetime) else value
+    if isinstance(row, orm.WorkOrderOrm):
+        # Old rows may contain PCTASKID under parent_wo. Suppress an unproven
+        # relationship on read without rewriting the database or source JSON.
+        sources = dict(out["sources"]) if isinstance(out.get("sources"), dict) else {}
+        maximo = dict(sources["maximo"]) if isinstance(sources.get("maximo"), dict) else {}
+        hierarchy = dict(maximo["hierarchy"]) if isinstance(maximo.get("hierarchy"), dict) else {}
+        hierarchy.update(schema_version=1, parent_wo_state="UNKNOWN")
+        if out.get("parent_wo") is not None:
+            hierarchy["legacy_parent_wo"] = out["parent_wo"]
+        maximo["hierarchy"] = hierarchy
+        sources["maximo"] = maximo
+        out.update(parent_wo=None, sources=sources)
     return out
 
 
@@ -164,6 +177,11 @@ def create_app() -> FastAPI:
     runtime_config = MaximoConfig.from_environment()
     wo_prefixes = runtime_config.wo_prefixes
     equipment_unit = runtime_config.equipment_unit
+
+    @app.get("/equipment/coverage", tags=["equipment"])
+    def asset_coverage(store: CollectorStore = Depends(_store)) -> dict:
+        from src.repositories.asset_references import AssetReferenceStore
+        return AssetReferenceStore(store._db).coverage()
 
     @app.get("/health", tags=["system"])
     def health() -> dict:

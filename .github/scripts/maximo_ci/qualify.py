@@ -8,7 +8,8 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-REPOSITORY = "johnd-creator/reliability-knowledge-starter"
+# GitHub repository id 1339119929, renamed in place; retain an exact-name gate.
+REPOSITORY = "johnd-creator/BSLA"
 SHA = re.compile(r"[0-9a-f]{40}\Z")
 
 

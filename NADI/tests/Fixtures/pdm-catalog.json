@@ -1,0 +1,285 @@
+{
+  "schema_version": 3,
+  "state": "SYNTHETIC_TEST_FIXTURE",
+  "templates": [
+    {
+      "id": "SYNTHETIC_MOTOR",
+      "title": "SYNTHETIC PUMP · Vibrasi motor utama",
+      "method": "VIBRATION",
+      "source": {
+        "filename": "synthetic-pdm-example.xlsx",
+        "sheet": "SYNTHETIC SYNTHETIC_MOTOR",
+        "sha256": "2bea967345b30d47b9d2ed2f5a13911ccf4414cb2c3ec9ae8d2f655101003c03"
+      },
+      "status": "INPUT_DRAFT_UNVERIFIED",
+      "binding_status": "UNVERIFIED",
+      "review_notes": [
+        "Synthetic test fixture only. No source workbook, asset mapping, threshold or engineering approval."
+      ],
+      "candidates": [
+        {
+          "canonical_id": "asset:MAXIMO:MXASSET:BSR:IP:SYNTHETIC-PUMP-001",
+          "kks": "SYNTHETIC-PUMP-001",
+          "description": "Synthetic pump for offline tests"
+        }
+      ],
+      "source_mapping_id": "SYNTHETIC",
+      "field_extraction_status": "deterministic_source_layout",
+      "preview_only": false,
+      "fields": [
+        {
+          "key": "field_c3",
+          "label": "1V",
+          "group": "Synthetic test points",
+          "source_cell": "C3",
+          "unit": "mm/s",
+          "type": "number",
+          "note": "Synthetic fixture, not plant data."
+        },
+        {
+          "key": "field_d3",
+          "label": "1H",
+          "group": "Synthetic test points",
+          "source_cell": "D3",
+          "unit": "mm/s",
+          "type": "number",
+          "note": "Synthetic fixture, not plant data."
+        },
+        {
+          "key": "field_e3",
+          "label": "1A",
+          "group": "Synthetic test points",
+          "source_cell": "E3",
+          "unit": "mm/s",
+          "type": "number",
+          "note": "Synthetic fixture, not plant data."
+        },
+        {
+          "key": "field_f3",
+          "label": "2V",
+          "group": "Synthetic test points",
+          "source_cell": "F3",
+          "unit": "mm/s",
+          "type": "number",
+          "note": "Synthetic fixture, not plant data."
+        },
+        {
+          "key": "field_g3",
+          "label": "2H",
+          "group": "Synthetic test points",
+          "source_cell": "G3",
+          "unit": "mm/s",
+          "type": "number",
+          "note": "Synthetic fixture, not plant data."
+        },
+        {
+          "key": "field_h3",
+          "label": "2A",
+          "group": "Synthetic test points",
+          "source_cell": "H3",
+          "unit": "mm/s",
+          "type": "number",
+          "note": "Synthetic fixture, not plant data."
+        }
+      ]
+    },
+    {
+      "id": "SYNTHETIC_FAN",
+      "title": "SYNTHETIC PUMP · Vibrasi fan",
+      "method": "VIBRATION",
+      "source": {
+        "filename": "synthetic-pdm-example.xlsx",
+        "sheet": "SYNTHETIC SYNTHETIC_FAN",
+        "sha256": "2bea967345b30d47b9d2ed2f5a13911ccf4414cb2c3ec9ae8d2f655101003c03"
+      },
+      "status": "INPUT_DRAFT_UNVERIFIED",
+      "binding_status": "UNVERIFIED",
+      "review_notes": [
+        "Synthetic test fixture only. No source workbook, asset mapping, threshold or engineering approval."
+      ],
+      "candidates": [
+        {
+          "canonical_id": "asset:MAXIMO:MXASSET:BSR:IP:SYNTHETIC-PUMP-001",
+          "kks": "SYNTHETIC-PUMP-001",
+          "description": "Synthetic pump for offline tests"
+        }
+      ],
+      "source_mapping_id": "SYNTHETIC",
+      "field_extraction_status": "deterministic_source_layout",
+      "preview_only": false,
+      "fields": [
+        {
+          "key": "field_i3",
+          "label": "3V",
+          "group": "Synthetic test points",
+          "source_cell": "I3",
+          "unit": "mm/s",
+          "type": "number",
+          "note": "Synthetic fixture, not plant data."
+        },
+        {
+          "key": "field_j3",
+          "label": "3H",
+          "group": "Synthetic test points",
+          "source_cell": "J3",
+          "unit": "mm/s",
+          "type": "number",
+          "note": "Synthetic fixture, not plant data."
+        },
+        {
+          "key": "field_k3",
+          "label": "3A",
+          "group": "Synthetic test points",
+          "source_cell": "K3",
+          "unit": "mm/s",
+          "type": "number",
+          "note": "Synthetic fixture, not plant data."
+        },
+        {
+          "key": "field_l3",
+          "label": "4V",
+          "group": "Synthetic test points",
+          "source_cell": "L3",
+          "unit": "mm/s",
+          "type": "number",
+          "note": "Synthetic fixture, not plant data."
+        },
+        {
+          "key": "field_m3",
+          "label": "4H",
+          "group": "Synthetic test points",
+          "source_cell": "M3",
+          "unit": "mm/s",
+          "type": "number",
+          "note": "Synthetic fixture, not plant data."
+        },
+        {
+          "key": "field_n3",
+          "label": "4A",
+          "group": "Synthetic test points",
+          "source_cell": "N3",
+          "unit": "mm/s",
+          "type": "number",
+          "note": "Synthetic fixture, not plant data."
+        }
+      ]
+    },
+    {
+      "id": "SYNTHETIC_REVIEW",
+      "title": "SYNTHETIC PUMP · Kanal tambahan perlu review",
+      "method": "VIBRATION",
+      "source": {
+        "filename": "synthetic-pdm-example.xlsx",
+        "sheet": "SYNTHETIC SYNTHETIC_REVIEW",
+        "sha256": "2bea967345b30d47b9d2ed2f5a13911ccf4414cb2c3ec9ae8d2f655101003c03"
+      },
+      "status": "INPUT_DRAFT_UNVERIFIED",
+      "binding_status": "UNVERIFIED",
+      "review_notes": [
+        "Synthetic test fixture only. No source workbook, asset mapping, threshold or engineering approval."
+      ],
+      "candidates": [
+        {
+          "canonical_id": "asset:MAXIMO:MXASSET:BSR:IP:SYNTHETIC-PUMP-001",
+          "kks": "SYNTHETIC-PUMP-001",
+          "description": "Synthetic pump for offline tests"
+        }
+      ],
+      "source_mapping_id": "SYNTHETIC",
+      "field_extraction_status": "review_required",
+      "preview_only": true,
+      "fields": [
+        {
+          "key": "field_b2",
+          "label": "Unverified channel",
+          "group": "Synthetic test points",
+          "source_cell": "B2",
+          "unit": "mm/s",
+          "type": "number",
+          "note": "Synthetic fixture, not plant data."
+        }
+      ]
+    },
+    {
+      "id": "SYNTHETIC_UNKNOWN_UNIT",
+      "title": "SYNTHETIC PUMP · Unknown physical unit",
+      "method": "MCSA",
+      "source": {
+        "filename": "synthetic-pdm-example.xlsx",
+        "sheet": "SYNTHETIC SYNTHETIC_UNKNOWN_UNIT",
+        "sha256": "2bea967345b30d47b9d2ed2f5a13911ccf4414cb2c3ec9ae8d2f655101003c03"
+      },
+      "status": "INPUT_DRAFT_UNVERIFIED",
+      "binding_status": "UNVERIFIED",
+      "review_notes": [
+        "Synthetic test fixture only. No source workbook, asset mapping, threshold or engineering approval."
+      ],
+      "candidates": [
+        {
+          "canonical_id": "asset:MAXIMO:MXASSET:BSR:IP:SYNTHETIC-PUMP-001",
+          "kks": "SYNTHETIC-PUMP-001",
+          "description": "Synthetic pump for offline tests"
+        }
+      ],
+      "source_mapping_id": "SYNTHETIC",
+      "field_extraction_status": "deterministic_source_layout",
+      "preview_only": false,
+      "fields": [
+        {
+          "key": "field_b2",
+          "label": "RMS current",
+          "group": "Synthetic test points",
+          "source_cell": "B2",
+          "unit": null,
+          "type": "number",
+          "note": "Synthetic fixture, not plant data."
+        }
+      ]
+    },
+    {
+      "id": "SYNTHETIC_COPY",
+      "title": "SYNTHETIC PUMP · Separate workbook copy",
+      "method": "VIBRATION",
+      "source": {
+        "filename": "synthetic-copy.xlsx",
+        "sheet": "SYNTHETIC SYNTHETIC_COPY",
+        "sha256": "8ed65c8efd5b174620c8ac8e481c176a8f4dcabb0da74a7333c4d34702b65a05"
+      },
+      "status": "INPUT_DRAFT_UNVERIFIED",
+      "binding_status": "UNVERIFIED",
+      "review_notes": [
+        "Synthetic test fixture only. No source workbook, asset mapping, threshold or engineering approval."
+      ],
+      "candidates": [
+        {
+          "canonical_id": "asset:MAXIMO:MXASSET:BSR:IP:SYNTHETIC-PUMP-001",
+          "kks": "SYNTHETIC-PUMP-001",
+          "description": "Synthetic pump for offline tests"
+        }
+      ],
+      "source_mapping_id": "SYNTHETIC",
+      "field_extraction_status": "deterministic_source_layout",
+      "preview_only": false,
+      "fields": [
+        {
+          "key": "field_c3",
+          "label": "1V",
+          "group": "Synthetic test points",
+          "source_cell": "C3",
+          "unit": "mm/s",
+          "type": "number",
+          "note": "Synthetic fixture, not plant data."
+        },
+        {
+          "key": "field_d3",
+          "label": "1H",
+          "group": "Synthetic test points",
+          "source_cell": "D3",
+          "unit": "mm/s",
+          "type": "number",
+          "note": "Synthetic fixture, not plant data."
+        }
+      ]
+    }
+  ]
+}

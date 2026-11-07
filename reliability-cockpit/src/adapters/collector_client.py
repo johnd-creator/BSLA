@@ -107,6 +107,17 @@ def work_order_from_view(view: Mapping[str, Any]) -> WorkOrder:
         view["id"] = view.pop("wonum")
     if "work_type" not in view and "worktype" in view:
         view["work_type"] = view.pop("worktype")
+    if view.get("parent_wo") is not None:
+        # Older Collector versions used an unverified PCTASKID mapping. Keep
+        # the legacy observation quarantined, never as a resolved relationship.
+        sources = dict(view["sources"]) if isinstance(view.get("sources"), Mapping) else {}
+        maximo = dict(sources["maximo"]) if isinstance(sources.get("maximo"), Mapping) else {}
+        hierarchy = dict(maximo["hierarchy"]) if isinstance(maximo.get("hierarchy"), Mapping) else {}
+        hierarchy.update(schema_version=1, parent_wo_state="UNKNOWN", legacy_parent_wo=view["parent_wo"])
+        maximo["hierarchy"] = hierarchy
+        sources["maximo"] = maximo
+        view["sources"] = sources
+    view["parent_wo"] = None
     return _build(
         WorkOrder,
         dict(view),

@@ -59,7 +59,7 @@ The live JSON Schema /oslc/jsonschemas/MXWODETAIL returned HTTP 200 with title W
 | woclass | string | Present in 3/3 members | Raw Work Order class | VERIFIED; failure meaning unknown |
 | status | string | Present in 3/3 members | Raw lifecycle/status value | VERIFIED; failure meaning unknown |
 | istask | boolean | Present in 3/3 members | Task indicator | VERIFIED |
-| pctaskid | string | Present where returned | Parent/task reference candidate | VERIFIED; sequence rule unknown |
+| pctaskid | string | Present where returned | Unverified source business attribute; not a resolved parent WO | Technical presence VERIFIED; parent-number equivalence and sequence rule UNKNOWN (semantic audit 2026-11-05, no new live reads) |
 | haschildren | boolean | Present in 3/3 members | Child indicator | VERIFIED |
 | hasfollowupwork | boolean | Present in 3/3 members | Follow-up indicator | VERIFIED |
 | origrecordclass | string | Present in 2/3 members | Origin classification candidate | VERIFIED; duplicate/follow-up rule unknown |

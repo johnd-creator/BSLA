@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from src.repositories.maintenance_activity import ACTIVITY_TIMEZONE, ACTIVITY_DATE_BASIS, ACTIVITY_COUNT_BASIS
+
 from datetime import datetime
 import re
 from typing import Generic, Literal, TypeVar
@@ -13,6 +15,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from src.services.condition_query import AssetConditionEvidence, ConditionQueryService
 from src.services.asset_hierarchy import HierarchyView, read_hierarchy
 from src.domain.asset_af_mapping import AssetAfMapping
+from src.services.work_order_timing import execution_interval
 from src.repositories.mart_database import MartDatabase, MartDatabaseConfigError, get_mart_database
 from src.repositories.mart_reader import MartQueryRepository, QueryPage
 from src.services.asset_af_mapping import AssetAfMappingResolution
@@ -107,6 +110,8 @@ class MaintenanceSourceDetailView(BaseModel):
 
 
 class MaintenanceView(BaseModel):
+    description: str | None = None
+    actual_timing_state: str = "NOT_AVAILABLE"
     canonical_id: str
     contract_version: str
     id: str
@@ -343,12 +348,41 @@ class DataTrustView(BaseModel):
     limitations: list[str]
 
 
+class MaintenanceActivityEvidenceView(BaseModel):
+    availability: Literal["AVAILABLE", "PARTIAL", "UNAVAILABLE"]
+    retained_records: int
+    unique_work_orders: int
+    duplicate_records_excluded: int
+    unknown_identity_records: int
+    not_closed_work_orders: int
+    unknown_status_work_orders: int
+    task_work_orders_excluded: int
+    unknown_task_work_orders: int
+    unknown_source_scope_work_orders: int
+    closed_work_orders: int
+    closed_non_task_work_orders: int
+    verified_start_work_orders: int
+    verified_finish_work_orders: int
+    unknown_start_work_orders: int
+    unknown_finish_work_orders: int
+    invalid_actual_order_work_orders: int
+    interpretation: str
+
+class DailyMaintenanceActivityView(BaseModel):
+    date: str
+    started_work_orders: int
+    finished_work_orders: int
+    record_changed_work_orders: int
+
+
 class DecisionScopeView(BaseModel):
     site_code: Literal["BSR"]
     organization_code: Literal["IP"]
     registry_scope: str
     maintenance_source: str
     date_basis: str
+    timezone: str | None = None
+    count_basis: str | None = None
 
 
 class DataMaturityView(BaseModel):
@@ -404,6 +438,8 @@ class DecisionOverviewView(BaseModel):
     as_of: datetime
     summary: DecisionSummaryView
     maintenance_activity: list[ActivityTrendView]
+    daily_maintenance_activity: list[DailyMaintenanceActivityView] = Field(default_factory=list)
+    activity_evidence: MaintenanceActivityEvidenceView | None = None
     status_distribution: list[DistributionView]
     work_type_distribution: list[DistributionView]
     activity_concentration: list[ActivityConcentrationView]
@@ -657,6 +693,8 @@ class InvestigationScopeView(BaseModel):
     registry_scope: str
     date_basis: str
     interpretation: Literal["ACTIVITY_NOT_FAILURE"]
+    timezone: str | None = None
+    count_basis: str | None = None
 
 
 class InvestigationWindowView(BaseModel):
@@ -696,6 +734,7 @@ class InvestigationEvidenceView(BaseModel):
 
 
 class MaintenanceInvestigationView(BaseModel):
+    activity_evidence: MaintenanceActivityEvidenceView
     scope: InvestigationScopeView
     window: InvestigationWindowView
     summary: InvestigationSummaryView
@@ -802,10 +841,25 @@ def _maintenance(row) -> MaintenanceView:
         reported_at=clock("reportdate"), scheduled_start=clock("schedstart"),
         scheduled_finish=clock("schedfinish"),
     )
-    return MaintenanceView.model_validate({
-        **{k: getattr(row, k) for k in MaintenanceView.model_fields if k not in {"classification", "source_detail"}},
-        "classification": classification, "source_detail": detail,
-    })
+    values = {k: getattr(row, k, None) for k in MaintenanceView.model_fields}
+    sources = getattr(row, "sources", None)
+    source = sources.get("maximo") if isinstance(sources, dict) else None
+    source = source if isinstance(source, dict) else {}
+    description = source.get("description")
+    values["description"] = description if isinstance(description, str) else None
+    values.update(execution_interval(row.status, row.actual_start, row.actual_finish))
+    for name in ("START", "FINISH"):
+        if values["actual_timing_state"] == "MISSING_ACTUAL_" + name:
+            allowed = {state + "_ACTUAL_" + name for state in ("INVALID", "NAIVE", "UNAVAILABLE")}
+            if source.get("actual_timing_state") in allowed:
+                values["actual_timing_state"] = source["actual_timing_state"]
+            break
+    if row.status != "CLOSE":
+        values["actual_start"] = None
+        values["actual_finish"] = None
+        values["duration_hours"] = None
+    values.update(classification=classification, source_detail=detail)
+    return MaintenanceView.model_validate(values)
 
 
 def _fmea(row) -> FmeaView:
@@ -879,7 +933,9 @@ def _decision_overview(raw: dict[str, object], window_days: int) -> DecisionOver
             organization_code="IP",
             registry_scope="reliability_asset_registry",
             maintenance_source="Local Collector → Reliability Mart",
-            date_basis="COALESCE(actual_start, source_changed_at)",
+            date_basis=ACTIVITY_DATE_BASIS,
+            timezone=ACTIVITY_TIMEZONE,
+            count_basis=ACTIVITY_COUNT_BASIS,
         ),
         data_maturity=DataMaturityView(
             asset_maintenance="CURRENT LOCAL PROJECTION",
@@ -899,6 +955,8 @@ def _decision_overview(raw: dict[str, object], window_days: int) -> DecisionOver
             assets_active_30d=_evidence(int(summary["assets_active_30d"]), "DERIVED_SAFE"),
             assets_active_90d=_evidence(int(summary["assets_active_90d"]), "DERIVED_SAFE"),
         ),
+        activity_evidence=MaintenanceActivityEvidenceView(**raw["activity_evidence"]),
+        daily_maintenance_activity=[DailyMaintenanceActivityView(**row) for row in raw["daily_activity"]],
         maintenance_activity=[
             ActivityTrendView(
                 period_start=row["period_start"],
@@ -939,6 +997,7 @@ def _decision_overview(raw: dict[str, object], window_days: int) -> DecisionOver
 
 def _maintenance_investigation(raw: dict[str, object]) -> MaintenanceInvestigationView:
     return MaintenanceInvestigationView(
+        activity_evidence=MaintenanceActivityEvidenceView(**raw["activity_evidence"]),
         scope=InvestigationScopeView(**raw["scope"]),
         window=InvestigationWindowView(**raw["window"]),
         summary=InvestigationSummaryView(**raw["summary"]),
@@ -1017,6 +1076,46 @@ def _data_trust(raw: dict[str, object]) -> DataTrustView:
         integrity=IntegrityView(**raw["integrity"]),
         limitations=list(raw["limitations"]),
     )
+
+
+class InventoryAssetView(AssetView):
+    hierarchy_category: Literal["system", "equipment", "component", "part", "unknown"]
+    scope_basis: str
+    registered: bool
+
+
+def _inventory_asset(row):
+    asset,category,basis,registered = row
+    return InventoryAssetView(**_asset(asset).model_dump(), hierarchy_category=category,
+        scope_basis=basis, registered=registered)
+
+
+@router.get("/assets/inventory-summary", summary="All collected CS01 hierarchy assets, not Registry only")
+def asset_inventory_summary(service: ReliabilityQueryService = Depends(_service)):
+    from src.repositories.asset_inventory import InventoryQuery
+    return InventoryQuery(service.repository.database).summary()
+
+
+@router.get("/assets/inventory", response_model=Page[InventoryAssetView])
+def asset_inventory(
+    status: str | None = None, unit: str | None = None, asset_type: str | None = None,
+    category: Literal["system", "equipment", "component", "part", "unknown"] | None = None,
+    q: str | None = Query(None, max_length=120),
+    offset: int = Query(0,ge=0), limit: int = Query(50,ge=1,le=200),
+    sort: Literal["updated_desc", "updated_asc", "status"] = "updated_desc",
+    service: ReliabilityQueryService = Depends(_service),
+):
+    from src.repositories.asset_inventory import InventoryQuery
+    return _page(InventoryQuery(service.repository.database).list(offset=offset,limit=limit,
+        status=status,unit=unit,asset_type=asset_type,category=category,q=q,sort=sort),_inventory_asset)
+
+
+@router.get("/assets/inventory/{canonical_id}", response_model=InventoryAssetView)
+def inventory_asset(canonical_id: str, service: ReliabilityQueryService = Depends(_service)):
+    from src.repositories.asset_inventory import InventoryQuery
+    row=InventoryQuery(service.repository.database).get(canonical_id)
+    if row is None: raise HTTPException(status_code=404,detail="inventory asset not found")
+    return _inventory_asset(row)
 
 
 @router.get("/assets", response_model=Page[AssetView], summary="List Reliability Mart assets")
@@ -1186,6 +1285,16 @@ def maintenance_events(
     return _page(service.repository.list_maintenance(asset_ref=asset_ref, work_order_id=work_order_id, status=status, event_type=event_type, date_from=date_from, date_to=date_to, offset=offset, limit=limit, sort=sort), _maintenance)
 
 
+@router.get("/maintenance-events/{canonical_id:path}", response_model=MaintenanceView)
+def maintenance_event_detail(canonical_id: str, service: ReliabilityQueryService = Depends(_service)):
+    if len(canonical_id) > 200:
+        raise HTTPException(status_code=404, detail="work order not found")
+    page = service.repository.list_maintenance(canonical_id=canonical_id, limit=1)
+    if not page.items:
+        raise HTTPException(status_code=404, detail="work order not found")
+    return _maintenance(page.items[0])
+
+
 @router.get("/fmea", response_model=Page[FmeaView])
 def fmea(asset_ref: str | None = None, asset_number: str | None = None, lifecycle_status: str | None = None, source_number: str | None = None, source_failure_code: str | None = None, updated_from: datetime | None = None, updated_to: datetime | None = None, offset: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=200), sort: Literal["updated_desc", "updated_asc", "status"] = "updated_desc", service: ReliabilityQueryService = Depends(_service)):
     _validate_range(updated_from, updated_to)
@@ -1252,3 +1361,125 @@ def asset_integration_status(canonical_id: str):
         except SQLAlchemyError:
             pass
     return service.status(canonical_id)
+
+
+# Additive inventory-only WO read path. Existing Registry routes stay unchanged.
+class InventoryMaintenanceScope(BaseModel):
+    population: Literal["COLLECTED_HIERARCHY"] = "COLLECTED_HIERARCHY"
+    asset_ref: str
+    site_code: Literal["BSR"] = "BSR"
+    organization_code: Literal["IP"] = "IP"
+    date_basis: Literal["ACTUAL_START_OR_SOURCE_CHANGED"] = "ACTUAL_START_OR_SOURCE_CHANGED"
+
+
+class InventoryMaintenancePage(Page[MaintenanceView]):
+    scope: InventoryMaintenanceScope
+
+
+@router.get("/inventory-maintenance-events", response_model=InventoryMaintenancePage)
+def inventory_maintenance_events(
+    asset_ref: str = Query(..., min_length=1, max_length=200),
+    work_order_id: str | None = Query(None, max_length=200),
+    status: str | None = Query(None, max_length=80),
+    date_from: datetime | None = None, date_to: datetime | None = None,
+    offset: int = Query(0, ge=0, le=1000000), limit: int = Query(25, ge=1, le=200),
+    sort: Literal["date_desc", "date_asc", "status"] = "date_desc",
+    service: ReliabilityQueryService = Depends(_service),
+):
+    from src.repositories.asset_inventory import InventoryQuery
+    from src.repositories.inventory_work_orders import InventoryWorkOrderQuery
+
+    for clock in (date_from, date_to):
+        if clock is not None and (clock.tzinfo is None or clock.utcoffset() is None):
+            raise HTTPException(status_code=422, detail="date bounds require explicit time zones")
+    _validate_range(date_from, date_to)
+    database = service.repository.database
+    if InventoryQuery(database).get(asset_ref) is None:
+        raise HTTPException(status_code=404, detail="inventory asset not found")
+    page = InventoryWorkOrderQuery(database).list(asset_ref=asset_ref, work_order_id=work_order_id,
+        status=status, date_from=date_from, date_to=date_to, offset=offset, limit=limit, sort=sort)
+    return {**_page(page, _maintenance), "scope": InventoryMaintenanceScope(asset_ref=asset_ref)}
+
+
+# Full-population yearly WO context; availability remains a separate DCS-backed domain.
+class AnnualWorkOrderScope(BaseModel):
+    asset_ref: str
+    population: Literal["REGISTRY", "COLLECTED_HIERARCHY"]
+    site_code: Literal["BSR"] = "BSR"
+    organization_code: Literal["IP"] = "IP"
+    date_basis: Literal["ACTUAL_START"] = "ACTUAL_START"
+    time_zone: Literal["Asia/Jakarta"] = "Asia/Jakarta"
+    count_basis: Literal["UNIQUE_WORK_ORDER_ID"] = "UNIQUE_WORK_ORDER_ID"
+
+
+class AnnualWorkOrderCount(BaseModel):
+    value: str | None
+    count: int = Field(ge=0)
+
+
+class AnnualWorkOrderBucket(BaseModel):
+    year: int | None
+    work_orders: int = Field(ge=0)
+    work_types: list[AnnualWorkOrderCount]
+    statuses: list[AnnualWorkOrderCount]
+
+
+class AnnualWorkOrderCounts(BaseModel):
+    record_count: int = Field(ge=0)
+    work_order_count: int = Field(ge=0)
+    duplicate_work_order_count: int = Field(ge=0)
+    duplicate_record_count: int = Field(ge=0)
+    missing_identity_record_count: int = Field(ge=0)
+    dated_work_order_count: int = Field(ge=0)
+    unknown_date_work_order_count: int = Field(ge=0)
+
+
+class AnnualWorkOrderSummary(BaseModel):
+    scope: AnnualWorkOrderScope
+    counts: AnnualWorkOrderCounts
+    years: list[AnnualWorkOrderBucket]
+    unknown_year: AnnualWorkOrderBucket
+    availability_state: Literal["REQUIRES_VALIDATED_DCS_HISTORY"] = "REQUIRES_VALIDATED_DCS_HISTORY"
+
+
+class AnnualWorkOrderPage(Page[MaintenanceView]):
+    scope: AnnualWorkOrderScope
+    selected_year: str
+
+
+def _annual_query(service):
+    from src.repositories.annual_work_orders import AnnualWorkOrderQuery
+    return AnnualWorkOrderQuery(service.repository.database)
+
+
+@router.get("/asset-work-orders/annual-summary", response_model=AnnualWorkOrderSummary)
+def annual_work_order_summary(
+    asset_ref: str = Query(..., min_length=1, max_length=200),
+    population: Literal["REGISTRY", "COLLECTED_HIERARCHY"] = "REGISTRY",
+    service: ReliabilityQueryService = Depends(_service),
+):
+    try:
+        result = _annual_query(service).summary(asset_ref=asset_ref, population=population)
+    except LookupError:
+        raise HTTPException(status_code=404, detail="asset not found in requested WO scope")
+    except RuntimeError:
+        raise HTTPException(status_code=503, detail="annual WO summary unavailable")
+    return {**result, "scope": AnnualWorkOrderScope(asset_ref=asset_ref, population=population)}
+
+
+@router.get("/asset-work-orders/year", response_model=AnnualWorkOrderPage)
+def annual_work_orders(
+    asset_ref: str = Query(..., min_length=1, max_length=200),
+    year: str = Query(..., pattern=r"^(unknown|[1-9][0-9]{0,3})$"),
+    population: Literal["REGISTRY", "COLLECTED_HIERARCHY"] = "REGISTRY",
+    status: str | None = Query(None, max_length=80),
+    offset: int = Query(0, ge=0, le=1000000), limit: int = Query(25, ge=1, le=200),
+    sort: Literal["date_desc", "date_asc"] = "date_desc",
+    service: ReliabilityQueryService = Depends(_service),
+):
+    try:
+        page = _annual_query(service).list_year(asset_ref=asset_ref, population=population,
+            year=year, status=status, offset=offset, limit=limit, sort=sort)
+    except LookupError:
+        raise HTTPException(status_code=404, detail="asset not found in requested WO scope")
+    return {**_page(page, _maintenance), "scope": AnnualWorkOrderScope(asset_ref=asset_ref, population=population), "selected_year": year}

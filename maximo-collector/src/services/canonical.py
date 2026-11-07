@@ -65,7 +65,7 @@ CANONICAL_CONFIGS: dict[str, CanonicalSourceConfig] = {
     ),
     "mxwodetail": CanonicalSourceConfig(
         "mxwodetail", "maintenance_event", maintenance_event_from_payload,
-        select=("wonum", "assetnum", "siteid", "orgid", "status", "worktype", "reportdate", "schedstart", "schedfinish", "actstart", "actfinish", "changedate", "downtime", "actlabhrs"),
+        select=("wonum", "assetnum", "siteid", "orgid", "status", "description", "worktype", "reportdate", "schedstart", "schedfinish", "actstart", "actfinish", "changedate", "downtime", "actlabhrs"),
         prefix_field="wonum", order_by=None, page_size=25,
     ),
     "ipfmea": CanonicalSourceConfig(
@@ -128,6 +128,8 @@ class CanonicalCollector:
         if max_pages is not None and max_pages < 1:
             raise ValueError("canonical max_pages must be at least 1")
         config = canonical_config_for(name, self._runtime_config)
+        if config.object_structure.lower() == "mxwodetail":
+            raise ValueError("Collect WOs through the lifecycle collector, then project the local store")
         result = CanonicalCollection(config.canonical_entity)
         # MX-008S intentionally means one page when only max_records is given.
         # A caller must opt into multi-page traversal explicitly.

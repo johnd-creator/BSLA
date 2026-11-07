@@ -259,7 +259,7 @@
     "status": ["STATUS"],
     "worktype": ["BUSINESS_ATTRIBUTE"],
     "woclass": ["BUSINESS_ATTRIBUTE"],
-    "pctaskid": ["PARENT_REFERENCE"],
+    "pctaskid": ["BUSINESS_ATTRIBUTE"],
     "haschildren": ["BUSINESS_ATTRIBUTE"],
     "hasfollowupwork": ["BUSINESS_ATTRIBUTE"],
     "origrecordclass": ["BUSINESS_ATTRIBUTE"],
@@ -301,8 +301,8 @@
     },
     {
       "field": "pctaskid",
-      "roles": ["PARENT_REFERENCE"],
-      "evidence": "Field is present in the live schema and in bounded members where returned; parent/task semantics remain source semantics."
+      "roles": ["BUSINESS_ATTRIBUTE"],
+      "evidence": "Field is present in the live schema and in bounded members where returned. Semantic audit 2026-11-05: equivalence to parent WO number or task sequence is UNKNOWN; the earlier PARENT_REFERENCE classification was not sufficient evidence. No new live verification was performed."
     }
   ],
   "field_candidates": [

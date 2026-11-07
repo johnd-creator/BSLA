@@ -7,9 +7,11 @@ never constructs a Maximo client and never changes a Maximo SyncCursor.
 
 from __future__ import annotations
 
+from src.adapters.maximo.actual_dates import retained_values
+
 import os
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -58,6 +60,7 @@ class ProjectionReport:
     null_source_changed_at: int = 0
     watermark: datetime | None = None
     completed: bool = False
+    started_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -141,6 +144,13 @@ def _work_order_payload(row: models.WorkOrderOrm) -> dict[str, Any] | None:
     equipment_id = normalize_identifier(row.equipment_id)
     if not equipment_id:
         return None
+    proof = (row.sources or {}).get("maximo", {}).get("actual_dates")
+    actual = retained_values(proof, row.id, equipment_id, row.source_changed_at) if row.status == "CLOSE" else {}
+    source = (row.sources or {}).get("maximo") or {}
+    # Explicit contradicting scope is never repaired by an asset join.
+    if any(source.get(key) not in (None, expected) for key, expected in (("siteid", SITE_CODE), ("orgid", ORGANIZATION_CODE))):
+        return None
+    direct_scope = source.get("siteid") == SITE_CODE and source.get("orgid") == ORGANIZATION_CODE
     # Only approved scalar fields are reconstructed.  Person fields and raw
     # source JSON are intentionally excluded from the canonical payload.
     return {
@@ -149,6 +159,8 @@ def _work_order_payload(row: models.WorkOrderOrm) -> dict[str, Any] | None:
         "siteid": SITE_CODE,
         "orgid": ORGANIZATION_CODE,
         "status": row.status,
+        "istask": row.is_task,
+        "collector_scope_evidence": "DIRECT_SOURCE" if direct_scope else "LEGACY_ASSET_JOIN_UNVERIFIED_WO_SCOPE",
         "worktype": row.work_type,
         # New retained source clocks keep uncertainty in disposable/naive stores.
         # Existing source_changed_at normalization is outside this correction.
@@ -159,9 +171,11 @@ def _work_order_payload(row: models.WorkOrderOrm) -> dict[str, Any] | None:
         "downtime": row.downtime_hours,
         "actlabhrs": row.actual_labor_hours,
         "failurecode": row.failure_code,
-        # The local operational schema does not retain actstart/actfinish.
-        "actstart": None,
-        "actfinish": None,
+        "description": row.description,
+        # Replay only scoped/versioned retained actual-clock evidence.
+        "collector_actual_dates": proof,
+        "actstart": actual.get("actstart"),
+        "actfinish": actual.get("actfinish"),
     }
 
 
@@ -201,7 +215,7 @@ class CollectorMartProjector:
                     projection_key=report.projection_key,
                     watermark=report.watermark,
                     last_status="SUCCEEDED",
-                    last_success_at=now,
+                    last_success_at=report.started_at,
                     rows_seen=report.rows_seen,
                     rows_written=report.rows_written,
                     updated_at=now,
@@ -210,7 +224,7 @@ class CollectorMartProjector:
             else:
                 state.watermark = report.watermark
                 state.last_status = "SUCCEEDED"
-                state.last_success_at = now
+                state.last_success_at = report.started_at
                 state.rows_seen = report.rows_seen
                 state.rows_written = report.rows_written
                 state.updated_at = now
@@ -264,19 +278,32 @@ class CollectorMartProjector:
         report = ProjectionReport(projection_key, mode)
         model = models.EquipmentOrm if projection_key == "asset_master" else models.WorkOrderOrm
         equipment_ids = self._equipment_ids() if projection_key == "maintenance_event" else set()
-        offset = 0
+        last_id = None
         while True:
             with self.collector_db.session() as session:
-                statement = select(model).order_by(model.id).offset(offset).limit(self.batch_size)
+                statement = select(model).order_by(model.id).limit(self.batch_size)
+                if last_id is not None:
+                    statement = statement.where(model.id > last_id)
                 if incremental and previous and previous.watermark:
                     lower = previous.watermark - self.overlap
-                    statement = statement.where(
-                        or_(model.source_changed_at.is_(None), model.source_changed_at >= lower)
-                    )
+                    changed = [model.source_changed_at.is_(None), model.source_changed_at >= lower]
+                    if previous.last_success_at:
+                        local_lower = previous.last_success_at
+                        if local_lower.tzinfo is None:
+                            local_lower = local_lower.replace(tzinfo=timezone.utc)
+                        local_lower = (local_lower - self.overlap).astimezone(timezone.utc).isoformat()
+                        changed.append(model.sources["maximo"]["collector_updated_at"].as_string() >= local_lower)
+                        if projection_key == "maintenance_event":
+                            # Old retained WOs skipped for a missing asset become
+                            # projectable when that exact asset arrives locally.
+                            recovered = select(models.EquipmentOrm.id).where(
+                                models.EquipmentOrm.sources["maximo"]["collector_updated_at"].as_string() >= local_lower)
+                            changed.append(model.equipment_id.in_(recovered))
+                    statement = statement.where(or_(*changed))
                 rows = list(session.scalars(statement).all())
             if not rows:
                 break
-            offset += len(rows)
+            last_id = rows[-1].id
             records: list[dict[str, Any]] = []
             for row in rows:
                 report.rows_seen += 1

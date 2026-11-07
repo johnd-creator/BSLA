@@ -5,6 +5,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any, TypeVar
+from zoneinfo import ZoneInfo
+
+from src.repositories.maintenance_activity import (
+    ACTIVITY_TIMEZONE, ACTIVITY_DATE_BASIS, ACTIVITY_COUNT_BASIS,
+    current_utc, calendar_start, latest_registered_work_orders, activity_evidence, daily_activity,
+)
 
 from sqlalchemy import Select, String, asc, case, cast, desc, func, literal, select
 
@@ -194,6 +200,7 @@ class MartQueryRepository:
     def list_maintenance(
         self,
         *,
+        canonical_id: str | None = None,
         asset_ref: str | None = None,
         work_order_id: str | None = None,
         status: str | None = None,
@@ -213,6 +220,8 @@ class MartQueryRepository:
             ),
             MaintenanceEventMart,
         )
+        if canonical_id:
+            statement = statement.where(MaintenanceEventMart.canonical_id == canonical_id)
         if asset_ref:
             statement = statement.where(MaintenanceEventMart.equipment_id == asset_ref)
         if work_order_id:
@@ -827,7 +836,7 @@ class MartQueryRepository:
             OverhaulEventMart.site_code == SITE_CODE,
             OverhaulEventMart.organization_code == ORGANIZATION_CODE,
         )
-        maintenance_date = func.coalesce(MaintenanceEventMart.actual_start, MaintenanceEventMart.source_changed_at)
+        maintenance_date = MaintenanceEventMart.source_changed_at
         overhaul_date = func.coalesce(OverhaulEventMart.source_updated_at, OverhaulEventMart.source_created_at)
         population_statement = select(
             select(func.count(ReliabilityAssetRegistryMart.asset_ref)).where(*registry_scope).scalar_subquery().label("registered_assets"),
@@ -904,8 +913,8 @@ class MartQueryRepository:
                 "business_scope": "Registry-scoped Maintenance Events",
                 "relationship_state": "Direct Registry scope verified",
                 "latest_record_date": population["maintenance_latest"],
-                "date_basis": "COALESCE(actual_start, source_changed_at)",
-                "known_limitation": "Latest activity evidence is not a sync freshness or failure-rate measure.",
+                "date_basis": "source_changed_at (record modification only)",
+                "known_limitation": "Record changes are not execution, daily maintenance activity, sync freshness or failures.",
                 "evidence_class": "VERIFIED",
             },
             {
@@ -1100,40 +1109,30 @@ class MartQueryRepository:
         """
         if window_days not in {7, 30, 90}:
             raise ValueError("window_days must be one of 7, 30, or 90")
-        current = as_of or datetime.now(timezone.utc)
-        if current.tzinfo is None:
-            current = current.replace(tzinfo=timezone.utc)
-        window_start = current - timedelta(days=window_days)
-        date_column = func.coalesce(MaintenanceEventMart.actual_start, MaintenanceEventMart.source_changed_at)
-        maintenance_scope = (
-            select(MaintenanceEventMart)
-            .join(ReliabilityAssetRegistryMart, ReliabilityAssetRegistryMart.asset_ref == MaintenanceEventMart.equipment_id)
-            .where(
-                MaintenanceEventMart.site_code == SITE_CODE,
-                MaintenanceEventMart.organization_code == ORGANIZATION_CODE,
-                ReliabilityAssetRegistryMart.site_code == SITE_CODE,
-                ReliabilityAssetRegistryMart.organization_code == ORGANIZATION_CODE,
-            )
-        ).subquery()
-        scoped_date = func.coalesce(maintenance_scope.c.actual_start, maintenance_scope.c.source_changed_at)
+        current = current_utc(as_of or datetime.now(timezone.utc))
+        window_start = calendar_start(current, window_days)
+        maintenance_scope = latest_registered_work_orders(self.database)
+        scoped_date = maintenance_scope.c.activity_start
 
-        week_start = datetime(current.year, current.month, current.day, tzinfo=current.tzinfo) - timedelta(days=current.weekday())
-        trend_starts = [week_start - timedelta(weeks=offset) for offset in range(11, -1, -1)]
+        local_current = current.astimezone(ZoneInfo(ACTIVITY_TIMEZONE))
+        week_start = local_current.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=local_current.weekday())
+        trend_starts = [(week_start - timedelta(weeks=offset)).astimezone(timezone.utc) for offset in range(11, -1, -1)]
         trend_counts = [
             func.count(maintenance_scope.c.canonical_id).filter(
                 scoped_date >= start,
                 scoped_date < start + timedelta(weeks=1),
+                scoped_date <= current,
             ).label(f"week_{index}")
             for index, start in enumerate(trend_starts)
         ]
 
         summary_statement = select(
-            func.count(maintenance_scope.c.canonical_id).filter(scoped_date >= current - timedelta(days=7), scoped_date <= current).label("maintenance_7d"),
-            func.count(maintenance_scope.c.canonical_id).filter(scoped_date >= current - timedelta(days=30), scoped_date <= current).label("maintenance_30d"),
-            func.count(maintenance_scope.c.canonical_id).filter(scoped_date >= current - timedelta(days=90), scoped_date <= current).label("maintenance_90d"),
-            func.count(func.distinct(maintenance_scope.c.equipment_id)).filter(scoped_date >= current - timedelta(days=7), scoped_date <= current).label("assets_active_7d"),
-            func.count(func.distinct(maintenance_scope.c.equipment_id)).filter(scoped_date >= current - timedelta(days=30), scoped_date <= current).label("assets_active_30d"),
-            func.count(func.distinct(maintenance_scope.c.equipment_id)).filter(scoped_date >= current - timedelta(days=90), scoped_date <= current).label("assets_active_90d"),
+            func.count(maintenance_scope.c.canonical_id).filter(scoped_date >= calendar_start(current, 7), scoped_date <= current).label("maintenance_7d"),
+            func.count(maintenance_scope.c.canonical_id).filter(scoped_date >= calendar_start(current, 30), scoped_date <= current).label("maintenance_30d"),
+            func.count(maintenance_scope.c.canonical_id).filter(scoped_date >= calendar_start(current, 90), scoped_date <= current).label("maintenance_90d"),
+            func.count(func.distinct(maintenance_scope.c.equipment_id)).filter(scoped_date >= calendar_start(current, 7), scoped_date <= current).label("assets_active_7d"),
+            func.count(func.distinct(maintenance_scope.c.equipment_id)).filter(scoped_date >= calendar_start(current, 30), scoped_date <= current).label("assets_active_30d"),
+            func.count(func.distinct(maintenance_scope.c.equipment_id)).filter(scoped_date >= calendar_start(current, 90), scoped_date <= current).label("assets_active_90d"),
         )
         status_value = func.coalesce(maintenance_scope.c.status, "UNKNOWN")
         raw_work_type = _raw_work_type(maintenance_scope.c.sources)
@@ -1227,6 +1226,8 @@ class MartQueryRepository:
         record_values = records._mapping
         return {
             "registered_assets": registered_assets,
+            "activity_evidence": activity_evidence(self.database, maintenance_scope),
+            "daily_activity": daily_activity(self.database, maintenance_scope, current=current, days=window_days),
             "summary": {
                 "maintenance_activity_7d": int(summary_values["maintenance_7d"] or 0),
                 "maintenance_activity_30d": int(summary_values["maintenance_30d"] or 0),
@@ -1766,35 +1767,21 @@ class MartQueryRepository:
         if sort not in {"event_count_desc", "latest_activity_desc", "latest_gap_asc"}:
             raise ValueError("unsupported maintenance investigation sort")
 
-        current = as_of or datetime.now(timezone.utc)
-        if current.tzinfo is None:
-            current = current.replace(tzinfo=timezone.utc)
-        window_start = current - timedelta(days=window_days)
-        activity_date = func.coalesce(MaintenanceEventMart.actual_start, MaintenanceEventMart.source_changed_at)
-        raw_work_type = _raw_work_type(MaintenanceEventMart.sources)
-        canonical_work_type = func.nullif(func.trim(MaintenanceEventMart.event_type), "")
+        current = current_utc(as_of or datetime.now(timezone.utc))
+        window_start = calendar_start(current, window_days)
+        work_orders = latest_registered_work_orders(self.database)
+        activity_date = work_orders.c.activity_start
+        raw_work_type = _raw_work_type(work_orders.c.sources)
+        canonical_work_type = func.nullif(func.trim(work_orders.c.event_type), "")
         work_type = func.coalesce(raw_work_type, canonical_work_type, "UNKNOWN")
 
-        scoped = (
-            select(
-                MaintenanceEventMart.equipment_id.label("asset_ref"),
-                ReliabilityAssetRegistryMart.source_asset_number.label("source_asset_number"),
-                MaintenanceEventMart.canonical_id.label("event_ref"),
-                activity_date.label("activity_date"),
-                work_type.label("work_type"),
-            )
-            .join(ReliabilityAssetRegistryMart, ReliabilityAssetRegistryMart.asset_ref == MaintenanceEventMart.equipment_id)
-            .where(
-                MaintenanceEventMart.site_code == SITE_CODE,
-                MaintenanceEventMart.organization_code == ORGANIZATION_CODE,
-                ReliabilityAssetRegistryMart.site_code == SITE_CODE,
-                ReliabilityAssetRegistryMart.organization_code == ORGANIZATION_CODE,
-                activity_date >= window_start,
-                activity_date <= current,
-                activity_date.is_not(None),
-            )
-            .subquery()
-        )
+        scoped = select(
+            work_orders.c.equipment_id.label("asset_ref"),
+            work_orders.c.source_asset_number,
+            work_orders.c.work_order_key.label("event_ref"),
+            activity_date.label("activity_date"),
+            work_type.label("work_type"),
+        ).where(activity_date >= window_start, activity_date <= current).subquery()
         latest_rank = func.row_number().over(
             partition_by=scoped.c.asset_ref,
             order_by=(desc(scoped.c.activity_date), desc(scoped.c.event_ref)),
@@ -1900,9 +1887,12 @@ class MartQueryRepository:
                 "site_code": SITE_CODE,
                 "organization_code": ORGANIZATION_CODE,
                 "registry_scope": "reliability_asset_registry",
-                "date_basis": "COALESCE(actual_start, source_changed_at)",
+                "date_basis": ACTIVITY_DATE_BASIS,
+                "timezone": ACTIVITY_TIMEZONE,
+                "count_basis": ACTIVITY_COUNT_BASIS,
                 "interpretation": "ACTIVITY_NOT_FAILURE",
             },
+            "activity_evidence": activity_evidence(self.database, work_orders),
             "window": {"days": window_days, "start": window_start, "as_of": current},
             "summary": {key: int(summary[key] or 0) for key in summary.keys()},
             "assets": assets,
@@ -1910,7 +1900,7 @@ class MartQueryRepository:
             "evidence": {
                 "repeat_activity": "DERIVED_SAFE",
                 "work_type_source": "sources.maximo.worktype → event_type → UNKNOWN",
-                "activity_date": "Activity date uses actual start when available, otherwise source change time.",
+                "activity_date": ACTIVITY_DATE_BASIS,
                 "repeat_failure": "BUSINESS_SEMANTICS_REQUIRED",
             },
         }

@@ -25,6 +25,7 @@
       "enum": ["CM", "PM", "INSPECTION", "CALIBRATION", "REPAIR", "EMERGENCY", null],
       "description": "CM=corrective, PM=preventive, etc."
     },
+    "description": {"type": ["string", "null"], "description": "Retained work order description; no personnel or raw source payload."},
     "status": {
       "type": ["string", "null"],
       "description": "Completion status e.g. CLOSE, COMP, WAPPR"
@@ -39,7 +40,7 @@
     },
     "duration_hours": {
       "type": ["number", "null"],
-      "description": "Realized execution duration (actual_finish - actual_start)"
+      "description": "Elapsed hours from valid timezone-aware actual_finish minus actual_start for CLOSE work orders; never status/schedule dates, labor effort or equipment downtime"
     },
     "labor_hours": {
       "type": ["number", "null"]

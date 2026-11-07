@@ -10,6 +10,8 @@ from src.adapters.maximo.oslc_client import (
     OslcRequestBudgetExceeded, oslc_timestamp,
 )
 from src.services.sync import SyncStats
+from src.services.workorder_age import eligibility, window
+from src.services.workorder_policy import SUMMARY_FIELDS, acquire_work_order
 
 LOG = logging.getLogger(__name__)
 
@@ -29,30 +31,46 @@ def sync_recent_work_orders(client, store, config, *, recovery_floor=None):
         raise ValueError("WO recency requires verified ordering, BSR scope and strict cursor safety")
     cursor = store.get_cursor(config.object_structure)
     stats = SyncStats(config.object_structure, mode="incremental" if cursor else "full")
+    age_bounds = window(stats.started_at)
     evidence = stats.recency
+    evidence.update(age_cutoff=age_bounds[0].isoformat(), age_years=4, age_timezone="Asia/Jakarta",
+                    age_field="reportdate", age_excluded=0, age_unknown=0,
+                    age_source_filter="NOT_VERIFIED_LOCAL_GUARD_ONLY")
     evidence.update(cursor_before=_iso(cursor), cursor_after=_iso(cursor),
                     source_rows_read=0, prefix_accepted=0, prefix_skipped=0,
                     newest_source_change=None, oldest_source_change=None,
-                    pages=0, requests=0, stop_reason=None)
+                    pages=0, validated_pages=0, requests=0, stop_reason=None)
     evidence.update(recovery_floor=_iso(recovery_floor), page_cap=config.max_pages,
                     request_budget=config.request_limit, page_size=config.page_size)
     if cursor is None and recovery_floor is None:
         return _operational_stop(store, stats, "BOOTSTRAP_REQUIRED")
     cutoff = recovery_floor if recovery_floor is not None else cursor
+    page_limit = config.max_pages
+    request_limit = config.request_limit
+    if config.work_order_lifecycle and recovery_floor is None:
+        page_limit = store.work_order_catchup_pages(cursor, config.max_pages, config.catchup_page_ceiling)
+        request_limit = max(config.request_limit, min(400, page_limit * 2))
+    evidence.update(page_cap=page_limit, request_budget=request_limit, detail_fetched=0,
+                    terminal_detail_skipped=0, source_scope_verified=0, source_scope_unknown=0,
+                    source_scope_excluded=0, source_total=None, source_total_state="NOT_VERIFIED",
+                    resume_strategy="IDEMPOTENT_REPLAY_BOUNDED_ADAPTIVE_BUDGET",
+                    coverage_state="BOUNDED_ORDERED_TRAVERSAL_NOT_TOTAL_RECONCILIATION")
     before_requests = client.request_telemetry["business_requests"]
     newest = oldest = previous = candidate = None
     identities = set()
+    page_signatures = set()
+    prior_page_identities = set()
     reason = "SOURCE_EXHAUSTED"
     where = config.scope_clause
     if config.prefix_query:
         values = ','.join(f'"{p}%"' for p in config.allowed_prefixes)
         where += f' and wonum in [{values}]'
     try:
-        with client.bounded_requests(config.request_limit):
+        with client.bounded_requests(request_limit):
             for page in client.iterate_pages(
                 config.object_structure, where=where, required_scope=config.scope_clause,
-                select=list(config.select) or None, order_by="-changedate",
-                page_size=config.page_size, max_pages=config.max_pages,
+                select=list(SUMMARY_FIELDS) if config.work_order_lifecycle else list(dict.fromkeys((*config.select, "reportdate"))), order_by="-changedate",
+                page_size=config.page_size, max_pages=page_limit,
                 identity_field="wonum", strict_members=True,
             ):
                 evidence["pages"] += 1
@@ -77,8 +95,24 @@ def sync_recent_work_orders(client, store, config, *, recovery_floor=None):
                     previous = change
                     if (str(raw.get("siteid") or "").upper() != "BSR"
                             or str(raw.get("orgid") or "").upper() != "IP"):
+                        if not raw.get("siteid") or not raw.get("orgid"):
+                            evidence["source_scope_unknown"] += 1
+                        else:
+                            evidence["source_scope_excluded"] += 1
                         reason = "SCOPE_ERROR"
                         raise OslcError("source row violates BSR/IP scope")
+                page_identities = {str(raw.get("wonum") or "").strip() for raw in page}
+                if page_identities & prior_page_identities:
+                    reason = "UNSTABLE_PAGINATION"
+                    raise OslcError("WO identity repeated across pages; coverage cannot be reconciled")
+                prior_page_identities.update(page_identities)
+                signature = tuple((str(raw.get("wonum") or ""), change.isoformat()) for raw,change in zip(page,changes))
+                if signature and signature in page_signatures:
+                    reason = "REPEATED_PAGE"
+                    raise OslcError("repeated WO page content")
+                page_signatures.add(signature)
+                evidence["validated_pages"] += 1
+                evidence["source_scope_verified"] += len(page)
                 boundary = False
                 for raw, change in zip(page, changes):
                     prefix_match = str(raw.get("wonum") or "").strip().upper().startswith(config.allowed_prefixes)
@@ -88,6 +122,13 @@ def sync_recent_work_orders(client, store, config, *, recovery_floor=None):
                         continue
                     if not prefix_match:
                         stats.skipped += 1
+                        continue
+                    age = eligibility(raw, age_bounds)
+                    if age != "AGE_ELIGIBLE":
+                        stats.skipped += 1
+                        evidence["age_excluded" if age == "AGE_EXCLUDED" else "age_unknown"] += 1
+                        if age == "AGE_EXCLUDED":
+                            candidate = change if candidate is None else max(candidate, change)
                         continue
                     try:
                         entity = config.mapper(raw)
@@ -99,7 +140,21 @@ def sync_recent_work_orders(client, store, config, *, recovery_floor=None):
                             stats.skipped += 1
                             continue
                         identities.add(identity)
-                        if store.is_unchanged(config.entity_name, identity, config.compare_column, change):
+                        if config.work_order_lifecycle:
+                            outcome, policy = acquire_work_order(client, store, config, raw)
+                            if policy == "AGE_EXCLUDED": evidence["age_excluded"] += 1
+                            if policy == "AGE_UNKNOWN": evidence["age_unknown"] += 1
+                            if not policy.startswith("AGE_") and str(raw.get("status") or "").upper() not in {"CLOSE", "CAN", "CANCEL"}:
+                                store.mark_work_order_status_checked(identity)
+                            if policy == "DETAIL": evidence["detail_fetched"] += 1
+                            if policy == "TERMINAL_FROZEN": evidence["terminal_detail_skipped"] += 1
+                            if outcome == "unchanged":
+                                stats.unchanged += 1; stats.skipped += 1
+                            else:
+                                stats.upserted += 1
+                                if outcome in ("inserted", "updated"):
+                                    setattr(stats, outcome, getattr(stats, outcome) + 1)
+                        elif store.is_unchanged(config.entity_name, identity, config.compare_column, change):
                             stats.unchanged += 1
                             stats.skipped += 1
                         else:
@@ -121,7 +176,9 @@ def sync_recent_work_orders(client, store, config, *, recovery_floor=None):
         stats.mode = "partial"
         stats.errors += 1
         stats.pagination_error = type(error).__name__
-        if isinstance(error, OslcPaginationLimitError):
+        if reason == "MAPPING_OR_STORE_ERROR":
+            pass  # Nested detail errors must never become a head-pagination fallback.
+        elif isinstance(error, OslcPaginationLimitError):
             reason = "PAGE_LIMIT"
         elif isinstance(error, OslcPaginationError):
             reason = "PAGINATION_ERROR"
@@ -130,6 +187,52 @@ def sync_recent_work_orders(client, store, config, *, recovery_floor=None):
         elif reason == "SOURCE_EXHAUSTED":
             reason = "SOURCE_ERROR"
         LOG.warning("WO recency partial reason=%s error_class=%s", reason, type(error).__name__)
+    head_rows_seen = stats.rows_seen
+    # Unstable offset pages cannot establish coverage, but exact active-WO reads
+    # remain useful. Continue only for local traversal guards, never after an
+    # authentication, permission, source, scope, mapping or storage failure.
+    poll_permitted = stats.complete or reason in {
+        "PAGE_LIMIT", "UNSTABLE_PAGINATION", "REPEATED_PAGE",
+    }
+    if config.work_order_lifecycle and recovery_floor is None and poll_permitted:
+        from src.services.workorder_status_poll import poll_active_work_orders
+        remaining = request_limit - (client.request_telemetry["business_requests"] - before_requests)
+        if remaining >= 2:
+            try:
+                with client.bounded_requests(remaining):
+                    poll = poll_active_work_orders(client, store, config, identities)
+                evidence["active_status_poll"] = poll
+                evidence["age_excluded"] += poll.get("age_excluded", 0)
+                evidence["age_unknown"] += poll.get("age_unknown", 0)
+                evidence["detail_fetched"] += poll["detail_fetched"]
+                stats.rows_seen += poll["checked"]
+                stats.upserted += poll["inserted"] + poll["updated"]
+                stats.inserted += poll["inserted"]; stats.updated += poll["updated"]
+                stats.unchanged += poll["unchanged"]; stats.skipped += poll["unchanged"]
+                if poll["errors"]:
+                    raise OslcError("bounded active status reconciliation failed")
+            except Exception as error:
+                if stats.complete:
+                    reason = "ACTIVE_STATUS_CHECK_FAILED"
+                stats.complete = False
+                stats.mode = "partial"
+                stats.errors += 1
+                stats.pagination_error = stats.pagination_error or type(error).__name__
+                evidence["active_status_poll_error_class"] = type(error).__name__
+        else:
+            evidence["active_status_poll"] = {"checked": 0, "stop_reason": "SHARED_REQUEST_BUDGET",
+                                            "entire_active_population_verified": False}
+    if config.work_order_lifecycle and recovery_floor is None and reason == "PAGE_LIMIT":
+        next_limit = min(config.catchup_page_ceiling, page_limit * 2)
+        if next_limit > page_limit:
+            store.save_work_order_catchup_pages(cursor, next_limit)
+        evidence["next_page_cap"] = next_limit
+        evidence["catchup_ceiling_reached"] = next_limit == page_limit
+    if evidence["age_unknown"]:
+        stats.complete = False
+        stats.mode = "partial"
+        if reason in {"SOURCE_EXHAUSTED", "CURSOR_REACHED", "NO_NEW_ROWS", "RECOVERY_FLOOR_REACHED"}:
+            reason = "AGE_UNKNOWN"
     if recovery_floor is not None:
         evidence["recovery_floor_reached"] = stats.complete and oldest is not None and oldest <= recovery_floor
         if stats.complete and (not evidence["recovery_floor_reached"] or candidate is None):
@@ -137,6 +240,8 @@ def sync_recent_work_orders(client, store, config, *, recovery_floor=None):
         # Changes after this run started must remain eligible on the next cycle.
         if candidate is not None:
             candidate = min(candidate, stats.started_at)
+    if candidate is not None:
+        candidate = min(candidate, stats.started_at)
     # No changes to a pre-existing watermark on any incomplete traversal.
     after = max(cursor, candidate) if cursor and candidate else candidate or cursor
     if stats.complete and after is not None:
@@ -153,8 +258,8 @@ def sync_recent_work_orders(client, store, config, *, recovery_floor=None):
         after = cursor
     stats.watermark = after
     stats.finished_at = datetime.now(timezone.utc)
-    evidence.update(validated_pages=evidence["pages"], pages=client.last_iteration_pages,
-                    source_rows_read=stats.rows_seen, cursor_after=_iso(after),
+    evidence.update(pages=evidence["pages"],
+                    source_rows_read=head_rows_seen, cursor_after=_iso(after),
                     newest_source_change=_iso(newest), oldest_source_change=_iso(oldest),
                     requests=client.request_telemetry["business_requests"] - before_requests,
                     stop_reason=reason, complete=stats.complete)
@@ -179,7 +284,7 @@ def _operational_stop(store, stats, reason):
 
 def _finish_unreconciled(client, store, stats, evidence, before_requests, newest, oldest):
     evidence.update(newest_source_change=_iso(newest), oldest_source_change=_iso(oldest),
-                    validated_pages=evidence["pages"], pages=client.last_iteration_pages,
+                    pages=evidence["pages"],
                     requests=client.request_telemetry["business_requests"] - before_requests,
                     source_rows_read=stats.rows_seen)
     return _operational_stop(store, stats, "RECOVERY_FLOOR_NOT_REACHED")

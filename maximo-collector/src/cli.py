@@ -580,11 +580,70 @@ def cmd_mart_bootstrap(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_collect_asset_references(args: argparse.Namespace) -> int:
+    from src.services.asset_references import collect_asset_references
+    from src.repositories.asset_references import AssetReferenceStore
+    store = CollectorStore(get_database())
+    if args.report_only:
+        print(json.dumps(AssetReferenceStore(store._db).coverage(), indent=2))
+        return 0
+    service, _ = _sync_service(store)
+    result = collect_asset_references(service._client, store, limit=args.limit,
+        scheduled=False, max_seconds=args.max_seconds)
+    print(json.dumps(result, sort_keys=True))
+    return 2 if result["errors"] else 0
+
+
+def cmd_collect_asset_inventory_batch(args):
+    from src.services.asset_inventory import read_role_reference
+    from src.services.asset_inventory_sweep import collect_sweep_batch
+    from src.repositories.asset_inventory import AssetInventoryStore
+    from src.repositories.asset_inventory_sweep import SweepStore
+    reference=read_role_reference(args.workbook)
+    store=CollectorStore(get_database())
+    AssetInventoryStore(store._db).create_tables();SweepStore(store._db).create_tables()
+    result=collect_sweep_batch(_sync_service(store)[0]._client,store,reference,
+        identity=args.sweep_id,new=args.new_sweep,max_requests=args.max_requests,max_seconds=args.max_seconds,page_size=args.page_size)
+    print(json.dumps(result,sort_keys=True))
+    return 2 if result.get("errors") else 0
+
+
+def cmd_refresh_asset_inventory(args):
+    from src.services.asset_inventory import read_role_reference, refresh_inventory
+    from src.repositories.asset_inventory import AssetInventoryStore
+    reference = read_role_reference(args.workbook)
+    store = CollectorStore(get_database())
+    AssetInventoryStore(store._db).create_tables()
+    client = None if args.local_only else _sync_service(store)[0]._client
+    result = refresh_inventory(store, reference, client=client,
+        max_requests=args.max_requests, max_seconds=args.max_seconds, page_size=args.page_size)
+    print(json.dumps(result, sort_keys=True))
+    return 2 if result["errors"] else 0
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(prog="mxcollector", description=__doc__)
     sub = p.add_subparsers(dest="command", required=True)
 
+    batch=sub.add_parser("collect-asset-inventory-batch",help="manual resumable 50-row assetid sweep and verification")
+    batch.add_argument("--workbook",required=True)
+    selection=batch.add_mutually_exclusive_group()
+    selection.add_argument("--sweep-id")
+    selection.add_argument("--new-sweep",action="store_true")
+    batch.add_argument("--max-requests",type=int,default=40)
+    batch.add_argument("--max-seconds",type=int,default=150)
+    batch.add_argument("--page-size",type=int,choices=(10,25,50),default=50)
+    inv = sub.add_parser("refresh-asset-inventory", help="manual BSR hierarchy inventory, never scheduled")
+    inv.add_argument("--workbook", required=True)
+    inv.add_argument("--local-only", action="store_true")
+    inv.add_argument("--max-requests", type=int, default=50)
+    inv.add_argument("--max-seconds", type=int, default=180)
+    inv.add_argument("--page-size", type=int, choices=(25, 50, 100), default=50)
     sub.add_parser("init-db", help="create collector local tables")
+    asset_refs = sub.add_parser("collect-asset-references", help="bounded exact-ID enrichment of missing WO assets")
+    asset_refs.add_argument("--limit", type=int, choices=range(1, 51), default=10)
+    asset_refs.add_argument("--max-seconds", type=int, choices=range(1, 181), default=45)
+    asset_refs.add_argument("--report-only", action="store_true")
 
     sync = sub.add_parser(
         "sync",
@@ -716,6 +775,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
     args = parse_args(argv)
+    if args.command == "collect-asset-inventory-batch":
+        return cmd_collect_asset_inventory_batch(args)
+    if args.command == "refresh-asset-inventory":
+        return cmd_refresh_asset_inventory(args)
+    if args.command == "collect-asset-references":
+        return cmd_collect_asset_references(args)
     if args.command == "init-db":
         return cmd_init_db(args)
     if args.command == "sync":

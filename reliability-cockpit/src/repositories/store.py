@@ -96,7 +96,9 @@ class CockpitStore:
             row.lead = item.lead
             row.failure_code = item.failure_code
             row.is_task = item.is_task
-            row.parent_wo = item.parent_wo
+            # No verified parent mapping exists. Retain old stored observations
+            # for provenance; read paths quarantine them instead of asserting a
+            # relationship. New rows keep the nullable column empty.
             row.has_children = item.has_children
             row.estimated_labor_cost = item.estimated_labor_cost
             row.estimated_material_cost = item.estimated_material_cost
@@ -369,11 +371,15 @@ def _work_order_from_row(r: models.WorkOrderOrm) -> WorkOrder:
         lead=r.lead,
         failure_code=r.failure_code,
         is_task=r.is_task,
-        parent_wo=r.parent_wo,
+        parent_wo=None,  # Existing legacy values have no verified parent provenance.
         has_children=r.has_children,
         estimated_labor_cost=r.estimated_labor_cost,
         estimated_material_cost=r.estimated_material_cost,
         actual_labor_cost=r.actual_labor_cost,
         actual_material_cost=r.actual_material_cost,
         actual_labor_hours=r.actual_labor_hours,
+        sources={"maximo": {"hierarchy": {
+            "schema_version": 1, "parent_wo_state": "UNKNOWN",
+            "legacy_parent_wo": r.parent_wo,
+        }}},
     )

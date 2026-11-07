@@ -105,3 +105,9 @@ produksi mentah, atau data personal. Jangan membuat database/worker duplikat unt
 mengatasi halaman kosong. Periksa konfigurasi, ownership, cursor dan freshness
 terlebih dahulu; lihat [deployment runbook](deploy/compose/README.md), termasuk
 batas runtime pada baseline `main`.
+
+## Local Laravel development workspace
+
+[NADI Laravel](NADI/README.md) is a separate loopback-only development UI.
+Its private catalogs, operational data and accounts are not distributed with the
+source. Publication does not replace the existing Next.js runtime or deploy it.

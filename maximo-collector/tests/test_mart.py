@@ -236,7 +236,7 @@ class ReliabilityMartTest(unittest.TestCase):
             self.assertEqual(session.scalar(select(func.count()).select_from(orm.AssetMasterMartOrm)), 0)
 
     def test_datetime_round_trip_preserves_timezone(self):
-        record = maintenance_event_from_payload(WORK_ORDER)
+        record = maintenance_event_from_payload({**WORK_ORDER, "status": "CLOSE"})
         self.writer.persist_collection(self._collection("maintenance_event", record))
         with self.db.session() as session:
             stored = session.get(orm.MaintenanceEventMartOrm, record["canonical_id"])

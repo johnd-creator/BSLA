@@ -1,0 +1,45 @@
+name: NADI Laravel
+on:
+  pull_request:
+    paths: ['NADI/**', '.github/workflows/nadi-laravel.yml']
+  push:
+    branches: [main]
+    paths: ['NADI/**', '.github/workflows/nadi-laravel.yml']
+permissions:
+  contents: read
+jobs:
+  laravel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: NADI
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
+        with:
+          php-version: '8.4'
+          extensions: mbstring, xml, sqlite3, pdo_sqlite
+          coverage: none
+          tools: composer:v2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: composer install --no-interaction --prefer-dist
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - name: Create only ephemeral test configuration
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+      - run: composer validate --no-check-publish && composer check-platform-reqs
+      - run: vendor/bin/pint --test
+      - run: composer test
+      - run: npm run test:ui
+      - name: Source-only release
+        run: |
+          test ! -f resources/data/pdm-form-catalog.json
+          test ! -f database/development.sqlite
+          git diff --exit-code

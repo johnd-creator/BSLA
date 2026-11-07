@@ -1,0 +1,1 @@
+<span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" focusable="false"><path d="M5 17h5l3-9 4 13 2-7h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></span><span class="brand-name">NADI</span>

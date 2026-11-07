@@ -31,6 +31,7 @@ SAMPLE_ASSET = {
 
 SAMPLE_WO = {
     "wonum": "WO-2001",
+    "reportdate": "2025-01-01T00:00:00+07:00",
     "assetnum": "BSR-101",
     "status": "CLOSE",
     "worktype": "PM",
@@ -261,7 +262,7 @@ class SyncEngineTest(unittest.TestCase):
         )
         store, client = FakeStore(), FakeClient([])
         SyncService(client, store).sync(cfg)
-        self.assertEqual(client.calls[0]["select"], list(select))
+        self.assertEqual(client.calls[0]["select"], list(select) + ["reportdate"])
 
     def test_batch_upsert_deduplicates_duplicate_entity_ids(self):
         cfg = ObjectSyncConfig(

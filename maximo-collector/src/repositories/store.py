@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from src.adapters.maximo.actual_dates import merge_evidence, version
+
 from contextlib import contextmanager
 import dataclasses
 from datetime import datetime, timezone
@@ -71,9 +73,21 @@ class CollectorStore:
     # -- entities ------------------------------------------------------------
     def upsert_equipment(self, e: domain.Equipment) -> str:
         row = _row(e)
+        # Keep ORM date columns typed; only nested source JSON is serialized.
+        for field in dataclasses.fields(e):
+            value = getattr(e, field.name)
+            if isinstance(value, datetime):
+                row[field.name] = value
         with self._db.session() as session:
             existing = session.get(orm.EquipmentOrm, e.id)
             if existing is None:
+                # A recovered old source row is new local evidence. Incremental
+                # Mart projection must see it without rewriting its changedate.
+                source = dict(row.get("sources") or {})
+                maximo = dict(source.get("maximo") or {})
+                maximo["collector_updated_at"] = datetime.now(timezone.utc).isoformat()
+                source["maximo"] = maximo
+                row["sources"] = source
                 session.add(orm.EquipmentOrm(**row))
                 outcome = "inserted"
             else:
@@ -97,8 +111,207 @@ class CollectorStore:
             session.commit()
         return outcome
 
-    def upsert_work_order(self, w: domain.WorkOrder) -> None:
-        self._upsert(orm.WorkOrderOrm, _row(w))
+    def upsert_equipment_manual(self, e: domain.Equipment, *, raw: dict) -> str:
+        """Explicit master refresh, exact source ID only, preserving newer records.
+
+        The caller is a manual bounded scan. Routine sync baseline policy stays
+        unchanged. A verified source field may refresh the same asset, never a WO.
+        """
+        row = _row(e)
+        for field in dataclasses.fields(e):
+            value = getattr(e, field.name)
+            if isinstance(value, datetime): row[field.name] = value
+        with self._db.session() as session:
+            existing = session.get(orm.EquipmentOrm, e.id, with_for_update=True)
+            if existing is not None:
+                def aware(v): return v.replace(tzinfo=timezone.utc) if v and v.tzinfo is None else v
+                old, new = aware(existing.source_changed_at), aware(e.source_changed_at)
+                if old is not None and (new is None or new < old): return "unchanged"
+            sources = dict(existing.sources or {}) if existing is not None else {}
+            source = dict(sources.get("maximo") or {})
+            incoming = dict((row.get("sources") or {}).get("maximo") or {})
+            # This manual projection owns the explicit source unit; plant is not a unit.
+            row["unit"] = incoming.get("eq11")
+            for key, value in incoming.items():
+                if key == "extra":
+                    source[key] = {**(source.get(key) or {}), **(value or {})}
+                elif value is not None or key in {"eq11", "parent"}:
+                    source[key] = value
+            source["collector_updated_at"] = datetime.now(timezone.utc).isoformat()
+            source["collection_mode"] = "MANUAL_HIERARCHY_REFRESH"
+            sources["maximo"] = source; row["sources"] = sources
+            if existing is None:
+                session.add(orm.EquipmentOrm(**row)); outcome = "inserted"
+            else:
+                for key, value in row.items():
+                    if key == "id": continue
+                    # An omitted/null optional field never erases retained history.
+                    # The manual full scalar projection includes parent; absent/null
+                    # parent is a source root, not permission to reuse an old edge.
+                    if value is not None or key in {"parent_id", "unit"}:
+                        setattr(existing, key, value)
+                outcome = "updated"
+            session.commit()
+        return outcome
+
+    def upsert_work_order(self, w: domain.WorkOrder) -> str:
+        from copy import deepcopy
+        from src.services.workorder_policy import TERMINAL, normalized_status
+        row = _row(w)
+        for field in dataclasses.fields(w):
+            value = getattr(w, field.name)
+            if isinstance(value, datetime):
+                row[field.name] = value.astimezone(timezone.utc) if value.tzinfo is not None else value
+        incoming = deepcopy((row.get("sources") or {}).get("maximo") or {})
+        with self._db.session() as session:
+            existing = session.get(orm.WorkOrderOrm, w.id, with_for_update=True)
+            if existing is None:
+                if incoming.get("collection", {}).get("mode") == "STATUS_ONLY" and normalized_status(w.status) not in {"CAN", "CANCEL"}:
+                    raise ValueError("a new WO requires an initial detail snapshot")
+                source = dict(row.get("sources") or {})
+                maximo = dict(source.get("maximo") or {})
+                maximo["collector_updated_at"] = datetime.now(timezone.utc).isoformat()
+                source["maximo"] = maximo
+                row["sources"] = source
+                session.add(orm.WorkOrderOrm(**row))
+                outcome = "inserted"
+            else:
+                old_version, new_version = version(existing.source_changed_at), version(w.source_changed_at)
+                if old_version is not None and (new_version is None or new_version < old_version):
+                    return "unchanged"
+                old_status, new_status = normalized_status(existing.status), normalized_status(w.status)
+                if old_version == new_version and old_status != new_status:
+                    observation = incoming.get("collection") or {}
+                    if not (observation.get("same_version_status_confirmed") is True
+                            and observation.get("prior_status") == old_status
+                            and observation.get("status") == new_status
+                            and version(observation.get("confirmed_status_changed_at")) is not None
+                            and version(observation.get("confirmed_status_changed_at")) == version(w.status_changed_at)
+                            and incoming.get("siteid") == "BSR" and incoming.get("orgid") == "IP"):
+                        raise ValueError("WO status conflict requires matching source summary and exact-WO confirmation")
+                sources = deepcopy(existing.sources or {})
+                previous = sources.get("maximo") or {}
+                old_proof = previous.get("actual_dates")
+                new_proof = incoming.get("actual_dates")
+                # Keep old evidence as history on observed reopen/cancellation, never reuse it on reclose.
+                legacy_open_clocks = old_status != "CLOSE" and any(
+                    item.get("state") == "VALID" for item in (old_proof or {}).get("fields", {}).values())
+                if old_proof and ((old_status == "CLOSE" and new_status != "CLOSE") or legacy_open_clocks):
+                    history = list(previous.get("actual_dates_history") or [])
+                    history.append({"prior_status": old_status,
+                                    "reason": "LEGACY_NONCLOSE_EVIDENCE" if legacy_open_clocks else "LEFT_CLOSE_STATUS",
+                                    "closed_source_changed_at": old_version.isoformat() if old_version else None,
+                                    "exit_source_changed_at": new_version.isoformat() if new_version else None,
+                                    "evidence": deepcopy(old_proof)})
+                    incoming["actual_dates_history"] = history
+                if new_proof and old_status == new_status == "CLOSE":
+                    incoming["actual_dates"] = merge_evidence(old_proof, new_proof)
+                elif not new_proof and old_status == new_status == "CLOSE" and old_proof:
+                    incoming["actual_dates"] = deepcopy(old_proof)
+                terminal_frozen = old_status in TERMINAL and new_status in TERMINAL and not (new_status == "CLOSE" and old_status != "CLOSE")
+                status_only = incoming.get("collection", {}).get("mode") == "STATUS_ONLY" or terminal_frozen
+                fields = {"equipment_id":"assetnum", "location_id":"location", "status":"status", "status_description":"status_description",
+                    "work_type":"worktype", "work_class":"woclass", "description":"description", "reported_at":"reportdate",
+                    "source_changed_at":"changedate", "status_changed_at":"statusdate", "scheduled_start":"schedstart",
+                    "scheduled_finish":"schedfinish", "target_completion":"targcompdate", "estimated_duration_hours":"estdur",
+                    "downtime_hours":"downtime", "priority":"wopriority", "priority_description":"wopriority_description",
+                    "reported_by":"reportedby", "supervisor":"supervisor", "lead":"lead", "failure_code":"failurecode",
+                    "is_task":"istask", "has_children":"haschildren", "estimated_labor_cost":"estlabcost",
+                    "estimated_material_cost":"estmatcost", "actual_labor_cost":"actlabcost", "actual_material_cost":"actmatcost",
+                    "actual_labor_hours":"actlabhrs"}
+                observed = incoming.get("observed_fields")
+                allowed = {"status", "status_description", "source_changed_at", "status_changed_at"} if status_only else set(row)
+                legacy_parent_before = existing.parent_wo
+                before = {c.name: deepcopy(getattr(existing,c.name)) for c in existing.__table__.columns}
+                for column, value in row.items():
+                    if column in {"id", "sources"} or column not in allowed:
+                        continue
+                    if observed is not None and column in fields and fields[column] not in observed:
+                        continue
+                    setattr(existing, column, value)
+                merged = {**previous, **incoming}
+                merged["extra"] = {**(previous.get("extra") or {}), **(incoming.get("extra") or {})}
+                old_h = previous.get("hierarchy") or {}
+                new_h = incoming.get("hierarchy") or {}
+                merged["hierarchy"] = {**old_h, **new_h,
+                    "source_fields": {**(old_h.get("source_fields") or {}), **(new_h.get("source_fields") or {})}}
+                if status_only:
+                    for key in ("extra", "hierarchy", "workorderid"):
+                        if key in previous:
+                            merged[key] = deepcopy(previous[key])
+                    # Summary asset changes cannot relabel retained terminal detail/evidence.
+                    old_identity = (old_proof or {}).get("identity", {})
+                    if old_identity.get("assetnum") not in (None, w.equipment_id):
+                        merged["terminal_identity_change"] = {"state":"REQUIRES_REVIEW", "source_assetnum":w.equipment_id}
+                old_hierarchy = previous.get("hierarchy") or {}
+                legacy_parent = old_hierarchy.get("legacy_parent_wo", legacy_parent_before)
+                if legacy_parent is not None:
+                    merged["hierarchy"] = {**(merged.get("hierarchy") or {}), "schema_version":1,
+                        "parent_wo_state":"UNKNOWN", "legacy_parent_wo":legacy_parent}
+                existing.parent_wo = None
+                sources["maximo"] = merged
+                existing.sources = sources
+                def differs(key, old):
+                    new = getattr(existing, key)
+                    if isinstance(new, datetime) and isinstance(old, datetime):
+                        return version(new) != version(old)
+                    return new != old
+                outcome = "updated" if any(differs(key, value) for key,value in before.items()) else "unchanged"
+                if outcome == "updated":
+                    merged["collector_updated_at"] = datetime.now(timezone.utc).isoformat()
+                    existing.sources = {**sources, "maximo": merged}
+            session.commit()
+        return outcome
+
+    def work_order_snapshot(self, identity: str) -> dict | None:
+        with self._db.session() as session:
+            row = session.get(orm.WorkOrderOrm, identity)
+            return {"status": row.status, "source_changed_at": row.source_changed_at} if row else None
+
+    def active_work_order_candidates(self, prefixes, excluded, limit=25):
+        """Round-robin only locally active WOs. Unknown source scope is rechecked by GET."""
+        from src.services.workorder_age import window
+        age_cutoff, age_now = window()
+        with self._db.session() as session:
+            model = orm.WorkOrderOrm
+            stmt = select(model.id).where(
+                model.reported_at >= age_cutoff, model.reported_at <= age_now,
+                func.upper(func.trim(model.status)).not_in(("CLOSE", "CAN", "CANCEL")),
+                or_(*(model.id.startswith(prefix) for prefix in prefixes)),
+            ).order_by(model.sources["maximo"]["status_checked_at"].as_string().asc().nulls_first(), model.id).limit(limit)
+            if excluded:
+                stmt = stmt.where(model.id.not_in(excluded))
+            return list(session.scalars(stmt))
+
+    def mark_work_order_status_checked(self, identity, state="OBSERVED"):
+        """Local check scheduling is not ingestion/activity and must not dirty Mart."""
+        from copy import deepcopy
+        with self._db.session() as session:
+            row = session.get(orm.WorkOrderOrm, identity, with_for_update=True)
+            if row is None or str(row.status or "").upper() in {"CLOSE", "CAN", "CANCEL"}:
+                return
+            sources = deepcopy(row.sources or {})
+            maximo = dict(sources.get("maximo") or {})
+            maximo.update(status_checked_at=datetime.now(timezone.utc).isoformat(), status_check_state=state)
+            sources["maximo"] = maximo
+            row.sources = sources
+            session.commit()
+
+    def work_order_catchup_pages(self, cursor, base: int, ceiling: int) -> int:
+        with self._db.session() as session:
+            marker = session.scalar(select(orm.CollectRunOrm).where(
+                orm.CollectRunOrm.object_structure == "mxwodetail-catchup-budget"
+            ).order_by(orm.CollectRunOrm.id.desc()).limit(1))
+            if marker and version(marker.watermark) == version(cursor):
+                return min(ceiling, max(base, marker.rows_seen))
+        return base
+
+    def save_work_order_catchup_pages(self, cursor, pages: int) -> None:
+        now = datetime.now(timezone.utc)
+        with self._db.session() as session:
+            session.add(orm.CollectRunOrm(object_structure="mxwodetail-catchup-budget", mode="catchup-budget",
+                rows_seen=pages, upserted=0, skipped=0, errors=0, watermark=cursor, started_at=now, finished_at=now))
+            session.commit()
 
     def upsert_service_request(self, s: domain.ServiceRequest) -> None:
         self._upsert(orm.ServiceRequestOrm, _row(s))

@@ -69,7 +69,8 @@ Status legend: ✅ verified on this instance · ⛔ forbidden (BMXAA0024E) · �
 | `lead` | `lead` | string | |
 | `failure_code` | `failurecode` | string | Retained direct scalar; MX-015A verified presence. Not a failure event, cause/remedy or verified Failure Code master relationship. |
 | `is_task` | `istask` | boolean | |
-| `parent_wo` | `pctaskid`/`wogroup` | string | task hierarchy |
+| `parent_wo` | — | string/null | Unknown in current adapters; pctaskid/wogroup are not verified parent WO numbers. Null is not proof of no parent. |
+| `sources.maximo.hierarchy.source_fields` | `pctaskid`, `parent`, `wogroup` when actually returned | object | Allowlisted observations only, state UNKNOWN; no inferred hierarchy/sequence. Old stored values use `legacy_parent_wo` with unknown provenance. |
 | `has_children` | `haschildren` | boolean | |
 | `estimated_labor_cost` | `estlabcost` | number | |
 | `estimated_material_cost` | `estmatcost` | number | |

@@ -15,7 +15,7 @@ CURSOR = datetime(2026, 8, 21, tzinfo=timezone.utc)
 
 
 def row(name, day=21):
-    return dict(wonum=name, changedate=f"2026-08-{day:02d}T00:00:00Z", siteid="BSR", orgid="IP")
+    return dict(wonum=name, reportdate="2025-01-01T00:00:00+07:00", changedate=f"2026-08-{day:02d}T00:00:00Z", siteid="BSR", orgid="IP")
 
 
 class Store:

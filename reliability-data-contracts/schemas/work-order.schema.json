@@ -88,7 +88,7 @@
     },
     "parent_wo": {
       "type": ["string", "null"],
-      "description": "Parent work order for task hierarchy"
+      "description": "Parent work order number only with verified source-field semantics. Current adapters emit null because pctaskid/wogroup equivalence is unverified; legacy observations remain quarantined under sources.maximo.hierarchy. Null means unknown, not proof of no parent."
     },
     "has_children": {
       "type": ["boolean", "null"]
@@ -213,6 +213,24 @@
             "extra": {
               "type": "object",
               "description": "Allowlisted vendor extension scalars (seksi, bu, jumlahhidup, jumlahmati, luasareatanam) quarantined verbatim; no hrefs or personal data"
+            },
+            "hierarchy": {
+              "type": "object",
+              "description": "Unverified source observations, never resolved WO hierarchy or sequence evidence.",
+              "properties": {
+                "schema_version": {"const": 1},
+                "parent_wo_state": {"const": "UNKNOWN"},
+                "source_fields": {
+                  "type": "object",
+                  "properties": {
+                    "pctaskid": {"type": ["string", "null"]},
+                    "parent": {"type": ["string", "null"]},
+                    "wogroup": {"type": ["string", "null"]}
+                  },
+                  "additionalProperties": false
+                },
+                "legacy_parent_wo": {"type": ["string", "null"], "description": "Old stored/view value with unknown field provenance; not relabeled as pctaskid or parent."}
+              }
             }
           }
         }
