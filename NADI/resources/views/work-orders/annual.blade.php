@@ -7,7 +7,7 @@
             <p><strong>{{ number_format($annual['counts']['dated_work_order_count'], 0, ',', '.') }}</strong> WO memiliki tahun aktual <span class="muted">dari {{ number_format($annual['counts']['work_order_count'], 0, ',', '.') }} identitas WO di Mart</span></p>
             <p class="muted">Seluruh WO aset ini, bukan hanya halaman atau filter daftar. Klik tahun untuk melihat WO penyusunnya.</p>
         </div>
-        <div class="table-scroll"><table class="annual-wo-table"><caption class="sr-only">Perbandingan jumlah WO, jenis pekerjaan, dan status sumber per tahun mulai aktual di Asia/Jakarta</caption><thead><tr><th>Tahun mulai</th><th>Jumlah WO</th><th>Jenis pekerjaan sumber</th><th>Status sumber saat ini</th></tr></thead><tbody>
+        <div class="table-scroll" role="region" tabindex="0" aria-label="Tabel data, dapat digeser"><table class="annual-wo-table"><caption class="sr-only">Perbandingan jumlah WO, jenis pekerjaan, dan status sumber per tahun mulai aktual di Asia/Jakarta</caption><thead><tr><th>Tahun mulai</th><th>Jumlah WO</th><th>Jenis pekerjaan sumber</th><th>Status sumber saat ini</th></tr></thead><tbody>
             @foreach([...$annual['years'], $annual['unknown_year']] as $bucket)
                 @php($yearKey = $bucket['year'] === null ? 'unknown' : (string) $bucket['year'])
                 <tr @class(['annual-wo-selected' => request('year') === $yearKey])><th scope="row"><a class="text-link" @if(request('year') === $yearKey) aria-current="true" @endif href="{{ route('work-orders.index', ['asset_ref' => $asset['canonical_id'], 'view' => $mode, 'year' => $yearKey]) }}">{{ $bucket['year'] ?? 'Tahun belum diketahui' }}</a></th><td class="annual-wo-count">{{ number_format($bucket['work_orders'], 0, ',', '.') }}</td>

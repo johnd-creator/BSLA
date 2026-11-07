@@ -60,3 +60,8 @@ cookies/
 /maximo-collector/docs/evidence/activation-20261105/
 /23496711.xls
 *.orig
+
+# Private runtime image pins, capture reports and source-replay artifacts
+/deploy/compose/runtime-images.lock.json
+/deploy/compose/runtime-durability-*.json
+/deploy/compose/compose.runtime.local.yaml

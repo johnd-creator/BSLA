@@ -7,6 +7,7 @@ use App\Models\PdmActivity;
 use App\Services\PdmFormCatalog;
 use App\Services\PdmLogbook;
 use App\Services\ReliabilityMart;
+use App\Services\WorkspaceActivityLog;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -188,15 +189,22 @@ class PdmActivityController extends Controller
             return redirect()->route('pdm.show', $existing)->with('status', 'Form ini sudah tersimpan. Gunakan Edit draft untuk mengubahnya.');
         }
         $data = $this->validated($request, $mart, $catalog);
-        $activity = PdmActivity::firstOrCreate(['request_key' => $key], [...$data, 'created_by' => $request->user()->id]);
-        abort_unless($activity->created_by === $request->user()->id, 409);
+        $activity = DB::transaction(function () use ($key, $data, $request) {
+            $activity = PdmActivity::firstOrCreate(['request_key' => $key], [...$data, 'created_by' => $request->user()->id]);
+            abort_unless($activity->created_by === $request->user()->id, 409);
+            if ($activity->wasRecentlyCreated) {
+                WorkspaceActivityLog::record($activity->refresh(), $request->user()->id);
+            }
+
+            return $activity;
+        });
 
         return redirect()->route('pdm.show', $activity)->with('status', 'Aktivitas PdM tersimpan sebagai draft lokal. Pemetaan aset, diagnosis dan alarm belum disahkan.');
     }
 
     public function show(PdmActivity $activity)
     {
-        return view('pdm.show', ['activity' => $activity->load(['author:id,name', 'inspection'])]);
+        return view('pdm.show', ['activity' => $activity->load(['author:id,name', 'inspection']), 'activityHistory' => WorkspaceActivityLog::history('pdm', $activity->id)]);
     }
 
     public function edit(PdmActivity $activity)
@@ -210,10 +218,13 @@ class PdmActivityController extends Controller
     {
         Gate::authorize('update-pdm-activity', $activity);
         $data = $this->validated($request, $mart, $catalog, $activity);
-        $updated = PdmActivity::whereKey($activity->id)->where('version', $request->integer('version'))->update([...$data, 'template_snapshot' => json_encode($data['template_snapshot'], JSON_THROW_ON_ERROR), 'readings' => json_encode($data['readings'], JSON_THROW_ON_ERROR), 'version' => DB::raw('version + 1')]);
-        if (! $updated) {
-            throw ValidationException::withMessages(['version' => 'Draft sudah berubah. Muat ulang sebelum menyimpan agar perubahan sebelumnya tidak tertimpa.']);
-        }
+        DB::transaction(function () use ($data, $activity, $request) {
+            $updated = PdmActivity::whereKey($activity->id)->where('version', $request->integer('version'))->update([...$data, 'template_snapshot' => json_encode($data['template_snapshot'], JSON_THROW_ON_ERROR), 'readings' => json_encode($data['readings'], JSON_THROW_ON_ERROR), 'version' => DB::raw('version + 1')]);
+            if (! $updated) {
+                throw ValidationException::withMessages(['version' => 'Draft sudah berubah. Muat ulang sebelum menyimpan agar perubahan sebelumnya tidak tertimpa.']);
+            }
+            WorkspaceActivityLog::record($activity->fresh(), $request->user()->id);
+        });
 
         return redirect()->route('pdm.show', $activity)->with('status', 'Draft aktivitas PdM diperbarui.');
     }

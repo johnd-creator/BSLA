@@ -25,7 +25,7 @@ class WorkOrderLineageTest(unittest.TestCase):
             self.assertEqual(row.failure_code,"RETAINED-CODE")
             self.assertIsNone(row.actual_start)
             self.assertIsNone(row.actual_finish)
-            self.assertEqual(row.downtime_hours,0)
+            self.assertIsNone(row.downtime_hours)  # Source flag is not a duration.
             # SQLite drops timezone metadata. Its uncertainty stays explicit.
             self.assertEqual(row.sources["maximo"]["reportdate"],NOW.replace(tzinfo=None).isoformat())
             self.assertEqual(row.sources["maximo"]["schedstart"],NOW.replace(tzinfo=None).isoformat())
@@ -39,7 +39,7 @@ class WorkOrderLineageTest(unittest.TestCase):
             persisted = _maintenance_row(mapped)
             self.assertEqual(persisted["failure_code"], "SOURCE-CODE")
             self.assertEqual(persisted["labor_hours"], 0)
-            self.assertEqual(persisted["downtime_hours"], 0)
+            self.assertIsNone(persisted["downtime_hours"])  # Legacy coerced flag cannot become hours.
             self.assertIsNone(persisted["actual_start"])
             self.assertIsNone(persisted["actual_finish"])
             self.assertIsNone(persisted["duration_hours"])

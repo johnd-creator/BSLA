@@ -1,0 +1,7 @@
+<x-shell title="Log Gangguan Aset" eyebrow="CATATAN MANUAL ENGINEER">
+    <div class="disruption-intro"><div><p>Catatan trip, gagal fungsi dan gangguan yang diamati. Tidak bergantung pada WO Maximo atau DCS.</p>@if($assetRef)<a class="text-link" href="{{ route('assets.show', $assetRef) }}">← Detail {{ $assetRef }}</a>@endif</div>@can('write-asset-disruptions')<a class="button primary" href="{{ route('disruptions.create', array_filter(['asset_ref'=>$assetRef])) }}">Catat gangguan</a>@endcan</div>
+    @include('disruptions.summary')
+    <form class="panel filters" method="get">@if($assetRef)<input type="hidden" name="asset_ref" value="{{ $assetRef }}">@endif<div><label for="year">Tahun kejadian</label><input id="year" name="year" type="number" min="1900" max="2200" value="{{ request('year') }}" placeholder="Semua tahun"></div><div><label for="status">Status catatan</label><select id="status" name="status"><option value="recorded" @selected(request('status', 'recorded')==='recorded')>Tercatat</option><option value="voided" @selected(request('status')==='voided')>Dibatalkan</option></select></div><button class="button primary">Terapkan</button>@if(request()->anyFilled(['year','status']))<a class="text-link" href="{{ route('disruptions.index', array_filter(['asset_ref'=>$assetRef])) }}">Reset filter</a>@endif</form>
+    <x-active-filters :filters="['year'=>'Tahun']" />
+    <section class="panel">@include('disruptions.table')<div class="page-controls">{{ $events->links() }}</div></section>
+</x-shell>

@@ -51,7 +51,7 @@
     },
     "failure_code": {
       "type": ["string", "null"],
-      "description": "Failure code if the event was failure-related"
+      "description": "Raw source failure classification when supplied. Presence does not establish a failure occurrence or failure count."
     },
     "reported_by": {
       "type": ["string", "null"]
@@ -71,6 +71,116 @@
           "type": ["object", "null"],
           "description": "Derived from mxwodetail actual fields (site BSR)",
           "properties": {
+            "reliability_evidence": {
+              "type": "object",
+              "description": "Allowlisted, scoped and versioned source observations only. No failure occurrence, failure timestamp, resolved origin/parent, restoration time, operating exposure or KPI is inferred.",
+              "required": [
+                "schema_version",
+                "semantics",
+                "identity",
+                "fields"
+              ],
+              "properties": {
+                "schema_version": {
+                  "const": 1
+                },
+                "semantics": {
+                  "const": "SOURCE_FIELDS_ONLY"
+                },
+                "identity": {
+                  "type": "object",
+                  "properties": {
+                    "wonum": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "assetnum": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "siteid": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "orgid": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "fields": {
+                  "type": "object",
+                  "propertyNames": {
+                    "enum": [
+                      "failurecode",
+                      "problemcode",
+                      "parent",
+                      "origrecordclass",
+                      "origrecordid",
+                      "woclass",
+                      "istask",
+                      "haschildren",
+                      "hasfollowupwork",
+                      "downtime",
+                      "faildate"
+                    ]
+                  },
+                  "additionalProperties": {
+                    "type": "object",
+                    "required": [
+                      "state",
+                      "value",
+                      "source_changed_at"
+                    ],
+                    "properties": {
+                      "state": {
+                        "enum": [
+                          "UNAVAILABLE",
+                          "MISSING",
+                          "INVALID",
+                          "NAIVE",
+                          "VALID",
+                          "OBSERVED"
+                        ]
+                      },
+                      "value": {
+                        "type": [
+                          "string",
+                          "boolean",
+                          "null"
+                        ],
+                        "maxLength": 200
+                      },
+                      "original": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 128
+                      },
+                      "source_changed_at": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "format": "date-time"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "additionalProperties": false
+            },
             "origin": {
               "type": ["string", "null"],
               "enum": ["MXWODETAIL", null]
@@ -99,7 +209,8 @@
               "type": ["number", "null"]
             },
             "downtime": {
-              "type": ["number", "null"]
+              "type": ["boolean", "number", "null"],
+              "description": "MXWODETAIL source indicator. Historical numeric source values are not verified hours; current mapper emits only a verified boolean or null."
             },
             "failurecode": {
               "type": ["string", "null"]

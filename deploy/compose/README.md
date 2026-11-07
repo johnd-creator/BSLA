@@ -16,6 +16,13 @@ all accepted ignored overrides. The commands below describe deliberately
 selected installations; never switch modes or run a broad startup to restart
 one existing service. Source credentials stay only in the source collector.
 
+## Optional private runtime releases
+
+[Runtime durability](runtime-durability.md) documents a fail-closed local release
+controller and offline rehearsal. Private locks, images and source snapshots are
+not in Git. Existing installations must retain their verified Compose overrides
+and release package. A fresh clone does not reproduce a captured local runtime.
+
 ## Mode 1 — external collectors (default for an existing local deployment)
 
 Use this mode when Maximo, PI, and CEMS collectors already run on the host or

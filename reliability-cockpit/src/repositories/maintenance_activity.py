@@ -26,15 +26,15 @@ def calendar_start(current: datetime, days: int) -> datetime:
     return datetime.combine(local.date() - timedelta(days=days - 1), time.min, local.tzinfo).astimezone(timezone.utc)
 
 
-def _task_state(database, sources):
+def _task_state(database, sources, *, maximo_only: bool = False):
     # JSON strings "false" / "true", numbers, missing values and malformed
     # markers are UNKNOWN. Only observed JSON booleans establish task status.
-    marker = sources["maximo"]["istask"]
+    marker = sources["istask"] if maximo_only else sources["maximo"]["istask"]
     if database.engine.dialect.name == "postgresql":
         known = func.jsonb_typeof(marker) == "boolean"
         is_true, is_false = marker.as_string() == "true", marker.as_string() == "false"
     else:
-        known = func.json_type(sources, "$.maximo.istask").in_(("true", "false"))
+        known = func.json_type(sources, "$.istask" if maximo_only else "$.maximo.istask").in_(("true", "false"))
         is_true, is_false = marker.as_boolean().is_(True), marker.as_boolean().is_(False)
     return case(
         (and_(known, is_true), "TASK"),
@@ -43,7 +43,7 @@ def _task_state(database, sources):
     )
 
 
-def latest_registered_work_orders(database):
+def latest_registered_work_orders(database, *, compact: bool = False):
     """Return one current row per WO, *before* status/task/date filtering.
 
     Prefer the canonical scoped WO reference, falling back only to the retained
@@ -55,8 +55,10 @@ def latest_registered_work_orders(database):
     partition = (key.is_(None), func.coalesce(key, Event.canonical_id))
     source_site = Event.sources["maximo"]["siteid"].as_string()
     source_org = Event.sources["maximo"]["orgid"].as_string()
+    # Investigation opts into a narrow sort: fetch payload only for the winning
+    # identity. Filtering source scope and ranking order stay exactly the same.
     ranked = select(
-        Event, key.label("work_order_key"),
+        *([Event.canonical_id] if compact else [Event]), key.label("work_order_key"),
         func.count().over(partition_by=partition).label("identity_records"),
         func.row_number().over(partition_by=partition, order_by=(
             desc(Event.source_changed_at).nulls_last(), desc(Event.mart_updated_at), desc(Event.canonical_id)
@@ -66,18 +68,51 @@ def latest_registered_work_orders(database):
         or_(source_site.is_(None), source_site == "BSR"),
         or_(source_org.is_(None), source_org == "IP"),
     ).cte("ranked_work_orders")
-    task_state = _task_state(database, ranked.c.sources)
+    if compact:
+        # Extract the source object once after the latest-identity/Registry join.
+        # Carry no raw Event payload or irrelevant canonical fields downstream.
+        ranked = select(
+            Event.equipment_id, Event.status, Event.actual_start, Event.actual_finish, Event.event_type,
+            Event.sources["maximo"].label("maximo"), Registry.source_asset_number,
+            ranked.c.work_order_key, ranked.c.identity_records,
+        ).join(ranked, Event.canonical_id == ranked.c.canonical_id).join(
+            Registry, Registry.asset_ref == Event.equipment_id,
+        ).where(ranked.c.identity_rank == 1, Registry.site_code == "BSR", Registry.organization_code == "IP"
+        ).cte("latest_work_order_payload").prefix_with("MATERIALIZED", dialect="postgresql")
+    maximo = ranked.c.maximo if compact else ranked.c.sources["maximo"]
+    task_state = _task_state(database, maximo, maximo_only=True)
     invalid_order = and_(ranked.c.actual_start.is_not(None), ranked.c.actual_finish.is_not(None),
                          ranked.c.actual_finish < ranked.c.actual_start)
     start_verified = and_(ranked.c.actual_start.is_not(None),
-        ranked.c.sources["maximo"]["actual_dates"]["fields"]["actstart"]["state"].as_string() == "VALID")
+        maximo["actual_dates"]["fields"]["actstart"]["state"].as_string() == "VALID")
     finish_verified = and_(ranked.c.actual_finish.is_not(None),
-        ranked.c.sources["maximo"]["actual_dates"]["fields"]["actfinish"]["state"].as_string() == "VALID")
+        maximo["actual_dates"]["fields"]["actfinish"]["state"].as_string() == "VALID")
     source_scope_verified = case((and_(
-        ranked.c.sources["maximo"]["scope_evidence"].as_string() == "DIRECT_SOURCE",
-        ranked.c.sources["maximo"]["siteid"].as_string() == "BSR",
-        ranked.c.sources["maximo"]["orgid"].as_string() == "IP",
+        maximo["scope_evidence"].as_string() == "DIRECT_SOURCE",
+        maximo["siteid"].as_string() == "BSR",
+        maximo["orgid"].as_string() == "IP",
     ), True), else_=False)
+    if compact:
+        # Scalar facts form a reusable checkpoint for metadata and chronology.
+        facts = select(
+            ranked.c.equipment_id, ranked.c.work_order_key, ranked.c.identity_records,
+            ranked.c.status, ranked.c.actual_start, ranked.c.actual_finish,
+            ranked.c.source_asset_number,
+            func.coalesce(func.nullif(func.trim(maximo["worktype"].as_string()), ""),
+                          func.nullif(func.trim(ranked.c.event_type), ""), "UNKNOWN").label("work_type"),
+            task_state.label("task_state"), source_scope_verified.label("source_scope_verified"),
+            invalid_order.label("invalid_actual_order"),
+            case((and_(start_verified, ~invalid_order), True), else_=False).label("start_clock_verified"),
+            case((and_(finish_verified, ~invalid_order), True), else_=False).label("finish_clock_verified"),
+        ).cte("registered_work_order_facts").prefix_with("MATERIALIZED", dialect="postgresql")
+        eligible = and_(facts.c.work_order_key.is_not(None), facts.c.status == "CLOSE",
+                        facts.c.task_state == "NON_TASK", facts.c.source_scope_verified,
+                        ~facts.c.invalid_actual_order)
+        return select(
+            facts,
+            case((and_(eligible, facts.c.start_clock_verified), facts.c.actual_start), else_=None).label("activity_start"),
+            case((and_(eligible, facts.c.finish_clock_verified), facts.c.actual_finish), else_=None).label("activity_finish"),
+        ).cte("registered_work_orders")
     eligible = and_(ranked.c.work_order_key.is_not(None), ranked.c.status == "CLOSE", task_state == "NON_TASK", source_scope_verified, ~invalid_order)
     return select(
         ranked, Registry.source_asset_number,
@@ -93,11 +128,11 @@ def latest_registered_work_orders(database):
     ).cte("registered_work_orders")
 
 
-def activity_evidence(database, scope):
+def activity_evidence_statement(scope):
     c = scope.c
     known_identity = c.work_order_key.is_not(None)
     closed_non_task = and_(known_identity, c.status == "CLOSE", c.task_state == "NON_TASK")
-    statement = select(
+    return select(
         func.coalesce(func.sum(c.identity_records), 0).label("retained_records"),
         func.count().filter(known_identity).label("unique_work_orders"),
         func.coalesce(func.sum(c.identity_records - 1), 0).label("duplicate_records_excluded"),
@@ -115,12 +150,19 @@ def activity_evidence(database, scope):
         func.count().filter(known_identity, c.status == "CLOSE", c.finish_clock_verified.is_(False)).label("unknown_finish_work_orders"),
         func.count().filter(closed_non_task, c.invalid_actual_order.is_(True)).label("invalid_actual_order_work_orders"),
     ).select_from(scope)
-    with database.read_session() as session:
-        values = {k: int(v or 0) for k, v in session.execute(statement).one()._mapping.items()}
+
+
+def format_activity_evidence(row):
+    values = {k: int(v or 0) for k, v in row.items()}
     incomplete = any(values[k] for k in ("unknown_identity_records", "unknown_task_work_orders", "unknown_source_scope_work_orders", "unknown_status_work_orders", "unknown_start_work_orders", "unknown_finish_work_orders"))
     values["availability"] = "UNAVAILABLE" if values["verified_start_work_orders"] == 0 else ("PARTIAL" if incomplete else "AVAILABLE")
     values["interpretation"] = "Known evidence only. Zero dated WO does not establish zero maintenance. Open/cancelled WO, tasks and unknown evidence are not physical activity."
     return values
+
+
+def activity_evidence(database, scope):
+    with database.read_session() as session:
+        return format_activity_evidence(session.execute(activity_evidence_statement(scope)).one()._mapping)
 
 
 def daily_activity(database, scope, *, current: datetime, days: int):

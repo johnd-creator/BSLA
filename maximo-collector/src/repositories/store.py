@@ -157,6 +157,7 @@ class CollectorStore:
     def upsert_work_order(self, w: domain.WorkOrder) -> str:
         from copy import deepcopy
         from src.services.workorder_policy import TERMINAL, normalized_status
+        from src.adapters.maximo.reliability_fields import merge_evidence as merge_reliability_evidence
         row = _row(w)
         for field in dataclasses.fields(w):
             value = getattr(w, field.name)
@@ -230,13 +231,16 @@ class CollectorStore:
                         continue
                     setattr(existing, column, value)
                 merged = {**previous, **incoming}
+                if "reliability_evidence" in incoming:
+                    merged["reliability_evidence"] = merge_reliability_evidence(
+                        previous.get("reliability_evidence"), incoming["reliability_evidence"])
                 merged["extra"] = {**(previous.get("extra") or {}), **(incoming.get("extra") or {})}
                 old_h = previous.get("hierarchy") or {}
                 new_h = incoming.get("hierarchy") or {}
                 merged["hierarchy"] = {**old_h, **new_h,
                     "source_fields": {**(old_h.get("source_fields") or {}), **(new_h.get("source_fields") or {})}}
                 if status_only:
-                    for key in ("extra", "hierarchy", "workorderid"):
+                    for key in ("extra", "hierarchy", "workorderid", "reliability_evidence"):
                         if key in previous:
                             merged[key] = deepcopy(previous[key])
                     # Summary asset changes cannot relabel retained terminal detail/evidence.

@@ -104,11 +104,11 @@ class DraftFeaturesTest extends TestCase
     public function test_action_board_separates_live_wappr_records_from_unknown_risk(): void
     {
         Http::fake(['mart.test/*' => Http::response($this->backlog())]);
-        $this->signIn($this->account('MANAGER'))->get('/action-board')->assertOk()->assertSee('STRUKTUR KEPUTUSAN')
-            ->assertSee('Peringkat belum dihitung')->assertSee('TEST-WO-1')->assertSee('18 record WAPPR')
+        $this->signIn($this->account('MANAGER'))->get('/action-board')->assertOk()->assertSee('Prioritas yang sudah dinilai')
+            ->assertSee('bukan skor risiko otomatis')->assertSee('TEST-WO-1')->assertSee('18 record WAPPR')
             ->assertDontSee('DO-NOT-EXPOSE')->assertSee('bukan jumlah gangguan');
-        Http::assertSent(fn ($r) => $r->method() === 'GET' && $r['status'] === 'WAPPR' && $r['limit'] === 10);
-        Http::assertSentCount(1);
+        Http::assertSent(fn ($r) => $r->method() === 'GET' && ($r['status'] ?? null) === 'WAPPR' && $r['limit'] === 10);
+        Http::assertSentCount(2);
     }
 
     public function test_action_board_rejects_wrong_scope_status_and_connection_errors(): void
@@ -125,7 +125,7 @@ class DraftFeaturesTest extends TestCase
     {
         Http::fake(['mart.test/*' => fn () => Http::response([], 503)]);
         $this->signIn($this->account())->get('/')->assertOk()->assertSee('<details class="asset-menu"', false)->assertSee('Master Asset')->assertSee('Action Board')->assertSee('Ringkasan workspace');
-        Http::assertSentCount(2);
+        Http::assertSentCount(3);
     }
 
     public function test_engineer_can_save_request_then_finding_and_recommendation_as_one_draft(): void

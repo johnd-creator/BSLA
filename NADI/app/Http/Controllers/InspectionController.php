@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\InspectionDraft;
 use App\Models\PdmActivity;
 use App\Services\ReliabilityMart;
+use App\Services\WorkspaceActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -134,13 +135,20 @@ class InspectionController extends Controller
             return redirect()->route('inspections.show', $existing)->with('status', 'Form ini sudah tersimpan. Gunakan Lanjutkan draft untuk mengubahnya.');
         }
         $data = [...$this->validated($request, $mart), 'request_key' => $key];
-        if (! empty($data['pdm_activity_id'])) {
-            $inspection = InspectionDraft::firstOrCreate(['pdm_activity_id' => $data['pdm_activity_id']], [...$data, 'created_by' => $request->user()->id]);
-            abort_unless($inspection->created_by === $request->user()->id, 409);
-        } else {
-            $inspection = InspectionDraft::firstOrCreate(['request_key' => $key], [...$data, 'created_by' => $request->user()->id]);
-            abort_unless($inspection->created_by === $request->user()->id, 409);
-        }
+        $inspection = DB::transaction(function () use ($data, $key, $request) {
+            if (! empty($data['pdm_activity_id'])) {
+                $inspection = InspectionDraft::firstOrCreate(['pdm_activity_id' => $data['pdm_activity_id']], [...$data, 'created_by' => $request->user()->id]);
+                abort_unless($inspection->created_by === $request->user()->id, 409);
+            } else {
+                $inspection = InspectionDraft::firstOrCreate(['request_key' => $key], [...$data, 'created_by' => $request->user()->id]);
+                abort_unless($inspection->created_by === $request->user()->id, 409);
+            }
+            if ($inspection->wasRecentlyCreated) {
+                WorkspaceActivityLog::record($inspection->refresh(), $request->user()->id);
+            }
+
+            return $inspection;
+        });
 
         return redirect()->route('inspections.show', $inspection)->with('status', 'Draft permintaan/hasil inspeksi tersimpan secara lokal. Belum dikirim atau disetujui.');
     }
@@ -149,7 +157,7 @@ class InspectionController extends Controller
     {
         $inspection->load(['author:id,name', 'pdmActivity']);
 
-        return view('inspections.show', compact('inspection'));
+        return view('inspections.show', ['inspection' => $inspection, 'activityHistory' => WorkspaceActivityLog::history('inspection', $inspection->id)]);
     }
 
     public function edit(InspectionDraft $inspection)
@@ -163,14 +171,17 @@ class InspectionController extends Controller
     {
         Gate::authorize('update-inspection-draft', $inspection);
         $data = $this->validated($request, $mart, $inspection);
-        DB::transaction(function () use ($data, $inspection) {
+        DB::transaction(function () use ($data, $inspection, $request) {
             $current = InspectionDraft::whereKey($inspection->id)->lockForUpdate()->firstOrFail();
             if ($current->version !== (int) $data['version']) {
                 throw ValidationException::withMessages(['version' => 'Draft sudah berubah. Muat ulang sebelum menyimpan.']);
             }
+            $before = $current->only(['recommendation', 'follow_up_status', 'target_completion']);
+            $before = array_intersect_key($current->getRawOriginal(), $before);
             $current->fill($data);
             $current->version++;
             $current->save();
+            WorkspaceActivityLog::record($current, $request->user()->id, $before);
         });
 
         return redirect()->route('inspections.show', $inspection)->with('status', 'Draft diperbarui. Rekomendasi belum dikirim atau disetujui.');

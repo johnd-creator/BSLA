@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Enums\Role;
+use App\Models\AssetDisruption;
+use App\Models\AssetPriority;
 use App\Models\InspectionDraft;
 use App\Models\PdmActivity;
 use App\Models\User;
@@ -24,6 +26,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::define('write-asset-priorities', fn (User $user) => $user->hasRole(Role::Engineer));
+        Gate::define('update-asset-priority', fn (User $user, AssetPriority $priority) => $user->hasRole(Role::Engineer) && $priority->created_by === $user->id);
+        Gate::define('write-asset-disruptions', fn (User $user) => $user->hasRole(Role::Engineer));
+        Gate::define('update-asset-disruption', fn (User $user, AssetDisruption $event) => $user->hasRole(Role::Engineer) && $event->created_by === $user->id);
         Gate::define('write-pdm-activities', fn (User $user) => $user->hasRole(Role::Engineer));
         Gate::define('update-pdm-activity', fn (User $user, PdmActivity $activity) => $user->hasRole(Role::Engineer) && $activity->created_by === $user->id);
         Gate::define('manage-users', fn (User $user) => $user->hasRole(Role::Admin));

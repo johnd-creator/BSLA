@@ -68,9 +68,15 @@ def acquire_work_order(client, store, config, summary):
     # A server may ignore oslc.select. Never store unsolicited open-state clocks.
     if status != "CLOSE" or mode == "STATUS_ONLY":
         raw.pop("actstart", None); raw.pop("actfinish", None)
+    if mode == "STATUS_ONLY":
+        raw = {key: value for key, value in raw.items() if key in SUMMARY_FIELDS}
     entity = config.mapper(raw)
     source = dict(entity.sources or {})
     maximo = dict(source.get("maximo") or {})
+    if mode == "STATUS_ONLY":
+        # A selected summary did not observe the reliability detail fields.
+        # Do not manufacture an all-UNAVAILABLE block or dirty legacy rows.
+        maximo.pop("reliability_evidence", None)
     maximo["collection"] = {"schema_version": 1, "mode": mode, "status": status,
         "source_changed_at": change.isoformat(), "terminal_detail_frozen": frozen,
         "same_version_status_confirmed": needs_status_confirmation,

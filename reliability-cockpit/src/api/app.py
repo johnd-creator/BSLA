@@ -9,12 +9,13 @@ from __future__ import annotations
 import logging
 
 from fastapi import Depends, FastAPI, HTTPException, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from src.repositories import get_database
 from src.repositories.database import Database
 from src.repositories.store import CockpitStore
 from src.api.reliability import router as reliability_router
+from src.services.kpi import WORK_ORDER_KPI_BLOCKERS
 
 LOG = logging.getLogger(__name__)
 
@@ -55,6 +56,8 @@ class WorkOrderPage(BaseModel):
 
 
 class ReliabilityKpiView(BaseModel):
+    readiness: str | None = None
+    blockers: list[str] = Field(default_factory=list)
     id: str
     equipment_id: str | None = None
     metric: str | None = None
@@ -172,11 +175,15 @@ def create_app() -> FastAPI:
         kpi = store.get_latest_kpi(equipment_id, metric)
         if kpi is None:
             raise HTTPException(status_code=404, detail="kpi not computed yet; run sync+kpi stage")
+        # Existing persisted snapshots also came from the unsupported WO-only basis.
+        blockers = WORK_ORDER_KPI_BLOCKERS.get((kpi.metric or metric).upper(), ())
         return ReliabilityKpiView(
             id=kpi.id,
             equipment_id=kpi.equipment_id,
             metric=kpi.metric,
-            value=kpi.value,
+            value=None if blockers else kpi.value,
+            readiness="NOT_READY" if blockers else None,
+            blockers=list(blockers),
             unit=kpi.unit,
             period_start=kpi.period_start.isoformat() if kpi.period_start else None,
             period_end=kpi.period_end.isoformat() if kpi.period_end else None,

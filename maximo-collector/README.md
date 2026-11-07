@@ -68,3 +68,16 @@ All list endpoints support `q`, `offset`, `limit`, and optional
 Vendor identifiers are quarantined under `sources.maximo`.
 The dashboard's sync button only triggers the local collector; business data
 requests to Maximo remain GET-only.
+
+## Typed reliability evidence
+
+Allowlisted work-order reliability observations retain identity, field state and
+observation version. Missing, invalid and unknown clocks remain explicit; parent
+and origin identifiers do not imply resolved relationships. `downtime` is a
+boolean indicator, never a repair-duration value. Failure classification is not
+a governed failure occurrence or a valid MTBF denominator. The local projector
+revalidates retained evidence and does not contact production.
+
+Offline coverage is in `tests/test_reliability_evidence.py` and the projector
+regressions under `deploy/compose/release_tests`. Operational evidence, source
+samples and local repairs are not shipped or performed by this release.

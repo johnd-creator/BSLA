@@ -34,11 +34,11 @@ class AssetVisualTest extends TestCase
             ->assertSee('Gambar aset')->assertSee('Belum ada gambar')
             ->assertSee('3D interaktif belum tersedia')->assertSee('Read only')
             ->assertSee('Synthetic visual test asset')->assertSee('Lihat WO untuk Asset ini')
-            ->assertSee('Riwayat PdM lokal')->assertSee('Input PdM untuk Asset ini')
+            ->assertSee('Riwayat PdM lokal')->assertSee('Input pengukuran PdM')
             ->assertDontSee('type="file"', false)->assertDontSee('<canvas', false)
             ->assertDontSee('Buka 3D')
             ->assertSee('Reliability score')->assertSee('Belum cukup data')
-            ->assertSee('Prioritas perhatian aset belum dinilai.')
+            ->assertSee('Reliability score belum tersedia.')
             ->assertSee('Kejadian gangguan yang sudah diverifikasi')
             ->assertSee('Jam operasi dan availability dari historian')
             ->assertSee('Riwayat pemeliharaan yang tervalidasi')
@@ -80,17 +80,22 @@ class AssetVisualTest extends TestCase
         $this->assertSame(1, $xpath->query($menu)->length);
         $this->assertSame(1, $xpath->query($menu.'/preceding-sibling::figure[@class="asset-visual"]')->length);
 
-        $expected = [route('assets.timeline', $asset['canonical_id']), route('pdm.history', ['asset_ref' => $asset['canonical_id']])];
-        if ($role === 'ENGINEER') {
-            $expected[] = route('pdm.create', ['asset_ref' => $asset['canonical_id']]);
-        }
-        if ($registered) {
-            $expected[] = route('operations', ['equipment' => $asset['canonical_id']]);
-        }
-        $expected[] = route('work-orders.index', ['asset_ref' => $asset['canonical_id']]);
-        $expected[] = route('work-orders.index', ['asset_ref' => $asset['canonical_id'], 'view' => 'disturbances']);
+        // Task actions precede read-only history, with every existing permission preserved.
+        $expected = $role === 'ENGINEER' ? [
+            route('pdm.create', ['asset_ref' => $asset['canonical_id']]),
+            route('disruptions.create', ['asset_ref' => $asset['canonical_id']]),
+            route('priorities.create', ['asset_ref' => $asset['canonical_id']]),
+        ] : [];
         if ($registered && $role === 'ENGINEER') {
             $expected[] = route('inspections.create', ['asset_ref' => $asset['canonical_id']]);
+        }
+        $expected[] = route('work-orders.index', ['asset_ref' => $asset['canonical_id']]);
+        $expected[] = route('assets.timeline', $asset['canonical_id']);
+        $expected[] = route('pdm.history', ['asset_ref' => $asset['canonical_id']]);
+        $expected[] = route('pdm.trends', ['asset_ref' => $asset['canonical_id']]);
+        $expected[] = route('work-orders.index', ['asset_ref' => $asset['canonical_id'], 'view' => 'disturbances']);
+        if ($registered) {
+            $expected[] = route('operations', ['equipment' => $asset['canonical_id']]);
         }
         $links = iterator_to_array($xpath->query($menu.'//a'));
         $this->assertSame($expected, array_map(fn ($link) => $link->getAttribute('href'), $links));

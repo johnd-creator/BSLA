@@ -7,6 +7,7 @@ fields, and collection references never cross this boundary.
 from __future__ import annotations
 
 from src.adapters.maximo.actual_dates import clock, projected_evidence, execution_interval
+from src.adapters.maximo.reliability_fields import projected_evidence as projected_reliability_evidence
 
 from datetime import datetime
 from typing import Any, Mapping
@@ -126,6 +127,7 @@ def maintenance_event_from_payload(member: Mapping[str, Any]) -> dict[str, Any]:
     work_type = _text(member, "worktype")
     asset_ref = scoped_reference("asset", "MXASSET", assetnum, site, organization)
     actual_dates = projected_evidence(member)
+    reliability = projected_reliability_evidence(member)
     timing = execution_interval(_text(member, "status"), member.get("actstart"), member.get("actfinish"))
     if _text(member, "status") == "CLOSE":
         # The local projector supplies NULL for clocks it cannot safely replay.
@@ -156,9 +158,9 @@ def maintenance_event_from_payload(member: Mapping[str, Any]) -> dict[str, Any]:
         "scheduled_start": _timestamp(member, "schedstart"),
         "scheduled_finish": _timestamp(member, "schedfinish"),
         "source_changed_at": changed,
-        "downtime_hours": oslc_pop_number(member, "downtime"),
-        "labor_hours": oslc_pop_number(member, "actlabhrs"),
+        "downtime_hours": None,  # source downtime is a flag, not restoration duration
         "failure_code": _text(member, "failurecode"),
+        "labor_hours": oslc_pop_number(member, "actlabhrs"),
         "site_code": site,
         "organization_code": organization,
         "provenance": _provenance("MXWODETAIL", wonum, site, organization, application=None, source_number=wonum, source_updated_at=changed),
@@ -171,9 +173,11 @@ def maintenance_event_from_payload(member: Mapping[str, Any]) -> dict[str, Any]:
             "worktype": work_type, "status": _text(member, "status"),
             "actstart": clock(member.get("actstart"))["normalized"], "actfinish": clock(member.get("actfinish"))["normalized"],
             "actual_dates": actual_dates,
+            "failurecode": _text(member, "failurecode"),
+            "reliability_evidence": reliability,
             "actual_timing_state": timing["state"],
             "description": _text(member, "description"),
-            "changedate": changed, "downtime": oslc_pop_number(member, "downtime"),
+            "changedate": changed, "downtime": reliability["fields"]["downtime"]["value"],
             "reportdate": _retained_clock(member, "reportdate"),
             "schedstart": _retained_clock(member, "schedstart"),
             "schedfinish": _retained_clock(member, "schedfinish"),

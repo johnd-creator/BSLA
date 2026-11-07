@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\InspectionDraft;
 use App\Models\PdmActivity;
 use App\Models\User;
+use App\Models\WorkspaceActivity;
 use App\Services\PdmFormCatalog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Factory;
@@ -186,5 +187,44 @@ class PdmWorkflowTest extends TestCase
         $this->get('/pdm')->assertOk()->assertSee('Peminta belum dicatat')->assertViewHas('activities', fn ($page) => $page->total() === 22 && $page->count() === 20);
         $this->get('/pdm?page=2')->assertOk()->assertViewHas('activities', fn ($page) => $page->count() === 2);
         Http::assertNothingSent();
+    }
+
+    public function test_activity_audit_is_atomic_idempotent_and_uses_authenticated_actor(): void
+    {
+        $measurement = $this->measurement();
+        $this->post('/pdm', $measurement)->assertSessionHasNoErrors();
+        $this->post('/pdm', $measurement)->assertSessionHasNoErrors();
+        $activity = PdmActivity::firstOrFail();
+        $this->assertDatabaseCount('workspace_activities', 1);
+        $this->assertDatabaseHas('workspace_activities', ['kind' => 'pdm', 'subject_id' => $activity->id, 'version' => 1, 'action' => 'created', 'actor_id' => $this->owner->id]);
+        $this->put(route('pdm.update', $activity), [...$measurement, 'version' => 1, 'actor_id' => 999])->assertSessionHasNoErrors();
+        $this->assertDatabaseCount('workspace_activities', 2);
+        $this->put(route('pdm.update', $activity), [...$measurement, 'version' => 1])->assertSessionHasErrors('version');
+        $this->assertDatabaseCount('workspace_activities', 2);
+        $data = $this->analysis($activity);
+        $this->post('/inspections', $data)->assertSessionHasNoErrors();
+        $this->post('/inspections', $data)->assertSessionHasNoErrors();
+        $this->assertDatabaseCount('workspace_activities', 3);
+        $draft = InspectionDraft::firstOrFail();
+        $this->put(route('inspections.update', $draft), [...$data, 'version' => 1, 'follow_up_status' => 'completed'])->assertSessionHasNoErrors();
+        $audit = WorkspaceActivity::latest('id')->firstOrFail();
+        $this->assertSame($this->owner->id, $audit->actor_id);
+        $this->assertSame(['before' => 'open', 'after' => 'completed'], $audit->changes['follow_up_status']);
+        $this->assertArrayNotHasKey('recommendation', $audit->changes);
+        $this->assertSame(2, $audit->version);
+        $this->put(route('inspections.update', $draft), [...$data, 'version' => 1])->assertSessionHasErrors('version');
+        $this->assertDatabaseCount('workspace_activities', 4);
+        WorkspaceActivity::creating(fn () => throw new \RuntimeException('Audit write failed'));
+        try {
+            $this->withoutExceptionHandling()->put(route('inspections.update', $draft), [...$data, 'version' => 2, 'follow_up_status' => 'open']);
+            $this->fail('Audit failure must abort the write.');
+        } catch (\RuntimeException $e) {
+            $this->assertSame('Audit write failed', $e->getMessage());
+        } finally {
+            WorkspaceActivity::flushEventListeners();
+        }
+        $this->assertSame(2, $draft->fresh()->version);
+        $this->assertSame('completed', $draft->fresh()->follow_up_status);
+        $this->assertDatabaseCount('workspace_activities', 4);
     }
 }

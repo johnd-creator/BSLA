@@ -66,3 +66,21 @@ git diff --check
 Tests use SQLite in memory, synthetic catalog fixtures and mocked HTTP. They do
 not need source workbooks, production credentials or operational databases.
 See [publication and integration notes](docs/publication.md).
+
+## Local workflow additions
+
+- Manual [disruption log](docs/asset-disruption-log.md), exact asset membership,
+  unknown impact/cause, optimistic updates and immutable revisions.
+- [Action Board](docs/asset-attention-priority.md) combines local candidate clues
+  with bounded read-only WO candidates, then records an engineer's explicit
+  assessment. It does not infer failures, health or a risk score.
+- [Home feed](docs/home-feed.md) presents recorded audit events, attention and
+  source quality. Historical updates are never fabricated from timestamps.
+- [PdM point trends](docs/pdm-trends.md) keep exact identity, context, template,
+  units and date precision separate. They do not interpolate or diagnose.
+- [Compact shared UI](docs/compact-workspace-ui.md) preserves role gates,
+  accessible validation, navigation and decorative category accents.
+
+The additional compatible migrations target only the existing local development
+store. Back it up and confirm the target before separately applying migrations.
+Publishing this code does not modify, deploy or migrate any running installation.

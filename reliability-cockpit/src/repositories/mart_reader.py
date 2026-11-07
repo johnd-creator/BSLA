@@ -10,9 +10,10 @@ from zoneinfo import ZoneInfo
 from src.repositories.maintenance_activity import (
     ACTIVITY_TIMEZONE, ACTIVITY_DATE_BASIS, ACTIVITY_COUNT_BASIS,
     current_utc, calendar_start, latest_registered_work_orders, activity_evidence, daily_activity,
+    activity_evidence_statement, format_activity_evidence,
 )
 
-from sqlalchemy import Select, String, asc, case, cast, desc, func, literal, select
+from sqlalchemy import Select, String, asc, case, cast, desc, func, literal, select, true
 
 from src.repositories.mart_models import (
     AssetHealthAssessmentMart,
@@ -1769,11 +1770,9 @@ class MartQueryRepository:
 
         current = current_utc(as_of or datetime.now(timezone.utc))
         window_start = calendar_start(current, window_days)
-        work_orders = latest_registered_work_orders(self.database)
+        work_orders = latest_registered_work_orders(self.database, compact=True)
         activity_date = work_orders.c.activity_start
-        raw_work_type = _raw_work_type(work_orders.c.sources)
-        canonical_work_type = func.nullif(func.trim(work_orders.c.event_type), "")
-        work_type = func.coalesce(raw_work_type, canonical_work_type, "UNKNOWN")
+        work_type = work_orders.c.work_type
 
         scoped = select(
             work_orders.c.equipment_id.label("asset_ref"),
@@ -1781,7 +1780,7 @@ class MartQueryRepository:
             work_orders.c.work_order_key.label("event_ref"),
             activity_date.label("activity_date"),
             work_type.label("work_type"),
-        ).where(activity_date >= window_start, activity_date <= current).subquery()
+        ).where(activity_date >= window_start, activity_date <= current).cte("investigation_scoped")
         latest_rank = func.row_number().over(
             partition_by=scoped.c.asset_ref,
             order_by=(desc(scoped.c.activity_date), desc(scoped.c.event_ref)),
@@ -1790,7 +1789,7 @@ class MartQueryRepository:
             partition_by=scoped.c.asset_ref,
             order_by=(asc(scoped.c.activity_date), asc(scoped.c.event_ref)),
         ).label("prior_activity")
-        chronology = select(scoped, latest_rank, prior_activity).subquery()
+        chronology = select(scoped, latest_rank, prior_activity).cte("investigation_chronology")
 
         event_count = func.count(chronology.c.event_ref).label("event_count")
         latest_activity = func.max(chronology.c.activity_date).label("latest_activity")
@@ -1807,7 +1806,7 @@ class MartQueryRepository:
                 latest_work_type,
             )
             .group_by(chronology.c.asset_ref)
-            .subquery()
+            .cte("investigation_aggregate")
         )
 
         type_count = func.count(chronology.c.event_ref).label("type_event_count")
@@ -1816,7 +1815,7 @@ class MartQueryRepository:
             partition_by=type_counts.c.asset_ref,
             order_by=(desc(type_counts.c.type_event_count), asc(type_counts.c.work_type)),
         ).label("type_rank")
-        dominant_type = select(type_counts, type_rank).subquery()
+        dominant_type = select(type_counts, type_rank).cte("investigation_work_types").prefix_with("MATERIALIZED", dialect="postgresql")
 
         asset_statement = (
             select(
@@ -1849,22 +1848,40 @@ class MartQueryRepository:
         else:
             asset_statement = asset_statement.order_by(desc(aggregate.c.event_count), *tie_breakers)
 
-        summary_statement = select(
+        summary_query = select(
             select(func.count(ReliabilityAssetRegistryMart.asset_ref)).where(
                 ReliabilityAssetRegistryMart.site_code == SITE_CODE,
                 ReliabilityAssetRegistryMart.organization_code == ORGANIZATION_CODE,
             ).scalar_subquery().label("registered_assets"),
-            select(func.count()).select_from(scoped).scalar_subquery().label("maintenance_events"),
-            select(func.count()).select_from(aggregate).scalar_subquery().label("assets_with_activity"),
-            select(func.count()).select_from(aggregate).where(aggregate.c.event_count >= 2).scalar_subquery().label("assets_with_2plus_events"),
-            select(func.count()).select_from(aggregate).where(aggregate.c.event_count >= 3).scalar_subquery().label("assets_with_3plus_events"),
-            select(func.coalesce(func.sum(case((aggregate.c.event_count > 1, aggregate.c.event_count - 1), else_=0)), 0)).select_from(aggregate).scalar_subquery().label("repeat_activity_events"),
+            func.coalesce(func.sum(aggregate.c.event_count), 0).label("maintenance_events"),
+            func.count().label("assets_with_activity"),
+            func.count().filter(aggregate.c.event_count >= 2).label("assets_with_2plus_events"),
+            func.count().filter(aggregate.c.event_count >= 3).label("assets_with_3plus_events"),
+            func.coalesce(func.sum(case((aggregate.c.event_count > 1, aggregate.c.event_count - 1), else_=0)), 0).label("repeat_activity_events"),
+            func.count().filter(aggregate.c.event_count >= min_events).label("total"),
+        ).select_from(aggregate).cte("investigation_summary")
+        coverage_query = activity_evidence_statement(work_orders).cte("investigation_coverage")
+        page_query = asset_statement.offset(offset).limit(limit).cte("investigation_page")
+        # One read-only statement evaluates retained identity/evidence once and
+        # returns at most the requested page. LEFT JOIN keeps metadata available
+        # even when there are no matches or the offset is beyond the final page.
+        statement = select(summary_query, coverage_query, page_query).select_from(
+            summary_query.join(coverage_query, true()).outerjoin(page_query, true())
         )
-
+        page_ties = (asc(page_query.c.source_asset_number), asc(page_query.c.asset_ref))
+        if sort == "latest_activity_desc":
+            statement = statement.order_by(desc(page_query.c.latest_activity), *page_ties)
+        elif sort == "latest_gap_asc":
+            statement = statement.order_by(page_query.c.latest_gap_days.nulls_last(), *page_ties)
+        else:
+            statement = statement.order_by(desc(page_query.c.event_count), *page_ties)
         with self.database.read_session() as session:
-            summary = session.execute(summary_statement).one()._mapping
-            total = int(session.scalar(select(func.count()).select_from(asset_statement.order_by(None).subquery())) or 0)
-            rows = session.execute(asset_statement.offset(offset).limit(limit)).all()
+            result_rows = session.execute(statement).all()
+        first = result_rows[0]._mapping
+        summary = {key: first[key] for key in summary_query.c.keys() if key != "total"}
+        total = int(first["total"])
+        evidence = format_activity_evidence({key: first[key] for key in coverage_query.c.keys()})
+        rows = [row for row in result_rows if row.asset_ref is not None]
 
         assets = [
             {
@@ -1892,7 +1909,7 @@ class MartQueryRepository:
                 "count_basis": ACTIVITY_COUNT_BASIS,
                 "interpretation": "ACTIVITY_NOT_FAILURE",
             },
-            "activity_evidence": activity_evidence(self.database, work_orders),
+            "activity_evidence": evidence,
             "window": {"days": window_days, "start": window_start, "as_of": current},
             "summary": {key: int(summary[key] or 0) for key in summary.keys()},
             "assets": assets,
