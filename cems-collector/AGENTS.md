@@ -204,3 +204,12 @@ CEMS remains independent of the active NADI Laravel UI. No CEMS-to-NADI
 projection or reliability failure/MTBF/MTTR interpretation is implied by a working
 API. Preserve the exact normalization/operator overrides above; this documentation
 refresh does not authorize diagnostic polling, deployment or formula changes.
+
+## Volatile CEMS source module
+
+The optional `cems-collector/src/live/` reader and NADI CEMS UI use one shared
+six-hour RAM window, five-second sampling and minute data-signal summaries.
+Legacy persistence services are opt-in under `cems-legacy-storage`; never start
+them beside a volatile PLC reader. Source publication does not authorize a
+cutover or runtime change. Follow `cems-collector/docs/volatile-cems-pilot.md`
+from the repository root; preserve existing history, backups and single ownership.

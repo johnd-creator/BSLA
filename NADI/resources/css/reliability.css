@@ -1,0 +1,19 @@
+.reliability-panel { margin-bottom: 14px; overflow-wrap: anywhere; min-width: 0; }
+.reliability-panel .table-wrap { overflow-x: auto; max-width: 100%; margin-top: 12px; }
+.reliability-panel table { min-width: 740px; width: 100%; }
+.reliability-panel td { max-width: 300px; overflow-wrap: anywhere; vertical-align: top; }
+.reliability-panel td small, .reliability-panel dd small { display: block; color: var(--muted); margin-top: 4px; }
+.reliability-panel h2 + p, .reliability-panel .data-note { margin-top: 10px; }
+.reliability-panel .detail-grid { margin-bottom: 14px; }
+.reliability-panel :is(ol, ul) { padding-left: 20px; }
+.reliability-panel .checkbox-label { display: flex; align-items: flex-start; gap: 10px; min-height: 44px; }
+.reliability-form fieldset { border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+.reliability-panel .workspace-audit { margin-top: 10px; }
+.reliability-panel .button { overflow-wrap: anywhere; max-width: 100%; }
+@media (max-width: 700px) {
+    .reliability-panel { padding: 14px; }
+    .reliability-panel .form-actions { justify-content: flex-start; }
+}
+
+.reliability-panel .detail-heading { align-items: flex-start; }
+.reliability-panel > .form-grid > .form-actions { grid-column: 1 / -1; }

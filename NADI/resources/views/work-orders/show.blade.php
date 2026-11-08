@@ -11,6 +11,10 @@
             <div><dt>Kejadian / relasi multi-WO</dt><dd>Belum tervalidasi<small class="field-hint">ID kejadian dan relasi parent/child belum tersedia pada API.</small></dd></div>
             <div><dt>Review engineering</dt><dd>Belum tersedia<small class="field-hint">Tidak ada validasi kejadian atau penghitungan Pareto, MTBF/MTTR.</small></dd></div>
         </dl><div class="asset-draft-action"><a class="button secondary small" href="{{ route('work-orders.index', ['asset_ref' => $record['equipment_id'], 'view' => 'disturbances']) }}">History gangguan aset ini →</a></div></section>
+        <section class="panel detail-panel disruption-detail"><h2>Log gangguan yang ditautkan engineer</h2><p class="data-note">Hubungan lokal tidak mengubah WO menjadi failure. Beberapa tautan bukan bukti beberapa failure; satu kejadian dapat memiliki beberapa WO.</p>
+            @forelse($disruptionLinks as $link)<p><a class="text-link" href="{{ route('disruptions.show', $link->disruption) }}">{{ $link->disruption->reference() }}</a> · {{ \App\Models\AssetDisruptionWorkOrder::STATES[$link->relation_state] }}{{ $link->disruption->status === 'voided' ? ' · Catatan dibatalkan' : '' }}</p>@empty<p>Belum ada hubungan yang dicatat. Ini bukan bukti tidak ada gangguan.</p>@endforelse
+            <div class="pagination">{{ $disruptionLinks->withQueryString()->links() }}</div>
+        </section>
         <div class="notice info">Tidak menggunakan tanggal perubahan status, tanggal laporan, atau jadwal sebagai pengganti actual start/finish. Nilai yang kosong atau tidak valid tidak diubah menjadi nol.</div>
         @if($record['status']==='WAPPR')<div class="mapping-scope">WO ini menunggu persetujuan (WAPPR). Data dipertahankan sebagai backlog dan tidak otomatis dihitung sebagai gangguan atau reliability score.</div>@endif
         <p class="data-note">Durasi adalah actual finish − actual start dalam jam. Bukan jam kerja personel, downtime aset/unit, lama status CLOSE, atau bukti gangguan. Sumber dibaca melalui API lokal; tidak ada perubahan pada Maximo atau Mart.</p>

@@ -35,6 +35,11 @@ class AssetDisruption extends Model
         return $this->hasMany(AssetDisruptionMember::class);
     }
 
+    public function workOrders(): HasMany
+    {
+        return $this->hasMany(AssetDisruptionWorkOrder::class)->orderBy('id');
+    }
+
     public function revisions(): HasMany
     {
         return $this->hasMany(AssetDisruptionRevision::class)->orderByDesc('version');
@@ -73,6 +78,7 @@ class AssetDisruption extends Model
     {
         return [...$this->only(['asset_ref', 'event_type', 'description', 'known_cause', 'impact', 'impact_note', 'occurred_on', 'restored_on', 'timezone', 'work_order_ref', 'evidence_note', 'status']),
             'occurred_at' => $this->occurred_at?->toIso8601String(), 'restored_at' => $this->restored_at?->toIso8601String(),
-            'members' => $this->members()->orderBy('asset_ref')->get(['asset_ref', 'role'])->toArray()];
+            'members' => $this->members()->orderBy('asset_ref')->get(['asset_ref', 'role'])->toArray(),
+            'work_orders' => $this->workOrders()->get(['asset_ref', 'work_order_ref', 'record_ref', 'relation_state', 'note', 'identity_checked_at'])->toArray()];
     }
 }

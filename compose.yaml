@@ -156,6 +156,8 @@ services:
 
   cems-init:
     <<: *python-common
+    # Legacy persistence is opt-in; never run alongside the volatile PLC reader.
+    profiles: [cems-legacy-storage]
     build: ./cems-collector
     restart: "no"
     command: ["sh", "-c", "cemscollector init-db && cemscollector load-registry"]
@@ -166,6 +168,9 @@ services:
 
   cems-worker:
     <<: *python-common
+    # Legacy persistence is opt-in; never run alongside the volatile PLC reader.
+    profiles: [cems-legacy-storage]
+    restart: "no"
     build: ./cems-collector
     command: ["cemscollector", "collect"]
     environment:
@@ -177,6 +182,9 @@ services:
 
   cems-aggregator:
     <<: *python-common
+    # Legacy persistence is opt-in; never run alongside the volatile PLC reader.
+    profiles: [cems-legacy-storage]
+    restart: "no"
     build: ./cems-collector
     command: ["cemscollector", "run-aggregator", "--interval-seconds", "${CEMS_AGGREGATION_INTERVAL_SECONDS:-300}"]
     environment:
@@ -186,6 +194,9 @@ services:
 
   cems-api:
     <<: *python-common
+    # Legacy persistence is opt-in; never run alongside the volatile PLC reader.
+    profiles: [cems-legacy-storage]
+    restart: "no"
     build: ./cems-collector
     environment:
       DATABASE_URL: postgresql://cems_collector:${CEMS_DB_PASSWORD}@cems-db/cems_collector

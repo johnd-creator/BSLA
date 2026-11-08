@@ -19,11 +19,19 @@
                                 <a href="{{ route('action-board') }}" @class(['nav-link', 'selected' => request()->routeIs('action-board', 'priorities.*')]) @if(request()->routeIs('action-board', 'priorities.*')) aria-current="page" @endif>Action Board</a>
                             </div>
                         </details>
-                        <a href="{{ route('operations') }}" @class(['nav-link', 'selected' => request()->routeIs('operations')]) @if(request()->routeIs('operations')) aria-current="page" @endif><x-icon name="operations" />Operasi <small class="nav-draft">Draft</small></a>
+                        <details class="asset-menu" @if(request()->routeIs('operations', 'operations.*')) open @endif>
+                            <summary class="nav-link"><x-icon name="operations" />Operasi <x-icon name="chevron" class="menu-chevron" /></summary>
+                            <div class="asset-submenu">
+                                <a href="{{ route('operations') }}" @class(['nav-link', 'selected' => request()->routeIs('operations')]) @if(request()->routeIs('operations')) aria-current="page" @endif>Konteks operasi <small class="nav-draft">Draft</small></a>
+                                <a href="{{ route('operations.historian') }}" @class(['nav-link', 'selected' => request()->routeIs('operations.historian')]) @if(request()->routeIs('operations.historian')) aria-current="page" @endif>Historian <small class="nav-draft">Pondasi</small></a>
+                                <a href="{{ route('operations.cems') }}" @class(['nav-link', 'selected' => request()->routeIs('operations.cems')]) @if(request()->routeIs('operations.cems')) aria-current="page" @endif>CEMS</a>
+                            </div>
+                        </details>
                         <div class="nav-label nav-section">PEMELIHARAAN</div>
                         <a href="{{ route('pdm.index') }}" @class(['nav-link', 'selected' => request()->routeIs('pdm.*')]) @if(request()->routeIs('pdm.*')) aria-current="page" @endif><x-icon name="inspection" />Logbook PdM <small class="nav-draft">Draft</small></a>
                         <a href="{{ route('inspections.index') }}" @class(['nav-link', 'selected' => request()->routeIs('inspections.*')]) @if(request()->routeIs('inspections.*')) aria-current="page" @endif><x-icon name="inspection" />Rekomendasi inspeksi</a>
                         <div class="nav-label nav-section">DATA & LAPORAN</div>
+                        <a href="{{ route('reliability.index') }}" @class(['nav-link', 'selected' => request()->routeIs('reliability.*')]) @if(request()->routeIs('reliability.*')) aria-current="page" @endif><x-icon name="inspection" />Reliability</a>
                         <a href="{{ route('data-quality') }}" @class(['nav-link', 'selected' => request()->routeIs('data-quality')]) @if(request()->routeIs('data-quality')) aria-current="page" @endif><x-icon name="access" />Kualitas data</a>
                         <a href="{{ route('reports.index') }}" @class(['nav-link', 'selected' => request()->routeIs('reports.*')]) @if(request()->routeIs('reports.*')) aria-current="page" @endif><x-icon name="inspection" />Laporan</a>
                         @can('manage-users')

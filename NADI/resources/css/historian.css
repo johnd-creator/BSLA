@@ -1,0 +1,11 @@
+.historian-picker { display: flex; gap: .75rem; align-items: end; flex-wrap: wrap; margin-block: .5rem 1rem; }
+.historian-picker > div { flex: 1 1 15rem; }
+[data-historian] .table-wrap { overflow-x: auto; }
+[data-historian] td, [data-historian] th { overflow-wrap: anywhere; }
+[data-history-result] { max-height: 22rem; overflow: auto; }
+[data-historian-status] { min-height: 1.5rem; }
+[data-historian] .data-table { min-width: 640px; }
+[data-historian-values] td:nth-child(2) { white-space: nowrap; overflow-wrap: normal; }
+[data-historian-values] td:first-child { max-width: 14rem; }
+.historian-scroll-hint { display: none; }
+@media (max-width: 700px) { .historian-scroll-hint { display: block; } }

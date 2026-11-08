@@ -238,3 +238,12 @@ Feature detail/evidence stays in `NADI/docs/`; API contracts stay in
 `reliability-cockpit/docs/`; source evidence in the owning knowledge/collector
 component. Old release reports, `USERGUIDE.md`, worktrees and runtime backups are
 historical references, not instructions to recreate old architecture.
+
+## Volatile CEMS source module
+
+The optional `cems-collector/src/live/` reader and NADI CEMS UI use one shared
+six-hour RAM window, five-second sampling and minute data-signal summaries.
+Legacy persistence services are opt-in under `cems-legacy-storage`; never start
+them beside a volatile PLC reader. Source publication does not authorize a
+cutover or runtime change. Follow `cems-collector/docs/volatile-cems-pilot.md`
+from the repository root; preserve existing history, backups and single ownership.

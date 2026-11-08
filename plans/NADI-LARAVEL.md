@@ -92,3 +92,11 @@ hanya karena tercantum sebagai kebutuhan masa depan.
 Tidak ada source write, automatic score, failure count dari WO mentah, risiko/
 approval yang diturunkan dari nama role, source credential di consumer, penggantian
 DB/volume, atau penghapusan history. Panduan rinci ada di [AGENTS](../AGENTS.md).
+
+## Source additions, 8 November 2026
+
+Disruption/WO links and versioned local Reliability review are implemented in
+[NADI](../NADI/docs/reliability-evidence.md). Official KPIs and exposure remain
+NOT_READY. The [historian demonstration](../NADI/docs/historian-demand.md) is
+simulation-only. The [CEMS RAM bridge](../NADI/docs/cems-live.md) has separate
+source-owner/cutover gates; publication alone activates neither source.
