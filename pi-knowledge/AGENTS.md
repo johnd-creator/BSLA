@@ -1,5 +1,16 @@
 # AGENTS.md — PI Knowledge
 
+## Solo developer workflow
+
+Follow root `../AGENTS.md`. Work directly in the active checkout: inspect existing
+changes → edit a small scoped change → run relevant checks → inspect the result.
+Preserve unrelated work. No routine extra worktree, subagent, mandatory branch,
+handoff or layered approval process. Documentation-only work needs factual/link
+checks and `git diff --check`, not source calls or restarts. Report checks actually
+run and limitations. Do not commit/push/deploy or change runtime/data ownership
+without a covering request. The active product UI is `../NADI/` (Laravel); this
+component keeps its existing responsibility and safety boundary.
+
 ## Mission
 
 Discover and maintain authorized PI Web API knowledge for operational and reliability use without altering PI production configuration or data.
@@ -34,11 +45,9 @@ Discover and maintain authorized PI Web API knowledge for operational and reliab
 
 ## Git Rules
 
-Use a dedicated branch:
-
-```bash
-git switch -c discovery/<short-topic>
-```
+Inspect the current branch/status and continue directly in the active checkout.
+No automatic branch, fetch or worktree is needed. Keep the knowledge evidence
+change small and test locally before considering explicitly requested discovery.
 
 Keep commits focused:
 
@@ -49,3 +58,15 @@ docs(pi): document stream query behavior
 ```
 
 Do not merge, reset, force-push, or rewrite history unless explicitly authorized.
+
+## NADI historian/exposure boundary
+
+The PI Collector already exists in `../pi-collector/`; do not create another.
+Technical registry entries are not verified NADI Asset↔AF signal mappings.
+Historian exposure integration for MTBF is future work, requiring explicit state,
+quality, time alignment, coverage and operating-boundary definitions. Never infer
+Asset identity from tag similarity or calendar hours from absent data.
+
+Do not retry credentials, discover production or change collection/backfill
+without a covering request and a check of current runtime ownership.
+Stored evidence may be read with its age/verification limits kept explicit.

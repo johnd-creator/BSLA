@@ -1,5 +1,30 @@
 # AGENTS.md — CEMS Collector
 
+## Solo developer workflow
+
+Follow root `../AGENTS.md`. Work directly in the active checkout: inspect existing
+changes → edit a small scoped change → run relevant checks → inspect the result.
+Preserve unrelated work. No routine extra worktree, subagent, mandatory branch,
+handoff or layered approval process. Documentation-only work needs factual/link
+checks and `git diff --check`, not source calls or restarts. Report checks actually
+run and limitations. Do not commit/push/deploy or change runtime/data ownership
+without a covering request. The active product UI is `../NADI/` (Laravel); this
+component keeps its existing responsibility and safety boundary.
+
+## Existing deployment and database ownership
+
+Read `../AGENTS.md` first. Reuse `cems-db` / database `cems_collector` / volume
+`cems-db` in root Compose project `reliability-cockpit-platform`.
+Managed DB port is private 5432; host 5435 belongs to the legacy standalone
+container. Do not restart that container, add another DB, overwrite `.env`,
+or run a local collector alongside `cems-worker`. The managed web default is
+3003 and API is 8003. `cems-aggregator` owns aggregation separately from polling.
+
+Cockpit has a configurable CEMS API base, but its CEMS projection is pending.
+Do not claim that NADI already ingests emissions merely because this API works.
+Preserve all normalization and operator overrides below. Source diagnostics
+must not be run as an implicit effect of consumer/UI development.
+
 ## Mission
 
 Collect CEMS (Continuous Emissions Monitoring System) readings from the
@@ -48,16 +73,17 @@ maximo-collector architecture and workspace safety conventions.
    order for parameters whose current read is implausible (SO2/CO), with
    plausibility bounds and rate-limited logging. Anything else must be
    recorded as `status: unknown` in the registry, not guessed.
-7. The collector writes only to its **own** Postgres store (:5435).
+7. The collector writes only to its **own existing** Postgres store
+   (`cems-db:5432` managed; host :5435 is legacy standalone only).
 8. **Outbound push to the KLHK/CEMS server is intentionally absent.**
-   The DAZ `SendDataToCEMS` job (POST to 192.168.198.22) was not ported —
+   The legacy outbound reporting job was not ported —
    this collector is read-only end to end. If reporting is ever needed it
    belongs in a separate, explicitly authorized component.
 
 ## Architecture
 
 ```text
-registry/cems-parameters.yaml (14 parameters, stack CB001)
+registry/cems-parameters.yaml (15 current parameters, stack CB001)
       │ (cemscollector load-registry)
       ▼
 cemscollector collect ──▶ ModbusClient (FC03/FC04 only, rate-limited,
@@ -68,28 +94,33 @@ Normalizer (gas conversion → threshold clamp → state overrides →
       │
       ▼
 Postgres (contract-shaped: stack, parameter, reading_realtime,
-          reading_5min, sync_cursor, collect_run)  :5435
+          reading_5min, sync_cursor, collect_run)  managed cems-db:5432
       │
       ├──▶ cemscollector aggregate (5-minute windows, idempotent upserts)
       ▼
-FastAPI read-only views (:8003) ──▶ Next.js dashboard (:3000, optional)
+FastAPI read-only views (:8003) ──▶ Next.js dashboard (managed host :3003)
 ```
 
 ## Commands
 
+These bootstrap commands describe a fresh isolated installation. They are not
+the default for the current managed workspace. Reuse root Compose and existing
+stores; create env files only if absent and avoid duplicate polling. Tests can
+use the existing venv without starting a DB or contacting the PLC.
+
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -e .
-cp .env.example .env                      # PLC host/port + DATABASE_URL
+[ -e .env ] || cp .env.example .env        # fresh setup only; preserve existing settings
 docker compose up -d postgres             # Postgres on :5435
 cemscollector init-db
-cemscollector load-registry               # stacks + 14 parameters from YAML
+cemscollector load-registry               # stacks + current parameter registry from YAML
 cemscollector collect                     # continuous polling (Ctrl-C stops)
 cemscollector collect --once              # single cycle
 cemscollector aggregate                   # aggregate last completed window
 cemscollector aggregate --start T --end T # backfill (ISO-8601)
 cemscollector diagnose                    # read-only probe of every parameter
 cemscollector serve                       # FastAPI on 127.0.0.1:8003
-.venv/bin/python -m unittest discover -s tests   # 81 hermetic tests
+.venv/bin/python -m unittest discover -s tests   # current hermetic test suite
 ```
 
 Dashboard (separate process):
@@ -111,35 +142,14 @@ maintenance; raw O2 > 18 → maintenance on all parameters) → rounding
 
 Maintenance values: Hg → 0.0001, everything else → 1.0.
 
-**Production verification (2026-08-19, live DAS at 172.16.201.135):**
-simultaneous PLC-vs-production sampling showed the live pipeline applies
-**span × O2-reference correction only** — the gas conversion and the
-maintenance/threshold logic are NOT active in production. The shipped
-registry therefore sets `normalization.enabled: false` for every
-parameter and carries the verified spans under `adjustment:`
-
-| parameter | span (adjust) | O2-reference |
-|---|---|---|
-| SO2 | 0.4 | 7 % |
-| NOx | 0.5 | 7 % |
-| PM | 0.6 | 7 % |
-| Hg | 1.0 | 7 % |
-| Laju_alir | 44.15625 | — |
-| O2, CO, Humidity, Pressure, Temp, Opacity | 1.0 | — (passthrough) |
-
-Verified end-to-end deviation vs the production UI: ≤ ~1.6 % mean per
-parameter (process noise). Opacity (register 3116) exists in production
-but was missing from the DAZ seed — added as `documented`.
-
-**Operator override (2026-08-20):** NO, NO2, CO2, and Flow are stored
-**raw** (`value_final = value_raw`) by explicit operator request — their
-O2-reference correction (and Flow's span 0.6) is disabled in the shipped
-registry even though production still applies it. Laju_alir keeps
-adjust 44.15625; its raw ≈ 36 is the genuine span-scaled register content
-(register 3102, shared with Flow), not a decode error — the engineering
-value is the corrected final (raw × 44.15625 ≈ 1590 m³/s). Do not
-"correct" `value_raw` and do not re-enable the disabled corrections
-without operator approval.
+**Normalization and operator overrides:** the configured registry is authoritative
+for normalization enablement, spans, reference correction and raw passthrough.
+Preserve each approved setting and the raw/final distinction. NO, NO2, CO2 and
+Flow have explicit raw-passthrough behavior; do not re-enable correction or
+"repair" raw values without an authorized engineering change. Validate intended
+semantics against code/tests and reviewed local evidence, not comparisons copied
+into public docs. Production endpoints, observed values and calibration reports
+are private and are not reproduced here.
 
 **Documented divergences from DAZ:**
 - The Laravel formula-string engine (shunting-yard evaluation of
@@ -174,8 +184,8 @@ without operator approval.
   delegate signature at runtime.
 - Learned probe overrides are process-local; to make one durable, edit the
   registry YAML and flip the parameter to `verified`.
-- Postgres port is **5435** (after cockpit 5432, pi-collector 5433,
-  maximo-collector 5434); API port **8003**.
+- Standalone legacy Postgres uses host port **5435**. Managed Compose uses
+  private `cems-db:5432` without a published DB port; API port is **8003**.
 
 ## Git Rules
 
@@ -187,3 +197,10 @@ feat(api): contract-shaped views
 
 Do not merge, reset, force-push, or rewrite history unless explicitly
 authorized.
+
+## Product scope
+
+CEMS remains independent of the active NADI Laravel UI. No CEMS-to-NADI
+projection or reliability failure/MTBF/MTTR interpretation is implied by a working
+API. Preserve the exact normalization/operator overrides above; this documentation
+refresh does not authorize diagnostic polling, deployment or formula changes.

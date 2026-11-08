@@ -1,83 +1,107 @@
-# Maximo Collector
+# Maximo Collector — sumber dan Reliability Mart NADI
 
-Read-only Maximo OSLC collector for site BSR. Auto-login (programmatic
-`j_security_check`), GET-only data requests, delta sync via `changedate` /
-`statusdate` watermarks, contract-shaped local Postgres store, and a FastAPI
-read-only API for consumers such as the reliability cockpit. The verified
-`mxapiasset` structure is the preferred equipment source; its additional
-scalar fields are retained under `sources.maximo.extra`.
+Collector Python/FastAPI read-only untuk Maximo BSR/IP. Source store dan
+Reliability Mart berada dalam **database Maximo Collector existing**. Backend
+FastAPI membaca Mart dan [NADI Laravel](../NADI/README.md) membaca DTO-nya;
+consumer tidak menerima source credentials atau memulai collection.
 
-See `AGENTS.md` for safety rules and architecture.
+Baca [AGENTS](AGENTS.md) dan [runbook managed runtime](../deploy/compose/README.md).
+Scope, source lock, rate minimum 1 request/detik dan body cap 1 MiB dipertahankan.
+Business calls hanya GET/HEAD/OPTIONS; satu exception POST adalah controlled
+`/j_security_check` authentication, bukan perubahan data Maximo.
 
-## Quick start
+## Deployment dan cara kerja
+
+Existing Compose project `reliability-cockpit-platform` memakai `maximo-db` /
+`maximo_collector` / volume `maximo-db`, API default 8002 dan dashboard 3001.
+Port standalone lama 5434 bukan DB managed. Jangan menyalin `.env`, membuat DB,
+menjalankan worker tambahan atau bootstrap ulang saat memperbaiki NADI.
+
+Kerja solo developer langsung checkout aktif: edit → test sesuai dampak → lihat
+hasil. Runtime existing dapat memakai image overlay privat; checkout yang berubah tidak otomatis
+berarti runtime berubah. Ikuti exact-service tools, bukan broad rebuild/restart.
+Dokumentasi tidak memerlukan restart atau source requests.
+
+## Acquisition WO saat ini
+
+- Bounded newest-first summary dan active-status queue memverifikasi BSR/IP;
+  prefix WO tambahan bukan bukti scope. Active queue dibatasi 25 pemeriksaan
+  terpilih per run dan berbagi lock/request budget yang sama.
+- Empat tahun kalender dari verified `reportdate` dalam Asia/Jakarta, cutoff
+  inklusif. Bukan `changedate`, actual clock atau WO number. Invalid/missing/naive/
+  future dates tetap unknown. Older retained records tetap bisa dibaca/proyeksi;
+  tidak ada purge atau penyembunyian history.
+- Detail hanya untuk WO baru/berubah sesuai lifecycle. CLOSE mengambil actuals
+  pada observation/transition yang memenuhi syarat. Retained same-terminal-status
+  CLOSE/CAN/CANCEL tetap frozen meski fields kosong; CAN/CANCEL summary-only.
+- Open actual clocks tidak diminta/dianggap current evidence; reopen tidak boleh
+  memakai clocks cycle lama. Konflik same-version status perlu exact confirmation.
+- Cursor sukses tidak maju untuk incomplete traversal, mapping/scope/order/
+  transport failure. Page catch-up bertahap tetap bounded; API 200 bukan complete
+  population/freshness. Tidak ada historical/terminal backfill otomatis.
+
+Aturan publik ada dalam [lifecycle policy](src/services/workorder_policy.py),
+[age window](src/services/workorder_age.py), [actual dates](src/adapters/maximo/actual_dates.py)
+dan [recency guards](docs/maximo-wo-recency-001.md). Pertahankan command/interval
+worker existing yang telah diotorisasi; jangan menggantinya dengan scheduler
+lain atau menyamakan post-cycle pause dengan freshness.
+
+## Mart dan evidence reliability
+
+`mart-projector` menggunakan local Equipment/WO dan read-only contract mount,
+tanpa panggilan Maximo. Mart bukan DB baru. Registry, FMEA, RCFA, health dan overhaul
+existing dipertahankan; projector operasional tidak mengoleksi semua domain itu.
+
+Failure code diproyeksikan ke `maintenance_event`; allowlisted reliability evidence
+menjaga per-field version, identity/scope, null versus omission dan clock validity.
+`downtime` sumber adalah boolean, **bukan jam**; labor dan actual WO elapsed juga
+bukan repair/restoration. Evidence baru hanya terisi saat lifecycle detail normal
+memerlukannya. Public DTO tidak otomatis dibuka ke seluruh vendor evidence.
+
+[Regresi evidence](tests/test_reliability_evidence.py) memakai fixture sintetis.
+Laporan sumber, aktivasi dan repair operasional tetap privat.
+[Roadmap MTBF/MTTR](../plans/MTBF-MTTR.md) tetap membutuhkan validated failure
+events, historian exposure dan repair boundary. KPI WO-only tetap NOT_READY.
+
+## API dan dashboard
+
+GET `/equipment`, `/work-orders`, `/service-requests`, `/persons`, `/items`,
+`/labor`, `/sync/status`, `/health`, `/stats`, `/collect-runs` menyediakan view
+lokal. Filter/pagination mengikuti kontrak resource; vendor identity ada di
+`sources.maximo`. `/equipment/{asset_id}/status-history` adalah observation history,
+bukan otomatis event operasi/failure.
+
+POST lokal `/sync/{object}` adalah trigger collection, **bukan read-only lookup**.
+Tombol dashboard juga dapat memulai source GETs; jangan klik/jalankan hanya untuk
+menguji UI consumer. Object selection dan trigger perlu scope kerja yang sesuai.
+
+`mxapiasset` adalah preferred equipment source, scoped CS01. Person memakai
+`locationorg=IP`, Labor `worksite=BSR`, Item `site=BSR`; zero rows tidak mengizinkan
+perluasan query atau tebakan item-set/object. Gunakan owning knowledge evidence.
+
+## Recovery manual yang tetap terpisah
+
+- `mxcollector collect-asset-references --report-only`: laporan coverage lokal.
+  Exact-ID source recovery hanya bila memang diminta dengan budget/scope sesuai
+  [implementasi bounded recovery](src/services/asset_references.py).
+- `collect-asset-inventory-batch --workbook <engineer-reference.xlsx>` adalah
+  source collection manual resumable; bukan bagian default UI/startup. Source
+  exhaustion dan verification wajib sebelum complete publication.
+- `refresh-asset-inventory --workbook <engineer-reference.xlsx> --local-only`
+  melakukan refresh klasifikasi lokal, tetap bukan perintah untuk menjalankan
+  tanpa kebutuhan. [Implementasi inventory](src/services/asset_inventory.py).
+- Historical actual backfill tetap langkah terpisah; jangan mengulang recovery
+  lama untuk mengisi evidence yang dibekukan policy terminal.
+
+## Pemeriksaan lokal
 
 ```bash
-python3 -m venv .venv && .venv/bin/pip install -e .
-cp .env.example .env          # fill MAXIMO_USERNAME / MAXIMO_PASSWORD
-docker compose up -d postgres # Postgres on :5434
-mxcollector init-db
-mxcollector sync              # WO/SR and operational master data
-mxcollector sync mxapiasset   # explicit asset baseline/status refresh
-mxcollector backfill          # cursor-independent, idempotent BSR WO traversal
-mxcollector diagnose master-data # GET-only probe for Persons, Items, Labor
-mxcollector serve             # http://127.0.0.1:8002 (+ /docs)
+.venv/bin/python -m unittest discover -s tests
+git diff --check
 ```
 
-The master-data sync uses verified scopes: Persons `locationorg="IP"`, Labor
-`worksite="BSR"`, and Items `site="BSR"`. Person, Item, and Labor rows are
-written in batches to the local Postgres store. If the diagnostic reports
-`mxitem: zero_rows`, do not broaden the query by guesswork; verify the Item
-object’s live site/item-set scope in `maximo-knowledge` first.
-
-`mxcollector backfill` never advances the incremental `mxwodetail` cursor. It
-uses the verified `siteid="BSR"` scope, follows Maximo’s server-provided
-`oslc:nextPage`, and returns a non-zero partial result when its configurable
-page cap is reached. A rerun is safe because work orders are upserted by
-`wonum`; do not treat a page-cap result as complete. The legacy `like`
-wildcard predicate is not used because this Maximo instance returns
-`BMXAA8744E` for it (and for the unsupported incremental date comparator on
-`mxwodetail`).
-
-The dashboard is a separate Next.js process:
-
-```bash
-cd web && npm install
-MAXIMO_COLLECTOR_API_BASE=http://127.0.0.1:8002 npm run dev
-# open http://127.0.0.1:3000
-```
-
-## API
-
-Read-only views whose field names follow `reliability-data-contracts`:
-
-- `GET /equipment?changed_since=…`
-- `GET /equipment/{asset_id}/status-history`
-- `GET /work-orders?changed_since=…`
-- `GET /service-requests?changed_since=…`
-- `GET /persons?status=…&location_org=…&q=…`
-- `GET /items?status=…&item_type=…&issue_unit=…&order_unit=…&q=…`
-- `GET /labor`
-- `GET /labor?status=…&work_site=…&person_id=…&q=…`
-- `GET /sync/status`, `GET /health`
-- `GET /stats`, `GET /collect-runs`
-- `POST /sync/{object}` — trigger one object's sync
-
-All list endpoints support `q`, `offset`, `limit`, and optional
-`changed_since` / `changed_until` where the resource has a source watermark.
-
-Vendor identifiers are quarantined under `sources.maximo`.
-The dashboard's sync button only triggers the local collector; business data
-requests to Maximo remain GET-only.
-
-## Typed reliability evidence
-
-Allowlisted work-order reliability observations retain identity, field state and
-observation version. Missing, invalid and unknown clocks remain explicit; parent
-and origin identifiers do not imply resolved relationships. `downtime` is a
-boolean indicator, never a repair-duration value. Failure classification is not
-a governed failure occurrence or a valid MTBF denominator. The local projector
-revalidates retained evidence and does not contact production.
-
-Offline coverage is in `tests/test_reliability_evidence.py` and the projector
-regressions under `deploy/compose/release_tests`. Operational evidence, source
-samples and local repairs are not shipped or performed by this release.
+Reuse venv existing dan fixture hermetic. Uji cursor/partial replay, terminal
+freeze, four-year age, scope, summary-only evidence, actual precision dan null
+semantics sesuai dampak. Tidak perlu produksi, DB baru atau bootstrap.
+Fresh isolated installation memerlukan pemilihan deployment/owner yang eksplisit;
+contoh standalone tidak boleh menggantikan store managed yang berisi data.

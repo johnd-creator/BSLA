@@ -1,5 +1,16 @@
 # AGENTS.md — Maximo Knowledge
 
+## Solo developer workflow
+
+Follow root `../AGENTS.md`. Work directly in the active checkout: inspect existing
+changes → edit a small scoped change → run relevant checks → inspect the result.
+Preserve unrelated work. No routine extra worktree, subagent, mandatory branch,
+handoff or layered approval process. Documentation-only work needs factual/link
+checks and `git diff --check`, not source calls or restarts. Report checks actually
+run and limitations. Do not commit/push/deploy or change runtime/data ownership
+without a covering request. The active product UI is `../NADI/` (Laravel); this
+component keeps its existing responsibility and safety boundary.
+
 ## Mission
 
 Discover, verify, document, and maintain the Maximo API knowledge available to this organization without changing production data.
@@ -53,19 +64,11 @@ For every resource:
 
 ## Git Working Rules
 
-Before modifying files:
-
-```bash
-git status
-git branch --show-current
-git fetch --all --prune
-```
-
-Create a dedicated branch:
-
-```bash
-git switch -c discovery/<short-topic>
-```
+Before editing, inspect `git status` and the current branch. Continue in the
+active checkout; no automatic fetch/branch/worktree is required for local work.
+Preserve existing edits and keep evidence changes focused. Source discovery is
+opt-in and bounded even though it is read-only; documentation/UI work does not
+authorize new source requests.
 
 Use small commits:
 
@@ -75,7 +78,7 @@ feat(discovery): add asset object structure
 docs(mapping): map failure fields
 ```
 
-Before handoff:
+Before reporting the result:
 
 ```bash
 git diff --check
@@ -83,3 +86,13 @@ git status
 ```
 
 Do not merge, rebase, reset, force-push, or delete branches unless explicitly instructed.
+
+## Current NADI evidence boundary
+
+Laravel consumes the existing Collector/Mart/API, never discovery directly.
+Use `docs/mx-015a-maintenance-failure-semantics.md` and the Collector source-evidence
+report for the newest technical findings. A field or schema name does not prove
+failure identity, parent/child taxonomy, operating exposure or repair duration.
+MXWODETAIL downtime is boolean. Failure Code business HTTP 400 is not proof of
+a permission denial; preserve actual observed status. BSR workbook mappings stay
+proposals unless separately validated/authorized, never auto-applied hierarchy.

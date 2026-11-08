@@ -1,270 +1,240 @@
-# AGENTS.md — Power Plant Data Platform
+# AGENTS.md — BSLA workspace
 
-Read [plans/README.md](plans/README.md) first, then the scoped `AGENTS.md` and
-`CONTEXT.md` for any component you touch. Root rules govern platform ownership;
-scoped rules govern source safety, normalization and implementation details.
+Read this file, then the owning component's `AGENTS.md` and relevant source docs.
+This is one Git repository. **NADI Laravel in `NADI/` is the active product
+workspace.** `reliability-cockpit/` remains the FastAPI/Mart backend and retained
+Next.js application; choosing Laravel does not authorize a production cutover.
 
-## Current Phase-1 runtime handoff — 2026-10-08
+## 1. Solo developer workflow
 
-Read [authoritative acceptance](plans/NADI-PHASE-1-ACCEPTANCE.md) and
-[runtime report](reliability-cockpit/docs/nadi-phase1-runtime-acceptance-001.md).
-Merged main c2fb0fc/PR20 foundation is deployed in PI API/NADI API/UI. Existing
-Maximo-owned Mart002/003/004 and SELECT-only reader grants are ready; PI004quality
-is a separate already accepted migration. Actual control checkout remains0c800da
-with accepted private overrides; source workers/projector/volumes are preserved.
-PROPOSED0/VERIFIED0, approved signals0, projected condition evidence0. Do not
-seed mappings/signals or project technical registry merely because schema exists.
-Human crosswalk remains required; API freshness policy is blank/UNKNOWN pending
-approved engineering policy. Software runtime ACCEPTED; product BLOCKED, Phase1
-CURRENT/PARTIAL. PI technical BAD_QUALITY18 is visible separately from433/433
-collection success. Runtime is ready for controlled human-MATCH-gated IDN002B,
-not an authorization for autonomous mapping verification/source canary.
-Older checkpoint paragraphs below retain historical context; this handoff and
-acceptance override their absent-schema/open-PR/candidate deployment statements.
+- Work directly in the active checkout. Check `git status` and the current branch
+  before edits; preserve all unrelated staged, unstaged and untracked work.
+- Make a small useful change, run checks proportional to its impact, then inspect
+  the result in the existing preview: **edit → test → inspect**.
+- No routine extra worktrees, subagents, handoff gates, parallel implementation
+  teams or mandatory branch/fetch/review ceremonies. Use extra structure only
+  when explicitly needed or requested, not as the default way to resume work.
+- Reuse current environments and dependencies. Read package scripts before testing.
+  Documentation-only changes need fact/link checks and `git diff --check`, not
+  application restarts, source collection or migrations.
+- Report what changed, checks actually run, and unresolved limits. A source check
+  or DOM test is not a browser visual pass; a focused suite is not a full pass.
+- Do not commit, push, merge, deploy, rewrite history, discard changes or switch
+  deployment modes without a request that authorizes it. Never reset or clean
+  the working tree as a shortcut. Delete obsolete plans only recoverably after
+  moving useful requirements into the current roadmap; retain evidence/runbooks.
 
-## Existing Mart runtime checkpoint
+## 2. Existing data and runtime are the default
 
-NADI-RUNTIME-002 uses the existing Maximo Collector DB for Mart, never a new DB.
-Public NADI `RELIABILITY_MART_DATABASE_URL` is SELECT-only; legacy `DATABASE_URL`
-is separate. Controlled schema/mapping commands require explicit
-`RELIABILITY_MART_ADMIN_DATABASE_URL` and expected owner DB, no fallback.
-Read [Mart runtime runbook](reliability-cockpit/docs/mart-runtime.md) before DDL
-or Compose operations; preserve accepted ignored Maximo/PI overrides, cursors,
-recovery floor, volumes and other services. Governance is deliberately applied,
-not legacy init-db or automatic source collection. No real pilot mapping is
-created by runtime reconciliation; Phase 1 remains CURRENT/PARTIAL.
+Continue using the existing databases, volumes, APIs and collector identities.
+Do not create a new operational database to implement a feature or fix an empty
+page. Reliability Mart is a set of tables **inside the Maximo Collector DB**.
 
-## 1. Identity, priorities and source of truth
+- No DB container/DSN/volume/project-name replacement or architecture migration
+  without an explicit request. Correct a mistaken DSN only after verifying its
+  documented existing owner. Do not create a store as a side effect.
+- Never use `docker compose down -v`, remove volumes, drop/truncate tables, reset
+  cursors, or redownload production history to compensate for a wrong connection.
+- Compatible schema additions belong in the existing owning store. Back up and
+  verify before a requested data/migration operation. Tests may use temporary,
+  hermetic stores, never operational data or source systems.
+- Preserve `.env` files, secrets, private workbooks, models, local logs and backups.
+  Never copy an example over an existing `.env`, print full DSNs, or expose
+  unfiltered `docker inspect` / interpolated Compose environment output.
+- Laravel's existing ignored `NADI/database/development.sqlite` owns local accounts,
+  inspection/recommendation drafts, PdM, manual disruptions, asset priorities and
+  workspace audit records. It is not a source replica or production replacement.
+- NK has no DB. It consumes the existing PI Collector API or manual/CSV input.
 
-This is one Git monorepo for **Power Plant Data Platform**, evolved from
-Reliability Knowledge Starter. Shared foundation: Maximo Knowledge/Collector,
-PI Knowledge/Collector, CEMS Collector, Reliability Data Contracts/governance.
-**NADI is the main product** (`reliability-cockpit/`). **NK is an intentional
-child application** for coal calorific value prediction, outside NADI's
-Reliability domain. Future consumers can reuse the same collectors.
+## 3. Components and data paths
 
-At PLATFORM-ROADMAP-001 audit (`main ef07a26`, 2026-10-07), seven components
-are merged; NK's eighth logical component is still on
-`feature/pi-governed-source-adapter`. Do not invent a local NK path on main,
-copy feature binaries/data into a docs task, or count branch work as DONE.
-
-Authority by purpose:
-
-- `plans/PLATFORM-VISION.md`: shared ownership, storage and consumer boundaries.
-- `plans/NADI-ROADMAP.md`: Phase 0–5, current Phase 1, next technical task.
-- `plans/reliability-cockpit-platform/05-roadmap-implementasi.md`: M0–M8 engineering
-  backlog and reconciled milestone status. Old 20-Aug snapshot is historical.
-- `plans/NK-ROADMAP.md`: NK child roadmap and branch-only implementation state.
-- `plans/REPOSITORY-STATUS.md`: baseline/PR/branch/documentation debt and evidence.
-- Scoped contracts, discovery and domain docs: exact accepted source semantics.
-
-Factual NADI Phase 0 is complete within `v0.1.0-rc.1`; Phase 1 is current/partial.
-**NADI-PI-001 — Governed PI Source Adapter** is MERGED via PR #12 in
-`main 3e981a3c5e20e148feba5b01ec0b1c134ca89205` (2026-10-07). PR #13/#14
-Maximo WO acceptance is preserved: registered BSR/IP factual views are CURRENT,
-MXR-004 remains PARTIAL. NADI-PI-RUNTIME-001 upgrades the existing PI store with
-migration 004 and deploys that reviewed PI main image. New operator/lease/Compose
-changes are separately reviewable in its unmerged PR; never confuse the runtime
-control checkout, reviewed image, and candidate branch.
-See [PI runtime evidence](pi-collector/docs/nadi-pi-runtime-001.md).
-NADI-IDN-002 pilot mapping follows PI readiness; first reconcile existing Mart
-schema/runtime debt through NADI-RUNTIME-002. PI evidence projection,
-integration status and Phase 1 acceptance remain pending. Do not implement
-Phase 2–5 or import unrelated feature/NK work merely because it is on a roadmap.
-
-## 2. Reuse stores — no new application database
-
-Continue development using existing collectors, APIs, databases and volumes.
-Do not create a database, duplicate collector or new Compose project for a
-routine feature or empty-page fix. Explicit architecture/data-migration work
-must separately establish ownership and acceptance. Compatible schema additions
-belong in the existing owning store. Temporary hermetic test DBs are allowed;
-they never replace operational history or contact production.
-
-| Owner | Existing managed service/database | Responsibilities |
+| Directory | Responsibility | Persistence |
 |---|---|---|
-| Maximo Collector | `maximo-db` / `maximo_collector` | source records, canonical Reliability Mart, Registry and governed mappings |
-| PI Collector | `pi-db` / `pi_collector` (TimescaleDB) | source registry, snapshots, history and collection state |
-| CEMS Collector | `cems-db` / `cems_collector` | raw/final readings, aggregation and collection state |
-| Legacy Cockpit | `cockpit-db` / `cockpit` | Maximo API ingestion and legacy KPIs |
-| NK | **No database** | model/scaler/mapping files and session history; PI Collector API consumer |
-
-Compose volumes `maximo-db`, `pi-db`, `cems-db`, `cockpit-db` are project-scoped.
-Managed `reliability-cockpit-platform` and alternate external mode have distinct
-volumes. Changing project name, `-p`, mode, DB identity or volume can produce
-empty parallel stores. Never use `down -v`, delete volumes, truncate tables,
-reset cursors or redownload history as a routine fix.
-
-Correct an incorrect DSN only after verifying the documented existing owner;
-do not create a replacement DB. Preserve newer rows, cursors and sequences in
-any deliberately reviewed local migration. Never overwrite existing `.env` with
-an example. Never print full DSNs or interpolated environment/inspect output.
-
-## 3. NADI data paths and semantic boundaries
+| `NADI/` | Laravel 13 / Blade / Vite active UI | Existing development SQLite only |
+| `reliability-cockpit/` | FastAPI query backend and retained Next.js UI | Cockpit legacy store; read-only Mart connection to Maximo DB |
+| `maximo-collector/` | Maximo acquisition, API and local Mart projection | Existing Maximo Collector Postgres |
+| `pi-collector/` | PI snapshots/time series/API | Existing PI TimescaleDB |
+| `cems-collector/` | Modbus reads, normalization, aggregation/API | Existing CEMS Postgres |
+| `maximo-knowledge/`, `pi-knowledge/` | Verified source catalogs and mappings | Knowledge files, no app DB |
+| `reliability-data-contracts/` | JSON Schema Draft 2020-12 / semantics | Contract files |
+| `NK/` | Documentation for separately maintained Streamlit consumer; code is not bundled here | Model/scaler/session history in its own checkout, no DB |
 
 ```text
-Maximo → Maximo Collector → local DB
-                         ├→ API → cockpit-worker → legacy Cockpit DB/KPIs
-                         └→ canonical Mart in SAME Maximo DB
-                                    ↓ read-only
-                               NADI /v1/reliability/* → Next.js UI
+Maximo → maximo-worker → Maximo DB → maximo-api → legacy cockpit-worker → Cockpit DB
+                              │
+                       local mart-projector
+                              │
+                   Mart tables IN Maximo DB
+                              │
+                 cockpit-api /v1/reliability/*
+                         ┌────┴────┐
+                    NADI Laravel   retained Next.js UI
+                    local SQLite   legacy /api/cockpit/* proxy
+PI → pi-worker → PI DB → pi-api → PI dashboard / NK
+PLC → cems-worker → CEMS DB → cems-aggregator / cems-api → CEMS dashboard
 ```
 
-`DATABASE_URL` owns the legacy Cockpit store; `RELIABILITY_MART_DATABASE_URL`
-selects the existing Mart. They are different read paths, not a request for a
-new Mart database. Missing Mart DSN has no legacy-store fallback. Public Mart
-queries remain SELECT-only; internal mapping administration is a separate
-controlled local write boundary.
+Laravel uses `RELIABILITY_MART_API_BASE` via GET-only bounded DTOs. It must not
+read source SQL, copy source records into SQLite, register Assets, or collect.
+A narrowly scoped legacy description fallback reads the existing loopback Maximo
+Collector API after exact WO+Asset matching; it must not expose raw payloads.
 
-Normal Asset membership comes from `reliability_asset_registry`, not every
-technical Equipment/Asset Master row. `asset_af_mapping` is governance in that
-same Mart. Only one VERIFIED PRIMARY_EQUIPMENT target resolves to MAPPED;
-PROPOSED/RETIRED/UNMAPPED/AMBIGUOUS are not usable identity. Never fuzzy-match
-names or silently seed verified mappings.
+`cockpit-api` uses `RELIABILITY_MART_DATABASE_URL` for the existing Maximo DB,
+with the configured SELECT-only identity. No fallback to legacy
+`DATABASE_URL`; a missing Mart connection returns unavailable/503.
+`cockpit-worker` consumes collector APIs into its separate legacy store.
 
-Local Equipment/Work Order projection does not acquire all FMEA/RCFA/health/
-overhaul histories. Controlled population is not full history. New merged source
-discovery does not automatically update canonical projection/product semantics.
-Do not manufacture unresolved relationships, failure identity or health scores.
-Legacy KPI code does not authorize presenting blocked factual NADI analytics.
+Master Asset inventory and governed Registry are different populations. Inventory
+supports exact non-Registry Asset/WO history; Registry-only operations retain
+membership gates. Technical counts or a populated `asset_master` do not prove
+Registry availability. Never auto-enroll all technical assets or fuzzy-match IDs. Only one VERIFIED
+PRIMARY_EQUIPMENT target resolves to MAPPED; proposed, retired, unmapped and
+ambiguous records remain unusable. Controlled governance commands require the
+explicit existing-owner admin DSN, never a fallback from the SELECT-only API.
+Read `reliability-cockpit/docs/mart-runtime.md` before deliberate DDL or role changes.
 
-PI/CEMS API bases are configurable, but their NADI projections remain pending.
-Do not add PI/Maximo source credentials to NADI. Browser requests go through
-`/api/cockpit/*` proxy to `COCKPIT_API_BASE`.
+`mart-projector` projects retained local Equipment/WO only, without Maximo calls,
+using `RELIABILITY_CONTRACTS_ROOT=/contracts` and its read-only mount. Preserve
+FMEA, RCFA, health, overhaul, Registry, AF mappings and projection state. The
+projector does not populate every domain. PI/CEMS projections and the NADI
+historian/Operations integration remain pending; configured URLs are not proof.
 
-## 4. Runtime checks before changing services
+## 4. Deployment identity and safe operations
 
-1. Check Git status/branch and the actual Compose definitions/configuration.
-   Main and feature have different runtime capabilities; verify the checkout.
-2. Inspect Docker, local processes, systemd and cron for worker ownership. Use
-   one acquisition worker per source/registry; do not run local venv collection
-   alongside an existing worker.
-3. Verify DB/API targets without revealing secrets. Managed DBs are internal
-   port 5432; old standalone localhost ports are not proof of the active store.
-4. Inspect worker completion, cursor and collection timestamps; HTTP 200 and
-   recent business-record dates are not proof of source sync freshness.
-5. Diagnose NADI DSN, canonical tables, Registry membership and projection state
-   before source collection. Keep source and projection cursors distinct.
-6. Restart only affected services when authorized work requires it. Successful
-   init/registry-loader exits are normal one-shot jobs, not collection daemons.
+Resolve the active checkout path locally. Preserve any existing compatibility
+symlinks while Docker mounts, systemd units, venvs or worktree pointers use them.
 
-At merged baseline `3e981a3`, main lacked a managed PI worker and Mart DSN.
-NADI-PI-RUNTIME-001 adds opt-in PI migration/worker wiring and managed API Mart
-DSN in its review branch. The accepted runtime still uses the original feature
-checkout with private reviewed-image overrides. Preserve these overrides; the
-new branch does not authorize a broad platform redeploy. Existing Mart is owned
-by `maximo-db`; its `asset_af_mapping` table is absent in the audited deployment.
-NADI-RUNTIME-002 owns deliberate Mart governance migrations, projection/init
-reconciliation and external-mode wiring; do not create a new Mart database.
+- Managed project: `reliability-cockpit-platform`; network:
+  `reliability-cockpit-platform_platform`.
+- Files: `compose.yaml` + `compose.dev.yaml`; existing `.env.platform`.
+- Private DB port 5432, no published managed DB ports. Volume names retain the
+  project prefix, for example `reliability-cockpit-platform_maximo-db`.
 
-The earlier deferred HTTP 401 investigation was superseded by the explicit
-NADI-PI-RUNTIME-001 source-canary authorization. One known technical GET returned
-HTTP 200 with TLS/origin guards intact; one managed snapshot owner was then
-started. This does not approve broad AF discovery, history download, automatic
-Asset mapping, or governed NADI PI ingestion. See the runtime acceptance and
-[operator runbook](pi-collector/docs/runtime-migrations.md) before restarting.
+| Service | Database / owner | Volume | Default app ports |
+|---|---|---|---|
+| `maximo-db` | `maximo_collector` | `maximo-db` | API 8002 / dashboard 3001 |
+| `pi-db` | `pi_collector` | `pi-db` | API 8001 / dashboard 3002 |
+| `cems-db` | `cems_collector` | `cems-db` | API 8003 / dashboard 3003 |
+| `cockpit-db` | `cockpit` | `cockpit-db` | API 8000 / retained Next.js 3000 |
+| Laravel preview | existing development SQLite | no Compose DB volume | loopback 8010 |
+| NK | no DB | none | separate Streamlit 8501 |
 
-## 5. NK consumer rules
+Existing installations may select privately pinned Collector/Mart/Cockpit images.
+The public clone does not include the private lock or archived images. Read `deploy/compose/README.md` and `runtime-durability.md` there before
+an operation. Use `runtime_release.py verify` and the exact-service
+`runtime_service.py` workflow when a restart/recreate is actually needed.
+Stopped rollback containers retain Compose labels: no mass `compose up`,
+`--remove-orphans`, rebuild from the dirty checkout, or generic service recreation.
+Never start a saved worker alongside its active replacement.
 
-NK supports explicit manual sliders/CSV or PI Collector input. It reads stored
-attributes/snapshots through API, without direct production PI/SQL access,
-source credentials, collection triggers or a new DB. Do not silently fallback
-from invalid automatic inputs to manual values or zero.
+Old per-project Postgres containers/ports 5434, 5433, 5435 are not the managed
+stores. `compose.external.yaml` is a separate alternative project/volume, not an
+overlay or routine recovery route. Do not switch to it to fix NADI.
 
-Preserve all 13 model feature names/order and model/scaler compatibility.
-Confirm mappings, feature meaning, source/training units and evidence; candidate
-tags are not approved mappings. Validate finite values, quality, timezone-aware
-timestamps, source age and time skew. PS means pemakaian sendiri; exact tag and
-W/MW remain unconfirmed. Never infer SFC formula or APH inlet/outlet equivalence.
-Manual simulation and ML prediction are not operational control authorization.
-Do not retrain or change artifacts incidentally. NK roadmap describes remaining
-fetch/review/predict and validation acceptance rather than claiming production
-readiness from model files or UI accuracy figures.
+Before service/data work:
 
-## 6. Source safety and contracts
+1. Inspect relevant Compose definitions, running containers/processes, systemd
+   and cron. One collector worker per source/registry; no duplicate local daemon.
+2. Verify non-secret API/DB owner, project, network, volume and image identity.
+3. Check completed runs, partial/errors, cursors and collection timestamps.
+   HTTP 200, source record dates and `mart_updated_at` do not prove source freshness.
+4. For empty pages, check Mart connection, scope, inventory/Registry population,
+   projection state and DTO compatibility before considering source acquisition.
+5. Reuse a reviewed local migration with backups if data exists in another old
+   volume. Preserve newer rows/cursors, conflict keys and sequences. Never reset.
+6. Restart only affected services if authorized and needed. Successful one-shot
+   registry/init jobs are not failed daemons.
 
-- Production business data is read-only. Maximo OSLC/PI allow GET/HEAD/OPTIONS;
-  the sole Maximo POST exception is the controlled `/j_security_check` auth
-  handshake prescribed by scoped rules. Never relax source guards or brute-force.
-- Preserve BSR/IP and validated equipment scope; field predicates differ per
-  object. Verified mappings, not guessed `siteid` filters, govern each request.
-- Preserve HTTP rate/1 MiB caps, bounded paging/retry and partial-run cursor
-  safety. CEMS only FC03/FC04, register caps/poll floors and operator overrides.
-  Preserve PI bulk off-hours/circuit-breaker/chunking/resume controls.
-- Source fields/tags/WebIds come from owning knowledge with appropriate verified
-  evidence. Missing knowledge creates a bounded discovery task, not an app-side
-  guessed identifier. Production discovery execution is explicit opt-in.
-- Knowledge statuses unknown/documented/verified/forbidden/deprecated are distinct
-  from ingestion eligibility, business semantic approval and runtime health.
-- Core contracts: snake_case, explicit units, ISO-8601; vendor fields under
-  `sources.maximo/pi/cems`. Public DTO exposure may be narrower than contracts.
-- No direct Maximo WO create/update from NADI; future write-back needs separately
-  governed authorization. No outbound CEMS reporting implicitly added.
-- Never commit/log credentials, cookies, tokens, Authorization headers, raw
-  production exports or personal samples. Secrets remain in ignored runtime
-  environment files. Report auth status without printing values.
+## 5. Current collection and reliability semantics
 
-## 7. Code discovery and workflow
+- Maximo WO acquisition uses an inclusive rolling **four calendar years** of
+  verified `reportdate` in `Asia/Jakarta`. It is not changedate/actual/WO-number
+  age. Unknown, invalid, naive or future age fails closed. Older retained rows
+  remain readable and projectable; this is acquisition policy, not deletion.
+- New/changed active WOs get needed detail. CLOSE gets current-cycle actuals when
+  first observed/transitioned; same terminal status stays frozen. CAN/CANCEL is
+  summary-only. No terminal recovery/backfill just to fill missing evidence.
+- Bounded newest-first traversal and active-status queue share source locks,
+  request/rate/page budgets. Incomplete/error runs must not advance successful
+  cursors. Do not turn local skips into a verified source-total claim.
+- Failure code, problem, faildate, parent/task/follow-up clues are evidence, not
+  governed failure identity. `downtime` is a source boolean, not hours; labor
+  effort and CLOSE actual elapsed time are not repair/restoration duration.
+- Manual disruption records are engineer observations with corrections, not
+  automatically validated failures. Cause/affected/unknown asset roles remain
+  distinct. WAPPR is backlog, repeat WO is a review candidate, and no data is not
+  proof of health. Do not sum per-asset event counts into plant incident totals.
+- WO-only MTBF/MTTR/availability remain null with **NOT_READY** and blockers,
+  including old stored KPI snapshots at the read boundary. Do not re-enable the
+  formulas from raw WO counts or calendar hours. Follow `plans/MTBF-MTTR.md`.
+- Verify the current PI acquisition owner before any source action. Do not
+  retry authentication, change collection state or start history jobs without a
+  covering request. Read stored data with honest age/quality; a snapshot worker
+  does not authorize governed NADI identity mapping or exposure ingestion.
 
-Prefer codebase-memory MCP over grep/glob for structural queries. Confirm nearest
-project and generation at session start/compaction. Tier 2 verification by
-default: search_graph → trace_path → get_code_snippet; check_index_coverage for
-all evidence paths and scopes behind exhaustive/negative claims. Query_graph
-and get_architecture support wider relationships. Coverage is best-effort;
-read stale/partial/skipped/excluded/unknown source directly. Read config/docs or
-use `rg` for literal/config searches. A graph from another checkout is not Git
-acceptance evidence. Do not count unmerged work as mainline implementation.
+## 6. Production safety and source contracts
 
-Only root is a Git repo. Use scoped conventional commits and a task branch → PR
-against latest main. Do not merge, reset, force-push, delete branches or modify
-protection unless explicitly requested. Preserve unrelated local changes.
+- Maximo/PI business data: GET/HEAD/OPTIONS only. Sole Maximo POST exception is
+  the controlled `/j_security_check` login in scoped rules; never weaken the
+  business-data guard or brute-force authentication.
+- Preserve BSR/IP and verified CS01 scope. Field names differ by object:
+  `siteid`, `worksite`, `site`, `locationorg`; use verified mappings.
+- Maximo/PI rate limit defaults to 1 request/second and 1 MiB response cap.
+  Preserve PI off-hours, circuit breakers, bounded chunks and resumable upserts.
+  CEMS only FC03/FC04, with its register caps, poll floors and operator overrides;
+  no outbound KLHK push. Consumer development must not trigger discovery/backfill.
+- Do not guess endpoints, tags, WebIds, register numbers or cross-source links.
+  Use the owning knowledge repository; discovery execution is separately opt-in.
+- `unknown` = untested; `documented` = described, not verified; `verified` = tested
+  with authorized access; `forbidden` = account denied; `deprecated` = do not use.
+  HTTP 400 is not an access denial. PI eligibility is verified + stream ok;
+  CEMS `collect` is distinct from registry status.
+- Contracts: snake_case, explicit units, ISO-8601 timestamps, intentional nulls.
+  Literal date-only observations must not acquire invented midnight/timezone.
+  Vendor fields stay under `sources.*`; public DTO allowlists may be stricter.
+- No credentials, cookies, tokens, Authorization headers, private DSNs or raw
+  personal source samples in source control, logs, documentation or chat.
 
-There is no root test command. Each Python component uses its own environment
-and mostly hermetic unittest suite; Mart tests can use temporary SQLite. Inspect
-web package.json for relevant checks. Do not start operational DBs or call
-production to run tests. Documentation-only work uses Markdown/reference checks,
-`git diff --check` and a docs-only diff gate; no runtime restart is necessary.
+## 7. Independent NK input integrity
 
+Read `NK/AGENTS.md` and `plans/NK-ROADMAP.md`. NK implementation and private
+mapping inputs are not part of this public documentation-only directory. Use existing GET `/attributes` and
+`/snapshots?limit=5000`, not direct PI/SQL or a new collector/store. Preserve all
+13 training features and the model/scaler pair. Candidate tags are not mappings.
+Check meaning, units, quality, finite values, age and time skew; missing/stale
+inputs block auto prediction, never silently become zero/manual defaults.
+PS means **pemakaian sendiri**; its tag and W/MW unit remain unconfirmed, not a
+percentage or guessed auxiliary sum. SFC and APH inlet/outlet equivalence remain
+unconfirmed. History is session-local and bounded, not persistent model validation.
 
-## 11. NADI documentation onboarding and continuity
+## 8. Discovery, checks and documentation
 
-Before implementing a NADI task, read in order:
+Use codebase-memory graph tools when available for structural discovery; verify
+index generation and path coverage, then read stale/partial/unknown paths
+explicitly. File reads and `rg` are appropriate for docs/config and fallback.
+Do not infer completeness from an old graph.
 
-1. This `AGENTS.md`, then relevant scoped `AGENTS.md` and any available `CONTEXT.md`.
-2. [NADI-CONTEXT.md](NADI-CONTEXT.md) for concise product/runtime context.
-3. [PRD.md](PRD.md) for product requirements and acceptance boundaries.
-4. [DESIGN-SYSTEM.md](DESIGN-SYSTEM.md) and [UI specification](docs/design/NADI-UI-SPEC.md)
-   for proposed tokens, page requirements and reference availability.
-5. [Official roadmap](plans/NADI-ROADMAP.md), [Repository Status](plans/REPOSITORY-STATUS.md)
-   and [DEV-LOG.md](DEV-LOG.md) for current priorities and independent milestones.
-6. Scoped ADRs, contracts, semantic/acceptance reports and the task's exact PR diff.
+Use each component's existing environment; no root test suite:
 
-Verify latest main, open/merged PRs, exact-head CI, active runtime source/dirty state
-and data ownership; never infer current status from an old “current” heading.
-`plans/NADI-ROADMAP.md` is the sole product roadmap. M0–M8 remains its technical
-implementation roadmap; domain documents retain their own authority.
+```bash
+# In NADI/; tests use memory SQLite + mocked HTTP.
+composer test
+vendor/bin/pint --test
+npm run test:ui
+npm run build
+# In the affected Python component (reuse its venv):
+.venv/bin/python -m unittest discover -s tests
+# Documentation / all changes:
+git diff --check
+```
 
-Record requirement IDs and evidence in each task/PR. Treat IMPLEMENTED, TESTED,
-MERGED, VISIBLE and ACCEPTED independently, with date, exact SHA and scope. CI
-cannot prove runtime visibility or Product Owner/engineer UAT. Record actual PO
-decisions separately from proposals; do not infer method/threshold approval from
-schema enums, screenshots, design approval or test success. UNKNOWN remains explicit.
+Validate the actual JSON Schema set for contract changes; do not hardcode a count.
+Relevant checks include negative permissions, stale forms, missing/partial data,
+repeat submissions and interrupted navigation. Do not seed test data in the user's
+preview. Consult scoped test setup before any database integration test.
 
-Update the owning PRD/design/roadmap/status documents when their scope changes and
-append DEV-LOG events at material milestones. Preserve historical evidence and
-append corrections instead of rewriting prior log entries. Cite pending PRs at
-immutable heads; reconcile overlap without dropping their requirements. Never
-silently merge a candidate or create a duplicate implementation/roadmap.
-
-For documentation-only tasks, use a separate clean worktree when the running source
-is active. Do not switch it, restart services, modify env/data/collectors or delete
-untracked files. Preserve `23496711.xls` and existing isolated Engineering records.
-The primary development address is https://localhost:3000; follow the reviewed
-single-frontend launcher runbook for separately authorized runtime work. Do not
-create another permanent NADI frontend. Existing HTTPS/session/CSRF/RBAC protections
-remain intact. Global login design grants no authority to enforce it globally.
-
-Missing design originals must be reported and tracked; never regenerate/substitute
-images or claim files were committed without the actual supplied bytes. Design
-metrics are illustrative and cannot become engineering evidence. Phase1 review
-checkpoints/expiry and accepted facts stay independent of UI/documentation work.
+Current plans: `plans/README.md`, `plans/NADI-LARAVEL.md`, `plans/MTBF-MTTR.md`.
+Feature detail/evidence stays in `NADI/docs/`; API contracts stay in
+`reliability-cockpit/docs/`; source evidence in the owning knowledge/collector
+component. Old release reports, `USERGUIDE.md`, worktrees and runtime backups are
+historical references, not instructions to recreate old architecture.

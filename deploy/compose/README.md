@@ -1,95 +1,116 @@
-# Reliability Cockpit platform Compose
+# BSLA managed platform — backend NADI Laravel
 
-The platform has two separate deployment modes. Legacy Cockpit sync reads
-collector APIs. Canonical NADI routes use a SELECT-only Reliability Mart reader
-against the existing Maximo Collector DB. Cockpit has no production Maximo, PI
-or PLC credential.
+Deployment existing menggunakan project **`reliability-cockpit-platform`**,
+`compose.yaml` + `compose.dev.yaml`, `.env.platform`, network dan volumes yang
+sama. **NADI Laravel di `../../NADI/` adalah preview lokal terpisah pada loopback
+8010**, bukan service Compose atau pengganti otomatis Next.js lama di 3000.
 
-NADI-PI-001 is MERGED; NADI-PI-RUNTIME-001 is ACCEPTED via merged PR #15.
-NADI-RUNTIME-002 candidate reconciles existing Mart governance and explicit
-reader/admin paths. [Mart operator runbook](../../reliability-cockpit/docs/mart-runtime.md)
-contains backup, deliberate DDL, role and accepted-override requirements.
-Historical `7149455` remains evidence only.
+Collector tetap pemilik data sumber. `cockpit-api` menyajikan Mart yang ada di
+Maximo Collector DB dengan identity read-only existing. Legacy Cockpit worker
+mengonsumsi collector API ke Cockpit DB sendiri. Tidak ada DB Mart kelima,
+source credentials di consumer, atau source write dari NADI.
 
-Reuse the existing project identity, stores, volumes and env files. Preserve
-all accepted ignored overrides. The commands below describe deliberately
-selected installations; never switch modes or run a broad startup to restart
-one existing service. Source credentials stay only in the source collector.
+## Operasi instalasi existing
 
-## Optional private runtime releases
+Baca [AGENTS root](../../AGENTS.md) sebelum operasi. Reuse semua database,
+volume, konfigurasi dan account. Jangan overwrite `.env.platform`, mengubah
+project name, menggunakan `down -v`, menghapus history atau reset cursors.
+Dokumen/UI Laravel tidak memerlukan restart collector.
 
-[Runtime durability](runtime-durability.md) documents a fail-closed local release
-controller and offline rehearsal. Private locks, images and source snapshots are
-not in Git. Existing installations must retain their verified Compose overrides
-and release package. A fresh clone does not reproduce a captured local runtime.
-
-## Mode 1 — external collectors (default for an existing local deployment)
-
-Use this mode when Maximo, PI, and CEMS collectors already run on the host or
-elsewhere. It creates **only** Cockpit's local database/API/worker/web and
-never starts a source collector, preventing duplicate source polling. The
-current Cockpit worker ingests Maximo collector resources only; PI and CEMS API
-bases are configurable, but their Cockpit projections remain pending.
-
-1. Only if absent, copy `.env.platform.example` to `.env.platform`.
-2. Set `COCKPIT_DB_PASSWORD`, the three `*_COLLECTOR_API_BASE` values and
-   **RELIABILITY_MART_DATABASE_URL** for the existing external SELECT-only Mart.
-   No admin DSN or Mart initialization is passed to the external API.
-   For host-local collector APIs from Docker on Linux, use
-   `http://host.docker.internal:800{1,2,3}`; the file supplies the required
-   `host-gateway` mapping.
-3. Start external mode:
-
-   ```bash
-   docker compose --env-file .env.platform -f compose.external.yaml up --build -d
-   ```
-
-## Mode 2 — managed collectors
-
-Use this only when no existing worker polls the same source. `compose.yaml`
-starts isolated Maximo/CEMS Postgres and their collector workers/APIs plus the
-PI TimescaleDB, init, and API services. A single leased `pi-worker` is defined
-under the opt-in `pi-collection` profile; default startup does not acquire PI.
-`pi-maintenance` provides deliberate status/apply migrations after backup.
-Managed PI configuration comes only from `.env.platform`; the worker receives
-explicit source substitutions and never requires `pi-collector/.env` or a home
-dotenv. API receives only non-secret pause metadata; API/migrate/Cockpit remain
-source-credential-free. `PI_SNAPSHOT_INTERVAL_SECONDS` means post-cycle pause:
-508s observed acquisition + 300s pause is ~808s (~13.5m) start-to-start.
-See [PI operator runbook](../../pi-collector/docs/runtime-migrations.md). It requires the
-source-only environment names exactly as implemented:
-`CEMS_MODBUS_HOST`, `CEMS_MODBUS_PORT`, `PI_WEB_API_BASE_URL`, and one valid
-Maximo authentication mode (`login`, `token`, or `cookie`).
+Instalasi existing dapat memakai image pins dan release privat. Root Compose
+publik tetap definisi instalasi buildable, bukan salinan pin lokal. Clone baru
+tidak memiliki lock, arsip atau snapshot release. Sebelum operasi instalasi
+berpin, pilih input privat melalui `BSLA_RUNTIME_LOCK`, `BSLA_RUNTIME_RELEASE_DIR`
+dan `BSLA_RUNTIME_COMPOSE_FILES` sesuai runbook. Setelah input itu diverifikasi:
 
 ```bash
-# Only deliberately selected fresh installations; existing runtime uses targeted
-# operations with accepted overrides, never this broad command as a repair.
-# First prepare existing Mart governance/reader via the operator runbook.
-docker compose --env-file .env.platform up --build -d
+python3 deploy/compose/runtime_release.py verify
 ```
 
-For development ports for managed internal APIs, add `-f compose.dev.yaml`.
+Hanya bila restart/recreate memang diminta/diperlukan, ikuti
+[runtime durability dan rollback](runtime-durability.md), satu exact service
+sekali operasi. Helper `runtime_service.py` menerima `maximo-api`, `maximo-worker`,
+`mart-projector`, `cockpit-api`, `cockpit-worker` dan memeriksa image/config serta
+single-worker identity. Jangan jalankan semua contoh operasi secara beruntun.
 
-Only the Cockpit web port is published by default. Databases are never
-published. Attach source-network routes/firewall policy outside this file; do
-not put a production Maximo, PI, or PLC endpoint on a public Docker network.
+Stopped rollback containers dapat memiliki label Compose. Karena itu **jangan
+mass `compose up`, `--remove-orphans`, atau generic service restart/recreate**
+pada instalasi ini; hal tersebut dapat memilih backup atau image yang salah.
+Jangan menjalankan backup worker bersamaan dengan worker aktif. Path/source/image
+snapshot lokal dipertahankan untuk recovery, bukan target cleanup plans.
 
-## Service responsibilities
+## Tanggung jawab layanan
 
-| Service | Responsibility |
-| --- | --- |
-| `mart-migrate` / `mart-reader` | opt-in, status by default; explicit local DDL/role apply only after backup |
-| `mart-ready` | non-destructive canonical schema gate in owning Maximo DB |
-| `mart-projector` | local incremental projection after gate; contracts mounted, no source acquisition |
-| `cockpit-api` | explicit SELECT-only existing-Mart DSN, distinct legacy store; no admin/source credentials |
-| `maximo-worker` | scheduled GET-only delta sync; operational data is frequent, asset master data is slow |
-| `pi-api` | serves existing stored PI data without source credentials |
-| `pi-migrate` | opt-in maintenance: status by default, deliberate local DDL with `--apply` |
-| `pi-worker` | opt-in single leased snapshot owner; cycle plus 300s pause, no automatic history jobs |
-| `cems-worker` / `cems-aggregator` | FC03/FC04 polling and separate completed-window aggregation |
-| `cockpit-worker` | currently ingests Maximo collector resources and derives KPIs; PI/CEMS API bases are configurable, but their projections are pending |
+| Service | Tanggung jawab |
+|---|---|
+| `maximo-worker` | Scheduled bounded acquisition; pertahankan command/interval/override yang disetujui pada instalasi existing, source locks dan guards |
+| `maximo-api` | API store Maximo existing; local trigger bukan read-only lookup |
+| `mart-projector` | Local incremental Equipment/WO projection; contract mount read-only; tanpa Maximo calls |
+| `cockpit-api` | Mart read API untuk Laravel dan UI lama; no legacy DSN fallback |
+| `cockpit-worker` | Maximo Collector API → legacy Cockpit records/KPI readiness; PI/CEMS projection pending |
+| `pi-registry` / `pi-api` | One-shot verified/ok registry loader dan stored-data API |
+| `pi-auth-check` / `pi-worker` | Opt-in `pi-collection`; verifikasi satu acquisition owner dan izin source sebelum mengubah state |
+| `cems-worker` / `cems-aggregator` / `cems-api` | FC03/FC04 polling, completed-window aggregation dan API, dengan operator overrides existing |
 
-PI baseline collection uses every registry record with `status: verified` and
-`stream_status: ok`; P0/P1 selects priority/cadence/dashboard use only and is
-not an access blocker. Do not start managed PI collection if its external
-worker is already active.
+| Store | Owner/database | Volume | Default app ports |
+|---|---|---|---|
+| Maximo + Mart | `maximo_collector` | `maximo-db` | API 8002 / dashboard 3001 |
+| PI TimescaleDB | `pi_collector` | `pi-db` | API 8001 / dashboard 3002 |
+| CEMS | `cems_collector` | `cems-db` | API 8003 / dashboard 3003 |
+| Cockpit legacy | `cockpit` | `cockpit-db` | API 8000 / Next.js 3000 |
+
+Managed DB ports 5432 berada di network privat, tidak dipublish. Physical volume
+prefix tetap `reliability-cockpit-platform_`. Host ports 5434/5433/5435 pada
+standalone lama bukan bukti koneksi managed. Laravel development SQLite tidak
+termasuk tabel ini dan tidak mengganti store operasional.
+
+## Kesegaran, scope dan data
+
+Periksa completed run/cursor, partial/error, ingestion/source timestamps dan
+projection state secara terpisah. API 200, process alive, source `changedate`
+atau `mart_updated_at` bukan bukti source catch-up lengkap. Registry membership,
+Asset inventory dan technical Equipment count berbeda populasi.
+
+Mart projector tidak mengisi semua FMEA/RCFA/health/overhaul; pertahankan data
+controlled loads yang sudah ada. Four-year acquisition WO tidak menghapus history
+lama. Same terminal status tetap frozen; tidak memulai backfill untuk mengisi
+field baru. MTBF/MTTR/availability WO-only tetap null/NOT_READY.
+
+Managed PI menggunakan `.env.platform` sebagai otoritas konfigurasi dan
+`PI_CONFIG_MODE=managed` untuk melewati dotenv lokal/home. Source settings hanya
+masuk ke `pi-worker`, bukan API/migrate/Cockpit. Jangan menyalin secret ke consumer
+atau membuat konfigurasi paralel. Periksa owner/lease yang berjalan sebelum
+collection, migration atau retry authentication; contoh command bukan izin.
+Lihat [runbook PI](../../pi-collector/docs/runtime-migrations.md).
+
+Mart schema/governance menggunakan existing Maximo owner. `mart-ready` adalah
+gate non-destructive; `mart-migrate`/`mart-reader` opt-in dan status-only secara
+default. DDL/role apply memerlukan backup dan target yang benar, bukan bootstrap
+API. Writer/admin DSN terpisah dari SELECT-only API tanpa fallback. Lihat
+[runbook Mart](../../reliability-cockpit/docs/mart-runtime.md).
+
+## Mode alternatif dan checkout baru
+
+`compose.external.yaml` adalah deployment terpisah bernama
+`reliability-cockpit-external`, dengan Cockpit volume sendiri dan collector API
+external. Bukan overlay managed dan bukan solusi empty-page. Jangan berpindah
+mode untuk development biasa atau menganggap menyalakannya memigrasi data.
+
+Untuk instalasi baru yang secara eksplisit diminta: tentukan mode, target existing
+atau fresh stores, secrets, image availability, source access, ownership/single
+worker, backup/migration plan dan ports lebih dahulu. File contoh tidak boleh
+menimpa env existing. Release privat perlu image/arsipnya sendiri, tidak bisa
+direproduksi hanya dari clone publik. Jangan mengganti pin existing dengan broad
+build dari checkout dirty atau mengklaim source build sama dengan runtime arsip.
+
+## Cara kerja dan verifikasi
+
+Solo developer: edit kecil → test sesuai dampak → inspeksi hasil. Tidak perlu
+membuat worktree, stack paralel atau handoff berlapis. Untuk dokumentasi cukup
+fact/link checks dan `git diff --check`; operasi runtime tidak dilakukan.
+
+Perubahan controller runtime memakai fixture/tests di `tests/` dan `release_tests/`;
+rehearsal terisolasi dibedakan dari live activation. Ikuti
+[durability evidence](runtime-durability.md) untuk command, parity, backup dan
+rollback. Jangan menganggap file lock atau laporan historis sebagai bukti semua
+service sehat saat ini; verify sesuai kebutuhan tanpa mengubah runtime.

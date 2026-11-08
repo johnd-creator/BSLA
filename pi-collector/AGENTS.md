@@ -1,5 +1,16 @@
 # AGENTS.md — PI Collector
 
+## Solo developer workflow
+
+Follow root `../AGENTS.md`. Work directly in the active checkout: inspect existing
+changes → edit a small scoped change → run relevant checks → inspect the result.
+Preserve unrelated work. No routine extra worktree, subagent, mandatory branch,
+handoff or layered approval process. Documentation-only work needs factual/link
+checks and `git diff --check`, not source calls or restarts. Report checks actually
+run and limitations. Do not commit/push/deploy or change runtime/data ownership
+without a covering request. The active product UI is `../NADI/` (Laravel); this
+component keeps its existing responsibility and safety boundary.
+
 ## Mission
 
 Collect verified PI Web API time-series data into a local store and serve it
@@ -140,3 +151,12 @@ is preferred. `/schedule` is an estimated next cycle start, not guaranteed data
 arrival or source freshness. Keep completed/failed/successful collection and
 individual source timestamp separate. Preserve accepted runtime evidence when
 correcting labels/configuration; no production migration or source rerun needed.
+
+## Exposure roadmap, not an active KPI feed
+
+Follow `../plans/MTBF-MTTR.md`. A governed target plus stored time series is not
+validated operating exposure: state rules, gaps/quality, boundaries, periods and
+engineer reconciliation must be explicit. A snapshot worker's 300-second delay
+is after the sequential cycle, not a five-minute freshness guarantee. Do not
+add parallel requests/workers, infer missing running time or enable source auth
+as a side effect of Laravel work. Check the existing acquisition owner and preserve all source guards.

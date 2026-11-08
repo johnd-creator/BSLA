@@ -1,5 +1,10 @@
 # Repository status and debt — PLATFORM-ROADMAP-001
 
+> Historical design/status reference retained for traceability. Current product
+> work follows [NADI Laravel](NADI-LARAVEL.md) and [MTBF/MTTR](MTBF-MTTR.md).
+> Phase/checkpoint statements below do not establish current runtime readiness
+> or authorize implementation, collection, migrations or deployment.
+
 Current source/runtime checkpoint (including 3 November approved canonical append): [2–3 November integration](../docs/NADI-NIGHT-INTEGRATION-20261102.md). Earlier dated sections retain historical scope.
 
 ## 1 November2026 — Sprint4 isolated Reliability Performance foundation

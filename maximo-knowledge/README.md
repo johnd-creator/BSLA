@@ -1,5 +1,21 @@
 # Maximo Knowledge
 
+## Peran dalam NADI Laravel
+
+Ini komponen knowledge dalam monorepo BSLA, bukan aplikasi atau collector baru.
+[NADI Laravel](../NADI/README.md) adalah UI aktif; data mengalir melalui Maximo
+Collector → Mart → FastAPI → Laravel. Kerja solo developer langsung checkout
+aktif: edit bukti/mapping → uji lokal → periksa hasil, tanpa discovery produksi
+sebagai efek samping perubahan UI. Baca [AGENTS](AGENTS.md).
+
+Bukti [failure semantics](docs/mx-015a-maintenance-failure-semantics.md) dan
+[typed collector evidence](../maximo-collector/src/adapters/maximo/reliability_fields.py)
+menjadi acuan roadmap [MTBF/MTTR](../plans/MTBF-MTTR.md): field teknis tidak
+membuktikan event/repair/exposure. `downtime` WO adalah boolean, dan HTTP 400
+Failure Code master tidak boleh disimpulkan sebagai permission denial.
+Mapping dan review hierarki lokal tetap privat dan non-destructive, bukan
+perubahan source hierarchy atau bagian otomatis dari clone publik.
+
 Living knowledge base for Maximo API capabilities available to the organization.
 
 > **Building an app on top of this data?** Read [`CONTEXT.md`](./CONTEXT.md)

@@ -112,7 +112,10 @@ Keberadaan file Compose tidak membuktikan collector hidup atau datanya fresh.
 
 ## Product hierarchy
 
-[NADI Phase 0–5](NADI-ROADMAP.md) adalah roadmap utama. [M0–M8](reliability-cockpit-platform/05-roadmap-implementasi.md)
-merupakan implementation roadmap di bawahnya. [NK-00–07](NK-ROADMAP.md) memakai
-foundation yang sama dengan acceptance terpisah; prediksi kalor bukan indikator
-reliability Asset NADI. Aplikasi mendatang harus mempertahankan pemisahan ini.
+Pengembangan aktif mengikuti [NADI Laravel](NADI-LARAVEL.md) dan
+[MTBF/MTTR](MTBF-MTTR.md). [NADI Phase 0–5](NADI-ROADMAP.md) dan
+[M0–M8](https://github.com/johnd-creator/BSLA/blob/cea9503c9c605d8a060d448e36a16cf1ea646089/plans/reliability-cockpit-platform/05-roadmap-implementasi.md)
+merupakan referensi desain dan urutan implementasi historis, bukan backlog aktif.
+[NK-00–07](NK-ROADMAP.md) memakai foundation yang sama dengan acceptance terpisah;
+prediksi kalor bukan indikator reliability Asset NADI. Aplikasi mendatang harus
+mempertahankan pemisahan ini.
