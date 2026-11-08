@@ -1,5 +1,18 @@
 # PI Knowledge
 
+## Konteks workspace dan rencana reliability
+
+Knowledge ini mendukung PI Collector existing dan rencana historian
+[NADI Laravel](../NADI/README.md), belum operating-exposure integration aktif.
+Lihat [roadmap MTBF/MTTR](../plans/MTBF-MTTR.md). Technical attribute registry
+bukan governed Asset signal; mapping, state/quality, clock alignment dan coverage
+harus tervalidasi sebelum interval dipakai sebagai operating hours.
+
+Ikuti [AGENTS](AGENTS.md) dan root: solo developer langsung checkout aktif,
+edit → uji lokal → lihat hasil. Jangan retry authentication, discovery atau
+backfill sebagai efek samping merapikan UI; verifikasi runtime dan izin terlebih dahulu.
+Read stored data tidak membuktikan source freshness.
+
 Read-only knowledge base for the central PI Web API / PI Asset Framework
 operational boundary used by NADI discovery.
 
@@ -28,9 +41,9 @@ This repository records:
 - recorded/interpolated/summary capabilities
 - unit-specific equipment mappings
 
-No PI collector is created by this knowledge task. Any future collector must
-consume verified AF/stream evidence through the read-only API and keep
-credentials outside Git.
+The existing `../pi-collector/` owns collection. This knowledge component does not
+create another collector; verified AF/stream evidence and runtime-only credentials
+remain required. The NADI exposure/orchestration consumer is future work.
 
 ## Principle
 

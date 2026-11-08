@@ -97,10 +97,10 @@ independently authorized operational task.
 | [PRD](../PRD.md) | Product requirements, IDs, acceptance and dependencies | Runtime implementation or engineer approval |
 | [Design System](../DESIGN-SYSTEM.md) | Proposed visual/component rules | Engineering severity or final visual acceptance |
 | [UI specification](design/NADI-UI-SPEC.md) | Page layout/interaction requirements | Existing functionality without evidence |
-| [Official roadmap](../plans/NADI-ROADMAP.md) | Product phases and UX track | Automatic deployment authority |
+| [Current plans](../plans/README.md) | Active Laravel and MTBF/MTTR work; links to historical phase references | Automatic deployment authority |
 | [Repository Status](../plans/REPOSITORY-STATUS.md) | Git/runtime checkpoints and debt | Fresh source facts from old reports |
 | [DEV-LOG](../DEV-LOG.md) | Append-only milestone events | Approval inferred from tests |
-| [Technical M0–M8](../plans/reliability-cockpit-platform/05-roadmap-implementasi.md) | Engineering delivery dependencies | A competing product roadmap |
+| [Technical M0–M8](https://github.com/johnd-creator/BSLA/blob/cea9503c9c605d8a060d448e36a16cf1ea646089/plans/reliability-cockpit-platform/05-roadmap-implementasi.md) | Historical engineering delivery dependencies | Current backlog or a competing product roadmap |
 | Scoped ADRs, contracts, semantic/acceptance docs | Their architecture, data and evidence scopes | Broadening approved semantics through design |
 
 Reviewed GitHub documents are the durable project knowledge source. Link exact PRs

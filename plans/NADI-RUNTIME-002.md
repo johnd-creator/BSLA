@@ -1,5 +1,10 @@
 # NADI-RUNTIME-002 — Existing Mart Governance Schema and Runtime Reconciliation
 
+> Historical design/status reference retained for traceability. Current product
+> work follows [NADI Laravel](NADI-LARAVEL.md) and [MTBF/MTTR](MTBF-MTTR.md).
+> Phase/checkpoint statements below do not establish current runtime readiness
+> or authorize implementation, collection, migrations or deployment.
+
 Status: **CURRENT / CANDIDATE — runtime scope PASS, ready for senior review**.
 
 PR #15 merged as `c052d7d`; fresh branch `codex/nadi-runtime-002`. Existing

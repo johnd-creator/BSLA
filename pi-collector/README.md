@@ -1,5 +1,25 @@
 # PI Collector
 
+## Existing workspace, bukan bootstrap ulang
+
+Komponen ini tetap independen dari [NADI Laravel](../NADI/README.md), UI aktif
+BSLA. Reuse managed `pi-db` / `pi_collector` / volume `pi-db`; API 8001,
+dashboard 3002. Jangan memakai Cockpit DB atau menjalankan database/worker baru.
+[AGENTS](AGENTS.md) dan [runbook root](../deploy/compose/README.md) mengalahkan
+contoh standalone di bawah untuk instalasi existing.
+
+Jangan retry authentication atau mengubah collection tanpa permintaan yang
+mencakup tindakan tersebut. Periksa ownership worker yang sudah berjalan.
+Stored data tetap dapat dibaca dengan age/quality jujur; NK memakai API tanpa DB
+sendiri. Proyeksi PI/historian NADI belum aktif. Roadmap
+[MTBF/MTTR](../plans/MTBF-MTTR.md) membutuhkan mapping/state/exposure tervalidasi,
+bukan jam kalender atau technical registry saja.
+
+Cara kerja solo developer: edit langsung checkout aktif → test yang terdampak →
+periksa hasil. Tidak perlu worktree/handoff/collector paralel. Perintah setup,
+collection, scheduler dan backfill di bawah adalah referensi opt-in untuk
+instalasi/operasi yang diminta, bukan checklist development rutin.
+
 Time-series data collector for PI Web API (AVEVA/OSIsoft). Pulls verified
 attributes into a local TimescaleDB store and serves them via REST API to
 multiple consumers: trending dashboards, ML feature pipelines, and the

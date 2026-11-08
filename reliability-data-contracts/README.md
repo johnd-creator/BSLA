@@ -1,5 +1,19 @@
 # Reliability Data Contracts
 
+## Konteks aktif NADI Laravel
+
+Kontrak ini dipakai collector/Mart, backend FastAPI dan consumer NADI Laravel.
+UI aktif ada di [NADI](../NADI/README.md); Next.js lama bukan target produk baru.
+Kerja langsung di checkout aktif mengikuti [AGENTS root](../AGENTS.md): edit,
+uji schema/consumer yang terdampak, periksa hasil. Schema tersedia tidak berarti
+workflow, sumber atau metrik sudah terimplementasi/tervalidasi.
+
+Untuk MTBF/MTTR, gunakan [roadmap evidence](../plans/MTBF-MTTR.md). Failure code
+bukan failure occurrence; actual WO elapsed/labor bukan repair duration;
+`downtime` MXWODETAIL yang terverifikasi adalah boolean, bukan jam. WO-only KPI
+legacy tetap null/NOT_READY. Vendor evidence internal tidak otomatis boleh
+keluar dalam DTO NADI.
+
 Vendor-neutral semantic contracts used by reliability applications.
 
 The purpose is to prevent application code from becoming tightly coupled to
@@ -16,15 +30,19 @@ field-by-field translation tables.
 
 ## Schemas
 
-### Verified against Maximo (site BSR)
+### Maximo source contracts (site BSR)
+
+Verification refers to documented source/field evidence, not complete collection
+or validated failure semantics. Use the current knowledge catalogs for coverage.
+Historical field counts are not a runtime completeness contract.
 | Schema | Maximo source | Status |
 |---|---|---|
-| [`equipment.schema.json`](./schemas/equipment.schema.json) | MXASSET (69 fields) | ✅ verified |
-| [`work-order.schema.json`](./schemas/work-order.schema.json) | MXWODETAIL (166 fields) | ✅ verified |
-| [`service-request.schema.json`](./schemas/service-request.schema.json) | MXAPISR (96 fields) | ✅ verified |
-| [`person.schema.json`](./schemas/person.schema.json) | MXPERSON (34 fields) | ✅ verified |
-| [`item.schema.json`](./schemas/item.schema.json) | MXITEM (40 fields) | ✅ verified |
-| [`labor.schema.json`](./schemas/labor.schema.json) | MXAPILABOR (14 fields) | ✅ verified |
+| [`equipment.schema.json`](./schemas/equipment.schema.json) | MXAPIASSET preferred; MXASSET historical | ✅ verified |
+| [`work-order.schema.json`](./schemas/work-order.schema.json) | MXWODETAIL | ✅ verified |
+| [`service-request.schema.json`](./schemas/service-request.schema.json) | MXAPISR | ✅ verified |
+| [`person.schema.json`](./schemas/person.schema.json) | MXPERSON | ✅ verified |
+| [`item.schema.json`](./schemas/item.schema.json) | MXITEM | ✅ verified |
+| [`labor.schema.json`](./schemas/labor.schema.json) | MXAPILABOR | ✅ verified |
 
 ### Vendor-neutral source
 | Schema | Source | Status |
@@ -45,11 +63,11 @@ field-by-field translation tables.
 ### Computed reliability concepts (derived, not a direct source field)
 | Schema | Derived from |
 |---|---|
-| [`failure.schema.json`](./schemas/failure.schema.json) | work_order.failure_code (MXFAILURECODE ⛔ forbidden) |
-| [`downtime.schema.json`](./schemas/downtime.schema.json) | work_order.downtime / equipment.downtime_total |
+| [`failure.schema.json`](./schemas/failure.schema.json) | Classification evidence only; governed occurrence/deduplication pending; latest master collection HTTP 400 is not an access-denial verdict |
+| [`downtime.schema.json`](./schemas/downtime.schema.json) | Requires verified elapsed downtime intervals; WO boolean downtime and unverified legacy totals are not eligible hours |
 | [`location.schema.json`](./schemas/location.schema.json) | location_id on Equipment/WO/SR (MXAPILOCATION ⛔ forbidden) |
-| [`maintenance-event.schema.json`](./schemas/maintenance-event.schema.json) | work_order actuals — actstart/actfinish/actlabhrs (MXWODETAIL) |
-| [`reliability-kpi.schema.json`](./schemas/reliability-kpi.schema.json) | MTBF, MTTR, availability, PM compliance |
+| [`maintenance-event.schema.json`](./schemas/maintenance-event.schema.json) | WO maintenance evidence; actstart/actfinish describe execution and actlabhrs effort, not a validated failure or MTTR |
+| [`reliability-kpi.schema.json`](./schemas/reliability-kpi.schema.json) | Formula/transport contract; WO-only MTBF/MTTR/availability NOT_READY, PM compliance retains its separate basis |
 
 ## Catalog examples
 

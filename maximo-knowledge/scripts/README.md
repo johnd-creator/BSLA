@@ -1,5 +1,15 @@
 # Safe Discovery Scripts
 
+## Penggunaan pada workspace aktif
+
+Ikuti [AGENTS komponen](../AGENTS.md) dan [workflow root](../../AGENTS.md).
+NADI aktif adalah [Laravel](../../NADI/README.md); script discovery di sini bukan
+langkah startup aplikasi. Kerjakan langsung checkout aktif, pilih parsing/test
+lokal lebih dahulu, dan jalankan source discovery hanya bila diminta dengan
+scope/budget yang jelas. Tidak perlu branch/worktree/handoff rutin. Script
+`prepare_bsr_hierarchy_mapping.py` dan `review_bsr_hierarchy_mapping.py` menyiapkan
+proposal dari evidence lokal; tidak mengubah Maximo atau mendaftarkan Registry.
+
 Scripts in this folder must:
 
 - use GET/HEAD/OPTIONS for business resources; the only POST exception is the

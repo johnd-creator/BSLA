@@ -1,29 +1,45 @@
 # CEMS Collector
 
+## Konteks aktif dan operasi existing
+
+CEMS tetap komponen independen; [NADI Laravel](../NADI/README.md) adalah UI produk
+aktif tetapi proyeksi CEMS ke NADI belum dibuat. Jangan klaim emisi sudah menjadi
+input reliability/MTBF/MTTR. Reuse managed `cems-db` / `cems_collector` / volume
+`cems-db`; API 8003 dan dashboard 3003. Port standalone lama 5435 bukan store ini.
+
+Ikuti [AGENTS](AGENTS.md) dan root: edit langsung checkout aktif → uji sesuai
+perubahan → lihat hasil, tanpa worktree/handoff atau poller paralel. Source
+collector/diagnose bukan langkah default pengembangan consumer. Contoh bootstrap
+berikut hanya untuk instalasi standalone baru yang memang diminta.
+
+Pipeline legacy tetap tersedia, tetapi registry saat ini menonaktifkan legacy
+normalization dan mempertahankan verified adjustments/operator overrides.
+NO/NO2/CO2/Flow tetap raw sesuai override; jangan mengaktifkan koreksi otomatis.
+Status knowledge dan switch `collect` berbeda. Detail bukti/override ada di AGENTS.
+
 Read-only CEMS Modbus TCP collector for stack 1 (PLTU Suralaya, Beijer
-Box2Base gateway). Polls 14 emission parameters (SO2, NOx, O2, PM, Hg,
-CO2, …) every few seconds via Modbus FC03/FC04 only, normalizes them with
-the ported DAZ legacy pipeline (gas conversion, threshold clamp,
-maintenance overrides, O2-reference correction), aggregates 5-minute
-windows, and serves everything through a FastAPI read-only API. Ported
+Box2Base gateway). The checked-in registry contains 15 emission parameters
+(SO2, NOx, O2, PM, Hg, CO2, …). The collector uses Modbus FC03/FC04 only,
+normalizes readings through registry-driven adjustments, aggregates 5-minute
+windows, and serves a FastAPI read API. Ported
 from the DAZ project and restructured to follow the maximo-collector
 architecture; the outbound KLHK/CEMS push was deliberately not ported.
 
 See `AGENTS.md` for safety rules and architecture.
 
-## Quick start
+## Setup standalone baru (bukan instalasi managed existing)
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -e .
-cp .env.example .env          # PLC host/port + DATABASE_URL
+[ -e .env ] || cp .env.example .env # preserve current PLC/DB settings
 docker compose up -d postgres # Postgres on :5435
 cemscollector init-db
-cemscollector load-registry   # stack CB001 + 14 parameters from YAML
+cemscollector load-registry   # stack + current parameter registry from YAML
 cemscollector collect         # continuous polling (or --once for one cycle)
 cemscollector aggregate       # 5-minute window aggregation (or --start/--end)
 cemscollector diagnose        # read-only probe of every parameter
 cemscollector serve           # http://127.0.0.1:8003 (+ /docs)
-.venv/bin/python -m unittest discover -s tests   # 81 tests, no network/DB
+.venv/bin/python -m unittest discover -s tests   # hermetic suite, no source network
 ```
 
 The parameter registry lives in `registry/cems-parameters.yaml`. Entries
@@ -37,7 +53,7 @@ The dashboard is a separate Next.js process:
 ```bash
 cd web && npm install
 CEMS_COLLECTOR_API_BASE=http://127.0.0.1:8003 npm run dev
-# open http://127.0.0.1:3000
+# Standalone dev default may be 3000; managed dashboard is 3003.
 ```
 
 ## API

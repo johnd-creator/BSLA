@@ -1,5 +1,10 @@
 # NADI product roadmap — main quest
 
+> Historical design/status reference retained for traceability. Current product
+> work follows [NADI Laravel](NADI-LARAVEL.md) and [MTBF/MTTR](MTBF-MTTR.md).
+> Phase/checkpoint statements below do not establish current runtime readiness
+> or authorize implementation, collection, migrations or deployment.
+
 ## 1 November 2026 — PdM Sprint2 candidate, no phase advancement
 
 [Sprint2 delivery / issue mapping](../reliability-cockpit/docs/NADI-PDM-SPRINT-02-DELIVERY.md)
@@ -101,7 +106,7 @@ inferred from merge or documentation approval.
 | 5 — Organizational Learning | **PLANNED** | Evidence and accepted outcome history prerequisites |
 
 [PRD](../PRD.md) owns product requirements, [UI spec](../docs/design/NADI-UI-SPEC.md)
-owns page design, and [M0–M8](reliability-cockpit-platform/05-roadmap-implementasi.md)
+owns page design, and [M0–M8](https://github.com/johnd-creator/BSLA/blob/cea9503c9c605d8a060d448e36a16cf1ea646089/plans/reliability-cockpit-platform/05-roadmap-implementasi.md)
 retains scoped engineering sequencing. No completion percentages are inferred.
 
 ### Product UI/UX Development track
@@ -785,7 +790,7 @@ Mart projection freshness and API availability.
 
 Review the scoped end-to-end pilot and failure evidence, publish acceptance and
 remaining domain gaps, then explicitly authorize Phase 2 planning/implementation.
-[M0–M8](reliability-cockpit-platform/05-roadmap-implementasi.md) stays the
+[M0–M8](https://github.com/johnd-creator/BSLA/blob/cea9503c9c605d8a060d448e36a16cf1ea646089/plans/reliability-cockpit-platform/05-roadmap-implementasi.md) stays the
 engineering implementation map underneath these product phases. M5 derived
 intelligence and M7 PdM/actions now belong to later phases, not Phase 0 gaps.
 
