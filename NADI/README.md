@@ -220,3 +220,13 @@ Repository: <https://github.com/johnd-creator/BSLA>. Root fisik dan symlink lama
 Compose project/volume, akun lama serta port layanan tetap dipertahankan.
 Operasi backend mengikuti [runbook platform](../deploy/compose/README.md), bukan
 restart/rebuild seluruh stack dari perubahan frontend.
+
+## Additional source modules (8 November 2026)
+
+- [Explicit disruption-to-WO links](docs/disruption-work-order-links.md).
+- [Reliability evidence and versioned engineer review](docs/reliability-evidence.md); official KPIs remain NOT_READY.
+- [Page-demand historian simulation](docs/historian-demand.md), disabled until deliberately configured.
+- [Read-only CEMS RAM view](docs/cems-live.md), with an optional internal bridge.
+
+Publishing these definitions does not apply migrations, switch source ownership,
+start a gateway, restart services or change private catalog paths.

@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'cems_live' => ['url' => env('CEMS_LIVE_API_BASE')],
     'maximo_collector' => ['url' => env('MAXIMO_COLLECTOR_API_BASE', 'http://127.0.0.1:8002')],
     'asset_mapping' => ['file' => env('NADI_ASSET_MAPPING', storage_path('app/private/asset-mapping.json'))],
     'reliability_mart' => [

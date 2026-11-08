@@ -156,7 +156,7 @@ class AssetDisruptionController extends Controller
     {
         $input = request()->validate(['revision' => ['nullable', 'integer', 'min:1'], 'page' => ['nullable', 'integer', 'between:1,1000']]);
 
-        return view('disruptions.show', ['event' => $disruption->load(['author:id,name', 'members']),
+        return view('disruptions.show', ['event' => $disruption->load(['author:id,name', 'members', 'workOrders']),
             'revisions' => $disruption->revisions()->with('author:id,name')->when(! empty($input['revision']), fn ($q) => $q->where('version', $input['revision']))->paginate(10)->withQueryString()]);
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AssetDisruptionWorkOrder;
 use App\Services\CollectorWorkOrderDescription;
 use App\Services\ReliabilityMart;
 use App\Services\WorkOrderEvidence;
@@ -99,6 +100,10 @@ class WorkOrderController extends Controller
             $record = $timing = $evidence = null;
         }
 
-        return view('work-orders.show', compact('record', 'timing', 'descriptionOrigin', 'evidence', 'inventory'));
+        $disruptionLinks = $record ? AssetDisruptionWorkOrder::with('disruption')
+            ->where('work_order_ref', $record['work_order_id'])->where('asset_ref', $record['equipment_id'])
+            ->where('relation_state', '!=', 'removed')->orderByDesc('id')->simplePaginate(10) : null;
+
+        return view('work-orders.show', compact('record', 'timing', 'descriptionOrigin', 'evidence', 'inventory', 'disruptionLinks'));
     }
 }

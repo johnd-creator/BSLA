@@ -8,6 +8,7 @@
             <a class="button secondary" href="{{ request()->url() }}">Muat ulang</a>
         </div>
     @else
+        <a class="button secondary" href="{{ route('reliability.index', ['asset_ref'=>$record['canonical_id']]) }}">Reliability · bukti & review tahunan</a>
         <div class="panel detail-panel">
             <div class="asset-detail-layout">
                 <div class="asset-detail-facts">

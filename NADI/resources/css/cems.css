@@ -1,0 +1,30 @@
+.cems-page { display: grid; gap: 16px; }
+.cems-page [data-cems-content] { display: grid; gap: 16px; }
+.cems-empty, .cems-card, .cems-history { padding: 18px; }
+.cems-facts { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; padding: 16px; }
+.cems-facts dt { color: var(--muted); font-size: 12px; }
+.cems-facts dd { margin: 4px 0 0; overflow-wrap: anywhere; font-size: 13px; }
+.cems-status > .data-note { padding: 0 16px 12px; }
+.cems-process { display: grid; grid-template-columns: minmax(280px, 420px) minmax(0,1fr); gap: 24px; align-items: center; padding: 16px; border-bottom: 1px solid var(--border); }
+.cems-process svg { width: 100%; max-width: 420px; }
+.cems-scope-title { display: block; font-size: 22px; }
+.cems-scope > p { margin: 10px 0; }
+.cems-scope h3 { margin: 14px 0 0; font-size: 14px; }
+.cems-parameters-heading { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.cems-parameters > .data-note { margin: 10px 0 14px; }
+.cems-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 12px; }
+.cems-card { min-width: 0; }
+.cems-card-heading { display: flex; justify-content: space-between; gap: 8px; }
+.cems-card h3 { margin-top: 10px; font-size: 15px; min-height: 36px; }
+.cems-value { font-size: 28px; font-weight: 650; margin: 8px 0; overflow-wrap: anywhere; }
+.cems-value small { font-size: 13px; font-weight: 400; }
+.cems-card > .muted { margin: 6px 0 12px; }
+.cems-card > small { display: block; color: var(--muted); overflow-wrap: anywhere; }
+.cems-card-feed { display: grid; gap: 5px; padding: 10px; border-left: 3px solid var(--accent); background: var(--surface-soft); font-size: 12px; overflow-wrap: anywhere; }
+.cems-card-asset { margin: 12px 0; overflow-wrap: anywhere; }
+.cems-card-asset .text-link { font-size: 12px; }
+.cems-simulation { border-color: #b85f15; background: #fff6e7; color: #743b0d; }
+.cems-history form { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+.cems-history-scroll { max-height: 390px; overflow: auto; }
+@media (max-width: 900px) { .cems-facts { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (max-width: 700px) { .cems-process { grid-template-columns: 1fr; gap: 10px; } .cems-process svg { justify-self: center; } .cems-facts { grid-template-columns: 1fr; } }

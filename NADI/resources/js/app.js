@@ -1,3 +1,5 @@
+import { setupHistorian } from './historian-demand';
+import { setupCems } from './cems-live';
 import { setupWorkspace } from './workspace-ui';
 import { setupPdmTime } from './pdm-time';
 
@@ -17,3 +19,7 @@ if (navigation) {
 }
 
 if (document.documentElement) setupWorkspace(document, window);
+
+document.querySelectorAll('[data-cems]').forEach((root) => setupCems(root));
+
+document.querySelectorAll('[data-historian]').forEach((root) => setupHistorian(root));

@@ -1,4 +1,7 @@
+@import './historian.css';
+@import './reliability.css';
 @import 'tailwindcss';
+@import './cems.css';
 @import './pdm.css';
 @import './pdm-trends.css';
 @import './disruptions.css';

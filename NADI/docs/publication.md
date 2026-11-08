@@ -35,3 +35,24 @@ before separately authorized operational use.
 
 GitHub CI provides the separate PostgreSQL/browser acceptance. Local results do
 not claim those skipped/browser checks or engineering UAT.
+
+## Remaining source integration, 8 November 2026
+
+The additional source package contains explicit multi-WO links, local Reliability
+reviews/snapshots, the simulation-only page-demand historian, and the optional
+shared CEMS RAM service/UI. Legacy CEMS persistence is now opt-in through the
+`cems-legacy-storage` profile. This is a source/configuration change only; no
+service, existing environment file, database or source acquisition was changed
+by publication. Main's private catalog handling, synthetic fixtures, collector
+fixes, Mart governance and existing frontend are retained.
+
+Final focused integration checks: 916 Laravel tests / 13,383 assertions, 61 UI
+tests, 385 Maximo tests, 106 CEMS tests, 16 historian tests, 18 runtime controller
+tests and all 36 current schemas passed. Pint, Composer validation/platform,
+Vite build and whitespace checks passed. CEMS browser QA separately covered
+focused-filter polling, 15-second expiry, blocked-request recovery and narrow
+layouts. The two Python RAM-source suites also have exact-commit GitHub CI.
+
+Workbooks, source-derived catalogs/mappings/review reports, private image locks,
+source snapshots, backups and database files remain outside this public package.
+Old branch-only PI/NK changes are not merged over current main.

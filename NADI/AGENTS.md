@@ -23,7 +23,8 @@ build`), not a separate Vite server under the current strict CSP.
 
 - Reuse ignored `database/development.sqlite`: accounts, inspection/recommendation
   drafts, PdM activities, manual disruption events/members/revisions, asset
-  priorities/revisions, and workspace activities. This is development data, not
+  priorities/revisions, workspace activities, reliability reviews and immutable
+  evidence snapshots. This is development data, not
   disposable fixture data and not a replacement for any operational DB.
 - Compatible migrations require checking the actual local target and a verified
   SQLite backup before application. Do not migrate/reset production, import old
@@ -60,7 +61,12 @@ build`), not a separate Vite server under the current strict CSP.
 - CLOSE actual elapsed execution is not MTTR; labor is not elapsed repair time;
   source boolean downtime is not hours. MTBF requires governed failures and
   operating exposure. Keep NOT_READY until the gates in `../plans/MTBF-MTTR.md`
-  are met. Operations is a context/navigation foundation, not live HMI/historian.
+  are met. The local Reliability module keeps descriptive completed-episode
+  sample means separate from official null KPIs. Reviews/snapshots are append-only
+  by route, per event/member asset, and tied to event/review/rule versions. Changed
+  event/WO/duplicate-root evidence makes old reviews stale. Read
+  `docs/reliability-evidence.md` before modifying these semantics. Operations includes an optional CEMS RAM read view and a simulation-only
+  historian demonstration, never HMI/control or verified operating exposure.
 
 ## Checks and documentation
 
