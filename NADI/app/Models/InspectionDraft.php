@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class InspectionDraft extends Model
 {
@@ -26,6 +27,33 @@ class InspectionDraft extends Model
     public function pdmActivity(): BelongsTo
     {
         return $this->belongsTo(PdmActivity::class);
+    }
+
+    public function pdmReviewAudit(): HasOne
+    {
+        return $this->hasOne(WorkspaceActivity::class, 'subject_id')->ofMany(['id' => 'max'], function ($query) {
+            $query->where('kind', 'inspection')->whereNotNull('changes->pdm_basis');
+        });
+    }
+
+    public function pdmReviewedBasis(): ?array
+    {
+        $changes = $this->pdmReviewAudit?->getAttribute('changes');
+
+        return $changes['pdm_basis']['after'] ?? null;
+    }
+
+    public function pdmReviewState(): ?string
+    {
+        if (! $this->pdm_activity_id || (! $this->finding && ! $this->recommendation)) {
+            return null;
+        }
+        $basis = $this->pdmReviewedBasis();
+        if (! is_string($basis['fingerprint'] ?? null)) {
+            return 'unknown';
+        }
+
+        return $this->pdmActivity && hash_equals($basis['fingerprint'], $this->pdmActivity->analysisBasis()['fingerprint']) ? null : 'stale';
     }
 
     public function stageLabel(): string

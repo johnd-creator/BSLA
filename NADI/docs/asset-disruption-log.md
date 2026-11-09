@@ -11,11 +11,16 @@ Engineer chooses a verified inventory or Registry asset, event type, optional ob
 asset role (cause / affected / unknown), and impact (including unknown). The log
 requires neither WO nor causal diagnosis. Date, clock time, known cause, impact
 explanation, recovery, WO reference and evidence reference are optional. Evidence
-is currently text/location/URL reference, not a file upload or a verified WO link.
+is text/location/URL reference, not a file upload. The original free-text WO field
+remains unverified; structured WO links are managed separately from the saved
+event detail, as described in [WO relationships](disruption-work-order-links.md).
 
 A date without a clock time remains a literal date, with no invented midnight or
 zone. Both clock times use the explicitly selected zone and are stored in UTC.
-Dates without times are accepted. Future timestamps, invalid dates, times without
+Dates without times use the current Asia/Jakarta (WIB) calendar date as their
+latest permitted day; they still store no timezone or invented instant. Zoned
+timestamps are checked as instants, so a valid WITA/WIT date ahead of UTC or WIB
+is not rejected by a second calendar cutoff. Future timestamps, invalid dates, times without
 a date/zone, and recovery before the event are rejected. Empty recovery does not
 mean the asset is still stopped. Duration is calculated only when both complete
 instants exist, and is labelled recorded event duration, not verified downtime.
@@ -56,9 +61,34 @@ checking rejects stale edits. Cancellation is a status change with a reason,
 retained in history and excluded from active indicators. No delete route exists.
 This is application-level traceability, not a tamper-proof compliance audit store.
 
-## Verification boundary
+Corrections and cancellation remain available during a Mart outage when their
+asset identities are retained in the current local record. Adding a new affected
+or causal asset still requires a successful exact identity check. A member removed
+from the current record must be checked again before re-adding it; historical
+snapshots are not an offline identity cache. Role, version, audit and input checks
+remain unchanged. Saving a local correction does not claim fresh source evidence.
 
-Public tests use fictional assets, measurements, in-memory SQLite and mocked HTTP.
-They establish software behavior, not source freshness, verified engineering
-judgments or deployment acceptance. Private runtime evidence is not shipped.
-Run the aggregate checks in the workspace README against the selected commit.
+## Storage and verification
+
+The additive migration `2026_11_07_000003_create_asset_disruptions.php` creates three
+tables in the existing ignored Laravel development SQLite: events, memberships,
+and revision snapshots. No operational stores, accounts, source payloads or existing
+records are migrated/replaced. A private local backup precedes preview activation.
+This extends the local draft workspace to manual incident observations only.
+
+`AssetDisruptionTest` uses in-memory SQLite and mocked HTTP, including authorization,
+precision, annual counts, idempotency, rollback, stale edits, cancellation, escaping,
+Mart outages, pagination and impacted-asset history. Browser QA runs against a
+separate temporary SQLite fixture and synthetic users/assets on loopback 8021;
+no test incident is saved in the user's development logbook.
+
+Checks: `composer test`, `vendor/bin/pint --test`, `npm run test:ui`,
+`npm run build`, `git diff --check`. The normal preview remains on port 8010.
+
+Latest regression verification (8 November 2026, including structured WO links):
+875 PHP tests / 21,683 assertions, 54 frontend tests, Pint, Composer validation and
+platform requirements, Vite build and diff whitespace checks pass. The original
+logbook browser coverage includes creation, edit/audit, stale updates, cancellation,
+role denials, annual filters and interrupted navigation. The new link workflow
+passed 12 additional isolated browser scenario groups at 320/390/768/1440;
+see the linked feature contract for its scope and real-data limits.

@@ -26,6 +26,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::define('write-wellness-policies', fn (User $user) => $user->hasRole(Role::Engineer));
+        Gate::define('approve-reliability', fn (User $user) => $user->hasRole(Role::Supervisor));
         Gate::define('write-asset-priorities', fn (User $user) => $user->hasRole(Role::Engineer));
         Gate::define('update-asset-priority', fn (User $user, AssetPriority $priority) => $user->hasRole(Role::Engineer) && $priority->created_by === $user->id);
         Gate::define('write-asset-disruptions', fn (User $user) => $user->hasRole(Role::Engineer));

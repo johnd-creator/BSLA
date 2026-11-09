@@ -40,12 +40,13 @@ restart, migration, collection atau build aplikasi.
 | Log Gangguan Aset | Observasi engineer, satu event dengan aset penyebab/terdampak/unknown, koreksi/revisi dan pembatalan |
 | Action Board | Prioritas yang dinilai engineer, kandidat belum dinilai, rekomendasi lokal dan WAPPR terpisah |
 | Kualitas data / laporan | Cakupan dan ketidaklengkapan eksplisit, CSV snapshot ringkasan tanpa isi temuan atau identitas pengguna |
-| Operasi | Pemilihan Asset Registry dan tautan konteks; belum ada historian, live value, layout HMI atau kontrol |
+| Operasi | Konteks Asset Registry, historian simulasi sesuai halaman dan CEMS RAM opsional; bukan HMI/kontrol |
 | Administrasi | Kelola akun/role lokal, aktivasi/nonaktif, penggantian password development |
 
 Ilustrasi Asset adalah gambar generik berlabel, bukan foto/spesifikasi aktual.
-Tidak ada automatic diagnosis, reliability score, approval bisnis, pengiriman
-notifikasi eksternal, Maximo write-back, atau perhitungan MTBF/MTTR resmi.
+Tidak ada diagnosis otomatis, skor Asset Wellness, pengiriman notifikasi eksternal
+atau Maximo write-back. Metrik Reliability resmi memerlukan keputusan Supervisor
+yang sesuai dengan evidence/metode snapshot; bukan hasil otomatis dari WO.
 
 ## Akun dan hak akses
 
@@ -56,8 +57,9 @@ Credential awal bukan sumber password terkini setelah password diganti.
 
 - **ADMIN:** kelola akun lokal. Tidak mewarisi hak tulis engineering.
 - **ENGINEER:** buat dan koreksi hanya catatan engineering miliknya sendiri.
-- **SUPERVISOR / MANAGER:** baca workspace; bukan hak approval, risk acceptance,
-  budget decision atau administrasi akun.
+- **SUPERVISOR:** baca workspace dan sahkan/cabut metrik Reliability siap pada
+  snapshot aset/tahun tepat; bukan approval WO, anggaran, risiko atau edit evidence.
+- **MANAGER:** baca workspace; tidak mendapat hak tulis atau pengesahan.
 - Semua izin diperiksa oleh server Gate, bukan sekadar tombol tersembunyi.
   Auth-version menolak sesi lama/nonaktif, termasuk setelah reaktivasi. Perubahan
   akun melindungi admin aktif terakhir dan melarang perubahan role/status sendiri.
@@ -224,9 +226,39 @@ restart/rebuild seluruh stack dari perubahan frontend.
 ## Additional source modules (8 November 2026)
 
 - [Explicit disruption-to-WO links](docs/disruption-work-order-links.md).
-- [Reliability evidence and versioned engineer review](docs/reliability-evidence.md); official KPIs remain NOT_READY.
+- [Reliability evidence and versioned engineer review](docs/reliability-evidence.md); official KPIs require a current selected-metric Supervisor decision.
 - [Page-demand historian simulation](docs/historian-demand.md), disabled until deliberately configured.
 - [Read-only CEMS RAM view](docs/cems-live.md), with an optional internal bridge.
 
 Publishing these definitions does not apply migrations, switch source ownership,
 start a gateway, restart services or change private catalog paths.
+
+## Governed workflows (9 November 2026)
+
+- [PdM inspection plans](docs/pdm-inspection-plans.md): engineer-owned schedules,
+  day/week/month intervals, manual due-date overrides, immutable revisions and
+  progress linked to exact compatible measurement evidence.
+- [Action effectiveness](docs/pdm-workflow.md): before/after comparisons bind the
+  same asset, template, point, units and operating context; engineer conclusions
+  remain explicit and become stale when their evidence changes.
+- [Asset Wellness](docs/asset-wellness-draft.md): versioned method/weight proposals
+  and evidence readiness. Draft weights never produce a numerical health score.
+- [Operating evidence](docs/reliability-operating-readiness.md),
+  [pilot calculations](docs/reliability-calculation.md), and
+  [Supervisor approval](docs/reliability-supervisor-approval.md): selected ready
+  metrics can be approved for an immutable exact asset/year snapshot. Changed
+  evidence or method invalidates current approval without deleting its history.
+- [MTTR pilot](docs/mttr-real-data-pilot.md): synthetic end-to-end regression passes;
+  operational figures still require verified failure/restoration evidence. WO
+  dates are not MTTR inputs, and historian is not an MTTR prerequisite.
+- [CEMS](docs/cems-live.md): Hg values use decimal-comma display without scientific
+  notation or changing the underlying values. Freshness rules are preserved.
+
+ADMIN has no implicit engineering/approval rights. SUPERVISOR can approve/revoke
+selected ready Reliability metrics, not WO, budget, risk or engineering evidence.
+MANAGER remains read-only. Official metrics stay unavailable unless a current
+Supervisor decision matches their evidence and method; availability stays null.
+
+Publication does not apply migrations, insert data, approve real KPIs or alter the
+running preview. Existing private catalogs, source mappings, accounts and database
+remain local. The public source uses fictional test fixtures only.

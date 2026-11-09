@@ -44,7 +44,7 @@ class PdmLogbook
         $page = DB::query()->fromSub($activities->unionAll($drafts), 'logbook')
             ->orderByDesc('occurred_on')->orderByRaw('CASE WHEN occurred_at IS NULL THEN 1 ELSE 0 END')->orderByDesc('occurred_at')->orderBy('source')->orderByDesc('id')->paginate(20)->withQueryString();
         $rows = $page->getCollection();
-        $pdm = PdmActivity::with(['author:id,name', 'inspection'])->whereIn('id', $rows->where('source', 'pdm')->pluck('id'))->get()->keyBy('id');
+        $pdm = PdmActivity::with(['author:id,name', 'inspection.pdmActivity', 'inspection.pdmReviewAudit'])->whereIn('id', $rows->where('source', 'pdm')->pluck('id'))->get()->keyBy('id');
         $inspections = InspectionDraft::with('author:id,name')->whereIn('id', $rows->where('source', 'inspection')->pluck('id'))->get()->keyBy('id');
         $page->setCollection($rows->map(fn ($row) => $row->source === 'pdm' ? $pdm[$row->id] : $inspections[$row->id]));
 

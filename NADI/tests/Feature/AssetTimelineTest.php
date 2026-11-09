@@ -2,10 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Models\AssetDisruption;
 use App\Models\PdmActivity;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Factory;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -169,5 +171,115 @@ class AssetTimelineTest extends TestCase
         Http::fake(['mart.test/*' => Http::response([], 404)]);
         $this->get(route('assets.timeline', self::ASSET))->assertNotFound();
         Http::assertSentCount(2);
+    }
+
+    private function disruption(User $owner, array $values = [], ?array $members = null): AssetDisruption
+    {
+        $event = AssetDisruption::create(array_replace(['created_by' => $owner->id, 'request_key' => (string) Str::uuid(), 'asset_ref' => self::ASSET, 'event_type' => 'trip', 'description' => 'Synthetic manual observation', 'impact' => 'unknown', 'occurred_on' => '2026-01-05'], $values));
+        $event->members()->createMany($members ?? [['asset_ref' => $event->asset_ref, 'role' => 'unknown']]);
+
+        return $event;
+    }
+
+    public function test_manual_observations_join_timeline_by_exact_member_with_distinct_roles(): void
+    {
+        $owner = $this->signIn();
+        $cause = $this->disruption($owner, ['description' => 'PRIMARY-CAUSE'], [['asset_ref' => self::ASSET, 'role' => 'cause']]);
+        $affected = $this->disruption($owner, ['asset_ref' => 'asset:OTHER', 'description' => 'AFFECTED-MEMBER'], [['asset_ref' => 'asset:OTHER', 'role' => 'cause'], ['asset_ref' => self::ASSET, 'role' => 'affected']]);
+        $this->disruption($owner, ['asset_ref' => 'asset:OTHER', 'description' => 'UNRELATED-MANUAL-OBSERVATION']);
+        $this->fake($this->context());
+        $response = $this->get(route('assets.timeline', self::ASSET))->assertOk()->assertSee('PRIMARY-CAUSE')->assertSee('AFFECTED-MEMBER')->assertDontSee('UNRELATED-MANUAL-OBSERVATION')
+            ->assertSee('Penyebab (menurut catatan)')->assertSee('Terdampak')->assertSee('Log gangguan manual')
+            ->assertSee(route('disruptions.show', $cause), false)->assertSee(route('disruptions.show', $affected), false);
+        $preview = $response->viewData('preview');
+        $this->assertSame(2, $preview['counts']['disruptions']);
+        $this->assertSame('available', $preview['states']['disruptions']);
+        $this->assertDatabaseCount('asset_disruptions', 3);
+        Http::assertSentCount(2);
+        Http::assertNotSent(fn ($request) => $request->method() !== 'GET');
+    }
+
+    public function test_manual_dates_remain_literal_cancellation_visible_and_unknown_times_sort_last(): void
+    {
+        $owner = $this->signIn();
+        $this->disruption($owner, ['description' => 'DATE-ONLY-OBSERVATION']);
+        $this->disruption($owner, ['description' => 'EXACT-TIME-OBSERVATION', 'occurred_at' => '2026-01-04T17:15:23Z', 'timezone' => 'Asia/Jakarta']);
+        $this->disruption($owner, ['description' => 'UNKNOWN-TIME-OBSERVATION', 'occurred_on' => null]);
+        $this->disruption($owner, ['description' => 'VOIDED-OBSERVATION', 'occurred_on' => '2026-01-03', 'status' => 'voided']);
+        $this->fake($this->context());
+        $response = $this->get(route('assets.timeline', self::ASSET))->assertOk()->assertSeeInOrder(['EXACT-TIME-OBSERVATION', 'DATE-ONLY-OBSERVATION', 'VOIDED-OBSERVATION', 'UNKNOWN-TIME-OBSERVATION'])
+            ->assertSee('05 Jan 2026 00:15:23')->assertSee('Dibatalkan · histori dipertahankan')->assertSee('Tanggal observasi · jam/zona tidak dicatat')->assertSee('Tanpa waktu terverifikasi');
+        $rows = collect($response->viewData('preview')['events'])->keyBy('title');
+        $this->assertNull($rows['DATE-ONLY-OBSERVATION']['at']);
+        $this->assertSame('2026-01-05', $rows['DATE-ONLY-OBSERVATION']['date_only']);
+        $this->assertNull($rows['UNKNOWN-TIME-OBSERVATION']['at']);
+        $this->assertNull($rows['UNKNOWN-TIME-OBSERVATION']['date_only']);
+        $this->assertStringContainsString('bukan status operasi saat ini', $rows['EXACT-TIME-OBSERVATION']['note']);
+    }
+
+    public function test_manual_preview_is_bounded_and_reads_small_fields_without_history_snapshots(): void
+    {
+        $owner = $this->signIn();
+        $this->disruption($owner, ['description' => 'OLDEST-MANUAL-OUTSIDE-CUPLIKAN', 'occurred_on' => '2025-01-01']);
+        for ($i = 0; $i < 25; $i++) {
+            $this->disruption($owner);
+        }
+        $this->fake($this->context());
+        DB::enableQueryLog();
+        $response = $this->get(route('assets.timeline', self::ASSET))->assertOk()->assertDontSee('OLDEST-MANUAL-OUTSIDE-CUPLIKAN')->assertSee('25 log gangguan manual');
+        $queries = DB::getQueryLog();
+        DB::disableQueryLog();
+        $this->assertSame(25, $response->viewData('preview')['counts']['disruptions']);
+        $this->assertDatabaseCount('asset_disruptions', 26);
+        $this->assertFalse(collect($queries)->contains(fn ($q) => str_contains($q['query'], 'asset_disruption_revisions')));
+        $eventQuery = collect($queries)->first(fn ($q) => str_contains($q['query'], 'from "asset_disruptions"'));
+        $this->assertDoesNotMatchRegularExpression('/^select \*/', $eventQuery['query']);
+        $this->assertStringContainsString('limit 25', $eventQuery['query']);
+    }
+
+    public function test_manual_observations_remain_during_source_outage_but_still_require_asset_verification(): void
+    {
+        $owner = $this->signIn();
+        $this->disruption($owner);
+        Http::fake(['mart.test/v1/reliability/assets/inventory/*' => Http::response($this->asset()), 'mart.test/*' => Http::response([], 503)]);
+        $this->get(route('assets.timeline', self::ASSET))->assertOk()->assertSee('Synthetic manual observation')
+            ->assertViewHas('preview', fn ($preview) => $preview['states']['disruptions'] === 'available' && $preview['states']['maintenance'] === 'unavailable');
+        Http::swap(new Factory);
+        Http::preventStrayRequests();
+        Http::fake(['mart.test/*' => Http::response([], 503)]);
+        $this->get(route('assets.timeline', self::ASSET))->assertOk()->assertSee('Aset belum terverifikasi')->assertDontSee('Synthetic manual observation');
+        Http::assertSentCount(1);
+    }
+
+    public function test_manual_timeline_supports_nonregistry_and_all_read_roles_without_engineering_writes(): void
+    {
+        $owner = $this->signIn();
+        $this->disruption($owner, ['description' => '<script>MANUAL</script>']);
+        Http::fake(['mart.test/v1/reliability/assets/inventory/*' => fn () => Http::response($this->asset(false)), 'mart.test/*' => fn () => Http::response([], 503)]);
+        foreach (['ADMIN', 'ENGINEER', 'SUPERVISOR', 'MANAGER'] as $role) {
+            $this->signIn($role);
+            $this->get(route('assets.timeline', self::ASSET))->assertOk()->assertSee('&lt;script&gt;MANUAL&lt;/script&gt;', false)
+                ->assertDontSee('<script>MANUAL</script>', false)->assertSee('Memerlukan Registry')->assertSee('Log gangguan manual');
+        }
+        $this->assertDatabaseCount('asset_disruptions', 1);
+        $this->assertDatabaseCount('asset_disruption_revisions', 0);
+        Http::assertNotSent(fn ($request) => $request->method() !== 'GET');
+    }
+
+    public function test_source_unknown_or_impossible_offsets_are_not_verified_times_and_future_plans_stay_valid(): void
+    {
+        $this->signIn();
+        $this->fake($this->context(['fmea' => [
+            $this->row('fmea:unknown-offset', ['status_changed_at' => '2026-01-01T00:00:00-00:00']),
+            $this->row('fmea:impossible-offset', ['status_changed_at' => '2026-01-01T00:00:00+14:30']),
+            $this->row('fmea:invalid-minute', ['status_changed_at' => '2026-01-01T00:00:00+07:65']),
+        ], 'overhauls' => [$this->row('overhaul:future-plan', ['planned_start_at' => '2099-02-01T00:00:00+07:00'])]]));
+        $response = $this->get(route('assets.timeline', self::ASSET))->assertOk();
+        $rows = collect($response->viewData('preview')['events'])->keyBy('reference');
+        foreach (['fmea:unknown-offset', 'fmea:impossible-offset', 'fmea:invalid-minute'] as $id) {
+            $this->assertNull($rows[$id]['at'], $id);
+        }
+        $this->assertSame('2099-02-01', $rows['overhaul:future-plan']['at']->format('Y-m-d'));
+        $this->assertSame('Rencana mulai overhaul · bukan pelaksanaan', $rows['overhaul:future-plan']['basis']);
     }
 }

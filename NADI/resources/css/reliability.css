@@ -17,3 +17,30 @@
 
 .reliability-panel .detail-heading { align-items: flex-start; }
 .reliability-panel > .form-grid > .form-actions { grid-column: 1 / -1; }
+
+.review-queue-filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+.review-queue-filters > .form-actions { grid-column: 1 / -1; }
+.review-queue-count { margin-top: 12px; color: var(--muted); font-size: 12px; }
+#reliability-review-queue { scroll-margin-top: 16px; }
+@media (max-width: 700px) {
+    .review-queue-filters { grid-template-columns: minmax(0, 1fr); }
+}
+
+.reliability-readiness-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 14px; }
+.reliability-readiness-card { border: 1px solid var(--border); border-radius: 8px; padding: 14px; min-width: 0; }
+.reliability-readiness-grid > div { min-width: 0; }
+.reliability-readiness-grid table { min-width: 330px; }
+.repair-time label { display: block; margin-top: 8px; }
+.repair-interval-row > button { grid-column: 1 / -1; justify-self: start; }
+@media (max-width: 700px) {
+    .reliability-readiness-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+.reliability-chart { display: block; width: 100%; max-width: 100%; height: auto; margin: 12px 0; color: var(--text); }
+.reliability-chart text { fill: currentColor; font-size: 15px; font-family: inherit; }
+.reliability-result { font-size: 20px; font-weight: 700; margin: 8px 0; }
+.reliability-official-boundary { margin-top: 16px; }
+#reliability-calculation, #reliability-trends, #calculation-events { scroll-margin-top: 18px; }
+@media (max-width: 700px) {
+    .reliability-chart text { font-size: 22px; }
+}

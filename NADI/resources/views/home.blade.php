@@ -81,7 +81,7 @@
                 <div><dt>PdM / rekomendasi lokal</dt><dd>{{ $snapshot['metrics'][2]['value'] === null || $snapshot['metrics'][3]['value'] === null ? 'Sebagian belum tersedia' : 'Draft lokal tersedia' }}<small>Dapat saling terkait, bukan total inspeksi unik.</small></dd></div>
                 <div><dt>Kesegaran sumber</dt><dd>Belum dapat dipastikan<small>Waktu baca dan tanggal scan bukan jaminan data realtime.</small></dd></div>
             </dl>
-            <details class="method-note overview-note"><summary>Cakupan & aturan baca</summary><p>Data kosong / belum tersedia bukan aman, sehat, nol risiko, atau nol gangguan. Skor kesehatan dan kondisi realtime belum dinilai.</p></details>
+            <details class="method-note overview-note"><summary>Cakupan & aturan baca</summary><p>Data kosong / belum tersedia bukan aman, sehat, nol risiko, atau nol gangguan. Asset Wellness dan kondisi realtime belum dinilai.</p></details>
             <div class="home-shortcuts"><a href="{{ route('assets.index') }}">Master Asset</a><a href="{{ route('pdm.index') }}">Logbook PdM</a><a href="{{ route('disruptions.index') }}">Log gangguan</a></div>
         </section>
         </div>

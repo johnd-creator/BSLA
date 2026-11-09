@@ -18,7 +18,7 @@ class InspectionController extends Controller
     public function index(Request $request)
     {
         $filters = $request->validate(['q' => ['nullable', 'string', 'max:100'], 'stage' => ['nullable', Rule::in(['request', 'finding', 'recommendation'])]]);
-        $query = InspectionDraft::query()->with('author:id,name')->orderByDesc('id');
+        $query = InspectionDraft::query()->with(['author:id,name', 'pdmActivity', 'pdmReviewAudit'])->orderByDesc('id');
         if (! empty($filters['q'])) {
             $term = '%'.$filters['q'].'%';
             $query->where(fn ($q) => $q->where('request_reference', 'like', $term)->orWhere('request_summary', 'like', $term)->orWhere('finding', 'like', $term)->orWhere('recommendation', 'like', $term));
@@ -95,11 +95,13 @@ class InspectionController extends Controller
             'requester_name' => ['nullable', 'required_if:inspection_type,request', 'string', 'max:200'],
             'follow_up_status' => ['sometimes', 'required', Rule::in(array_keys(InspectionDraft::FOLLOW_UP_STATUSES))],
             'pdm_activity_id' => ['nullable', 'integer'],
+            'pdm_version' => [$activity ? 'required' : 'exclude', 'integer', 'min:1'],
+            'acknowledge_pdm_review' => ['sometimes', 'accepted'],
             'request_reference' => ['required', 'string', 'max:100'],
             'request_summary' => ['required', 'string', 'max:200'],
             'asset_ref' => ['nullable', 'required_with:recommendation', 'string', 'max:240', 'not_regex:/[\\\\\/]/'],
             'method' => ['nullable', 'required_with:finding,recommendation', Rule::in(array_keys(InspectionDraft::METHODS))],
-            'inspected_on' => ['nullable', 'required_with:finding,recommendation', 'date_format:Y-m-d', ...($activity ? [] : ['before_or_equal:today'])],
+            'inspected_on' => ['nullable', 'required_with:finding,recommendation', 'date_format:Y-m-d', ...($activity ? [] : ['before_or_equal:'.now('Asia/Jakarta')->toDateString()])],
             'finding' => ['nullable', 'required_with:recommendation', 'string', 'max:4000'],
             'recommendation' => ['nullable', 'string', 'max:4000'],
             'target_completion' => ['nullable', 'date_format:Y-m-d'],
@@ -112,7 +114,10 @@ class InspectionController extends Controller
         if (($data['follow_up_status'] ?? 'open') !== 'open' && empty($data['recommendation'])) {
             throw ValidationException::withMessages(['follow_up_status' => 'Catat rekomendasi sebelum mengubah status tindak lanjut.']);
         }
-        if (! empty($data['asset_ref']) && (! empty($data['recommendation']) || $data['asset_ref'] !== $inspection?->asset_ref)) {
+        // Reuse only this draft's saved identity or its exact linked measurement,
+        // never an unrelated record as a cache for a new asset association.
+        $savedAssetRef = $activity?->asset_ref ?? $inspection?->asset_ref;
+        if (! empty($data['asset_ref']) && $data['asset_ref'] !== $savedAssetRef) {
             try {
                 $mart->historyAsset($data['asset_ref']);
             } catch (Throwable) {
@@ -136,6 +141,7 @@ class InspectionController extends Controller
         }
         $data = [...$this->validated($request, $mart), 'request_key' => $key];
         $inspection = DB::transaction(function () use ($data, $key, $request) {
+            $activity = $this->lockActivity($data);
             if (! empty($data['pdm_activity_id'])) {
                 $inspection = InspectionDraft::firstOrCreate(['pdm_activity_id' => $data['pdm_activity_id']], [...$data, 'created_by' => $request->user()->id]);
                 abort_unless($inspection->created_by === $request->user()->id, 409);
@@ -144,7 +150,8 @@ class InspectionController extends Controller
                 abort_unless($inspection->created_by === $request->user()->id, 409);
             }
             if ($inspection->wasRecentlyCreated) {
-                WorkspaceActivityLog::record($inspection->refresh(), $request->user()->id);
+                $context = $activity ? ['pdm_basis' => ['before' => null, 'after' => $activity->analysisBasis()]] : [];
+                WorkspaceActivityLog::record($inspection->refresh(), $request->user()->id, [], $context);
             }
 
             return $inspection;
@@ -155,7 +162,7 @@ class InspectionController extends Controller
 
     public function show(InspectionDraft $inspection)
     {
-        $inspection->load(['author:id,name', 'pdmActivity']);
+        $inspection->load(['author:id,name', 'pdmActivity', 'pdmReviewAudit']);
 
         return view('inspections.show', ['inspection' => $inspection, 'activityHistory' => WorkspaceActivityLog::history('inspection', $inspection->id)]);
     }
@@ -172,18 +179,34 @@ class InspectionController extends Controller
         Gate::authorize('update-inspection-draft', $inspection);
         $data = $this->validated($request, $mart, $inspection);
         DB::transaction(function () use ($data, $inspection, $request) {
+            $activity = $this->lockActivity($data);
             $current = InspectionDraft::whereKey($inspection->id)->lockForUpdate()->firstOrFail();
             if ($current->version !== (int) $data['version']) {
                 throw ValidationException::withMessages(['version' => 'Draft sudah berubah. Muat ulang sebelum menyimpan.']);
             }
-            $before = $current->only(['recommendation', 'follow_up_status', 'target_completion']);
+            $context = $activity && $request->boolean('acknowledge_pdm_review')
+                ? ['pdm_basis' => ['before' => $current->pdmReviewedBasis(), 'after' => $activity->analysisBasis()]] : [];
+            $before = $current->only(['finding', 'recommendation', 'follow_up_status', 'target_completion']);
             $before = array_intersect_key($current->getRawOriginal(), $before);
             $current->fill($data);
             $current->version++;
             $current->save();
-            WorkspaceActivityLog::record($current, $request->user()->id, $before);
+            WorkspaceActivityLog::record($current, $request->user()->id, $before, $context);
         });
 
         return redirect()->route('inspections.show', $inspection)->with('status', 'Draft diperbarui. Rekomendasi belum dikirim atau disetujui.');
+    }
+
+    private function lockActivity(array $data): ?PdmActivity
+    {
+        if (empty($data['pdm_activity_id'])) {
+            return null;
+        }
+        $activity = PdmActivity::whereKey($data['pdm_activity_id'])->lockForUpdate()->firstOrFail();
+        if ($activity->version !== (int) $data['pdm_version']) {
+            throw ValidationException::withMessages(['pdm_version' => 'Pengukuran PdM sudah berubah. Muat ulang dan tinjau nilai serta konteks terbaru sebelum menyimpan analisis.']);
+        }
+
+        return $activity;
     }
 }

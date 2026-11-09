@@ -37,13 +37,16 @@ class AssetVisualTest extends TestCase
             ->assertSee('Riwayat PdM lokal')->assertSee('Input pengukuran PdM')
             ->assertDontSee('type="file"', false)->assertDontSee('<canvas', false)
             ->assertDontSee('Buka 3D')
-            ->assertSee('Reliability score')->assertSee('Belum cukup data')
-            ->assertSee('Reliability score belum tersedia.')
+            ->assertSee('Asset Wellness')->assertSee('Belum cukup data')
+            ->assertDontSee('Reliability score')->assertDontSee('Asset Health')
+            ->assertSee('Reliability · bukti & review tahunan', false)
+            ->assertSee('Draft awal Asset Wellness tersedia untuk meninjau bukti.')
+            ->assertSee('Data kosong bukan berarti aset sehat atau risikonya rendah.')
             ->assertSee('Kejadian gangguan yang sudah diverifikasi')
-            ->assertSee('Jam operasi dan availability dari historian')
+            ->assertSee('Parameter kondisi operasi serta log manual/historian terverifikasi')
             ->assertSee('Riwayat pemeliharaan yang tervalidasi')
             ->assertSee('Hasil PdM yang tervalidasi')
-            ->assertSee('Kelengkapan data untuk score:')->assertSee('Belum diverifikasi');
+            ->assertSee('Kelengkapan data untuk Asset Wellness:')->assertSee('Belum diverifikasi');
         Http::assertSentCount(1);
         Http::assertNotSent(fn ($request) => $request->method() !== 'GET');
     }
@@ -104,6 +107,7 @@ class AssetVisualTest extends TestCase
         }
         $this->assertSame(0, $xpath->query('//div[@class="asset-draft-action"]')->length);
         $this->assertSame(1, $xpath->query('//section[@aria-labelledby="asset-reliability-title"]')->length);
+        $this->assertSame('Asset Wellness', $xpath->query('//h3[@id="asset-reliability-title"]')->item(0)->textContent);
         $this->assertSame('Belum cukup data', $xpath->query('//span[@class="asset-reliability-pending"]')->item(0)->textContent);
         $this->assertSame(4, $xpath->query('//ul[@class="asset-reliability-inputs"]/li')->length);
         $this->assertSame(0, $xpath->query('//section[@aria-labelledby="asset-reliability-title"]//meter | //section[@aria-labelledby="asset-reliability-title"]//progress')->length);

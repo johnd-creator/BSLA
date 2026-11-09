@@ -67,7 +67,7 @@
                 <article class="panel cems-card" data-cems-parameter="{{ $row['parameter_code'] }}" data-cems-quality="{{ $row['quality'] }}" data-cems-observed-at="{{ $row['observed_at'] ?? '' }}" data-cems-age-seconds="{{ $row['age_seconds'] ?? '' }}">
                     <div class="cems-card-heading"><span class="eyebrow">{{ $row['parameter_code'] }}</span><span class="badge neutral">{{ $row['quality'] }}</span></div>
                     <h3>{{ $row['name'] }}</h3>
-                    <p class="cems-value">{{ \App\Services\CemsLive::formatValue($row['value_final']) }} <small>{{ $row['unit'] }}</small></p>
+                    <p class="cems-value">{{ \App\Services\CemsLive::formatValue($row['value_final'], $row['parameter_code']) }} <small>{{ $row['unit'] }}</small></p>
                     <p class="muted">Umur: {{ $row['age_seconds'] === null ? 'tidak diketahui' : number_format($row['age_seconds'], 1).' detik' }}</p>
                     <div class="cems-card-feed" data-cems-feed="{{ $row['parameter_code'] }}">
                         <strong>Feed data · 1 menit</strong>
@@ -90,7 +90,7 @@
         @elseif(count($history['points']) === 0)<p class="muted">Belum ada sampel untuk parameter ini.</p>
         @else
             @if($history['truncated'])<p class="data-note">Riwayat diringkas oleh layanan; tidak semua titik 5 detik ditampilkan.</p>@endif
-            <div class="table-wrap cems-history-scroll"><table><thead><tr><th>Waktu observasi</th><th>Nilai</th><th>Kualitas</th></tr></thead><tbody>@foreach(array_reverse($history['points']) as $point)<tr><td>{{ $point['observed_at'] }}</td><td>{{ \App\Services\CemsLive::formatValue($point['value_final']) }}</td><td>{{ $point['quality'] }}</td></tr>@endforeach</tbody></table></div>
+            <div class="table-wrap cems-history-scroll"><table><thead><tr><th>Waktu observasi</th><th>Nilai</th><th>Kualitas</th></tr></thead><tbody>@foreach(array_reverse($history['points']) as $point)<tr><td>{{ $point['observed_at'] }}</td><td>{{ \App\Services\CemsLive::formatValue($point['value_final'], $parameter) }}</td><td>{{ $point['quality'] }}</td></tr>@endforeach</tbody></table></div>
         @endif
     </section>
 @endif

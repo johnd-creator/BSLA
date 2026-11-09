@@ -63,9 +63,9 @@ class AssetDisruptionController extends Controller
             'known_cause' => ['nullable', 'string', 'max:4000'],
             'impact' => ['required', Rule::in(array_keys(AssetDisruption::IMPACTS))],
             'impact_note' => ['nullable', 'string', 'max:2000'],
-            'occurred_on' => ['nullable', 'required_with:occurred_time', 'date_format:Y-m-d', 'before_or_equal:today'],
+            'occurred_on' => ['nullable', 'required_with:occurred_time', 'date_format:Y-m-d'],
             'occurred_time' => ['nullable', 'date_format:H:i,H:i:s'],
-            'restored_on' => ['nullable', 'required_with:restored_time', 'date_format:Y-m-d', 'before_or_equal:today'],
+            'restored_on' => ['nullable', 'required_with:restored_time', 'date_format:Y-m-d'],
             'restored_time' => ['nullable', 'date_format:H:i,H:i:s'],
             'timezone' => ['nullable', 'required_with:occurred_time,restored_time', Rule::in(array_keys(AssetDisruption::ZONES))],
             'work_order_ref' => ['nullable', 'string', 'max:200'],
@@ -95,7 +95,13 @@ class AssetDisruptionController extends Controller
             }
             $members[] = ['asset_ref' => $data['cause_ref'], 'role' => 'cause'];
         }
+        // Only identities retained in the current record can be edited offline.
+        // A new member, including one removed in an earlier revision, needs Mart.
+        $retainedRefs = $event ? [$event->asset_ref, ...$event->members()->pluck('asset_ref')->all()] : [];
         foreach ($members as $member) {
+            if (in_array($member['asset_ref'], $retainedRefs, true)) {
+                continue;
+            }
             try {
                 $mart->historyAsset($member['asset_ref']);
             } catch (Throwable) {
@@ -108,6 +114,11 @@ class AssetDisruptionController extends Controller
         foreach (['occurred', 'restored'] as $field) {
             $times[$field.'_on'] = $data[$field.'_on'] ?? null;
             $times[$field.'_at'] = null;
+            // Date-only observations use the plant's WIB calendar for the cutoff,
+            // without assigning a timezone or an invented instant to the stored date.
+            if ($times[$field.'_on'] && empty($data[$field.'_time']) && $times[$field.'_on'] > now('Asia/Jakarta')->toDateString()) {
+                throw ValidationException::withMessages([$field.'_on' => 'Tanggal tidak boleh setelah hari ini (WIB).']);
+            }
             if (! empty($data[$field.'_time'])) {
                 $zone = $data['timezone'];
                 $time = $data[$field.'_time'];

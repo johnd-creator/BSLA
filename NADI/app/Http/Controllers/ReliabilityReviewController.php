@@ -27,9 +27,10 @@ class ReliabilityReviewController extends Controller
     public function store(Request $request, AssetDisruption $disruption, ReliabilityTiming $timing)
     {
         Gate::authorize('update-asset-disruption', $disruption);
-        $key = $request->validate(['request_key' => ['required', 'uuid']])['request_key'];
+        $identity = $request->validate(['request_key' => ['required', 'uuid'], 'asset_ref' => ['required', 'string', 'max:240']]);
+        $key = $identity['request_key'];
         if ($existing = ReliabilityReview::where('request_key', $key)->first()) {
-            abort_unless($existing->created_by === $request->user()->id && $existing->asset_disruption_id === $disruption->id, 409);
+            abort_unless($existing->created_by === $request->user()->id && $existing->asset_disruption_id === $disruption->id && $existing->asset_ref === $identity['asset_ref'], 409);
 
             return redirect()->route('reliability.reviews', [$disruption, 'asset_ref' => $existing->asset_ref])->with('status', 'Review ini sudah tersimpan sekali.');
         }

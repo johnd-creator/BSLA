@@ -41,7 +41,7 @@ class DataOverview
                 'detail' => $inventory === null ? 'Respons agregat belum tersedia atau tidak lolos validasi cakupan dan jumlah.' : ($inventory['complete'] ? 'Baseline lengkap dan tidak ada proyeksi tertunda pada scan yang dilaporkan.' : 'Belum ada bukti baseline lengkap dengan seluruh proyeksi selesai.'),
                 'source' => 'inventory-summary · coverage'],
             ['label' => 'Kategori aset', 'state' => $inventory === null ? 'Belum tersedia' : ($inventory['total'] === 0 ? 'Tidak ada populasi' : number_format($classificationPercent, 1, ',', '.').'% berkategori'),
-                'detail' => $inventory === null ? 'Kelengkapan kategori belum dapat dihitung.' : number_format($classified, 0, ',', '.').' dari '.number_format($inventory['total'], 0, ',', '.').' aset memiliki kategori; '.number_format($inventory['unknown'], 0, ',', '.').' belum dikategorikan. Acuan Excel engineer dengan kecocokan ID tepat. Ini bukan skor kepercayaan atau validasi kesehatan aset.',
+                'detail' => $inventory === null ? 'Kelengkapan kategori belum dapat dihitung.' : number_format($classified, 0, ',', '.').' dari '.number_format($inventory['total'], 0, ',', '.').' aset memiliki kategori; '.number_format($inventory['unknown'], 0, ',', '.').' belum dikategorikan. Acuan Excel engineer dengan kecocokan ID tepat. Ini bukan skor kepercayaan atau validasi Asset Wellness.',
                 'source' => 'inventory-summary · counts / classification'],
             ['label' => 'Kesegaran sumber', 'state' => 'Belum dapat dipastikan',
                 'detail' => 'Waktu baca halaman dan tanggal scan bukan waktu sinkronisasi terakhir. Respons HTTP berhasil tidak membuktikan data sumber masih baru.',
@@ -52,8 +52,8 @@ class DataOverview
             ['label' => 'Pengukuran & rekomendasi', 'state' => $pdm === null || $recommendations === null ? 'Sebagian belum tersedia' : 'Draft lokal',
                 'detail' => 'Kelengkapan pengisian tidak membuktikan akurasi pengukuran. Rekomendasi belum berarti persetujuan, pelaksanaan, atau WO sumber dibuat.',
                 'source' => 'Store development NADI'],
-            ['label' => 'Kondisi realtime & skor', 'state' => 'Belum dinilai',
-                'detail' => 'Ringkasan ini tidak mengukur kondisi realtime, health score, reliability, ataupun jumlah gangguan tervalidasi. Tidak ada nilai pengganti atau asumsi nol.',
+            ['label' => 'Kondisi realtime & Asset Wellness', 'state' => 'Belum dinilai',
+                'detail' => 'Ringkasan ini tidak mengukur kondisi realtime, skor Asset Wellness, reliability, ataupun jumlah gangguan tervalidasi. Tidak ada nilai pengganti atau asumsi nol.',
                 'source' => 'Tidak ada sumber tervalidasi untuk metrik ini'],
         ];
 

@@ -1,0 +1,21 @@
+<section class="panel wellness-method" aria-labelledby="wellness-policy-summary"><h2 id="wellness-policy-summary">Usulan pengaturan dan kelengkapan bukti</h2>
+    @if(!$report['storage_ready'])<p class="alert warning" role="status">Penyimpanan pengaturan belum diaktifkan. Halaman bukti tetap dapat dibaca; jangan menganggap draft sudah tersimpan.</p>
+    @elseif($report['policy'])
+        <p><span class="draft-label">Draft revisi {{ $report['policy']->revision }}</span> · {{ $report['policy']->author?->name ?? 'Engineer' }} · bukan validasi atau approval.</p>
+        <p>Criticality usulan: <strong>{{ $report['policy']->rules['criticality_label'] ?? 'Belum dipetakan' }}</strong>. {{ $report['policy']->rules['criticality_basis'] ?? '' }}</p>
+        <div class="wellness-policy-grid">@foreach(\App\Services\AssetWellness::COMPONENTS as $key => $component)<div><h3>{{ $component['label'] }}</h3><p>Usia maksimum usulan: {{ isset($report['policy']->rules['components'][$key]['max_age_days']) ? $report['policy']->rules['components'][$key]['max_age_days'].' hari' : 'Belum diputuskan' }}.</p><p>Bukti wajib: {{ $report['policy']->rules['components'][$key]['required_evidence'] ?? 'Belum ditentukan' }}</p></div>@endforeach</div>
+        <p class="data-note">Kelengkapan bukti: <strong>Belum dinilai engineer</strong>. Tidak ada persen kelengkapan atau confidence otomatis dari isian ini.</p>
+        @foreach($report['checks'] as $check)<div class="wellness-rule"><h3>{{ $check['rule']['field']['label'] }} · {{ $check['rule']['unit'] }}</h3><p>Usulan batas inklusif: {{ $check['rule']['lower'] ?? 'Sisi bawah terbuka' }} sampai {{ $check['rule']['upper'] ?? 'Sisi atas terbuka' }}. {{ $check['rule']['requirement'] }}</p>
+            <p class="data-note">{{ $check['rule']['scope']['template_id'] }} · {{ $check['rule']['scope']['method'] }} · {{ $check['rule']['scope']['measurement_mode'] }} · {{ $check['rule']['scope']['instrument'] }} · {{ $check['rule']['scope']['operating_condition'] }}</p>
+            @if(!$check['basis_current'])<p class="alert warning">Acuan pengaturan berubah atau tidak tersedia. Periksa ulang usulan; perbandingan ditahan.</p>@else
+                <p>Perbandingan draft: <strong>{{ ['NOT_COMPARED'=>'Belum dapat dibandingkan', 'OUTSIDE_PROPOSED_RANGE'=>'Di luar usulan rentang', 'WITHIN_PROPOSED_RANGE'=>'Di dalam usulan rentang'][$check['range']] }}</strong>. Nilai ini bukan kategori sehat atau alarm.</p>
+                <p>Usia pengukuran: {{ $check['age_days'] === null ? 'Belum diketahui' : $check['age_days'].' hari kalender' }}, per {{ $report['as_of_date'] }} WIB. {{ ['UNKNOWN'=>'Usia belum diketahui.', 'UNDECIDED'=>'Batas usia belum diputuskan.', 'OLDER_THAN_PROPOSAL'=>'Lebih lama dari usulan usia.', 'WITHIN_PROPOSED_AGE'=>'Masih dalam usulan usia.'][$check['freshness']] }}</p>
+                <p>Analisis: {{ ['NO_ANALYSIS'=>'Belum ada', 'STALE'=>'Berubah sejak review', 'UNKNOWN'=>'Basis review belum diketahui', 'CURRENT_LOCAL'=>'Sesuai versi pengukuran, bukan validasi metode'][$check['analysis']] }}.</p>
+            @endif
+            @if($check['order_ambiguous'])<p class="alert warning">Urutan pengukuran pada tanggal yang sama tidak pasti. Tidak dipilih satu nilai sebagai yang terbaru; perbandingan ditahan.</p>@endif
+            @if($check['activity'])<a class="text-link" href="{{ route('pdm.show', $check['activity']) }}">Pengukuran pada tanggal terbaru di konteks ini: {{ $check['activity']->reference() }} · {{ $check['activity']->measurementLabel() }} · {{ $check['activity']->precisionLabel() }} →</a>@else<p>Tidak ada pengukuran pada konteks dan tahun ini. Nilai tetap kosong.</p>@endif
+        </div>@endforeach
+        @if(!$report['checks'])<p>Belum ada usulan batas PdM per titik. Tidak ada threshold bawaan.</p>@endif
+    @else<p>Belum ada usulan criticality, batas PdM, usia data atau kebutuhan bukti yang tersimpan untuk aset/tahun ini.</p>@endif
+    <p class="data-note">{{ $report['note'] }}</p>
+</section>

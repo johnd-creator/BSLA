@@ -212,4 +212,53 @@ class CemsLiveTest extends TestCase
         Http::fake(['cems.test/v1/cems/snapshot' => Http::response($payload), '*' => Http::response([], 503)]);
         $this->assertNotNull(app(CemsLive::class)->read()['snapshot']);
     }
+
+    public function test_mercury_formats_plain_decimals_without_changing_numeric_values(): void
+    {
+        foreach ([
+            [8.05e-5, '0,0000805'], [8e-5, '0,00008'], [0.00016, '0,00016'],
+            [8.05e-12, '0,00000000000805'], [-8.05e-5, '-0,0000805'],
+            [1.23456789123, '1,23456789123'], [1e8, '100000000'],
+            [0.0, '0'], [-0.0, '0'], [null, '—'],
+        ] as [$value, $expected]) {
+            $original = $value;
+            $formatted = CemsLive::formatValue($value, 'Hg');
+            $this->assertSame($expected, $formatted);
+            $this->assertSame($original, $value);
+            if ($value !== null) {
+                $this->assertEquals($value, (float) str_replace(',', '.', $formatted));
+            }
+        }
+        foreach ([PHP_FLOAT_MIN, PHP_FLOAT_MAX, 5e-324] as $value) {
+            $formatted = CemsLive::formatValue($value, 'Hg');
+            $this->assertStringNotContainsString('e', $formatted);
+            $this->assertNotSame('0', $formatted);
+            $this->assertSame($value, (float) str_replace(',', '.', $formatted));
+        }
+        $this->assertSame('—', CemsLive::formatValue(INF, 'Hg'));
+        $this->assertSame('—', CemsLive::formatValue(NAN, 'Hg'));
+        $this->assertSame('8.05e-5', CemsLive::formatValue(8.05e-5, 'SO2'));
+    }
+
+    public function test_mercury_card_and_history_both_render_plain_decimal_and_keep_dto_value(): void
+    {
+        Http::preventStrayRequests();
+        config(['services.cems_live.url' => 'http://cems.test']);
+        $payload = $this->snapshot();
+        $payload['parameters'][0] = array_replace($payload['parameters'][0], ['parameter_code' => 'Hg', 'name' => 'Mercury', 'value_raw' => 8.05e-5, 'value_final' => 8.05e-5]);
+        Http::fake([
+            'cems.test/v1/cems/snapshot' => fn () => Http::response($payload),
+            'cems.test/v1/cems/history*' => fn () => Http::response(['parameter_code' => 'Hg', 'retention_seconds' => 21600, 'truncated' => false, 'points' => [['observed_at' => gmdate('Y-m-d\TH:i:s\Z'), 'value_final' => 8.05e-12, 'quality' => 'good']]]),
+            '*' => fn () => Http::response([], 503),
+        ]);
+        $data = app(CemsLive::class)->read('Hg');
+        $this->assertSame(8.05e-5, $data['snapshot']['parameters'][0]['value_final']);
+        $this->assertSame(8.05e-12, $data['history']['points'][0]['value_final']);
+        $user = User::factory()->create(['roles' => ['MANAGER']])->refresh();
+        foreach (['/operations/cems?parameter=Hg', '/operations/cems/refresh?parameter=Hg'] as $url) {
+            $this->actingAs($user)->withSession(['auth_version' => $user->auth_version])->get($url)->assertOk()
+                ->assertSee('0,0000805')->assertSee('0,00000000000805')->assertSee('mg/Nm3')
+                ->assertDontSee('8.05e-5')->assertDontSee('8.05e-12');
+        }
+    }
 }
