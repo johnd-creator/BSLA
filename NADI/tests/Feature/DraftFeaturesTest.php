@@ -172,7 +172,7 @@ class DraftFeaturesTest extends TestCase
         $this->signIn($this->account());
         $this->post('/inspections', $this->requestData(['recommendation' => 'Synthetic recommendation']))
             ->assertSessionHasErrors(['finding', 'method', 'inspected_on']);
-        $this->post('/inspections', $this->requestData(['method' => 'VISUAL', 'finding' => 'Synthetic finding', 'inspected_on' => now()->addDay()->format('Y-m-d')]))
+        $this->post('/inspections', $this->requestData(['method' => 'VISUAL', 'finding' => 'Synthetic finding', 'inspected_on' => now('Asia/Jakarta')->addDay()->format('Y-m-d')]))
             ->assertSessionHasErrors('inspected_on');
         $this->assertDatabaseCount('inspection_drafts', 0);
     }

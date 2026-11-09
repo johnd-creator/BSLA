@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import vm from 'node:vm';
+import { setupRepairIntervals } from '../../resources/js/reliability-intervals.js';
 import { setupPdmTime } from '../../resources/js/pdm-time.js';
 
 const source = readFileSync(new URL('../../resources/js/app.js', import.meta.url), 'utf8').replace(/^import .*;$/mg, '');
@@ -17,6 +18,7 @@ function mount(matches) {
     };
     vm.runInNewContext(source, {
         setupPdmTime,
+        setupRepairIntervals,
         document: { querySelector: () => navigation, querySelectorAll: () => [] },
         window: {
             matchMedia(query) {
@@ -52,6 +54,7 @@ test('resizing restores desktop navigation after the mobile menu was closed', ()
 test('login and error pages do not require a navigation element', () => {
     assert.doesNotThrow(() => vm.runInNewContext(source, {
         setupPdmTime,
+        setupRepairIntervals,
         document: { querySelector: () => null, querySelectorAll: () => [] },
     }));
 });

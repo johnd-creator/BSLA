@@ -85,16 +85,44 @@ class CemsLive
         return compact('snapshot', 'history', 'parameter');
     }
 
-    public static function formatValue(?float $value): string
+    public static function formatValue(?float $value, ?string $parameterCode = null): string
     {
-        if ($value === null) {
+        if ($value === null || ! is_finite($value)) {
             return '—';
         }
         if ($value === 0.0) {
             return '0';
         }
+        if ($parameterCode !== 'Hg') {
+            return sprintf('%.8g', $value);
+        }
 
-        return sprintf('%.8g', $value);
+        // Presentation only: expand the shortest JSON float representation as
+        // text. Fixed decimal-place rounding would turn very small Hg into zero.
+        $decimal = strtolower(json_encode($value, JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR));
+        if (str_contains($decimal, 'e')) {
+            [$mantissa, $exponent] = explode('e', $decimal);
+            $negative = str_starts_with($mantissa, '-');
+            $mantissa = ltrim($mantissa, '-');
+            $parts = explode('.', $mantissa);
+            $digits = implode('', $parts);
+            $position = strlen($parts[0]) + (int) $exponent;
+            if ($position <= 0) {
+                $decimal = '0.'.str_repeat('0', -$position).$digits;
+            } elseif ($position >= strlen($digits)) {
+                $decimal = $digits.str_repeat('0', $position - strlen($digits));
+            } else {
+                $decimal = substr($digits, 0, $position).'.'.substr($digits, $position);
+            }
+            if ($negative) {
+                $decimal = '-'.$decimal;
+            }
+        }
+        if (str_contains($decimal, '.')) {
+            $decimal = rtrim(rtrim($decimal, '0'), '.');
+        }
+
+        return str_replace('.', ',', $decimal);
     }
 
     public function signals(array $parameters, ?string $sourceMode): ?array

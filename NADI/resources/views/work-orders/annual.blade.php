@@ -22,7 +22,7 @@
         <li>Satu identitas WO dihitung sekali pada tahun actual start, kalender Asia/Jakarta (WIB). WO lintas tahun tetap pada tahun mulai, bukan dibagi ke beberapa tahun. Tanggal perubahan record, nomor WO, dan tanggal selesai tidak menggantikan actual start yang kosong.</li>
         <li>Jenis memakai kode worktype sumber, lalu kategori kanonis bila kode sumber kosong. Status adalah status terakhir di Mart, bukan snapshot status akhir tahun. Ini jumlah WO, bukan frekuensi kejadian atau jumlah pekerjaan yang pasti selesai. Tahun yang tidak muncul belum dapat dinyatakan nol.</li>
         <li>Availability tahunan perlu cross-check historian DCS, periode operasi yang sah, dan downtime tervalidasi. Durasi WO tidak menggantikan downtime.</li>
-        <li>Score reliability, asset wellness, dan Pareto loss tahunan memerlukan kejadian yang sudah direkonsiliasi serta bukti kehilangan waktu/produksi. Ringkasan WO memberi konteks pemeliharaan, belum menghasilkan skor atau loss.</li>
+        <li>Asset Wellness dan Pareto loss tahunan memerlukan kejadian yang sudah direkonsiliasi serta bukti kehilangan waktu/produksi. Ringkasan WO memberi konteks pemeliharaan, belum menghasilkan skor atau loss.</li>
         <li>Cakupan ini hanya data yang sudah terkumpul di Mart. Kelengkapan sejarah setiap tahun belum dibuktikan.</li>
     </ul></details>
 </section>

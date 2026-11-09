@@ -148,3 +148,17 @@ unknown coverage; overlap/batas periode; timestamp offset/naive/date-only; histo
 bad quality/gap; stale edits/permissions/idempotency; event correction dan hasil
 versi lama; fail-closed read API untuk legacy numeric KPI. Unit/contract tests
 hermetic, tidak memakai produksi. Browser UI bukan bukti semantic validation.
+
+## Governed source implementation, 9 November 2026
+
+The NADI [operating/readiness workflow](../NADI/docs/reliability-operating-readiness.md),
+[pilot calculator](../NADI/docs/reliability-calculation.md) and
+[Supervisor decisions](../NADI/docs/reliability-supervisor-approval.md) are implemented.
+Engineer methods, exact-asset evidence, immutable snapshots and selected-metric
+attestations remain separate. MTTR does not require historian exposure; MTBF still
+requires its complete eligible operating denominator. No WO-based shortcut is added.
+
+The [MTTR pilot](../NADI/docs/mttr-real-data-pilot.md) verifies the end-to-end workflow
+with fictional fixtures. Real operator/engineer failure and restoration evidence
+is still required before calculating or approving operational results. No migration,
+data import or real approval is performed by publication.

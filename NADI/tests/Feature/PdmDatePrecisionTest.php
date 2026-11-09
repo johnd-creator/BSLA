@@ -142,7 +142,7 @@ class PdmDatePrecisionTest extends TestCase
     public function test_linked_analysis_uses_date_only_and_locks_precision_date_and_time(): void
     {
         $activity = $this->saveActivity();
-        $this->post('/inspections', ['request_key' => (string) Str::uuid(), 'pdm_activity_id' => $activity->id, 'finding' => 'Source-derived result', 'recommendation' => 'QA review only'])->assertSessionHasNoErrors();
+        $this->post('/inspections', ['request_key' => (string) Str::uuid(), 'pdm_activity_id' => $activity->id, 'pdm_version' => $activity->version, 'finding' => 'Source-derived result', 'recommendation' => 'QA review only'])->assertSessionHasNoErrors();
         $analysis = InspectionDraft::firstOrFail();
         $this->assertSame('2026-07-15', $analysis->inspected_on->format('Y-m-d'));
         $this->assertSame(self::ASSET, $analysis->asset_ref);
@@ -205,5 +205,33 @@ class PdmDatePrecisionTest extends TestCase
         $this->assertDatabaseCount('pdm_activities', 1);
         $this->assertNull(PdmActivity::first()->measured_at);
         $this->assertSame('date', DB::table('pdm_activities')->value('time_precision'));
+    }
+
+    public function test_today_date_only_and_standalone_inspection_follow_wib_at_utc_day_boundary(): void
+    {
+        $this->travelTo(CarbonImmutable::parse('2026-11-07T17:15:00Z'));
+        $activity = $this->saveActivity(['measured_on' => '2026-11-08']);
+        $this->assertSame('2026-11-08', $activity->getRawOriginal('measured_on'));
+        $this->assertNull($activity->measured_at);
+        $this->assertNull($activity->timezone);
+        $this->get(route('pdm.edit', $activity))->assertOk()->assertSee('max="2026-11-08"', false);
+        $this->post('/pdm', $this->input(['measured_on' => '2026-11-09']))->assertSessionHasErrors('measured_on');
+        $inspection = ['request_key' => (string) Str::uuid(), 'inspection_type' => 'routine', 'request_reference' => 'WIB-TODAY', 'request_summary' => 'Local day boundary', 'method' => 'VISUAL', 'finding' => 'Recorded after local midnight', 'inspected_on' => '2026-11-08'];
+        $this->post('/inspections', $inspection)->assertSessionHasNoErrors();
+        $this->get(route('inspections.create'))->assertOk()->assertSee('max="2026-11-08"', false);
+        $this->post('/inspections', [...$inspection, 'request_key' => (string) Str::uuid(), 'inspected_on' => '2026-11-09'])->assertSessionHasErrors('inspected_on');
+        $this->assertSame('UTC', config('app.timezone'));
+    }
+
+    public function test_linked_source_date_ahead_of_wib_is_not_blocked_by_a_calendar_max(): void
+    {
+        $this->travelTo(CarbonImmutable::parse('2026-11-07T16:15:00Z'));
+        $activity = $this->saveActivity(['time_precision' => 'datetime', 'measured_local' => '2026-11-08T00:15:00', 'timezone' => 'Asia/Jayapura']);
+        $this->assertSame('2026-11-08', $activity->measurementDate());
+        $response = $this->get(route('inspections.create', ['pdm_activity_id' => $activity->id]))->assertOk();
+        preg_match('/<input id="inspected_on"[^>]*>/', $response->getContent(), $field);
+        $this->assertStringNotContainsString('max=', $field[0]);
+        $this->post('/inspections', ['request_key' => (string) Str::uuid(), 'pdm_activity_id' => $activity->id, 'pdm_version' => 1, 'finding' => 'WIT source time'])->assertSessionHasNoErrors();
+        $this->assertSame('2026-11-08', InspectionDraft::first()->inspected_on->format('Y-m-d'));
     }
 }

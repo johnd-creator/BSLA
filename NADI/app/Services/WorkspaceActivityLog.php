@@ -18,7 +18,7 @@ class WorkspaceActivityLog
     }
 
     /** Called only by authorized writes, inside the same transaction as the draft. */
-    public static function record(Model $draft, int $actor, array $before = []): void
+    public static function record(Model $draft, int $actor, array $before = [], array $context = []): void
     {
         $kind = $draft instanceof InspectionDraft ? 'inspection' : 'pdm';
         $changes = [];
@@ -35,7 +35,7 @@ class WorkspaceActivityLog
             'kind' => $kind, 'subject_id' => $draft->id, 'version' => $draft->version,
             'actor_id' => $actor, 'asset_ref' => $draft->asset_ref,
             'action' => $draft->wasRecentlyCreated ? 'created' : 'updated',
-            'changes' => $changes, 'created_at' => now(),
+            'changes' => [...$changes, ...$context], 'created_at' => now(),
         ]);
     }
 }

@@ -19,7 +19,7 @@ enum Role: string
         return match ($this) {
             self::Admin => 'Membaca workspace serta mengelola akun dan role.',
             self::Engineer => 'Membaca Asset, backlog WAPPR, dan draft Action Board. Dapat menyusun draft inspeksi/rekomendasi milik sendiri; bukan analisis tervalidasi.',
-            self::Supervisor => 'Membaca Asset, backlog WAPPR, dan draft Action Board. Persetujuan pekerjaan belum aktif.',
+            self::Supervisor => 'Membaca workspace dan mengesahkan metode serta hasil reliability pada snapshot. Persetujuan pekerjaan belum aktif.',
             self::Manager => 'Membaca Asset, backlog WAPPR, dan draft Action Board. Persetujuan anggaran dan risiko belum aktif.',
         };
     }

@@ -80,8 +80,9 @@ not occupy time. Unknown, stale, rejected, duplicate, voided, incomplete and
 ongoing records remain visible as separate quality categories. Complete-case
 means can be biased toward shorter repairs; the page explicitly warns about this.
 
-**MTBF, MTTR and availability remain null / NOT_READY**, including when a local
-sample exists. Organizational definitions, eligible population, completeness,
+**MTBF and MTTR remain null / NOT_READY without a current Supervisor decision**
+for the selected ready metrics; a descriptive sample alone never qualifies.
+Availability remains null. Organizational definitions, eligible population, completeness,
 coverage and recurrence/reopen policy are not approved by software. Exposure is
 not supplied by the WO period, calendar length, asset status, six-hour volatile
 cache or absence of events. Verified historian **or verified manual operating
@@ -175,3 +176,18 @@ These software checks do not establish engineering acceptance or official KPIs.
    from authorized historian mapping or engineer-validated manual operating logs.
 6. Only then qualify official KPI calculation, reconciliation, production access,
    persistence/backup and rollout. No completeness percentage is invented now.
+
+## Governed calculations and selected-metric approval
+
+[Operating evidence and readiness](reliability-operating-readiness.md) add versioned
+methods, manual exposure intervals, explicit gaps/overlaps and separate MTBF/MTTR
+gates. [Pilot calculations](reliability-calculation.md) retain deterministic
+numerators, denominators, exclusions and immutable evidence hashes.
+[Supervisor decisions](reliability-supervisor-approval.md) may approve selected
+ready metrics for one exact asset/year snapshot; changed evidence, method or engine
+makes the current approval stale without rewriting historical decisions.
+Availability remains unavailable. The [MTTR pilot workflow](mttr-real-data-pilot.md)
+requires actual onset/restoration evidence; WO elapsed time is not a substitute.
+
+Publication includes additive migration definitions only. It does not apply them
+or approve any operational method or KPI.

@@ -1,3 +1,4 @@
+import { setupRepairIntervals } from './reliability-intervals';
 import { setupHistorian } from './historian-demand';
 import { setupCems } from './cems-live';
 import { setupWorkspace } from './workspace-ui';
@@ -23,3 +24,5 @@ if (document.documentElement) setupWorkspace(document, window);
 document.querySelectorAll('[data-cems]').forEach((root) => setupCems(root));
 
 document.querySelectorAll('[data-historian]').forEach((root) => setupHistorian(root));
+
+document.querySelectorAll('[data-repair-intervals]').forEach(setupRepairIntervals);

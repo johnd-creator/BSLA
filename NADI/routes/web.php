@@ -2,19 +2,26 @@
 
 use App\Enums\Role;
 use App\Http\Controllers\ActionBoardController;
+use App\Http\Controllers\ActionEffectivenessController;
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\AssetDisruptionController;
 use App\Http\Controllers\AssetMappingController;
 use App\Http\Controllers\AssetPriorityController;
+use App\Http\Controllers\AssetWellnessController;
+use App\Http\Controllers\AssetWellnessPolicyController;
 use App\Http\Controllers\CemsController;
 use App\Http\Controllers\DisruptionWorkOrderController;
 use App\Http\Controllers\HistorianController;
 use App\Http\Controllers\InspectionController;
+use App\Http\Controllers\OperatingLogController;
 use App\Http\Controllers\OperationsController;
 use App\Http\Controllers\OverviewController;
 use App\Http\Controllers\PdmActivityController;
+use App\Http\Controllers\PdmInspectionPlanController;
 use App\Http\Controllers\PdmTrendController;
+use App\Http\Controllers\ReliabilityApprovalController;
 use App\Http\Controllers\ReliabilityController;
+use App\Http\Controllers\ReliabilityPolicyController;
 use App\Http\Controllers\ReliabilityReviewController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\UserController;
@@ -28,7 +35,17 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware(['auth', 'current-account'])->group(function () {
     Route::get('/', [OverviewController::class, 'index'])->name('home');
+    Route::get('/reliability/policies', [ReliabilityPolicyController::class, 'index'])->name('reliability.policies');
+    Route::post('/reliability/policies', [ReliabilityPolicyController::class, 'store'])->name('reliability.policies.store');
+    Route::resource('reliability/operating', OperatingLogController::class)->parameters(['operating' => 'operatingLog'])->names('reliability.operating')->except(['destroy']);
+    Route::get('/asset-wellness/policy', [AssetWellnessPolicyController::class, 'index'])->name('wellness.policy');
+    Route::post('/asset-wellness/policy', [AssetWellnessPolicyController::class, 'store'])->name('wellness.policy.store');
+    Route::get('/asset-wellness', [AssetWellnessController::class, 'index'])->name('wellness.index');
     Route::get('/reliability', [ReliabilityController::class, 'index'])->name('reliability.index');
+    Route::post('/reliability/snapshots/{snapshot}/approval', [ReliabilityApprovalController::class, 'store'])->name('reliability.approvals.store');
+    Route::get('/reliability/snapshots/{snapshot}/approval.json', [ReliabilityApprovalController::class, 'download'])->name('reliability.approvals.download');
+    Route::get('/reliability/calculation', [ReliabilityController::class, 'calculation'])->name('reliability.calculation');
+    Route::get('/reliability/snapshots/{snapshot}/calculation', [ReliabilityController::class, 'snapshotCalculation'])->name('reliability.snapshots.calculation');
     Route::get('/reliability/evidence.json', [ReliabilityController::class, 'download'])->name('reliability.download');
     Route::post('/reliability/snapshots', [ReliabilityController::class, 'store'])->name('reliability.snapshots.store');
     Route::get('/reliability/snapshots/{snapshot}', [ReliabilityController::class, 'show'])->name('reliability.snapshots.show');
@@ -45,6 +62,7 @@ Route::middleware(['auth', 'current-account'])->group(function () {
     Route::get('/operations', OperationsController::class)->name('operations');
     Route::get('/action-board', ActionBoardController::class)->name('action-board');
     Route::resource('priorities', AssetPriorityController::class)->except(['index', 'destroy']);
+    Route::resource('pdm/plans', PdmInspectionPlanController::class)->parameters(['plans' => 'plan'])->names('pdm.plans')->except(['destroy']);
     Route::get('/pdm/trends', PdmTrendController::class)->name('pdm.trends');
     Route::get('/pdm/templates', [PdmActivityController::class, 'templates'])->name('pdm.templates');
     Route::get('/pdm/history', [PdmActivityController::class, 'history'])->name('pdm.history');
@@ -53,6 +71,8 @@ Route::middleware(['auth', 'current-account'])->group(function () {
     Route::put('/disruptions/{disruption}/work-orders/{link}', [DisruptionWorkOrderController::class, 'update'])->name('disruptions.work-orders.update');
     Route::resource('disruptions', AssetDisruptionController::class)->except(['destroy']);
     Route::resource('pdm', PdmActivityController::class)->parameters(['pdm' => 'activity'])->except(['destroy']);
+    Route::get('/inspections/{inspection}/effectiveness', [ActionEffectivenessController::class, 'show'])->name('inspections.effectiveness');
+    Route::post('/inspections/{inspection}/effectiveness', [ActionEffectivenessController::class, 'store'])->name('inspections.effectiveness.store');
     Route::resource('inspections', InspectionController::class)->except(['destroy']);
     Route::post('/logout', [SessionController::class, 'destroy'])->name('logout');
     Route::get('/work-orders', [WorkOrderController::class, 'index'])->name('work-orders.index');

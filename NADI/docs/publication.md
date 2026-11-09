@@ -56,3 +56,35 @@ layouts. The two Python RAM-source suites also have exact-commit GitHub CI.
 Workbooks, source-derived catalogs/mappings/review reports, private image locks,
 source snapshots, backups and database files remain outside this public package.
 Old branch-only PI/NK changes are not merged over current main.
+
+## Governed workflow source integration, 9 November 2026
+
+The release adds engineer-owned PdM inspection plans and effectiveness reviews,
+versioned Asset Wellness draft settings, operating evidence and deterministic
+Reliability calculations with separate Supervisor decisions, exact-scope MTTR
+replay guards, and plain-decimal Hg display. Private catalog/mapping configuration,
+synthetic fixtures, missing-input notices and freshness controls from main remain.
+
+Selected source/tests/docs only were integrated from the active development
+checkout. No source workbook, derived catalog, operational asset/WO readout,
+database, account, private image lock or unrelated historical PI/NK/backend change
+is included. Existing source evidence and deployment files are not replaced.
+Additive migration definitions do not activate themselves or approve real KPIs.
+
+Integration review also reproduced and fixed the operating-log request-key race
+between identity verification and the write transaction. Replays now recheck exact
+owner and scope inside the owning SQLite transaction, without duplicate history.
+
+The final public-source regression uses in-memory SQLite and mocked HTTP. Browser
+acceptance of the new feature forms was completed separately with isolated fixtures;
+the integrated publication is not a production activation or an engineering signoff.
+
+Final integration checks: **1,056 Laravel tests / 14,856 assertions**, **72 frontend
+tests**, and **18 offline runtime-boundary tests** passed. Pint, Composer validation
+and platform requirements, Vite build, whitespace and changed-document links passed.
+The added replay regression failed before the fix and passed afterward.
+
+A scoped publication audit found no credential/private-source patterns or binary
+data in the selected changes. Ten catalog/mapping/ignore/fixture boundary files
+match the main baseline exactly. These checks reduce publication risk; they do not
+replace operational security review, engineering acceptance or deployment QA.

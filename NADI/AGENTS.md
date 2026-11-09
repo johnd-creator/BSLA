@@ -43,8 +43,11 @@ build`), not a separate Vite server under the current strict CSP.
 ## Roles, revisions and semantics
 
 - ADMIN manages only local accounts; it does not inherit ENGINEER write rights.
-  ENGINEER can create and edit only its own engineering records. SUPERVISOR and
-  MANAGER are read-only here, not business approval or risk-acceptance roles.
+  ENGINEER can create and edit only its own engineering records. SUPERVISOR may
+  approve/revoke Reliability method and selected KPI results for an exact asset/year
+  immutable snapshot (explicit user direction, 2026-11-09). It cannot edit engineer
+  evidence or approve WO/budget/risk. MANAGER remains read-only. ADMIN-only has no
+  engineering or Reliability approval rights. Multi-role rights are explicit.
 - Enforce server Gates on both forms and writes. Preserve account auth-version
   revocation, last-active-admin/self-change guards, optimistic version checks,
   idempotency keys, transaction boundaries and immutable-by-route revision history.
@@ -62,11 +65,13 @@ build`), not a separate Vite server under the current strict CSP.
   source boolean downtime is not hours. MTBF requires governed failures and
   operating exposure. Keep NOT_READY until the gates in `../plans/MTBF-MTTR.md`
   are met. The local Reliability module keeps descriptive completed-episode
-  sample means separate from official null KPIs. Reviews/snapshots are append-only
+  sample means and pilot calculations separate from Supervisor-approved KPIs.
+  Official values require a current approved snapshot basis; evidence/method/engine
+  changes invalidate that status without overwriting decisions or snapshots. Reviews/snapshots are append-only
   by route, per event/member asset, and tied to event/review/rule versions. Changed
   event/WO/duplicate-root evidence makes old reviews stale. Read
-  `docs/reliability-evidence.md` before modifying these semantics. Operations includes an optional CEMS RAM read view and a simulation-only
-  historian demonstration, never HMI/control or verified operating exposure.
+  `docs/reliability-evidence.md` before modifying these semantics. Operations is
+  a context/navigation foundation, not live HMI/historian.
 
 ## Checks and documentation
 

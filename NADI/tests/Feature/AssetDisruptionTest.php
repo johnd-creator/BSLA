@@ -222,4 +222,72 @@ class AssetDisruptionTest extends TestCase
         $this->assertSame('<script>alert(1)</script>', $event->fresh()->description);
         $this->assertDatabaseCount('asset_disruption_revisions', 1);
     }
+
+    public function test_date_only_accepts_today_wib_without_fabricating_time_and_rejects_tomorrow(): void
+    {
+        $this->travelTo(CarbonImmutable::parse('2026-11-07T17:15:00Z'));
+        $event = $this->save(['occurred_on' => '2026-11-08', 'restored_on' => '2026-11-08']);
+        $this->assertSame('2026-11-08', $event->occurred_on);
+        $this->assertNull($event->occurred_at);
+        $this->assertNull($event->restored_at);
+        $this->assertNull($event->timezone);
+        foreach (['occurred_on', 'restored_on'] as $field) {
+            $this->post('/disruptions', $this->input([$field => '2026-11-09']))->assertSessionHasErrors($field);
+        }
+        $this->assertDatabaseCount('asset_disruptions', 1);
+    }
+
+    public function test_zoned_disruption_uses_actual_instant_instead_of_the_utc_or_wib_date(): void
+    {
+        $this->travelTo(CarbonImmutable::parse('2026-11-07T16:15:00Z'));
+        $event = $this->save(['occurred_on' => '2026-11-08', 'occurred_time' => '00:30:00', 'restored_on' => '2026-11-08', 'restored_time' => '01:00:00', 'timezone' => 'Asia/Jayapura']);
+        $this->assertSame('2026-11-07 15:30:00', $event->occurred_at->format('Y-m-d H:i:s'));
+        $this->assertSame('2026-11-08', $event->occurred_on);
+        $this->post('/disruptions', $this->input(['occurred_on' => '2026-11-08', 'occurred_time' => '01:30:00', 'timezone' => 'Asia/Jayapura']))->assertSessionHasErrors('occurred_time');
+        $this->post('/disruptions', $this->input(['restored_on' => '2026-11-08', 'restored_time' => '01:30:00', 'timezone' => 'Asia/Jayapura']))->assertSessionHasErrors('restored_time');
+        $this->assertDatabaseCount('asset_disruptions', 1);
+    }
+
+    public function test_existing_disruption_members_can_be_corrected_and_cancelled_without_mart(): void
+    {
+        $event = $this->save(['affected_refs' => self::OTHER]);
+        $this->mock(ReliabilityMart::class, function ($mock) {
+            $mock->shouldNotReceive('historyAsset');
+        });
+        $input = $this->input(['version' => 1, 'status' => 'recorded', 'description' => 'Corrected offline observation', 'affected_refs' => self::OTHER, 'correction_reason' => 'Review retained local observation']);
+        $this->get(route('disruptions.edit', $event))->assertOk();
+        $this->put(route('disruptions.update', $event), $input)->assertSessionHasNoErrors();
+        $this->assertSame('Corrected offline observation', $event->fresh()->description);
+        $this->assertSame(2, $event->fresh()->version);
+        $this->assertSame(2, $event->members()->count());
+        $this->put(route('disruptions.update', $event), $input)->assertSessionHasErrors('version');
+        $this->put(route('disruptions.update', $event), [...$input, 'version' => 2, 'status' => 'voided'])->assertSessionHasNoErrors();
+        $this->assertSame('voided', $event->fresh()->status);
+        $this->assertDatabaseCount('asset_disruption_revisions', 3);
+        $this->assertSame('Synthetic motor tripped, cause not established.', $event->revisions()->where('version', 1)->firstOrFail()->snapshot['description']);
+        $this->assertSame('Corrected offline observation', $event->revisions()->where('version', 3)->firstOrFail()->snapshot['description']);
+    }
+
+    public function test_new_or_readded_disruption_identity_requires_verification_during_outage(): void
+    {
+        $event = $this->save(['affected_refs' => self::OTHER]);
+        $newAsset = 'asset:MAXIMO:MXASSET:BSR:IP:NEW-MEMBER';
+        $this->mock(ReliabilityMart::class, function ($mock) use ($newAsset) {
+            $mock->shouldReceive('historyAsset')->with(self::ASSET)->never();
+            $mock->shouldReceive('historyAsset')->with($newAsset)->twice()->andThrow(new \RuntimeException('Unavailable'));
+            $mock->shouldReceive('historyAsset')->with(self::OTHER)->once()->andThrow(new \RuntimeException('Unavailable'));
+        });
+        $input = $this->input(['version' => 1, 'status' => 'recorded', 'affected_refs' => self::OTHER, 'correction_reason' => 'Review local identities']);
+        $url = route('disruptions.edit', $event);
+        $this->from($url)->put(route('disruptions.update', $event), [...$input, 'affected_refs' => self::OTHER."\n".$newAsset])->assertSessionHasErrors('affected_refs')->assertSessionHasInput('affected_refs', self::OTHER."\n".$newAsset);
+        $this->put(route('disruptions.update', $event), [...$input, 'cause_ref' => $newAsset])->assertSessionHasErrors('cause_ref');
+        $this->assertSame(1, $event->fresh()->version);
+        $this->assertSame(2, $event->members()->count());
+        // Removing a member is local. Historical snapshots are not an identity cache for re-adding it.
+        $this->put(route('disruptions.update', $event), [...$input, 'affected_refs' => null])->assertSessionHasNoErrors();
+        $this->put(route('disruptions.update', $event), [...$input, 'version' => 2])->assertSessionHasErrors('affected_refs');
+        $this->assertSame(2, $event->fresh()->version);
+        $this->assertSame(1, $event->members()->count());
+        $this->assertDatabaseCount('asset_disruption_revisions', 2);
+    }
 }

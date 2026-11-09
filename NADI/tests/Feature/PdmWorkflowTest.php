@@ -7,6 +7,7 @@ use App\Models\PdmActivity;
 use App\Models\User;
 use App\Models\WorkspaceActivity;
 use App\Services\PdmFormCatalog;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Factory;
 use Illuminate\Support\Facades\Http;
@@ -53,7 +54,7 @@ class PdmWorkflowTest extends TestCase
 
     private function analysis(PdmActivity $activity, array $changes = []): array
     {
-        return array_replace(['request_key' => (string) Str::uuid(), 'pdm_activity_id' => $activity->id, 'finding' => 'TEST-FINDING', 'recommendation' => 'TEST-RECOMMENDATION', 'follow_up_status' => 'open'], $changes);
+        return array_replace(['request_key' => (string) Str::uuid(), 'pdm_activity_id' => $activity->id, 'pdm_version' => $activity->fresh()->version, 'finding' => 'TEST-FINDING', 'recommendation' => 'TEST-RECOMMENDATION', 'follow_up_status' => 'open'], $changes);
     }
 
     public function test_routine_and_request_share_one_logbook_and_filters_without_automatic_recommendations(): void
@@ -226,5 +227,176 @@ class PdmWorkflowTest extends TestCase
         $this->assertSame(2, $draft->fresh()->version);
         $this->assertSame('completed', $draft->fresh()->follow_up_status);
         $this->assertDatabaseCount('workspace_activities', 4);
+    }
+
+    public function test_changed_readings_keep_analysis_and_require_explicit_review_of_current_evidence(): void
+    {
+        $this->travelTo(CarbonImmutable::parse('2026-11-08T01:00:00Z'));
+        $measurement = $this->measurement(['readings' => ['field_c3' => ['value' => '10']]]);
+        $this->post('/pdm', $measurement)->assertSessionHasNoErrors();
+        $activity = PdmActivity::firstOrFail();
+        $analysis = $this->analysis($activity);
+        $this->post('/inspections', $analysis)->assertSessionHasNoErrors();
+        $draft = InspectionDraft::firstOrFail();
+        $this->assertNull($draft->pdmReviewState());
+        $this->assertSame(1, $draft->pdmReviewedBasis()['version']);
+
+        $corrected = [...$measurement, 'version' => 1, 'readings' => ['field_c3' => ['value' => '1']]];
+        $this->put(route('pdm.update', $activity), $corrected)->assertSessionHasNoErrors();
+        $audit = WorkspaceActivity::where('kind', 'pdm')->latest('id')->firstOrFail();
+        $this->assertSame('10', json_decode($audit->changes['readings']['before'], true)['field_c3']['value']);
+        $this->assertSame('1', json_decode($audit->changes['readings']['after'], true)['field_c3']['value']);
+        $this->assertSame('stale', $draft->fresh()->pdmReviewState());
+        $this->assertSame('TEST-FINDING', $draft->fresh()->finding);
+        $this->assertSame('TEST-RECOMMENDATION', $draft->fresh()->recommendation);
+        foreach ([route('pdm.show', $activity), route('inspections.show', $draft), '/pdm', '/inspections', '/action-board'] as $url) {
+            $this->get($url)->assertOk()->assertSee('Analisis perlu ditinjau');
+        }
+        $this->get(route('pdm.show', $activity))->assertSee('Sebelum: 10')->assertSee('Sesudah: 1');
+        $this->get(route('inspections.edit', $draft))->assertOk()->assertSee('name="pdm_version" value="2"', false)->assertSee('name="acknowledge_pdm_review"', false);
+
+        // Saving a manual follow-up status is not an evidence review.
+        $current = [...$analysis, 'version' => 1, 'pdm_version' => 2, 'follow_up_status' => 'completed'];
+        $this->put(route('inspections.update', $draft), $current)->assertSessionHasNoErrors();
+        $this->assertSame('stale', $draft->fresh()->pdmReviewState());
+        $this->assertSame('completed', $draft->fresh()->follow_up_status);
+        $this->put(route('inspections.update', $draft), [...$current, 'version' => 2, 'acknowledge_pdm_review' => '1'])->assertSessionHasNoErrors();
+        $this->assertNull($draft->fresh()->pdmReviewState());
+        $this->assertSame(2, $draft->fresh()->pdmReviewedBasis()['version']);
+        $this->get(route('inspections.show', $draft))->assertOk()->assertDontSee('Analisis perlu ditinjau');
+
+        // A no-op save does not change the evidence, even though the draft version advances.
+        $this->put(route('pdm.update', $activity), [...$corrected, 'version' => 2])->assertSessionHasNoErrors();
+        $this->assertNull($draft->fresh()->pdmReviewState());
+        $this->put(route('pdm.update', $activity), [...$corrected, 'version' => 3, 'instrument' => 'Corrected instrument'])->assertSessionHasNoErrors();
+        $this->assertSame('stale', $draft->fresh()->pdmReviewState());
+        Http::assertNotSent(fn ($request) => $request->method() !== 'GET');
+    }
+
+    public function test_analysis_rejects_missing_or_outdated_measurement_versions_and_keeps_idempotency(): void
+    {
+        $measurement = $this->measurement();
+        $this->post('/pdm', $measurement)->assertSessionHasNoErrors();
+        $activity = PdmActivity::firstOrFail();
+        $old = $this->analysis($activity);
+        $missing = $old;
+        unset($missing['pdm_version']);
+        $this->post('/inspections', $missing)->assertSessionHasErrors('pdm_version');
+        $this->put(route('pdm.update', $activity), [...$measurement, 'version' => 1, 'instrument' => 'New instrument'])->assertSessionHasNoErrors();
+        $this->post('/inspections', $old)->assertSessionHasErrors('pdm_version');
+        $this->assertDatabaseCount('inspection_drafts', 0);
+        $current = [...$old, 'pdm_version' => 2];
+        $this->post('/inspections', $current)->assertSessionHasNoErrors();
+        $draft = InspectionDraft::firstOrFail();
+        $this->put(route('pdm.update', $activity), [...$measurement, 'version' => 2, 'instrument' => 'Changed again'])->assertSessionHasNoErrors();
+        $before = WorkspaceActivity::count();
+        $this->from(route('inspections.edit', $draft))->put(route('inspections.update', $draft), [...$current, 'version' => 1, 'acknowledge_pdm_review' => '1'])->assertSessionHasErrors('pdm_version')->assertSessionHasInput('pdm_version', 2);
+        $this->assertSame(1, $draft->fresh()->version);
+        $this->assertSame($before, WorkspaceActivity::count());
+        $this->post('/inspections', $current)->assertRedirect(route('inspections.show', $draft));
+        $this->assertDatabaseCount('inspection_drafts', 1);
+        $this->assertSame('stale', $draft->fresh()->pdmReviewState());
+    }
+
+    public function test_old_analysis_without_review_basis_is_unknown_until_explicitly_reviewed(): void
+    {
+        $this->post('/pdm', $this->measurement())->assertSessionHasNoErrors();
+        $activity = PdmActivity::firstOrFail();
+        $draft = InspectionDraft::create(['created_by' => $this->owner->id, 'pdm_activity_id' => $activity->id, 'asset_ref' => self::ASSET, 'request_reference' => 'LEGACY', 'request_summary' => 'Legacy analysis', 'inspection_type' => 'routine', 'finding' => 'Retained finding', 'recommendation' => 'Retained recommendation']);
+        $this->assertSame('unknown', $draft->pdmReviewState());
+        $this->get(route('inspections.show', $draft))->assertOk()->assertSee('Versi pengukuran yang mendasari analisis lama belum tercatat');
+        $input = $this->analysis($activity, ['version' => 1, 'finding' => 'Retained finding', 'recommendation' => 'Retained recommendation']);
+        $this->put(route('inspections.update', $draft), $input)->assertSessionHasNoErrors();
+        $this->assertSame('unknown', $draft->fresh()->pdmReviewState());
+        $this->put(route('inspections.update', $draft), [...$input, 'version' => 2, 'acknowledge_pdm_review' => '1'])->assertSessionHasNoErrors();
+        $this->assertNull($draft->fresh()->pdmReviewState());
+        $this->assertSame('Retained finding', $draft->fresh()->finding);
+    }
+
+    public function test_pdm_audit_failure_rolls_back_readings_and_version(): void
+    {
+        $measurement = $this->measurement(['readings' => ['field_c3' => ['value' => '10']]]);
+        $this->post('/pdm', $measurement)->assertSessionHasNoErrors();
+        $activity = PdmActivity::firstOrFail();
+        WorkspaceActivity::creating(fn () => throw new \RuntimeException('Pdm audit failed'));
+        try {
+            $this->withoutExceptionHandling()->put(route('pdm.update', $activity), [...$measurement, 'version' => 1, 'readings' => ['field_c3' => ['value' => '1']]]);
+            $this->fail('Audit failure must abort measurement corrections.');
+        } catch (\RuntimeException $e) {
+            $this->assertSame('Pdm audit failed', $e->getMessage());
+        } finally {
+            WorkspaceActivity::flushEventListeners();
+        }
+        $this->assertSame(1, $activity->fresh()->version);
+        $this->assertSame('10', $activity->fresh()->readings['field_c3']['value']);
+        $this->assertDatabaseCount('workspace_activities', 1);
+    }
+
+    public function test_pdm_corrections_and_linked_analysis_use_saved_identity_during_mart_outage(): void
+    {
+        $measurement = $this->measurement(['readings' => ['field_c3' => ['value' => '10']]]);
+        $this->post('/pdm', $measurement)->assertSessionHasNoErrors();
+        $activity = PdmActivity::firstOrFail();
+        Http::swap(new Factory);
+        Http::preventStrayRequests();
+        Http::fake(['mart.test/*' => Http::response([], 503)]);
+
+        // A new analysis of this exact saved measurement adds no new source identity.
+        $analysis = $this->analysis($activity);
+        $this->post('/inspections', $analysis)->assertSessionHasNoErrors();
+        $draft = InspectionDraft::firstOrFail();
+        $corrected = [...$measurement, 'version' => 1, 'readings' => ['field_c3' => ['value' => '1']]];
+        $this->get(route('pdm.edit', $activity))->assertOk();
+        $this->put(route('pdm.update', $activity), $corrected)->assertSessionHasNoErrors();
+        $this->assertSame('1', $activity->fresh()->readings['field_c3']['value']);
+        $this->assertSame('stale', $draft->fresh()->pdmReviewState());
+        $this->put(route('pdm.update', $activity), $corrected)->assertSessionHasErrors('version');
+        $this->put(route('inspections.update', $draft), [...$analysis, 'version' => 1, 'pdm_version' => 2, 'follow_up_status' => 'in_progress'])->assertSessionHasNoErrors();
+        $this->assertSame('stale', $draft->fresh()->pdmReviewState());
+        $this->put(route('inspections.update', $draft), [...$analysis, 'version' => 2, 'pdm_version' => 2, 'acknowledge_pdm_review' => '1'])->assertSessionHasNoErrors();
+        $this->assertNull($draft->fresh()->pdmReviewState());
+        Http::assertNothingSent();
+        $audit = WorkspaceActivity::where('kind', 'pdm')->latest('id')->firstOrFail();
+        $this->assertSame('10', json_decode($audit->changes['readings']['before'], true)['field_c3']['value']);
+        $this->assertSame('1', json_decode($audit->changes['readings']['after'], true)['field_c3']['value']);
+
+        // Offline editing does not authorize a different measurement identity or new record.
+        $this->put(route('pdm.update', $activity), [...$corrected, 'version' => 2, 'asset_ref' => 'asset:OTHER'])->assertSessionHasErrors('asset_ref');
+        Http::assertNothingSent();
+        $this->post('/pdm', [...$measurement, 'request_key' => (string) Str::uuid()])->assertSessionHasErrors('asset_ref');
+        $this->assertDatabaseCount('pdm_activities', 1);
+        $this->assertDatabaseCount('inspection_drafts', 1);
+        Http::assertNotSent(fn ($request) => $request->method() !== 'GET');
+    }
+
+    public function test_standalone_inspection_keeps_local_edits_available_but_requires_mart_for_new_identity(): void
+    {
+        $known = $this->requestData(['asset_ref' => self::ASSET]);
+        $this->post('/inspections', $known)->assertSessionHasNoErrors();
+        $draft = InspectionDraft::latest('id')->firstOrFail();
+        $unbound = $this->requestData();
+        $this->post('/inspections', $unbound)->assertSessionHasNoErrors();
+        $unboundDraft = InspectionDraft::latest('id')->firstOrFail();
+        $this->post('/inspections', $this->requestData(['asset_ref' => self::ASSET]))->assertSessionHasNoErrors();
+        $reassignableDraft = InspectionDraft::latest('id')->firstOrFail();
+        Http::swap(new Factory);
+        Http::preventStrayRequests();
+        Http::fake(['mart.test/*' => Http::response([], 503)]);
+
+        $result = [...$known, 'version' => 1, 'method' => 'VISUAL', 'inspected_on' => '2026-01-01', 'finding' => 'Local observation', 'recommendation' => 'Local follow-up'];
+        $this->put(route('inspections.update', $draft), $result)->assertSessionHasNoErrors();
+        $this->put(route('inspections.update', $draft), [...$result, 'version' => 2, 'follow_up_status' => 'completed'])->assertSessionHasNoErrors();
+        $this->assertSame('completed', $draft->fresh()->follow_up_status);
+        $this->put(route('inspections.update', $draft), [...$result, 'version' => 1])->assertSessionHasErrors('version');
+        Http::assertNothingSent();
+
+        $url = route('inspections.edit', $unboundDraft);
+        $this->from($url)->put(route('inspections.update', $unboundDraft), [...$result, 'version' => 1])->assertSessionHasErrors('asset_ref')->assertSessionHasInput('finding', 'Local observation');
+        $this->assertNull($unboundDraft->fresh()->asset_ref);
+        $this->put(route('inspections.update', $reassignableDraft), [...$known, 'version' => 1, 'asset_ref' => 'asset:NEW'])->assertSessionHasErrors('asset_ref');
+        $this->assertSame(self::ASSET, $reassignableDraft->fresh()->asset_ref);
+        $this->post('/inspections', [...$result, 'request_key' => (string) Str::uuid()])->assertSessionHasErrors('asset_ref');
+        $this->assertDatabaseCount('inspection_drafts', 3);
+        Http::assertNotSent(fn ($request) => $request->method() !== 'GET');
     }
 }

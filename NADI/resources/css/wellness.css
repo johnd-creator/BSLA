@@ -1,0 +1,50 @@
+.wellness-intro, .wellness-empty, .wellness-priority, .wellness-trace, .wellness-method { padding: 18px; margin-bottom: 14px; }
+.wellness-intro h2 { margin: 10px 0 6px; font-size: 20px; }
+.wellness-filters { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; padding: 16px; margin-bottom: 16px; }
+.wellness-filters label { display: grid; gap: 5px; min-width: 0; }
+.wellness-filters label:first-child { flex: 1 1 320px; }
+.wellness-filters input { width: 100%; min-height: 40px; padding: 8px; border: 1px solid var(--border-strong); border-radius: 6px; }
+.wellness-filters input[type=number] { max-width: 110px; }
+.wellness-heading { display: flex; justify-content: space-between; align-items: start; gap: 12px; margin: 16px 0; overflow-wrap: anywhere; }
+.panel.wellness-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px; margin-bottom: 14px; background: var(--surface-soft); }
+.wellness-summary h2 { font-size: 26px; margin: 4px 0 8px; }
+.wellness-summary dl { margin: 0; display: grid; gap: 12px; }
+.wellness-summary dt, .wellness-evidence dt { font-weight: 600; }
+.wellness-summary dd, .wellness-evidence dd { margin: 2px 0 0; }
+.wellness-summary small { display: block; color: var(--muted); }
+.panel.wellness-alert { border-left: 5px solid #a4491c; background: #fff8ef; padding: 18px; margin-bottom: 14px; }
+.wellness-alert h2 { color: #823912; }
+.wellness-components { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 14px; }
+.wellness-component { padding: 18px; min-width: 0; overflow-wrap: anywhere; }
+.wellness-component-heading { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+.wellness-component-heading h2 { font-size: 18px; }
+.wellness-weight { font-weight: 700; font-size: 22px; text-align: right; color: var(--muted); }
+.wellness-weight small { display: block; font-size: 12px; font-weight: 400; }
+.wellness-pending { display: inline-block; padding: 3px 8px; background: var(--surface-soft); border: 1px solid var(--border); border-radius: 5px; color: var(--muted); }
+.wellness-evidence { display: grid; gap: 12px; margin: 15px 0; }
+.wellness-component details, .wellness-trace details { padding: 10px 0; margin-bottom: 10px; border-top: 1px solid var(--border); }
+.wellness-trace-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.wellness-trace ul { padding-left: 18px; }
+.wellness-trace li { margin: 12px 0; overflow-wrap: anywhere; }
+.wellness-trace li span { display: block; color: var(--muted); }
+.wellness-hash { overflow-wrap: anywhere; }
+.wellness-method li { margin: 8px 0; }
+@media (max-width: 800px) {
+    .wellness-components, .panel.wellness-summary, .wellness-trace-grid { grid-template-columns: minmax(0, 1fr); }
+    .wellness-filters .button, .wellness-component .button, .wellness-trace .text-link { min-height: 44px; }
+    .wellness-heading { flex-direction: column; }
+}
+
+.wellness-method ol { list-style: decimal; padding-left: 20px; }
+
+.wellness-policy-form { padding: 18px; margin-bottom: 16px; overflow-wrap: anywhere; }
+.wellness-policy-form fieldset { min-width: 0; border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin: 18px 0; }
+.wellness-policy-form legend { font-weight: 700; padding: 0 6px; }
+.wellness-policy-form label { display: grid; gap: 6px; margin: 12px 0; min-width: 0; }
+.wellness-policy-form input:not([type=checkbox]), .wellness-policy-form textarea, .wellness-policy-form select { width: 100%; min-width: 0; min-height: 44px; padding: 9px; border: 1px solid var(--border-strong); border-radius: 6px; }
+.wellness-policy-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.wellness-policy-grid > div, .wellness-rule { min-width: 0; overflow-wrap: anywhere; }
+.wellness-rule, .wellness-anchor { border-top: 1px solid var(--border); margin-top: 14px; padding-top: 14px; }
+.wellness-policy-form .wellness-check { display: flex; align-items: start; gap: 10px; }
+.wellness-check input { margin-top: 4px; flex-shrink: 0; }
+@media (max-width: 800px) { .wellness-policy-grid { grid-template-columns: minmax(0, 1fr); } }

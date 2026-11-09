@@ -500,4 +500,77 @@ class ReliabilityEvidenceTest extends TestCase
         $this->assertSame([$baseline + 1], array_values(array_unique($levels)));
         $this->assertSame($baseline, DB::connection()->transactionLevel());
     }
+
+    public function test_review_queue_pages_filter_only_display_and_keep_full_evidence(): void
+    {
+        for ($i = 0; $i < 24; $i++) {
+            $this->event();
+        }
+        $this->event(['occurred_on' => null]);
+        $this->event(['occurred_on' => '2025-01-01']);
+        $expected = $this->report();
+        $url = route('reliability.index', ['asset_ref' => self::ASSET, 'year' => 2026, 'review_state' => 'unreviewed', 'review_period' => 'in_year']);
+        $first = $this->get($url)->assertOk()->assertViewHas('reviewQueue', fn ($page) => $page->count() === 20 && $page->total() === 25)
+            ->assertViewHas('report', fn ($report) => count($report['events']) === 27 && $report['evidence_hash'] === $expected['evidence_hash'])
+            ->assertSee('Filter hanya menyaring tabel ini')->assertSee('20 per halaman');
+        $next = $first->viewData('reviewQueue')->nextPageUrl();
+        $this->get($next)->assertOk()->assertViewHas('reviewQueue', fn ($page) => $page->count() === 5 && $page->currentPage() === 2)
+            ->assertViewHas('report', fn ($report) => $report === $expected);
+        $this->get($url.'&review_page=99')->assertOk()->assertSee('Tidak ada observasi pada halaman/filter ini')->assertSee('Reset antrean');
+        $download = $this->get(route('reliability.download', ['asset_ref' => self::ASSET, 'year' => 2026, 'review_state' => 'unreviewed', 'review_period' => 'in_year', 'review_page' => 2]))->assertOk();
+        $this->assertCount(27, $download->json('events'));
+        $this->assertSame($expected['evidence_hash'], $download->json('evidence_hash'));
+        Http::assertNotSent(fn ($request) => $request->method() !== 'GET');
+    }
+
+    public function test_review_queue_filters_never_hide_unknown_years_by_assigning_them_to_current_year(): void
+    {
+        $unknown = $this->event(['occurred_on' => null]);
+        $old = $this->event(['occurred_on' => '2025-01-01']);
+        foreach (['in_year' => $this->event->id, 'unknown_year' => $unknown->id, 'out_of_year' => $old->id] as $period => $id) {
+            $this->get(route('reliability.index', ['asset_ref' => self::ASSET, 'year' => 2026, 'review_period' => $period]))->assertOk()
+                ->assertViewHas('reviewQueue', fn ($page) => $page->total() === 1 && $page->items()[0]['event_id'] === $id);
+        }
+    }
+
+    public function test_snapshot_queue_uses_stored_evidence_after_current_review_changes(): void
+    {
+        $this->event(['occurred_on' => null]);
+        $key = (string) Str::uuid();
+        $this->post(route('reliability.snapshots.store'), ['request_key' => $key, 'asset_ref' => self::ASSET, 'year' => 2026, 'review_state' => 'failure'])->assertRedirect();
+        $snapshot = ReliabilitySnapshot::firstOrFail();
+        $before = $snapshot->report;
+        $this->assertCount(2, $before['events']);
+        $this->review($this->event)->assertSessionHasNoErrors();
+        $url = route('reliability.snapshots.show', [$snapshot, 'review_state' => 'unreviewed', 'review_period' => 'all']);
+        $this->get($url)->assertOk()->assertViewHas('changed', true)
+            ->assertViewHas('report', fn ($report) => $report === $before)
+            ->assertViewHas('reviewQueue', fn ($page) => $page->total() === 2 && str_starts_with($page->url(2), route('reliability.snapshots.show', $snapshot)));
+        $this->assertSame($before, $snapshot->fresh()->report);
+        $this->get(route('reliability.snapshots.download', [$snapshot, 'review_state' => 'failure']))->assertOk()->assertExactJson($before);
+        $this->assertDatabaseCount('reliability_snapshots', 1);
+    }
+
+    public function test_invalid_queue_filters_fail_before_source_reads_and_read_only_roles_can_filter(): void
+    {
+        foreach (['review_state' => 'healthy', 'review_period' => 'invented', 'review_page' => 0] as $field => $value) {
+            $this->getJson(route('reliability.index', ['asset_ref' => self::ASSET, $field => $value]))->assertUnprocessable()->assertJsonValidationErrors($field);
+        }
+        Http::assertNothingSent();
+        foreach (['ADMIN', 'SUPERVISOR', 'MANAGER'] as $role) {
+            $this->signIn($role);
+            $this->get(route('reliability.index', ['asset_ref' => self::ASSET, 'review_state' => 'needs_review']))->assertOk()
+                ->assertViewHas('reviewQueue', fn ($page) => $page->total() === 1)->assertDontSee('Simpan snapshot review');
+        }
+        $this->assertDatabaseCount('reliability_reviews', 0);
+        $this->assertDatabaseCount('reliability_snapshots', 0);
+    }
+
+    public function test_source_outage_keeps_review_queue_and_null_wo_context(): void
+    {
+        $this->outage = true;
+        $this->get(route('reliability.index', ['asset_ref' => self::ASSET, 'review_state' => 'needs_review']))->assertOk()
+            ->assertViewHas('reviewQueue', fn ($page) => $page->total() === 1)
+            ->assertViewHas('report', fn ($report) => $report['work_orders']['state'] === 'UNAVAILABLE' && $report['metrics']['mtbf']['value'] === null);
+    }
 }

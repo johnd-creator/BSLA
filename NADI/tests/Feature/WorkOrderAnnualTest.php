@@ -51,7 +51,7 @@ class WorkOrderAnnualTest extends TestCase
     {
         $this->fake();
         $this->get(route('work-orders.index', ['asset_ref' => self::ASSET, 'year' => '2026', 'offset' => 25, 'status' => 'CLOSE']))
-            ->assertOk()->assertSee('Aktivitas WO per tahun')->assertSee('Tahun belum diketahui')->assertSee('dari 100 identitas WO di Mart')->assertSee('PM')->assertSee('72')->assertSee('WAPPR')->assertSee('Annual WO record')->assertSee('year=2026', false)->assertSee('offset=50', false)->assertSee('historian DCS')->assertSee('asset wellness')->assertSee('Pareto loss')->assertSee('1 identitas WO berulang (2 record)');
+            ->assertOk()->assertSee('Aktivitas WO per tahun')->assertSee('Tahun belum diketahui')->assertSee('dari 100 identitas WO di Mart')->assertSee('PM')->assertSee('72')->assertSee('WAPPR')->assertSee('Annual WO record')->assertSee('year=2026', false)->assertSee('offset=50', false)->assertSee('historian DCS')->assertSee('Asset Wellness')->assertDontSee('Score reliability')->assertSee('Pareto loss')->assertSee('1 identitas WO berulang (2 record)');
         Http::assertSent(fn ($r) => str_contains($r->url(), 'annual-summary') && $r['population'] === 'COLLECTED_HIERARCHY' && ! isset($r['offset']) && ! isset($r['status']) && ! isset($r['year']));
         Http::assertSent(fn ($r) => str_contains($r->url(), 'asset-work-orders/year') && $r['year'] === '2026' && $r['offset'] === 25 && $r['asset_ref'] === self::ASSET);
     }

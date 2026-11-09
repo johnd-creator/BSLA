@@ -93,7 +93,7 @@ class PdmActivityController extends Controller
             'template_id' => ['required', 'string', 'max:100'],
             'template_fingerprint' => ['required', 'string', 'size:64'],
             'time_precision' => ['required', Rule::in(['date', 'datetime'])],
-            'measured_on' => ['exclude_unless:time_precision,date', 'required_if:time_precision,date', 'date_format:Y-m-d', 'before_or_equal:today'],
+            'measured_on' => ['exclude_unless:time_precision,date', 'required_if:time_precision,date', 'date_format:Y-m-d', 'before_or_equal:'.now('Asia/Jakarta')->toDateString()],
             'measured_local' => ['exclude_unless:time_precision,datetime', 'required_if:time_precision,datetime', 'date_format:Y-m-d\TH:i,Y-m-d\TH:i:s'],
             'timezone' => ['exclude_unless:time_precision,datetime', 'required_if:time_precision,datetime', Rule::in(['Asia/Jakarta', 'Asia/Makassar', 'Asia/Jayapura', 'UTC'])],
             'instrument' => ['required', 'string', 'max:200'],
@@ -119,10 +119,14 @@ class PdmActivityController extends Controller
         if (! hash_equals($fingerprint, $data['template_fingerprint'])) {
             throw ValidationException::withMessages(['template_id' => 'Template berubah. Buka ulang form untuk memeriksa titik dan satuan terbaru.']);
         }
-        try {
-            $mart->historyAsset($data['asset_ref']);
-        } catch (Throwable) {
-            throw ValidationException::withMessages(['asset_ref' => 'Identitas aset belum dapat diverifikasi melalui Mart. Isian tetap ada; coba lagi setelah koneksi tersedia.']);
+        // Existing drafts retain their exact, immutable asset/template identity.
+        // Local corrections do not require the read-only source to be online.
+        if (! $activity) {
+            try {
+                $mart->historyAsset($data['asset_ref']);
+            } catch (Throwable) {
+                throw ValidationException::withMessages(['asset_ref' => 'Identitas aset belum dapat diverifikasi melalui Mart. Isian tetap ada; coba lagi setelah koneksi tersedia.']);
+            }
         }
         $measuredAt = null;
         $timezone = null;
@@ -137,12 +141,7 @@ class PdmActivityController extends Controller
                 throw ValidationException::withMessages(['measured_local' => 'Waktu pengukuran tidak boleh di masa depan. Periksa zona waktu.']);
             }
         }
-        if ($activity?->inspection && ($data['time_precision'] !== $activity->time_precision
-            || $measuredOn !== $activity->measurementDate()
-            || $measuredAt?->format('Y-m-d H:i:s') !== $activity->measured_at?->format('Y-m-d H:i:s')
-            || $timezone !== $activity->timezone)) {
-            throw ValidationException::withMessages([$data['time_precision'] === 'date' ? 'measured_on' : 'measured_local' => 'Tanggal, waktu dan presisi sudah menjadi dasar analisis terkait. Gunakan aktivitas baru untuk pengukuran berbeda.']);
-        }
+        $this->assertLinkedMeasurementTime($activity, ['time_precision' => $data['time_precision'], 'measured_on' => $measuredOn, 'measured_at' => $measuredAt, 'timezone' => $timezone]);
         $fields = array_column($template['fields'], null, 'key');
         if (array_diff(array_keys($data['readings']), array_keys($fields))) {
             throw ValidationException::withMessages(['readings' => 'Ada parameter yang tidak termasuk dalam template ini.']);
@@ -204,7 +203,7 @@ class PdmActivityController extends Controller
 
     public function show(PdmActivity $activity)
     {
-        return view('pdm.show', ['activity' => $activity->load(['author:id,name', 'inspection']), 'activityHistory' => WorkspaceActivityLog::history('pdm', $activity->id)]);
+        return view('pdm.show', ['activity' => $activity->load(['author:id,name', 'inspection.pdmReviewAudit', 'inspection.pdmActivity']), 'activityHistory' => WorkspaceActivityLog::history('pdm', $activity->id)]);
     }
 
     public function edit(PdmActivity $activity)
@@ -219,14 +218,33 @@ class PdmActivityController extends Controller
         Gate::authorize('update-pdm-activity', $activity);
         $data = $this->validated($request, $mart, $catalog, $activity);
         DB::transaction(function () use ($data, $activity, $request) {
-            $updated = PdmActivity::whereKey($activity->id)->where('version', $request->integer('version'))->update([...$data, 'template_snapshot' => json_encode($data['template_snapshot'], JSON_THROW_ON_ERROR), 'readings' => json_encode($data['readings'], JSON_THROW_ON_ERROR), 'version' => DB::raw('version + 1')]);
-            if (! $updated) {
+            $current = PdmActivity::whereKey($activity->id)->lockForUpdate()->firstOrFail();
+            if ($current->version !== $request->integer('version')) {
                 throw ValidationException::withMessages(['version' => 'Draft sudah berubah. Muat ulang sebelum menyimpan agar perubahan sebelumnya tidak tertimpa.']);
             }
-            WorkspaceActivityLog::record($activity->fresh(), $request->user()->id);
+            // Recheck after acquiring the same measurement lock used by analysis writes.
+            $this->assertLinkedMeasurementTime($current, $data);
+            if ($current->inspection) {
+                $data = [...$data, ...$current->only(['inspection_type', 'requester_name', 'request_reference', 'request_summary'])];
+            }
+            $before = array_intersect_key($current->getRawOriginal(), $data);
+            $current->fill($data);
+            $current->version++;
+            $current->save();
+            WorkspaceActivityLog::record($current, $request->user()->id, $before);
         });
 
         return redirect()->route('pdm.show', $activity)->with('status', 'Draft aktivitas PdM diperbarui.');
+    }
+
+    private function assertLinkedMeasurementTime(?PdmActivity $activity, array $data): void
+    {
+        if ($activity?->inspection && ($data['time_precision'] !== $activity->time_precision
+            || $data['measured_on'] !== $activity->measurementDate()
+            || $data['measured_at']?->format('Y-m-d H:i:s') !== $activity->measured_at?->format('Y-m-d H:i:s')
+            || $data['timezone'] !== $activity->timezone)) {
+            throw ValidationException::withMessages([$data['time_precision'] === 'date' ? 'measured_on' : 'measured_local' => 'Tanggal, waktu dan presisi sudah menjadi dasar analisis terkait. Gunakan aktivitas baru untuk pengukuran berbeda.']);
+        }
     }
 
     public function history(Request $request, PdmFormCatalog $catalog)

@@ -50,7 +50,7 @@ class HomeFeed
         foreach (['disruption' => ['asset_disruption_revisions', 'asset_disruption_id'], 'priority' => ['asset_priority_revisions', 'asset_priority_id']] as $kind => [$table, $subject]) {
             $queries[] = DB::table($table)->selectRaw("id, '$kind' as kind, $subject as subject_id, version, changed_by as actor_id, NULL as asset_ref, CASE WHEN version = 1 THEN 'created' ELSE 'updated' END as action, snapshot as payload, created_at, 'revision' as basis");
         }
-        $queries[] = DB::table('workspace_activities')->selectRaw("id, kind, subject_id, version, actor_id, asset_ref, action, changes as payload, created_at, 'audit' as basis");
+        $queries[] = DB::table('workspace_activities')->selectRaw("id, kind, subject_id, version, actor_id, asset_ref, action, CASE WHEN kind = 'pdm' THEN '{}' ELSE changes END as payload, created_at, 'audit' as basis");
         foreach (['pdm' => 'pdm_activities', 'inspection' => 'inspection_drafts'] as $kind => $table) {
             // Only creation metadata is known for older rows. updated_at is NOT an actor/event history.
             $queries[] = DB::table($table)->whereNotExists(fn ($q) => $q->selectRaw('1')->from('workspace_activities as a')

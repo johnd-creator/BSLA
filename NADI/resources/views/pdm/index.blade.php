@@ -1,6 +1,7 @@
 <x-shell title="Logbook PdM" eyebrow="RUTIN / REQUEST → HASIL → REKOMENDASI">
 
     <div class="section-intro"><p class="muted">Satu daftar inspeksi rutin dan request. Rekomendasi dibuat hanya bila hasil memerlukan tindak lanjut.</p>@can('write-pdm-activities')<div class="form-actions"><a class="button secondary" href="{{ route('inspections.create') }}">+ Catat request</a><a class="button primary" href="{{ route('pdm.create') }}">+ Input pengukuran</a></div>@endcan</div>
+    <p><a class="text-link" href="{{ route('pdm.plans.index') }}">Jadwal &amp; cakupan inspeksi →</a></p>
     <div class="notice info">Draft lokal. Hasil tidak otomatis menjadi rekomendasi atau WO. Catatan inspeksi lama tetap tersedia di daftar ini.</div>
     <form class="panel filters" method="get">
         <div><label for="q">Cari aktivitas / KKS / peminta</label><input id="q" name="q" value="{{ request('q') }}" maxlength="120"></div>
@@ -18,7 +19,7 @@
         <td>{{ ['request'=>'Request', 'routine'=>'Rutin'][$activity->inspection_type] ?? 'Jenis belum dicatat' }}@if($activity->inspection_type === 'request')<small>{{ $activity->requester_name ?: 'Peminta belum dicatat' }}</small>@endif<small>{{ $activity->request_reference }}</small></td>
         <td>@if($isPdm){{ $activity->measurementLabel() }}<small>{{ $activity->precisionLabel() }}</small>@else{{ $activity->inspected_on?->format('d M Y') ?? 'Menunggu inspeksi' }}@endif<small>{{ \App\Models\InspectionDraft::METHODS[$activity->method] ?? 'Metode belum ditentukan' }}</small></td>
         <td>@if($isPdm){{ collect($activity->readings)->filter(fn($r) => $r['value'] !== null && $r['value'] !== '')->count() }} / {{ count($activity->readings) }} titik @endif<small>{{ \Illuminate\Support\Str::limit($analysis?->finding ?? ($isPdm ? 'Pengukuran tersimpan' : 'Hasil belum dicatat'), 90) }}</small></td>
-        <td>@if($analysis?->recommendation)<a class="text-link" href="{{ route('inspections.show', $analysis) }}">{{ \Illuminate\Support\Str::limit($analysis->recommendation, 90) }}</a><small>{{ \App\Models\InspectionDraft::FOLLOW_UP_STATUSES[$analysis->follow_up_status] }}</small>@else Belum dibuat @endif</td><td>{{ $activity->author->name }}</td></tr>
+        <td>@if($analysis?->pdmReviewState())<small><strong>Analisis perlu ditinjau</strong></small>@endif @if($analysis?->recommendation)<a class="text-link" href="{{ route('inspections.show', $analysis) }}">{{ \Illuminate\Support\Str::limit($analysis->recommendation, 90) }}</a><small>{{ \App\Models\InspectionDraft::FOLLOW_UP_STATUSES[$analysis->follow_up_status] }}</small>@else Belum dibuat @endif</td><td>{{ $activity->author->name }}</td></tr>
     @empty<tr><td colspan="6" class="board-empty"><strong>Belum ada aktivitas PdM pada pilihan ini</strong><p>Catat request atau masukkan hasil pengukuran rutin. Tidak ada data contoh.</p></td></tr>@endforelse
     </tbody></table></div><div class="pagination">{{ $activities->links() }}</div></div>
 <details class="method-note history-rules"><summary>Urutan waktu & batas data</summary><p class="data-note">Urutan berdasarkan tanggal sumber. Catatan tanggal saja ditampilkan setelah catatan berjam pada tanggal yang sama; ini bukan urutan kejadian dalam hari tersebut. Data berkala tidak berarti pengukuran setiap hari atau pemantauan realtime.</p></details>

@@ -16,7 +16,7 @@
             <div class="pagination">{{ $disruptionLinks->withQueryString()->links() }}</div>
         </section>
         <div class="notice info">Tidak menggunakan tanggal perubahan status, tanggal laporan, atau jadwal sebagai pengganti actual start/finish. Nilai yang kosong atau tidak valid tidak diubah menjadi nol.</div>
-        @if($record['status']==='WAPPR')<div class="mapping-scope">WO ini menunggu persetujuan (WAPPR). Data dipertahankan sebagai backlog dan tidak otomatis dihitung sebagai gangguan atau reliability score.</div>@endif
+        @if($record['status']==='WAPPR')<div class="mapping-scope">WO ini menunggu persetujuan (WAPPR). Data dipertahankan sebagai backlog dan tidak otomatis dihitung sebagai gangguan atau skor Asset Wellness.</div>@endif
         <p class="data-note">Durasi adalah actual finish − actual start dalam jam. Bukan jam kerja personel, downtime aset/unit, lama status CLOSE, atau bukti gangguan. Sumber dibaca melalui API lokal; tidak ada perubahan pada Maximo atau Mart.</p>
     @endif
 </x-shell>

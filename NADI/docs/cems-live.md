@@ -39,8 +39,10 @@ Tests use mocked HTTP and in-memory SQLite; browser QA must use an isolated fixt
 `/v1/cems/signals` reads the same service's once-per-minute RAM summary. NADI
 shows feed timestamp/age/status and received-good sample count per parameter.
 This is communication/data evidence only, never operating-state, equipment health,
-WO status or automatic MTBF/MTTR/downtime evidence. No separate source poll occurs. Numeric values use eight significant digits to
-preserve small Hg readings. Snapshots older than 15 seconds or inconsistent
+WO status or automatic MTBF/MTTR/downtime evidence. No separate source poll occurs. Hg values use plain decimal notation with an Indonesian decimal comma, including
+very small nonzero values. The formatter expands the JSON float representation
+without changing DTO/source values, units or collector corrections. Other
+parameters retain eight significant digits. Snapshots older than 15 seconds or inconsistent
 non-good numeric values fail closed at the UI read boundary.
 
 

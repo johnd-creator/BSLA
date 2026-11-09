@@ -51,11 +51,39 @@ test('validation stays server-rendered and error links target the exact fields',
     assert.ok(summary.includes('tabindex="-1" data-error-summary'));
 });
 
-test('grouped actions preserve unavailable health and technical source caveats', () => {
+test('grouped actions preserve unavailable Asset Wellness and technical source caveats', () => {
     const detail = read('resources/views/assets/show.blade.php');
-    for (const text of ['Catat & tindak lanjuti', 'Telusuri riwayat', 'Reliability score belum tersedia.', 'Identitas teknis & waktu record sumber', 'Waktu record sumber bukan bukti kesegaran sinkronisasi']) assert.ok(detail.includes(text));
+    for (const text of ['Catat & tindak lanjuti', 'Telusuri riwayat', 'Draft awal Asset Wellness tersedia untuk meninjau bukti.', 'Identitas teknis & waktu record sumber', 'Waktu record sumber bukan bukti kesegaran sinkronisasi']) assert.ok(detail.includes(text));
     assert.ok(detail.includes("@can('write-pdm-activities')"));
     assert.ok(detail.includes("@if($record['registered'])"));
+});
+
+test('aggregate condition labels consistently use Asset Wellness without renaming technical Reliability', () => {
+    const paths = [
+        'resources/views/assets/show.blade.php',
+        'resources/views/assets/timeline.blade.php',
+        'resources/views/action-board.blade.php',
+        'resources/views/inspections/show.blade.php',
+        'resources/views/work-orders/show.blade.php',
+        'resources/views/work-orders/annual.blade.php',
+        'resources/views/disruptions/summary.blade.php',
+        'resources/views/home.blade.php',
+        'resources/views/operations/index.blade.php',
+        'resources/views/overview/reports.blade.php',
+        'app/Services/DataOverview.php',
+        'app/Services/AssetTimeline.php',
+    ];
+    for (const path of paths) {
+        const source = read(path);
+        assert.match(source, /Asset Wellness|ASSET WELLNESS/, path);
+        assert.doesNotMatch(source, /reliability score|score reliability|asset health|health score|skor kesehatan/i, path);
+    }
+    const detail = read('resources/views/assets/show.blade.php');
+    assert.ok(detail.includes('Reliability · bukti & review tahunan'));
+    assert.ok(detail.includes('Data kosong bukan berarti aset sehat atau risikonya rendah.'));
+    assert.ok(detail.includes('Belum cukup data'));
+    assert.ok(detail.includes('Belum diverifikasi'));
+    assert.doesNotMatch(detail, /<meter|<progress/);
 });
 
 test('keyboard disclosure focus clears the sticky save bar', () => {

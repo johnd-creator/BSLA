@@ -1,7 +1,7 @@
 .timeline-intro { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
 .timeline-intro > div { min-width: 0; overflow-wrap: anywhere; }
 .timeline-links { display: flex; flex-wrap: wrap; gap: 8px; flex-shrink: 0; }
-.timeline-sources { list-style: none; padding: 0; margin: 12px 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.timeline-sources { list-style: none; padding: 0; margin: 12px 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
 .timeline-sources li { min-width: 0; padding-left: 10px; border-left: 2px solid var(--border); }
 .timeline-sources strong, .timeline-sources span { display: block; overflow-wrap: anywhere; }
 .timeline-sources span { color: var(--muted); font-size: 12px; }

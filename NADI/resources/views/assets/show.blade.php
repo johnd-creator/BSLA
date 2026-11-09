@@ -22,18 +22,19 @@
                     </div>
                     <section class="asset-reliability-status" aria-labelledby="asset-reliability-title">
                         <div class="asset-reliability-heading">
-                            <h3 id="asset-reliability-title">Reliability score</h3>
+                            <h3 id="asset-reliability-title">Asset Wellness</h3>
                             <span class="asset-reliability-pending">Belum cukup data</span>
                         </div>
-                        <p>Reliability score belum tersedia. Data kosong bukan berarti aset sehat atau risikonya rendah.</p>
-                        <details class="method-note"><summary>Data yang diperlukan untuk score</summary>
+                        <p>Draft awal Asset Wellness tersedia untuk meninjau bukti. Skor belum ditetapkan. Data kosong bukan berarti aset sehat atau risikonya rendah.</p>
+                        <a class="button secondary" href="{{ route('wellness.index', ['asset_ref'=>$record['canonical_id']]) }}">Tinjau draft Wellness →</a>
+                        <details class="method-note"><summary>Data yang diperlukan untuk Asset Wellness</summary>
                         <ul class="asset-reliability-inputs">
                             <li>Kejadian gangguan yang sudah diverifikasi</li>
-                            <li>Jam operasi dan availability dari historian</li>
+                            <li>Parameter kondisi operasi serta log manual/historian terverifikasi</li>
                             <li>Riwayat pemeliharaan yang tervalidasi</li>
                             <li>Hasil PdM yang tervalidasi</li>
                         </ul>
-                        <p class="asset-reliability-completeness">Kelengkapan data untuk score: <strong>Belum diverifikasi</strong>.</p></details>
+                        <p class="asset-reliability-completeness">Kelengkapan data untuk Asset Wellness: <strong>Belum diverifikasi</strong>.</p></details>
                         @if($disruptionSummary['total'])<p class="asset-reliability-completeness">Log engineer: <strong>{{ $disruptionSummary['total'] }} kejadian tercatat</strong>, belum diverifikasi. <a class="text-link" href="#log-gangguan">Lihat catatan & kelengkapannya ↓</a></p>@endif
                     </section>
                     <dl class="detail-grid">

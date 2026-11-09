@@ -4,9 +4,11 @@ namespace App\Services;
 
 use App\Models\AssetDisruption;
 use App\Models\PdmActivity;
+use App\Models\ReliabilityPolicy;
 use App\Models\ReliabilityReview;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Throwable;
 
 class ReliabilityEvidence
@@ -83,6 +85,7 @@ class ReliabilityEvidence
             $row = ['event_id' => $event->id, 'reference' => $event->reference(), 'event_version' => $event->version,
                 'observation' => [...$event->only(['asset_ref', 'event_type', 'description', 'known_cause', 'impact', 'impact_note', 'occurred_on', 'restored_on', 'timezone', 'work_order_ref', 'evidence_note', 'status']), 'occurred_at' => $event->occurred_at?->toIso8601String(), 'restored_at' => $event->restored_at?->toIso8601String(), 'members' => $event->members->map(fn ($member) => ['asset_ref' => $member->asset_ref, 'role' => $member->role])->all()],
                 'asset_role' => $event->roleFor($asset), 'state' => $state, 'date' => $date, 'date_basis' => $basis, 'in_year' => $inYear,
+                'review_event_version' => $review?->event_version, 'review_rule_version' => $review?->rule_version, 'duplicate_version' => $review?->duplicate_version, 'duplicate_review_revision' => $review?->duplicate_review_revision,
                 'review_id' => $review?->id, 'review_revision' => $review?->revision, 'reviewer_id' => $review?->created_by,
                 'reviewed_at' => $review?->created_at?->toIso8601String(), 'required_function' => $review?->required_function,
                 'evidence' => $review?->evidence, 'reason' => $review?->reason, 'duplicate_of' => $review?->duplicate_of,
@@ -164,11 +167,32 @@ class ReliabilityEvidence
             'work_orders' => ['state' => $wo ? 'RETAINED_MART_CONTEXT' : 'UNAVAILABLE', 'date_basis' => 'ACTUAL_START', 'timezone' => self::ZONE, 'selected_year' => $woYear, 'all_year_counts' => $wo['counts'] ?? null, 'meaning' => 'WO identities, not failure occurrences. Actual elapsed and labor are not repair duration.'],
             'pdm' => $pdmData, 'events' => $rows,
         ];
+        $exposure = app(OperatingExposure::class)->report($asset, $year);
+        $policy = Schema::hasTable('reliability_policies') ? ReliabilityPolicy::where('asset_ref', $asset)->where('year', $year)->latest('revision')->first() : null;
+        $report['manual_operating'] = $exposure;
+        $report['coverage']['manual_operating_evidence'] = $exposure['status'];
+        $report['coverage']['operating_seconds'] = $exposure['operating_seconds'];
+        $report['coverage']['covered_seconds'] = $exposure['known_seconds'];
+        $report['coverage']['coverage_percent'] = $exposure['coverage_percent'];
+        $report['readiness'] = app(ReliabilityReadiness::class)->assess($report, $exposure, $policy);
+        $report['coverage']['observation_coverage'] = $report['readiness']['failure_coverage']['status'];
+        $report['calculation'] = app(ReliabilityCalculator::class)->calculate($report);
+        $report['trends'] = app(ReviewedFailureTrends::class)->report($report);
+        $report['blockers'] = array_values(array_unique([...$report['readiness']['mtbf']['blockers'], ...$report['readiness']['mttr']['blockers'], ...$report['readiness']['active_repair']['blockers'], ...$report['readiness']['restoration']['blockers'], ...($quality['in_year'] === 0 ? ['NO_LOCAL_OBSERVATIONS_IN_PERIOD'] : [])]));
         $hashBasis = $report;
         unset($hashBasis['observed_at']);
         $report['evidence_hash'] = hash('sha256', json_encode($hashBasis, JSON_THROW_ON_ERROR));
 
-        return $report;
+        return app(ReliabilityApprovalStatus::class)->apply($report);
+    }
+
+    public function localApprovalReport(string $asset, int $year): array
+    {
+        if (DB::connection()->transactionLevel() < 1) {
+            throw new \LogicException('Approval evidence requires the owning-store write transaction.');
+        }
+
+        return $this->localReport($asset, $year, null, null);
     }
 
     private function state(AssetDisruption $event, ?ReliabilityReview $review, $events, $reviews): string
