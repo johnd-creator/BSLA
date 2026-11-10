@@ -2,7 +2,7 @@
 <h2>Pengesahan metode & hasil oleh Supervisor</h2>
 @foreach(['previous_revision','calculation_hash','metrics','metrics.0','metrics.1','method_attestation','result_attestation','evidence','reason','decision','request_key'] as $field)<x-field-error :name="$field" />@endforeach
 <p>Engineer menyiapkan/review evidence dan aturan. Supervisor mengesahkan metode beserta metrik yang dipilih, khusus snapshot ini. Ini tidak mengesahkan pekerjaan WO, anggaran atau aset lain.</p>
-<p><strong>Scope: {{ $snapshot->asset_ref }} · tahun onset {{ $snapshot->year }} WIB.</strong> Episode perbaikan/pemulihan memakai seluruh durasi episode tahun onset. MTBF memakai exposure eligible pada tahun kalender tersebut. Tidak ada penggabungan plant atau pengesahan otomatis untuk tahun berikutnya.</p>
+<p><strong>Scope: {{ $snapshot->asset_ref }} · periode onset {{ \App\Services\ReliabilityPeriod::fromReport($snapshot->report)->label() }} WIB.</strong> Episode perbaikan/pemulihan memakai seluruh durasi episode periode onset. MTBF memakai exposure eligible pada periode exact tersebut. Tidak ada penggabungan plant atau pengesahan otomatis untuk rentang lain.</p>
 <p>Status terkini: <strong>{{ $approvalStatus['status'] }}</strong>. Status ini diperiksa terpisah dari isi snapshot historis yang tidak ditimpa.</p>
 @if($approvalStatus['approval'])
 <p class="data-note">Keputusan scope terakhir #{{ $approvalStatus['approval']['revision'] }} · Supervisor ID {{ $approvalStatus['approval']['created_by'] }} · {{ $approvalStatus['approval']['created_at'] }} · snapshot #{{ $approvalStatus['approval']['reliability_snapshot_id'] }}.</p>
@@ -23,9 +23,9 @@
 @endforeach
 <label>Referensi pemeriksaan Supervisor<textarea name="evidence" required minlength="5" maxlength="4000">{{ old('evidence') }}</textarea></label>
 <label>Alasan keputusan<textarea name="reason" required minlength="5" maxlength="2000">{{ old('reason') }}</textarea></label>
-<label class="checkbox-label"><input type="checkbox" name="method_attestation" value="1" required> Saya mengesahkan definisi fungsi/failure, scope aset/tahun, aturan exposure/recurrence/kelengkapan dan definisi MTTR pada versi metode snapshot ini.</label>
+<label class="checkbox-label"><input type="checkbox" name="method_attestation" value="1" required> Saya mengesahkan definisi fungsi/failure, scope aset/periode exact, aturan exposure/recurrence/kelengkapan dan definisi MTTR pada versi metode snapshot ini.</label>
 <label class="checkbox-label"><input type="checkbox" name="result_attestation" value="1" required> Saya telah memeriksa evidence, pengecualian, pembilang/penyebut dan hasil metrik terpilih. Saya mengesahkannya sebagai hasil resmi untuk scope ini.</label>
-<p class="data-note">Keputusan baru menggantikan pengesahan aktif sebelumnya untuk scope aset/tahun ini. Metrik yang tidak dipilih tidak tetap resmi. Riwayat keputusan tidak dihapus.</p>
+<p class="data-note">Keputusan baru menggantikan pengesahan aktif sebelumnya untuk scope aset/periode exact ini. Metrik yang tidak dipilih tidak tetap resmi. Riwayat keputusan tidak dihapus.</p>
 <button class="button primary" type="submit">Sahkan metode & metrik terpilih</button>
 </form>
 @endif
@@ -42,7 +42,7 @@
 @else
 <p class="notice error">Penyimpanan pengesahan belum tersedia. Migrasi diperlukan sebelum keputusan dapat dicatat.</p>
 @endif
-<h3>Audit keputusan scope aset/tahun</h3>
+<h3>Audit keputusan scope aset/periode exact</h3>
 @forelse($approvalHistory as $decision)
 <details><summary>Revisi {{ $decision->revision }} · {{ $decision->decision }} · snapshot #{{ $decision->reliability_snapshot_id }}</summary>
 <p>Supervisor ID {{ $decision->created_by }} · {{ $decision->created_at->toIso8601String() }} · metode v{{ $decision->policy_revision }} · {{ $decision->engine_version }} · metrik {{ implode(', ', $decision->metrics) }}.</p>

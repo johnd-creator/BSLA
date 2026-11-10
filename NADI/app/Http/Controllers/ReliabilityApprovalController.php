@@ -7,6 +7,7 @@ use App\Models\ReliabilitySnapshot;
 use App\Services\ReliabilityApprovalStatus;
 use App\Services\ReliabilityEvidence;
 use App\Services\ReliabilityMart;
+use App\Services\ReliabilityPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -19,6 +20,8 @@ class ReliabilityApprovalController extends Controller
     public function store(Request $request, ReliabilitySnapshot $snapshot, ReliabilityEvidence $evidence)
     {
         Gate::authorize('approve-reliability');
+        $period = ReliabilityPeriod::fromReport($snapshot->report);
+        abort_unless($period->storageReady('reliability_approvals'), 503, 'Penyimpanan pengesahan untuk periode ini belum diaktifkan.');
         abort_unless(Schema::hasTable('reliability_approvals'), 503, 'Penyimpanan pengesahan belum dimigrasikan.');
         $data = $request->validate(['request_key' => ['required', 'uuid'], 'decision' => ['required', Rule::in(['approved', 'revoked'])],
             'previous_revision' => ['required', 'integer', 'min:0'], 'calculation_hash' => ['required', 'string', 'size:64'],
@@ -30,10 +33,10 @@ class ReliabilityApprovalController extends Controller
 
             return redirect()->route('reliability.snapshots.show', $snapshot)->with('status', 'Keputusan ini sudah tersimpan sekali.');
         }
-        DB::transaction(function () use ($request, $snapshot, $data, $evidence) {
+        DB::transaction(function () use ($request, $snapshot, $data, $evidence, $period) {
             // SQLite IMMEDIATE transaction serializes the decision with local
             // event/review/log/method edits. No source HTTP runs under this lock.
-            $latest = ReliabilityApproval::where('asset_ref', $snapshot->asset_ref)->where('year', $snapshot->year)->latest('revision')->first();
+            $latest = $period->constrain(ReliabilityApproval::where('asset_ref', $snapshot->asset_ref))->latest('revision')->first();
             if (($latest?->revision ?? 0) !== (int) $data['previous_revision']) {
                 throw ValidationException::withMessages(['previous_revision' => 'Keputusan lebih baru sudah ada. Buka ulang snapshot sebelum bertindak.']);
             }
@@ -41,7 +44,7 @@ class ReliabilityApprovalController extends Controller
             if (! $saved || ! hash_equals($saved['calculation_hash'], $data['calculation_hash'])) {
                 throw ValidationException::withMessages(['calculation_hash' => 'Snapshot tidak memiliki engine/basis yang cocok. Buat snapshot pilot baru.']);
             }
-            $current = $evidence->localApprovalReport($snapshot->asset_ref, $snapshot->year);
+            $current = $evidence->localApprovalReport($snapshot->asset_ref, $period);
             $values = [];
             if ($data['decision'] === 'approved') {
                 if (! hash_equals($saved['calculation_hash'], $current['calculation']['calculation_hash'])) {
@@ -58,7 +61,7 @@ class ReliabilityApprovalController extends Controller
                     throw ValidationException::withMessages(['decision' => 'Hanya keputusan pengesahan terakhir untuk snapshot ini yang dapat dicabut.']);
                 }
             }
-            ReliabilityApproval::create(['asset_ref' => $snapshot->asset_ref, 'year' => $snapshot->year, 'revision' => ($latest?->revision ?? 0) + 1,
+            ReliabilityApproval::create(['asset_ref' => $snapshot->asset_ref, 'year' => $snapshot->year, ...$period->attributes(), 'revision' => (ReliabilityApproval::where('asset_ref', $snapshot->asset_ref)->where('year', $snapshot->year)->max('revision') ?? 0) + 1,
                 'reliability_snapshot_id' => $snapshot->id, 'created_by' => $request->user()->id, 'actor_role' => 'SUPERVISOR',
                 'request_key' => $data['request_key'], 'decision' => $data['decision'], 'metrics' => $data['decision'] === 'approved' ? array_values($data['metrics']) : $latest->metrics,
                 'engine_version' => $saved['engine_version'], 'policy_id' => $saved['policy_id'], 'policy_revision' => $saved['policy_revision'],
@@ -73,7 +76,7 @@ class ReliabilityApprovalController extends Controller
     public function download(ReliabilitySnapshot $snapshot, ReliabilityEvidence $evidence, ReliabilityMart $mart, ReliabilityApprovalStatus $status)
     {
         abort_unless(Schema::hasTable('reliability_approvals'), 503);
-        $current = $evidence->report($snapshot->asset_ref, $snapshot->year, $mart);
+        $current = $evidence->report($snapshot->asset_ref, ReliabilityPeriod::fromReport($snapshot->report), $mart);
         $packet = ['schema_version' => 'nadi.supervisor-approval.v1', 'checked_at' => now()->toIso8601String(), 'snapshot_id' => $snapshot->id,
             'snapshot_evidence_hash' => $snapshot->evidence_hash, 'status' => $status->current($current, $snapshot),
             'decisions' => ReliabilityApproval::where('reliability_snapshot_id', $snapshot->id)->orderBy('revision')->get()->toArray(),

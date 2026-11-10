@@ -21,6 +21,7 @@ use App\Http\Controllers\PdmInspectionPlanController;
 use App\Http\Controllers\PdmTrendController;
 use App\Http\Controllers\ReliabilityApprovalController;
 use App\Http\Controllers\ReliabilityController;
+use App\Http\Controllers\ReliabilityIntakeController;
 use App\Http\Controllers\ReliabilityPolicyController;
 use App\Http\Controllers\ReliabilityReviewController;
 use App\Http\Controllers\SessionController;
@@ -42,6 +43,10 @@ Route::middleware(['auth', 'current-account'])->group(function () {
     Route::post('/asset-wellness/policy', [AssetWellnessPolicyController::class, 'store'])->name('wellness.policy.store');
     Route::get('/asset-wellness', [AssetWellnessController::class, 'index'])->name('wellness.index');
     Route::get('/reliability', [ReliabilityController::class, 'index'])->name('reliability.index');
+    Route::get('/reliability/intake', [ReliabilityIntakeController::class, 'index'])->name('reliability.intake');
+    Route::post('/reliability/intake/preview', [ReliabilityIntakeController::class, 'preview'])->name('reliability.intake.preview');
+    Route::post('/reliability/intake/draft', [ReliabilityIntakeController::class, 'draft'])->name('reliability.intake.draft');
+    Route::get('/reliability/intake/template.csv', [ReliabilityIntakeController::class, 'template'])->name('reliability.intake.template');
     Route::post('/reliability/snapshots/{snapshot}/approval', [ReliabilityApprovalController::class, 'store'])->name('reliability.approvals.store');
     Route::get('/reliability/snapshots/{snapshot}/approval.json', [ReliabilityApprovalController::class, 'download'])->name('reliability.approvals.download');
     Route::get('/reliability/calculation', [ReliabilityController::class, 'calculation'])->name('reliability.calculation');

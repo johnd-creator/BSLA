@@ -14,10 +14,32 @@ use Throwable;
 
 class ActionBoardController extends Controller
 {
+    public const FOLLOW_UP_TARGETS = ['overdue' => 'Terlambat', 'today' => 'Jatuh tempo hari ini', 'upcoming' => 'Akan datang', 'undated' => 'Tanpa target'];
+
     public function __invoke(Request $request, ReliabilityMart $mart)
     {
-        $query = $request->validate(['window_days' => ['nullable', Rule::in([30, 90, 180])], 'candidate_offset' => ['nullable', 'integer', 'between:0,1000000'], 'priority_status' => ['nullable', Rule::in(array_keys(AssetPriority::STATUSES))], 'backlog_offset' => ['sometimes', 'integer', 'min:0', 'max:1000000'], 'follow_up_status' => ['nullable', Rule::in(array_keys(InspectionDraft::FOLLOW_UP_STATUSES))]]);
+        $query = $request->validate(['candidate_page' => ['nullable', 'integer', 'between:1,100000'], 'follow_up_target' => ['nullable', Rule::in(array_keys(self::FOLLOW_UP_TARGETS))], 'follow_up_page' => ['nullable', 'integer', 'between:1,100000'], 'priority_page' => ['nullable', 'integer', 'between:1,100000'], 'window_days' => ['nullable', Rule::in([30, 90, 180])], 'candidate_offset' => ['nullable', 'integer', 'between:0,1000000'], 'priority_status' => ['nullable', Rule::in(array_keys(AssetPriority::STATUSES))], 'backlog_offset' => ['sometimes', 'integer', 'min:0', 'max:1000000'], 'follow_up_status' => ['nullable', Rule::in(array_keys(InspectionDraft::FOLLOW_UP_STATUSES))]]);
+        $today = now('Asia/Jakarta')->toDateString();
+        $pending = InspectionDraft::query()->whereNotNull('recommendation')->where('recommendation', '!=', '')
+            ->whereIn('follow_up_status', ['open', 'in_progress']);
+        $followUpSummary = ['pending' => (clone $pending)->count(),
+            'overdue' => (clone $pending)->whereDate('target_completion', '<', $today)->count(),
+            'today' => (clone $pending)->whereDate('target_completion', '=', $today)->count(),
+            'upcoming' => (clone $pending)->whereDate('target_completion', '>', $today)->count(),
+            'undated' => (clone $pending)->whereNull('target_completion')->count()];
+        $targetLabels = self::FOLLOW_UP_TARGETS;
+        $boardQuery = array_filter($query, fn ($value) => $value !== null && $value !== '');
+        $otherBoardFilters = array_diff_key($boardQuery, array_flip(['follow_up_status', 'follow_up_target', 'follow_up_page']));
         $followUps = InspectionDraft::with(['author:id,name', 'pdmActivity', 'pdmReviewAudit'])->whereNotNull('recommendation')->where('recommendation', '!=', '');
+        if (! empty($query['follow_up_target'])) {
+            $followUps->whereIn('follow_up_status', ['open', 'in_progress']);
+            match ($query['follow_up_target']) {
+                'overdue' => $followUps->whereDate('target_completion', '<', $today),
+                'today' => $followUps->whereDate('target_completion', '=', $today),
+                'upcoming' => $followUps->whereDate('target_completion', '>', $today),
+                'undated' => $followUps->whereNull('target_completion'),
+            };
+        }
         if (! empty($query['follow_up_status'])) {
             $followUps->where('follow_up_status', $query['follow_up_status']);
         }
@@ -49,6 +71,6 @@ class ActionBoardController extends Controller
         )->get()->keyBy('inspection_draft_id');
         $effectiveness = app(ActionEffectiveness::class);
 
-        return view('action-board', compact('effectivenessReviews', 'effectiveness', 'backlog', 'followUps', 'priorities', 'candidates', 'windowDays', 'repeat', 'unlinkedPdm'));
+        return view('action-board', compact('today', 'followUpSummary', 'targetLabels', 'boardQuery', 'otherBoardFilters', 'effectivenessReviews', 'effectiveness', 'backlog', 'followUps', 'priorities', 'candidates', 'windowDays', 'repeat', 'unlinkedPdm'));
     }
 }

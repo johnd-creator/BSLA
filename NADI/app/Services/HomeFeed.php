@@ -25,7 +25,7 @@ class HomeFeed
                 ->orderBy('id')->limit(6)->get());
             $followUps = $this->read(fn () => InspectionDraft::query()->whereNotNull('recommendation')->where('recommendation', '!=', '')
                 ->whereIn('follow_up_status', ['open', 'in_progress'])->whereNotNull('target_completion')
-                ->where('target_completion', '<=', today()->addDays(7)->endOfDay())->orderBy('target_completion')->orderBy('id')->limit(4)
+                ->whereDate('target_completion', '<=', now('Asia/Jakarta')->addDays(7)->toDateString())->orderBy('target_completion')->orderBy('id')->limit(4)
                 ->get(['id', 'asset_ref', 'target_completion', 'follow_up_status']));
             $candidates = $this->read(fn () => app(AssetAttention::class)->query()->limit(5)->get());
             $activities = $this->read(fn () => $this->activities($filters));

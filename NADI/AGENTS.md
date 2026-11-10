@@ -44,7 +44,7 @@ build`), not a separate Vite server under the current strict CSP.
 
 - ADMIN manages only local accounts; it does not inherit ENGINEER write rights.
   ENGINEER can create and edit only its own engineering records. SUPERVISOR may
-  approve/revoke Reliability method and selected KPI results for an exact asset/year
+  approve/revoke Reliability method and selected KPI results for an exact asset/period
   immutable snapshot (explicit user direction, 2026-11-09). It cannot edit engineer
   evidence or approve WO/budget/risk. MANAGER remains read-only. ADMIN-only has no
   engineering or Reliability approval rights. Multi-role rights are explicit.

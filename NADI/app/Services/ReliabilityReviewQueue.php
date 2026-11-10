@@ -10,7 +10,7 @@ class ReliabilityReviewQueue
 
     public const STATES = ['all' => 'Semua status', 'needs_review' => 'Perlu diperiksa', 'unreviewed' => 'Belum direview', 'stale' => 'Review kedaluwarsa', 'uncertain' => 'Belum dipastikan', 'conflict' => 'Interval konflik', 'failure' => 'Kehilangan fungsi · review lokal', 'not_failure' => 'Bukan failure aset ini', 'duplicate' => 'Duplikat', 'voided' => 'Dibatalkan'];
 
-    public const PERIODS = ['all' => 'Semua periode', 'in_year' => 'Tahun dipilih', 'unknown_year' => 'Tanpa tahun', 'out_of_year' => 'Di luar tahun dipilih'];
+    public const PERIODS = ['all' => 'Semua periode', 'in_year' => 'Periode dipilih', 'unknown_year' => 'Tanpa tahun', 'out_of_year' => 'Di luar periode dipilih'];
 
     // This is a display-only projection. Never filter the evidence report used
     // for sample arithmetic, quality totals, downloads, hashes or snapshots.

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\AssetWellness;
 use App\Services\ReliabilityMart;
+use App\Services\ReliabilityPeriod;
 use Illuminate\Http\Request;
 
 class AssetWellnessController extends Controller
@@ -15,9 +16,10 @@ class AssetWellnessController extends Controller
             'year' => ['nullable', 'integer', 'between:1900,'.now('Asia/Jakarta')->year],
         ]);
         $assetRef = $filters['asset_ref'] ?? null;
-        $year = (int) ($filters['year'] ?? now('Asia/Jakarta')->year);
-        $report = $assetRef ? $wellness->report($assetRef, $year, $mart) : null;
+        $period = ReliabilityPeriod::fromRequest($request);
+        $year = $period->start->year;
+        $report = $assetRef ? $wellness->report($assetRef, $period, $mart) : null;
 
-        return response()->view('wellness.index', compact('assetRef', 'year', 'report'))->header('Cache-Control', 'no-store, private');
+        return response()->view('wellness.index', compact('assetRef', 'year', 'period', 'report'))->header('Cache-Control', 'no-store, private');
     }
 }

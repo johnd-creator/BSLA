@@ -88,3 +88,34 @@ A scoped publication audit found no credential/private-source patterns or binary
 data in the selected changes. Ten catalog/mapping/ignore/fixture boundary files
 match the main baseline exactly. These checks reduce publication risk; they do not
 replace operational security review, engineering acceptance or deployment QA.
+
+## Workflow and exact-period source integration, 10 November 2026
+
+This publication branch starts at current main after PR #135. It selectively adds
+Operations draft navigation, plan-guided PdM measurement forms, follow-up date
+filters, flexible Reliability/Wellness periods, bounded evidence intake and the
+read-only Wellness completeness matrix. Annual governance remains separate from
+exact ranges. Wellness scores remain null; draft completeness is not health.
+
+Main's private input configuration, missing-catalog notice, synthetic fixtures,
+existing collector/backend changes and replay safety are retained. New PdM tests
+use the public synthetic catalog. Workbooks, derived catalogs, source examples,
+private runtime locks, databases and the old branch's unrelated changes are not
+included. The active development checkout remains unchanged. Migration definitions
+are published only; no live migration, source acquisition, merge or deployment
+was performed.
+
+Verified against the integrated publication tree:
+
+- 1,139 Laravel tests / 16,152 assertions passed with in-memory SQLite and HTTP mocks.
+- 82 frontend tests, Pint, Composer validation/platform requirements and Vite build passed.
+- 18 offline runtime-boundary tests and 16 simulation-only historian tests passed.
+- Changed-document links and whitespace checks passed.
+- A scoped file/pattern audit found no private source examples, credential patterns
+  or binary data in selected changes. Ten catalog/mapping/ignore/fixture boundary
+  files match the main baseline byte-for-byte.
+
+No fresh browser visual acceptance was run for this publication. These local
+checks do not establish field mapping, engineering acceptance or production
+readiness. The existing GitHub workflows run for pull requests and main, not
+ordinary feature-branch pushes; a branch push alone does not imply CI acceptance.

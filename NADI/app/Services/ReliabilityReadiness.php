@@ -11,6 +11,7 @@ class ReliabilityReadiness
     {
         $rules = $policy?->rules ?? [];
         $q = $report['quality'];
+        $range = ($report['period']['kind'] ?? 'year') !== 'year';
         $common = [];
         if (($rules['status'] ?? null) !== 'reviewed_local') {
             $common[] = 'LOCAL_METHOD_NOT_REVIEWED';
@@ -76,11 +77,11 @@ class ReliabilityReadiness
         } elseif ($exposure['coverage_percent'] === null || $exposure['coverage_percent'] < (float) $rules['minimum_coverage']) {
             $mtbf[] = 'OPERATING_COVERAGE_BELOW_RULE';
         }
-        if (! $report['period']['is_closed_calendar_year']) {
-            $mtbf[] = 'FULL_CALENDAR_YEAR_NOT_CLOSED';
+        if (! ($range ? $report['period']['is_closed_period'] : $report['period']['is_closed_calendar_year'])) {
+            $mtbf[] = $range ? 'SELECTED_PERIOD_NOT_CLOSED' : 'FULL_CALENDAR_YEAR_NOT_CLOSED';
         }
         if ($policy && CarbonImmutable::parse($rules['failure_scope_checked_at'] ?? $policy->created_at)->lt(CarbonImmutable::parse($report['period']['end_exclusive']))) {
-            $mtbf[] = 'FAILURE_CENSUS_DOES_NOT_COVER_FULL_YEAR';
+            $mtbf[] = $range ? 'FAILURE_CENSUS_DOES_NOT_COVER_SELECTED_PERIOD' : 'FAILURE_CENSUS_DOES_NOT_COVER_FULL_YEAR';
         }
         if ($exposure['truncated']) {
             $mtbf[] = 'OPERATING_LOG_LIMIT_REACHED';
@@ -139,7 +140,7 @@ class ReliabilityReadiness
         };
         $status = fn ($blockers) => ['status' => $blockers ? 'INSUFFICIENT_LOCAL_EVIDENCE' : 'LOCAL_EVIDENCE_READY', 'blockers' => array_values(array_unique($blockers))];
 
-        return ['recurrence_event_ids' => array_values(array_unique($recurrenceIds)), 'method_version' => ReliabilityPolicy::SCHEMA, 'policy' => $policy ? ['id' => $policy->id, 'revision' => $policy->revision, 'actor_id' => $policy->created_by, 'created_at' => $policy->created_at->toIso8601String(), 'rules' => $rules, 'evidence' => $policy->evidence, 'reason' => $policy->reason] : null,
+        return ['recurrence_event_ids' => array_values(array_unique($recurrenceIds)), 'method_version' => $range ? ReliabilityPolicy::RANGE_SCHEMA : ReliabilityPolicy::SCHEMA, 'policy' => $policy ? ['id' => $policy->id, 'revision' => $policy->revision, 'actor_id' => $policy->created_by, 'created_at' => $policy->created_at->toIso8601String(), 'rules' => $rules, 'evidence' => $policy->evidence, 'reason' => $policy->reason] : null,
             'mtbf' => [...$status($mtbf), 'eligible_operating_seconds' => $exposureSeconds, 'reviewed_failure_count' => $q['failure']],
             'mttr' => [...$status($mttr), 'basis' => $rules['mttr_basis'] ?? 'undecided', 'operating_exposure_required' => false],
             'active_repair' => $status($active), 'restoration' => $status($restoration),
@@ -148,6 +149,6 @@ class ReliabilityReadiness
                 'checked_at' => $rules['failure_scope_checked_at'] ?? null,
             ],
             'official_kpi' => ['status' => 'REQUIRES_SUPERVISOR_DECISION', 'blockers' => ['SUPERVISOR_APPROVAL_REQUIRED']],
-            'meaning' => 'Readiness is local evidence sufficiency, not organizational approval. Failure census attestation is separate from operating-state coverage. WO/historian availability is not an MTTR gate. Full annual MTBF requires complete non-conflicting exposure, never calendar extrapolation.'];
+            'meaning' => ($range ? 'Exact range method and attestation; no annual attestation is inherited. ' : '').'Readiness is local evidence sufficiency, not organizational approval. Failure census attestation is separate from operating-state coverage. WO/historian availability is not an MTTR gate. Full annual MTBF requires complete non-conflicting exposure, never calendar extrapolation.'];
     }
 }

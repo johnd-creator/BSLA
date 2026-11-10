@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\InspectionDraft;
 use App\Models\PdmActivity;
+use App\Models\PdmInspectionPlan;
 use App\Services\PdmFormCatalog;
 use App\Services\PdmLogbook;
+use App\Services\PdmTrend;
 use App\Services\ReliabilityMart;
 use App\Services\WorkspaceActivityLog;
 use Carbon\CarbonImmutable;
@@ -47,7 +49,25 @@ class PdmActivityController extends Controller
     public function create(Request $request, ReliabilityMart $mart, PdmFormCatalog $catalog)
     {
         Gate::authorize('write-pdm-activities');
-        $filters = $request->validate(['q' => ['nullable', 'string', 'max:120'], 'offset' => ['sometimes', 'integer', 'min:0', 'max:1000000'], 'asset_ref' => ['nullable', 'string', 'max:240', 'not_regex:/[\\\\\/]/'], 'template_id' => ['nullable', 'string', 'max:100']]);
+        $filters = $request->validate(['plan_id' => ['nullable', 'integer', 'min:1'], 'q' => ['nullable', 'string', 'max:120'], 'offset' => ['sometimes', 'integer', 'min:0', 'max:1000000'], 'asset_ref' => ['nullable', 'string', 'max:240', 'not_regex:/[\\\\\/]/'], 'template_id' => ['nullable', 'string', 'max:100']]);
+        $planContext = ! empty($filters['plan_id']) ? PdmInspectionPlan::findOrFail($filters['plan_id']) : null;
+        if ($planContext) {
+            foreach (['asset_ref', 'template_id'] as $key) {
+                if (! empty($filters[$key]) && $filters[$key] !== $planContext->$key) {
+                    throw ValidationException::withMessages([$key => 'Pilihan tidak sama dengan rencana inspeksi. Buka kembali rencana yang dimaksud.']);
+                }
+                $filters[$key] = $planContext->$key;
+            }
+            $template = collect($catalog->all())->firstWhere('id', $planContext->template_id);
+            if (! $template || ($template['preview_only'] ?? true)
+                || ! hash_equals($planContext->template_fingerprint, $catalog->fingerprint($template))
+                || $planContext->template_snapshot !== $catalog->snapshot($template)
+                || $planContext->method !== $template['method'] || ! $planContext->point()) {
+                return response()->view('pdm.plan-template-changed', ['plan' => $planContext], 409);
+            }
+        } else {
+            $template = ! empty($filters['template_id']) ? $catalog->find($filters['template_id']) : null;
+        }
         $asset = null;
         $page = null;
         $unavailable = false;
@@ -60,15 +80,23 @@ class PdmActivityController extends Controller
         } catch (Throwable) {
             $unavailable = true;
         }
-        $template = ! empty($filters['template_id']) ? $catalog->find($filters['template_id']) : null;
         // Keep a rejected submission editable during a Mart outage. Do not replace
         // its identity with sample data; saving still requires a fresh Mart check.
         $recoveringInput = $unavailable && $template
             && $request->old('asset_ref') === ($filters['asset_ref'] ?? null)
             && $request->old('template_id') === $template['id']
             && $request->old('template_fingerprint') === $catalog->fingerprint($template);
-        if (($asset || $recoveringInput) && $template && ! ($template['preview_only'] ?? true) && count($template['fields'])) {
-            return view('pdm.form', ['activity' => new PdmActivity(['asset_ref' => $asset['canonical_id'] ?? $filters['asset_ref']]), 'asset' => $asset, 'template' => $template, 'fingerprint' => $catalog->fingerprint($template), 'requestKey' => (string) Str::uuid(), 'unavailable' => $unavailable]);
+        if (($asset || $recoveringInput || $planContext) && $template && ! ($template['preview_only'] ?? true) && count($template['fields'])) {
+            // A plan supplies editable context, never a measured value, date, or proof of coverage.
+            $initial = ['asset_ref' => $asset['canonical_id'] ?? $filters['asset_ref']];
+            if ($planContext) {
+                $initial += $planContext->only(['title', ...PdmTrend::CONTEXT]);
+                $initial['readings'] = [$planContext->point_key => ['value' => null, 'unit' => $planContext->unit]];
+            }
+
+            return view('pdm.form', ['activity' => new PdmActivity($initial), 'asset' => $asset, 'template' => $template,
+                'fingerprint' => $catalog->fingerprint($template), 'requestKey' => (string) Str::uuid(),
+                'unavailable' => $unavailable, 'planContext' => $planContext]);
         }
 
         return view('pdm.choose', compact('asset', 'page', 'unavailable', 'template') + ['templates' => $asset ? $catalog->forAsset($asset['canonical_id']) : []]);

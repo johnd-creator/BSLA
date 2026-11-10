@@ -9,6 +9,8 @@ class ReliabilityPolicy extends Model
 {
     public const SCHEMA = 'local-kpi-policy-v1';
 
+    public const RANGE_SCHEMA = 'local-kpi-policy-period-v1';
+
     public $timestamps = false;
 
     protected $guarded = ['id'];

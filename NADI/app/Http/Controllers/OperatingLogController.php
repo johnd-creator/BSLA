@@ -6,6 +6,7 @@ use App\Models\OperatingLog;
 use App\Models\OperatingLogRevision;
 use App\Services\OperatingExposure;
 use App\Services\ReliabilityMart;
+use App\Services\ReliabilityPeriod;
 use App\Services\ReliabilityTiming;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,10 +22,11 @@ class OperatingLogController extends Controller
     {
         $data = $this->scope($request);
         $asset = $data['asset_ref'];
-        $year = (int) ($data['year'] ?? now('Asia/Jakarta')->year);
+        $period = ReliabilityPeriod::fromRequest($request);
+        $year = $period->start->year;
 
-        return view('reliability.operating-index', ['assetRef' => $asset, 'year' => $year, 'coverage' => $exposure->report($asset, $year),
-            'logs' => OperatingLog::where('asset_ref', $asset)->with(['latestRevision', 'author:id,name'])->latest('id')->paginate(20)->withQueryString()]);
+        return view('reliability.operating-index', ['assetRef' => $asset, 'year' => $year, 'period' => $period, 'coverage' => $exposure->report($asset, $period),
+            'logs' => OperatingLog::where('asset_ref', $asset)->with(['latestRevision', 'author:id,name'])->latest('id')->paginate(20)->appends(['asset_ref' => $asset, ...$period->query()])]);
     }
 
     public function create(Request $request)

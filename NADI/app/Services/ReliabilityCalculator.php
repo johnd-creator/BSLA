@@ -112,6 +112,13 @@ class ReliabilityCalculator
                 'active_intervals' => $event['active_intervals'], 'required_function' => $event['required_function'],
                 'evidence' => $event['evidence'], 'timing_evidence' => $event['timing_evidence'], 'work_orders' => $event['work_orders']];
         }
+        if (($report['period']['kind'] ?? 'year') !== 'year') {
+            foreach ($events as &$row) {
+                $row['period_month'] = $row['onset'] && $row['month'] !== null ? CarbonImmutable::parse($row['onset'])->setTimezone(ReliabilityEvidence::ZONE)->format('Y-m') : null;
+                $row['exclusion_reasons'] = array_map(fn ($reason) => $reason === 'OUTSIDE_ONSET_YEAR' ? 'OUTSIDE_ONSET_PERIOD' : $reason, $row['exclusion_reasons']);
+            }
+            unset($row);
+        }
         $operatingSeconds = 0;
         $segmentInvalid = false;
         $periodStart = CarbonImmutable::parse($report['period']['start_inclusive'])->timestamp;
@@ -143,7 +150,11 @@ class ReliabilityCalculator
         }
         unset($event);
         $segmentInvalid = $segmentInvalid || $previousEnd !== $periodEnd;
-        $methodInvalid = $policy && ($rules['schema_version'] ?? null) !== ReliabilityPolicy::SCHEMA;
+        $expectedSchema = ($report['period']['kind'] ?? 'year') === 'year' ? ReliabilityPolicy::SCHEMA : ReliabilityPolicy::RANGE_SCHEMA;
+        $methodInvalid = $policy && ($rules['schema_version'] ?? null) !== $expectedSchema;
+        if (($report['period']['kind'] ?? 'year') !== 'year' && $policy && (($rules['period_key'] ?? null) !== ReliabilityPeriod::fromReport($report)->key())) {
+            $methodInvalid = true;
+        }
         $shared = [...$invalid, ...($methodInvalid ? ['UNSUPPORTED_METHOD_VERSION'] : [])];
         $metric = function (string $basis, ?int $seconds, array $ids, array $blockers, string $formula) use ($shared): array {
             $blockers = array_values(array_unique([...$blockers, ...$shared, ...($seconds === null ? ['NUMERATOR_NOT_AVAILABLE'] : []), ...(! $ids ? ['NO_ELIGIBLE_DENOMINATOR'] : [])]));

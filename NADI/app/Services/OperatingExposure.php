@@ -10,10 +10,11 @@ class OperatingExposure
 {
     public const LIMIT = 5000;
 
-    public function report(string $asset, int $year): array
+    public function report(string $asset, int|ReliabilityPeriod $year): array
     {
-        $start = CarbonImmutable::create($year, 1, 1, 0, 0, 0, ReliabilityEvidence::ZONE)->timestamp;
-        $end = CarbonImmutable::create($year + 1, 1, 1, 0, 0, 0, ReliabilityEvidence::ZONE)->timestamp;
+        $period = $year instanceof ReliabilityPeriod ? $year : ReliabilityPeriod::year($year);
+        $start = $period->start->timestamp;
+        $end = $period->end->timestamp;
         $logs = Schema::hasTable('operating_logs') ? OperatingLog::where('asset_ref', $asset)->with('latestRevision')->orderBy('id')->limit(self::LIMIT + 1)->get() : collect();
         $truncated = $logs->count() > self::LIMIT;
         $rows = $changes = [];
@@ -74,6 +75,6 @@ class OperatingExposure
             'known_seconds' => $truncated || ! $hasVerified ? null : $known,
             'coverage_percent' => $truncated || ! $hasVerified ? null : round($known / ($end - $start) * 100, 6),
             'quality' => $quality, 'records' => $rows, 'segments' => $segments,
-            'meaning' => 'Exact asset, clipped half-open annual window. Known coverage excludes UNKNOWN, gaps and all overlaps. RUN only is observed operating exposure; no extrapolation. Draft/voided records excluded.'];
+            'meaning' => 'Exact asset, clipped half-open '.($period->annual ? 'annual' : 'selected').' window. Known coverage excludes UNKNOWN, gaps and all overlaps. RUN only is observed operating exposure; no extrapolation. Draft/voided records excluded.'];
     }
 }

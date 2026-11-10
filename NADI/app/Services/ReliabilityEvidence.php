@@ -8,7 +8,6 @@ use App\Models\ReliabilityPolicy;
 use App\Models\ReliabilityReview;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Throwable;
 
 class ReliabilityEvidence
@@ -17,7 +16,7 @@ class ReliabilityEvidence
 
     public const LIMIT = 2000;
 
-    public function report(string $asset, int $year, ReliabilityMart $mart): array
+    public function report(string $asset, int|ReliabilityPeriod $year, ReliabilityMart $mart): array
     {
         $identity = $wo = null;
         try {
@@ -51,15 +50,17 @@ class ReliabilityEvidence
         }
     }
 
-    private function localReport(string $asset, int $year, ?array $identity, ?array $wo): array
+    private function localReport(string $asset, int|ReliabilityPeriod $year, ?array $identity, ?array $wo): array
     {
+        $period = $year instanceof ReliabilityPeriod ? $year : ReliabilityPeriod::year($year);
+        $year = $period->start->year;
         $events = AssetDisruption::forAsset($asset)->with(['members', 'workOrders'])->orderBy('id')->limit(self::LIMIT + 1)->get();
         $truncated = $events->count() > self::LIMIT;
         $events = $events->take(self::LIMIT);
         $latestIds = ReliabilityReview::where('asset_ref', $asset)->whereIn('asset_disruption_id', $events->pluck('id'))->selectRaw('MAX(id) as id')->groupBy('asset_disruption_id')->pluck('id');
         $reviews = ReliabilityReview::whereIn('id', $latestIds)->get()->keyBy('asset_disruption_id');
-        $start = CarbonImmutable::create($year, 1, 1, 0, 0, 0, self::ZONE);
-        $end = $start->addYear();
+        $start = $period->start;
+        $end = $period->end;
         $rows = [];
         $quality = array_fill_keys(['all_local_observations', 'in_year', 'unknown_year', 'out_of_year', 'voided', 'unreviewed', 'stale', 'uncertain', 'failure', 'not_failure', 'duplicate', 'date_only', 'missing_failure_time', 'restoration_complete', 'restoration_missing', 'repair_complete', 'repair_ongoing', 'repair_unknown', 'repair_not_applicable', 'cross_year_restoration', 'conflicting_intervals'], 0);
         $active = $restoration = $allRestoration = $allRepair = [];
@@ -69,7 +70,7 @@ class ReliabilityEvidence
             $currentFailure = $state === 'failure';
             $basis = $currentFailure && $review->failure_at ? 'REVIEWED_FAILURE_ONSET' : ($event->occurred_at ? 'OBSERVATION_INSTANT' : ($event->occurred_on ? 'OBSERVATION_LITERAL_DATE' : 'UNKNOWN'));
             $date = $currentFailure && $review->failure_at ? $review->failure_at->setTimezone(self::ZONE)->format('Y-m-d') : ($event->occurred_at?->setTimezone(self::ZONE)->format('Y-m-d') ?? $event->occurred_on);
-            $inYear = $date !== null && substr($date, 0, 4) === (string) $year;
+            $inYear = $period->containsDate($date);
             $quality['all_local_observations']++;
             if ($state === 'voided') {
                 $quality['voided']++;
@@ -147,28 +148,28 @@ class ReliabilityEvidence
 
             return ['value' => ! $truncated && count($eligible) ? round($seconds / count($eligible) / 3600, 6) : null, 'unit' => 'hours', 'status' => $truncated ? 'PARTIAL' : (count($eligible) ? 'REVIEWED_LOCAL_SAMPLE_ONLY' : 'NOT_AVAILABLE'), 'numerator_seconds' => $truncated || ! count($eligible) ? null : $seconds, 'denominator_completed_episodes' => count($eligible), 'excluded_overlap_episodes' => count($excluded), 'event_ids' => array_column($eligible, 'event_id')];
         };
-        $pdm = PdmActivity::where('asset_ref', $asset)->whereBetween('measured_on', [$year.'-01-01', $year.'-12-31']);
+        $pdm = PdmActivity::where('asset_ref', $asset)->whereBetween('measured_on', [$start->toDateString(), $end->subDay()->toDateString()]);
         $pdmData = ['count' => (clone $pdm)->count(), 'date_only' => (clone $pdm)->where('time_precision', 'date')->count(), 'linked_analysis' => (clone $pdm)->whereHas('inspection')->count(), 'date_basis' => 'MEASURED_LITERAL_DATE', 'meaning' => 'Local measurements, not failure or continuous operating exposure'];
         $fingerprint = hash_init('sha256');
         foreach ((clone $pdm)->with('inspection')->orderBy('id')->lazyById(200) as $activity) {
             hash_update($fingerprint, json_encode([$activity->id, $activity->version, $activity->updated_at, $activity->inspection?->id, $activity->inspection?->version, $activity->inspection?->updated_at], JSON_THROW_ON_ERROR));
         }
         $pdmData['evidence_hash'] = hash_final($fingerprint);
-        $woYear = $wo ? (collect($wo['years'])->firstWhere('year', $year) ?? ['year' => $year, 'work_orders' => 0, 'work_types' => [], 'statuses' => []]) : null;
+        $woYear = $wo && $period->annual ? (collect($wo['years'])->firstWhere('year', $year) ?? ['year' => $year, 'work_orders' => 0, 'work_types' => [], 'statuses' => []]) : null;
         $report = [
-            'schema_version' => 'nadi.reliability-evidence.v1', 'rule_version' => ReliabilityReview::RULE, 'observed_at' => now()->toIso8601String(),
+            'schema_version' => $period->annual ? 'nadi.reliability-evidence.v1' : 'nadi.reliability-evidence.v2', 'rule_version' => ReliabilityReview::RULE, 'observed_at' => now()->toIso8601String(),
             'asset_ref' => $asset, 'asset' => $identity ? array_intersect_key($identity, array_flip(['canonical_id', 'source_asset_number', 'description', 'registered', 'hierarchy_category'])) : null,
-            'period' => ['year' => $year, 'timezone' => self::ZONE, 'start_inclusive' => $start->toIso8601String(), 'end_exclusive' => $end->toIso8601String(), 'is_closed_calendar_year' => $end->lte(now()), 'episode_basis' => 'Reviewed failure onset when known; otherwise observation date for review queue. Full completed episode belongs to onset year, never clipped or double-counted in later year.'],
+            'period' => $period->metadata(),
             'population' => 'Exact asset only; no hierarchy propagation or sum across assets', 'source_freshness' => 'UNKNOWN',
             'coverage' => ['local_rows_truncated' => $truncated, 'observation_coverage' => 'UNKNOWN', 'operating_seconds' => null, 'covered_seconds' => null, 'coverage_percent' => null, 'historian' => 'NOT_INTEGRATED', 'manual_operating_evidence' => 'NOT_RECORDED'],
             'metrics' => ['mtbf' => ['value' => null, 'unit' => 'hours', 'status' => 'NOT_READY'], 'mttr' => ['value' => null, 'unit' => 'hours', 'status' => 'NOT_READY'], 'availability' => ['value' => null, 'unit' => 'percent', 'status' => 'NOT_READY']],
             'reviewed_samples' => ['mean_active_repair' => $sample($active), 'mean_restoration' => $sample($restoration)],
             'quality' => $quality, 'blockers' => $blockers, 'overlap_event_ids' => $overlap,
-            'work_orders' => ['state' => $wo ? 'RETAINED_MART_CONTEXT' : 'UNAVAILABLE', 'date_basis' => 'ACTUAL_START', 'timezone' => self::ZONE, 'selected_year' => $woYear, 'all_year_counts' => $wo['counts'] ?? null, 'meaning' => 'WO identities, not failure occurrences. Actual elapsed and labor are not repair duration.'],
+            'work_orders' => ['state' => ! $wo ? 'UNAVAILABLE' : ($period->annual ? 'RETAINED_MART_CONTEXT' : 'RANGE_AGGREGATE_NOT_AVAILABLE'), 'date_basis' => 'ACTUAL_START', 'timezone' => self::ZONE, 'selected_year' => $woYear, 'all_year_counts' => $wo['counts'] ?? null, 'meaning' => 'WO identities, not failure occurrences. Actual elapsed and labor are not repair duration.'],
             'pdm' => $pdmData, 'events' => $rows,
         ];
-        $exposure = app(OperatingExposure::class)->report($asset, $year);
-        $policy = Schema::hasTable('reliability_policies') ? ReliabilityPolicy::where('asset_ref', $asset)->where('year', $year)->latest('revision')->first() : null;
+        $exposure = app(OperatingExposure::class)->report($asset, $period);
+        $policy = $period->storageReady('reliability_policies') ? $period->constrain(ReliabilityPolicy::where('asset_ref', $asset))->latest('revision')->first() : null;
         $report['manual_operating'] = $exposure;
         $report['coverage']['manual_operating_evidence'] = $exposure['status'];
         $report['coverage']['operating_seconds'] = $exposure['operating_seconds'];
@@ -186,7 +187,7 @@ class ReliabilityEvidence
         return app(ReliabilityApprovalStatus::class)->apply($report);
     }
 
-    public function localApprovalReport(string $asset, int $year): array
+    public function localApprovalReport(string $asset, int|ReliabilityPeriod $year): array
     {
         if (DB::connection()->transactionLevel() < 1) {
             throw new \LogicException('Approval evidence requires the owning-store write transaction.');

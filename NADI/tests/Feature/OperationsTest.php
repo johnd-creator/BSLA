@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Services\OperationsDraft;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
@@ -36,7 +37,7 @@ class OperationsTest extends TestCase
         $asset = $this->asset($changes);
         Http::fake([
             'mart.test/v1/reliability/assets/*' => fn () => Http::response($asset),
-            'mart.test/v1/reliability/assets?*' => fn () => Http::response(['items' => [$asset], 'meta' => ['offset' => 0, 'limit' => 25, 'total' => 26, 'has_more' => true]]),
+            'mart.test/v1/reliability/assets?*' => fn ($request) => Http::response(['items' => [$asset], 'meta' => ['offset' => (int) ($request['offset'] ?? 0), 'limit' => 25, 'total' => 26, 'has_more' => (int) ($request['offset'] ?? 0) < 25]]),
         ]);
     }
 
@@ -93,12 +94,128 @@ class OperationsTest extends TestCase
         $this->get(route('operations', ['equipment' => self::ASSET]))->assertOk()->assertSee('Detail equipment belum terhubung')->assertDontSee('ASSET TERPILIH')->assertDontSee('WRONG-DETAIL');
     }
 
+    public function test_boiler_draft_links_only_to_local_details_without_source_binding(): void
+    {
+        Http::fake(['mart.test/*' => Http::response([], 503)]);
+        $this->signIn();
+        $response = $this->get('/operations')->assertOk()
+            ->assertSee('Boiler overview')->assertSee('Semua nilai masih placeholder')
+            ->assertSee('SIMULASI WARNA')->assertSee('bukan kondisi aset')
+            ->assertSee('? Unknown')->assertSee('Alarm DCS')
+            ->assertSee('Kualitas: unknown')->assertSee('Link Asset belum dipetakan');
+        $document = new \DOMDocument;
+        @$document->loadHTML($response->getContent());
+        $xpath = new \DOMXPath($document);
+        $this->assertCount(18, $xpath->query('//*[@data-operations-draft]//a[@data-component]'));
+        $this->assertCount(18, $xpath->query('//nav[@aria-label="Detail komponen BOIL"]/a'));
+        $this->assertCount(8, $xpath->query('//nav[@aria-label="Layar proses draft"]//a'));
+        foreach ($xpath->query('//*[@data-operations-draft]//a') as $link) {
+            $this->assertStringStartsWith(route('operations').'?screen=BOIL&component=', $link->getAttribute('href'));
+            $this->assertStringEndsWith('#ops-component-detail', $link->getAttribute('href'));
+        }
+        $this->assertCount(0, $xpath->query('//*[@id="ops-wellness-demo" and @checked]'));
+        $this->assertCount(0, $xpath->query('//*[@data-operations-draft]//button'));
+        $this->assertCount(0, $xpath->query('//*[@data-operations-draft]//script | //*[@data-operations-draft]//*[@data-historian or @data-cems]'));
+        Http::assertSentCount(1);
+        Http::assertSent(fn ($request) => $request->method() === 'GET' && str_starts_with($request->url(), 'http://mart.test/v1/reliability/assets?'));
+    }
+
+    public function test_every_boiler_component_has_read_only_placeholder_details(): void
+    {
+        $this->signIn('MANAGER');
+        Http::fake(['mart.test/*' => Http::response([], 503)]);
+        $this->assertCount(18, OperationsDraft::components());
+        foreach (OperationsDraft::components() as $id => $detail) {
+            $response = $this->get(route('operations', ['component' => $id]))->assertOk()
+                ->assertSee('id="ops-component-detail"', false)->assertSee($detail['label'])
+                ->assertSee('Tutup detail')->assertSee('Pembacaan pada draft')
+                ->assertSee('Bukan pernyataan bebas alarm.')->assertSee('Tidak mengikuti warna simulasi.')
+                ->assertSee('Canonical Asset')->assertSee('Tag historian')->assertSee('Belum dipetakan');
+            $document = new \DOMDocument;
+            @$document->loadHTML($response->getContent());
+            $xpath = new \DOMXPath($document);
+            $this->assertCount(count($detail['units']), $xpath->query('//*[@id="ops-component-detail"]//*[@class="ops-reading"]'));
+            $this->assertCount(0, $xpath->query('//*[@id="ops-component-detail"]//input | //*[@id="ops-component-detail"]//button | //*[@id="ops-component-detail"]//form'));
+        }
+        Http::assertSentCount(18);
+        Http::assertNotSent(fn ($request) => $request->method() !== 'GET' || ! str_starts_with($request->url(), 'http://mart.test/v1/reliability/assets?'));
+    }
+
+    public function test_unreferenced_screens_do_not_invent_diagrams_or_parameters(): void
+    {
+        $this->signIn();
+        Http::fake(['mart.test/*' => Http::response([], 503)]);
+        foreach (array_slice(OperationsDraft::SCREENS, 1) as $screen) {
+            $response = $this->get(route('operations', ['screen' => $screen]))->assertOk()
+                ->assertSee($screen.' · Referensi belum tersedia')
+                ->assertSee('Diagram, equipment, jalur proses, dan parameter belum dibuat.')
+                ->assertSee('? Unknown')->assertSee('Tidak terhubung')->assertSee('Belum dinilai')
+                ->assertDontSee('class="ops-process"', false)->assertDontSee('ops-reading-grid')
+                ->assertDontSee('MILL G')->assertDontSee('Contoh warna wellness');
+            $document = new \DOMDocument;
+            @$document->loadHTML($response->getContent());
+            $xpath = new \DOMXPath($document);
+            $active = $xpath->query('//nav[@aria-label="Layar proses draft"]//a[@aria-current="page"]');
+            $this->assertCount(1, $active);
+            $this->assertSame($screen, $active->item(0)->textContent);
+        }
+        Http::assertSentCount(7);
+    }
+
+    public function test_registry_filter_and_pagination_stay_open_and_preserve_draft_context(): void
+    {
+        $this->signIn();
+        $this->fakeMart();
+        foreach ([['unit' => 'CS01'], ['offset' => 25], ['unit' => ''], ['unit' => '0'], ['offset' => 0]] as $query) {
+            $response = $this->get(route('operations', array_merge($query, ['screen' => 'BOIL', 'component' => 'drum'])))->assertOk();
+            $document = new \DOMDocument;
+            @$document->loadHTML($response->getContent());
+            $xpath = new \DOMXPath($document);
+            $this->assertCount(1, $xpath->query('//details[@class="ops-registry" and @open]'));
+            $this->assertCount(2, $xpath->query('//input[@name="screen" and @value="BOIL"]'));
+            $this->assertCount(2, $xpath->query('//input[@name="component" and @value="drum"]'));
+            foreach ($xpath->query('//*[@class="operations-pagination"]//a') as $link) {
+                $this->assertStringContainsString('screen=BOIL', $link->getAttribute('href'));
+                $this->assertStringContainsString('component=drum', $link->getAttribute('href'));
+            }
+        }
+    }
+
+    public function test_selected_registry_asset_is_not_implicitly_mapped_to_a_draft_symbol(): void
+    {
+        $this->signIn('MANAGER');
+        $this->fakeMart();
+        $response = $this->get(route('operations', ['component' => 'drum', 'equipment' => self::ASSET]))->assertOk()
+            ->assertSee('ASSET TERPILIH')->assertSee('tidak menghubungkannya otomatis ke DRUM');
+        $document = new \DOMDocument;
+        @$document->loadHTML($response->getContent());
+        $xpath = new \DOMXPath($document);
+        $this->assertStringNotContainsString('TEST-EQUIPMENT', $xpath->query('//*[@id="ops-component-detail"]')->item(0)->textContent);
+        $this->assertCount(0, $xpath->query('//a[contains(@href, "/inspections/create")]'));
+        Http::assertSentCount(2);
+    }
+
+    public function test_draft_detail_is_readable_by_each_role_without_extra_permissions(): void
+    {
+        $this->fakeMart();
+        foreach (['ADMIN', 'ENGINEER', 'SUPERVISOR', 'MANAGER'] as $role) {
+            $this->signIn($role);
+            $this->get('/operations?component=drum')->assertOk()->assertSee('Tutup detail');
+        }
+        Http::assertSentCount(4);
+    }
+
     public function test_invalid_input_is_rejected_before_any_source_read(): void
     {
         $this->signIn();
         $this->get('/operations?offset=-1')->assertSessionHasErrors('offset');
         $this->get('/operations?unit='.str_repeat('x', 61))->assertSessionHasErrors('unit');
         $this->get('/operations?equipment=asset%2Fwrong')->assertNotFound();
+        $this->get('/operations?screen=INVALID')->assertSessionHasErrors('screen');
+        $this->get('/operations?screen[]=BOIL')->assertSessionHasErrors('screen');
+        $this->get('/operations?component=invalid')->assertSessionHasErrors('component');
+        $this->get('/operations?component[]=drum')->assertSessionHasErrors('component');
+        $this->get('/operations?screen=TURB&component=drum')->assertNotFound();
         Http::assertNothingSent();
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AssetDisruption;
 use App\Models\ReliabilityReview;
+use App\Services\ReliabilityPeriod;
 use App\Services\ReliabilityTiming;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -20,8 +21,15 @@ class ReliabilityReviewController extends Controller
         $asset = $data['asset_ref'] ?? $disruption->asset_ref;
         abort_unless($disruption->members()->where('asset_ref', $asset)->exists(), 404);
         $reviews = ReliabilityReview::where('asset_disruption_id', $disruption->id)->where('asset_ref', $asset);
+        $intakePeriod = $request->hasAny(['period', 'year', 'start_date', 'end_date']) ? ReliabilityPeriod::fromRequest($request) : null;
+        $context = $request->session()->pull('reliability_intake_draft');
+        $intakeDraft = $context && $context['event_id'] === $disruption->id && $context['asset_ref'] === $asset ? $context['values'] : null;
+        $draftWarnings = $intakeDraft ? $context['warnings'] : [];
+        if ($intakeDraft) {
+            $intakePeriod = ReliabilityPeriod::fromReport(['period' => $context['period']]);
+        }
 
-        return view('reliability.review', ['event' => $disruption->load('members'), 'assetRef' => $asset, 'latest' => (clone $reviews)->latest('revision')->first(), 'reviews' => $reviews->with('author:id,name')->latest('revision')->paginate(10), 'requestKey' => (string) Str::uuid()]);
+        return view('reliability.review', ['intakeDraft' => $intakeDraft, 'intakePeriod' => $intakePeriod, 'draftWarnings' => $draftWarnings, 'event' => $disruption->load('members'), 'assetRef' => $asset, 'latest' => (clone $reviews)->latest('revision')->first(), 'reviews' => $reviews->with('author:id,name')->latest('revision')->paginate(10), 'requestKey' => (string) Str::uuid()]);
     }
 
     public function store(Request $request, AssetDisruption $disruption, ReliabilityTiming $timing)
@@ -29,10 +37,11 @@ class ReliabilityReviewController extends Controller
         Gate::authorize('update-asset-disruption', $disruption);
         $identity = $request->validate(['request_key' => ['required', 'uuid'], 'asset_ref' => ['required', 'string', 'max:240']]);
         $key = $identity['request_key'];
+        $periodQuery = $request->hasAny(['period', 'year', 'start_date', 'end_date']) ? ReliabilityPeriod::fromRequest($request)->query() : [];
         if ($existing = ReliabilityReview::where('request_key', $key)->first()) {
             abort_unless($existing->created_by === $request->user()->id && $existing->asset_disruption_id === $disruption->id && $existing->asset_ref === $identity['asset_ref'], 409);
 
-            return redirect()->route('reliability.reviews', [$disruption, 'asset_ref' => $existing->asset_ref])->with('status', 'Review ini sudah tersimpan sekali.');
+            return redirect()->route('reliability.reviews', [$disruption, 'asset_ref' => $existing->asset_ref, ...$periodQuery])->with('status', 'Review ini sudah tersimpan sekali.');
         }
         $data = $request->validate([
             'asset_ref' => ['required', 'string', 'max:240'], 'event_version' => ['required', 'integer', 'min:1'],
@@ -93,6 +102,6 @@ class ReliabilityReviewController extends Controller
             ]);
         });
 
-        return redirect()->route('reliability.reviews', [$disruption, 'asset_ref' => $data['asset_ref']])->with('status', 'Review lokal tersimpan. Versi sebelumnya tetap ada; ini bukan approval KPI organisasi.');
+        return redirect()->route('reliability.reviews', [$disruption, 'asset_ref' => $data['asset_ref'], ...$periodQuery])->with('status', 'Review lokal tersimpan. Versi sebelumnya tetap ada; ini bukan approval KPI organisasi.');
     }
 }

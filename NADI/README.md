@@ -262,3 +262,14 @@ Supervisor decision matches their evidence and method; availability stays null.
 Publication does not apply migrations, insert data, approve real KPIs or alter the
 running preview. Existing private catalogs, source mappings, accounts and database
 remain local. The public source uses fictional test fixtures only.
+
+## Workflow additions, 10 November 2026
+
+- [Operations draft](docs/operations-overview-draft.md): read-only component details and explicit missing-reference screens, with no live bindings or controls.
+- PdM plans can open a measurement form with editable context; measured values and dates remain blank. Coverage still requires exact matching evidence.
+- Action Board and home follow-ups use explicit completion status and Asia/Jakarta date boundaries.
+- [Flexible periods](docs/reliability-periods.md): 3/6/12-month and custom ranges with independent exact-period methods and Supervisor decisions.
+- [Evidence intake](docs/reliability-intake.md): bounded CSV preview and explicit draft review, with no automatic business-record save.
+- [Wellness completeness](docs/asset-wellness-completeness.md): separate evidence, analysis and effectiveness states; no automatic health score.
+
+Private catalog and asset-mapping configuration from the public baseline remain unchanged.

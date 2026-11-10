@@ -28,3 +28,9 @@
 
 /* Author styles must not override the inactive precision group. */
 [data-time-fields][hidden] { display: none; }
+
+.pdm-plan-context h2 { font-size: 14px; margin-bottom: 6px; }
+.pdm-plan-context p + p { margin-top: 6px; }
+.pdm-plan-context { overflow-wrap: anywhere; }
+.pdm-planned-point { border: 1px dashed #397186; border-radius: 6px; padding: 10px; }
+.pdm-planned-point > .badge { margin-bottom: 6px; }

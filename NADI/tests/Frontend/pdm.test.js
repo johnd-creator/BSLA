@@ -48,3 +48,11 @@ test('precision switch requires only the active fields and retains entered value
     assert.equal(time.value, '2026-07-08T00:15:37');
     assert.equal(zone.value, 'Asia/Jakarta');
 });
+
+test('plan-guided measurement keeps context review explicit and marks only the planned point', () => {
+    assert.match(form, /Konteks awal dari rencana inspeksi/);
+    assert.match(form, /Nilai dan tanggal tetap kosong/);
+    assert.match(form, /pdm-planned-point/);
+    assert.match(form, /route\('pdm.plans.show', \$planContext\)/);
+    assert.match(css, /\.pdm-plan-context\s*\{[^}]*overflow-wrap:\s*anywhere/);
+});
