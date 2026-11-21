@@ -46,7 +46,7 @@ class CreateDevelopmentUsers extends Command
         $content = "NADI LOCAL DEVELOPMENT ONLY\nURL: http://127.0.0.1:8010/login\nShared development password: {$password}\n\n";
         try {
             DB::transaction(function () use ($password, &$content) {
-                foreach (Role::cases() as $role) {
+                foreach (Role::localRoles() as $role) {
                     $username = strtolower($role->value);
                     if (User::where('username', $username)->orWhere('email', $username.'@nadi.local')->exists()) {
                         throw new \RuntimeException('Akun tujuan sudah ada. Tidak ada akun/password yang ditimpa.');

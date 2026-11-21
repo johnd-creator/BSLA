@@ -20,12 +20,14 @@ class UserController extends Controller
 
     public function create()
     {
-        return view('users.form', ['account' => new User, 'roles' => Role::cases()]);
+        return view('users.form', ['account' => new User, 'roles' => Role::localRoles()]);
     }
 
     public function edit(User $user)
     {
-        return view('users.form', ['account' => $user, 'roles' => Role::cases()]);
+        abort_unless($user->directory_subject === null, 403);
+
+        return view('users.form', ['account' => $user, 'roles' => Role::localRoles()]);
     }
 
     private function validated(Request $request, ?User $user = null): array
@@ -43,7 +45,7 @@ class UserController extends Controller
             'email' => ['required', 'email', 'max:254', Rule::unique('users')->ignore($user?->id)],
             'password' => [$user ? 'nullable' : 'required', 'string', Password::min(15), 'max:256', 'confirmed'],
             'roles' => ['required', 'array', 'min:1', 'max:4'],
-            'roles.*' => ['required', Rule::enum(Role::class), 'distinct'],
+            'roles.*' => ['required', Rule::enum(Role::class)->only(Role::localRoles()), 'distinct'],
             'active' => ['required', 'boolean'],
             'version' => [$user ? 'required' : 'nullable', 'integer', 'min:1'],
         ]);
@@ -66,6 +68,8 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
+        abort_unless($user->directory_subject === null, 403);
+
         $data = $this->validated($request, $user);
         DB::transaction(function () use ($data, $user, $request) {
             $accounts = User::orderBy('id')->lockForUpdate()->get();
@@ -73,6 +77,7 @@ class UserController extends Controller
             $actor = $accounts->firstWhere('id', $request->user()->id);
             abort_unless($actor?->hasRole(Role::Admin) && $request->session()->get('auth_version') === $actor->auth_version, 403);
             abort_unless($target, 404);
+            abort_unless($target->directory_subject === null, 403);
             if ($target->auth_version !== (int) $data['version']) {
                 throw ValidationException::withMessages(['version' => 'Akun sudah berubah. Muat ulang halaman sebelum menyimpan.']);
             }

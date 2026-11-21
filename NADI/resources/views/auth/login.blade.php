@@ -18,6 +18,9 @@
                     </div>
                     <button class="button primary full" type="submit">Masuk</button>
                 </form>
+                @if(config('directory.enabled') === true && config('session.secure') === true && request()->isSecure())
+                    <p><a href="{{ route('directory.login') }}">Masuk dengan direktori internal</a></p>
+                @endif
                 <p class="login-help">Belum punya akses? Hubungi administrator workspace Anda.</p>
             </div>
             <footer class="login-footer"><span>BSLA</span><span>Local development</span></footer>

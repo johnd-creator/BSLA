@@ -10,6 +10,8 @@ use App\Http\Controllers\AssetPriorityController;
 use App\Http\Controllers\AssetWellnessController;
 use App\Http\Controllers\AssetWellnessPolicyController;
 use App\Http\Controllers\CemsController;
+use App\Http\Controllers\DirectorySessionController;
+use App\Http\Controllers\DirectorySettingsController;
 use App\Http\Controllers\DisruptionWorkOrderController;
 use App\Http\Controllers\HistorianController;
 use App\Http\Controllers\InspectionController;
@@ -26,15 +28,23 @@ use App\Http\Controllers\ReliabilityReviewController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkOrderController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [SessionController::class, 'create'])->name('login');
     Route::post('/login', [SessionController::class, 'store'])->name('login.store');
+    Route::get('/login/directory', [DirectorySessionController::class, 'create'])->name('directory.login');
+    Route::post('/login/directory', [DirectorySessionController::class, 'store'])->name('directory.login.store');
 });
 
 Route::middleware(['auth', 'current-account'])->group(function () {
     Route::get('/', [OverviewController::class, 'index'])->name('home');
+    Route::get('/viewer', function (Request $request) {
+        abort_unless($request->user()->hasRole(Role::Viewer), 403);
+
+        return view('auth.viewer');
+    })->name('viewer.home');
     Route::get('/reliability/policies', [ReliabilityPolicyController::class, 'index'])->name('reliability.policies');
     Route::post('/reliability/policies', [ReliabilityPolicyController::class, 'store'])->name('reliability.policies.store');
     Route::resource('reliability/operating', OperatingLogController::class)->parameters(['operating' => 'operatingLog'])->names('reliability.operating')->except(['destroy']);
@@ -82,6 +92,8 @@ Route::middleware(['auth', 'current-account'])->group(function () {
     Route::get('/assets/{asset}/timeline', [AssetController::class, 'timeline'])->name('assets.timeline');
     Route::get('/assets/{asset}', [AssetController::class, 'show'])->name('assets.show');
     Route::middleware('can:manage-users')->group(function () {
+        Route::get('/settings/ldap', [DirectorySettingsController::class, 'show'])->name('settings.directory');
+        Route::post('/settings/ldap', [DirectorySettingsController::class, 'update'])->middleware('throttle:10,1')->name('settings.directory.update');
         Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'edit', 'update']);
         Route::get('/roles', fn () => view('users.roles', ['roles' => Role::cases()]))->name('roles.index');
     });

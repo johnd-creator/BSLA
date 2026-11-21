@@ -37,6 +37,7 @@
                         <a href="{{ route('reports.index') }}" @class(['nav-link', 'selected' => request()->routeIs('reports.*')]) @if(request()->routeIs('reports.*')) aria-current="page" @endif><x-icon name="inspection" />Laporan</a>
                         @can('manage-users')
                             <div class="nav-label administration">ADMINISTRASI</div>
+                            <a href="{{ route('settings.directory') }}" @class(['nav-link', 'selected' => request()->routeIs('settings.*')]) @if(request()->routeIs('settings.*')) aria-current="page" @endif><x-icon name="access" />Pengaturan LDAP / Microsoft AD</a>
                             <a href="{{ route('users.index') }}" @class(['nav-link', 'selected' => request()->routeIs('users.*')]) @if(request()->routeIs('users.*')) aria-current="page" @endif><x-icon name="users" />User management</a>
                             <a href="{{ route('roles.index') }}" @class(['nav-link', 'selected' => request()->routeIs('roles.*')]) @if(request()->routeIs('roles.*')) aria-current="page" @endif><x-icon name="access" />Role & akses</a>
                         @endcan

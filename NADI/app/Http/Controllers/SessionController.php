@@ -35,7 +35,7 @@ class SessionController extends Controller
         RateLimiter::hit($ipKey, 60);
         $field = filter_var($data['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
         $credentials = [$field => $data['login'], 'password' => $data['password'], 'active' => true];
-        if (! Auth::attemptWhen($credentials, fn (User $user) => DevelopmentAccess::allowed($user, $request))) {
+        if (! Auth::attemptWhen($credentials, fn (User $user) => $user->directory_subject === null && DevelopmentAccess::allowed($user, $request))) {
             RateLimiter::hit($key, 60);
             throw ValidationException::withMessages(['login' => 'Username/email atau kata sandi tidak sesuai.']);
         }
