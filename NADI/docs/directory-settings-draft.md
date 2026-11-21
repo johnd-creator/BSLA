@@ -1,0 +1,7 @@
+# Pengaturan LDAP / Microsoft AD
+
+Di NADI, admin lokal dapat membuka **Pengaturan LDAP / Microsoft AD** dan menyimpan draft FQDN, Base DN, DN grup Viewer, serta username/DN akun bind. Port LDAPS tetap 636. Untuk menyimpan, masukkan kata sandi akun lokal NADI sebagai konfirmasi, bukan kata sandi Active Directory. Akses dari jaringan hanya melalui HTTPS internal; HTTP diizinkan khusus untuk alamat loopback lokal. Tidak ada impor akun, uji sambungan, atau tombol aktifkan.
+
+Draft disimpan pada penyimpanan aplikasi privat server (bukan disk publik, bukan konfigurasi login). Data awal tetap kosong sekalipun ada konfigurasi efektif. Tidak perlu migrasi basis data untuk menyimpan draft. Jangan menempelkan password/token/isi file CA di bidang teks. Draft bersifat satu set per instance dan penyimpanan terakhir yang valid menggantikan draft sebelumnya.
+
+Sebelum operator menerapkan nilai secara terpisah, verifikasi FQDN DC terhadap nama yang disetujui dan SAN, CA, Base DN terbatas, DN grup Viewer langsung, dan akun baca minimum. Jika sudah lolos, operator dapat memasukkan FQDN, Base DN, DN grup, dan identitas bind yang ditinjau ke `NADI_DIRECTORY_HOST`, `NADI_DIRECTORY_BASE_DN`, `NADI_DIRECTORY_REQUIRED_GROUP`, dan `NADI_DIRECTORY_BIND_DN` melalui konfigurasi server. Simpan password bind dan trust CA hanya di server. Selesaikan prasyarat serta uji negatif TLS dalam [panduan login direktori](directory-login.md) sebelum aktivasi; draft tidak pernah dibaca oleh adapter autentikasi.
